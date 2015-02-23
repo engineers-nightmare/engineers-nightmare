@@ -54,6 +54,8 @@ resize(int width, int height)
      * surfaces, etc.
      */
     glViewport(0, 0, width, height);
+    wnd.width = width;
+    wnd.height = height;
 }
 
 void
