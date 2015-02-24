@@ -10,6 +10,10 @@ enum surface_type {
     wall
 };
 
+/* a single block
+ * represents a 1m^3 cube
+ * for more information see docs/ships-space.md
+ */
 struct block {
     block_type type;
 
