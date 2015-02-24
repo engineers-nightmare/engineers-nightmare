@@ -12,6 +12,8 @@ struct chunk {
      * 8m^3
      */
     grid_3d<block, CHUNK_SIZE> blocks;
+
+    block * get_block(int x, int y, int z);
 };
 
 /* a sub space containing N^3 chunks
@@ -53,6 +55,6 @@ sub_space<N>::get_block(int x, int y, int z)
         z >= CHUNK_SIZE )
         return 0;
 
-    return &( this->chunks.contents[chunk_x][chunk_y][chunk_z].blocks.contents[x][y][z] );
+    return this->chunks.contents[chunk_x][chunk_y][chunk_z].get_block(x, y, z);
 }
 
