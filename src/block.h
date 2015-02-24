@@ -2,7 +2,7 @@
 
 enum block_type {
     block_empty,
-    wall_support
+    block_support
 };
 
 enum surface_type {

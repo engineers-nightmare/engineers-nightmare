@@ -17,7 +17,7 @@ main(void)
     for( int i = 0; i<8; ++i ){
         for( int j = 0; j<8; ++j ){
             for( int k = 0; k<8; ++k ){
-                grid_8.contents[i][j][k].type = wall_support;
+                grid_8.contents[i][j][k].type = block_support;
                 switch(k){
                     case 0:
                         grid_8.contents[i][j][k].yp = surface_wall;
@@ -54,7 +54,7 @@ main(void)
     for( int i = 0; i<8; ++i ){
         for( int j = 0; j<8; ++j ){
             for( int k = 0; k<8; ++k ){
-                assert( grid_8.contents[i][j][k].type == wall_support );
+                assert( grid_8.contents[i][j][k].type == block_support );
                 switch(k){
                     case 0:
                         assert( grid_8.contents[i][j][k].yp == surface_wall );
