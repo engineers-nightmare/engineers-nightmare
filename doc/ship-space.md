@@ -2,6 +2,7 @@
 
 our ship space coordinate system is z axis 'up' and right-handed:
 
+```
           +Z
           |
           |
@@ -12,13 +13,16 @@ our ship space coordinate system is z axis 'up' and right-handed:
         /
        /
       +x
+```
 
 within a ship:
 
-* +x corresponds to starboard
-* +y fore
-* +z up
+* +x is starboard
+* +y is fore
+* +z is up
 
+
+```
     +----------------\
     |                 \
     |      0---- +y    \
@@ -28,6 +32,7 @@ within a ship:
     |      +x          /
     |                 /
     +----------------/
+```
 
 
 each unit along the axes is 1m
@@ -35,6 +40,7 @@ each unit along the axes is 1m
 our space is dividied into 1m^3 blocks (voxels)
 
 
+```
        1m
       <-->
 
@@ -43,4 +49,5 @@ our space is dividied into 1m^3 blocks (voxels)
     +--+  |     -
     |  + /
     +--+/
+```
 
