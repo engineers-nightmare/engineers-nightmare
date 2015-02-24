@@ -26,7 +26,27 @@ struct sub_space {
      * will move across chunks
      */
     block * get_block(int x, int y, int z){
-        return 0;
+        int chunk_x, chunk_y, chunk_z;
+
+        chunk_x = x / CHUNK_SIZE;
+        x = x % CHUNK_SIZE;
+
+        chunk_y = y / CHUNK_SIZE;
+        y = y % CHUNK_SIZE;
+
+        chunk_z = z / CHUNK_SIZE;
+        z = z % CHUNK_SIZE;
+
+        /* check bounds */
+        if( chunk_x >= N    ||
+            x >= CHUNK_SIZE ||
+            chunk_y >= N    ||
+            y >= CHUNK_SIZE ||
+            chunk_z >= N    ||
+            z >= CHUNK_SIZE )
+            return 0;
+
+        return &( this->chunks.contents[chunk_x][chunk_y][chunk_z].blocks.contents[x][y][z] );
     }
 
 };
