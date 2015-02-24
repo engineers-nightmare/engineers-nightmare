@@ -3,5 +3,5 @@ CMake*
 Makefile
 nightmare
 *.ninja*
-tmp
+scratch
 *.out
