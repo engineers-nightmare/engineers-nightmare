@@ -4,3 +4,4 @@ Makefile
 nightmare
 *.ninja*
 tmp
+*.out
