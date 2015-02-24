@@ -13,12 +13,12 @@ struct chunk {
      */
     grid_3d<block, CHUNK_SIZE> blocks;
 
-    block * get_block(int x, int y, int z);
+    block * get_block(unsigned int x, unsigned int y, unsigned int z);
 };
 
 /* a sub space containing N^3 chunks
  */
-template <int N>
+template <unsigned int N>
 struct sub_space {
     grid_3d<chunk, N> chunks;
 
@@ -27,17 +27,17 @@ struct sub_space {
      * the whole sub_space
      * will move across chunks
      */
-    block * get_block(int block_x, int block_y, int block_z);
+    block * get_block(unsigned int block_x, unsigned int block_y, unsigned int block_z);
 
     /* returns the chunk containing the block denotated by (x, y, z)
      * or null
      */
-    chunk * get_chunk_containing(int block_x, int block_y, int block_z);
+    chunk * get_chunk_containing(unsigned int block_x, unsigned int block_y, unsigned int block_z);
 
     /* returns the chunk corresponding to the chunk coordinates (x, y, z)
      * note this is NOT using block coordinates
      */
-    chunk * get_chunk(int chunk_x, int chunk_y, int chunk_z);
+    chunk * get_chunk(unsigned int chunk_x, unsigned int chunk_y, unsigned int chunk_z);
 };
 
 /* returns a block or null
@@ -45,14 +45,14 @@ struct sub_space {
  * the whole sub_space
  * will move across chunks
  */
-template <int N>
+template <unsigned int N>
 block *
-sub_space<N>::get_block(int block_x, int block_y, int block_z)
+sub_space<N>::get_block(unsigned int block_x, unsigned int block_y, unsigned int block_z)
 {
     /* Within Block coordinates */
-    int wb_x = block_x % CHUNK_SIZE;
-    int wb_y = block_y % CHUNK_SIZE;
-    int wb_z = block_z % CHUNK_SIZE;
+    unsigned int wb_x = block_x % CHUNK_SIZE;
+    unsigned int wb_y = block_y % CHUNK_SIZE;
+    unsigned int wb_z = block_z % CHUNK_SIZE;
 
     chunk *c;
 
@@ -66,13 +66,13 @@ sub_space<N>::get_block(int block_x, int block_y, int block_z)
 /* returns the chunk containing the block denotated by (x, y, z)
  * or null
  */
-template <int N>
+template <unsigned int N>
 chunk *
-sub_space<N>::get_chunk_containing(int block_x, int block_y, int block_z)
+sub_space<N>::get_chunk_containing(unsigned int block_x, unsigned int block_y, unsigned int block_z)
 {
-    int chunk_x = block_x / CHUNK_SIZE;
-    int chunk_y = block_y / CHUNK_SIZE;
-    int chunk_z = block_z / CHUNK_SIZE;
+    unsigned int chunk_x = block_x / CHUNK_SIZE;
+    unsigned int chunk_y = block_y / CHUNK_SIZE;
+    unsigned int chunk_z = block_z / CHUNK_SIZE;
 
     return this->get_chunk(chunk_x, chunk_y, chunk_z);
 }
@@ -80,9 +80,9 @@ sub_space<N>::get_chunk_containing(int block_x, int block_y, int block_z)
 /* returns the chunk corresponding to the chunk coordinates (x, y, z)
  * note this is NOT using block coordinates
  */
-template <int N>
+template <unsigned int N>
 chunk *
-sub_space<N>::get_chunk(int chunk_x, int chunk_y, int chunk_z)
+sub_space<N>::get_chunk(unsigned int chunk_x, unsigned int chunk_y, unsigned int chunk_z)
 {
     if( chunk_x >= N ||
         chunk_y >= N ||

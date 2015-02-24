@@ -1,7 +1,7 @@
 #include "space.h"
 
 block *
-chunk::get_block(int x, int y, int z)
+chunk::get_block(unsigned int x, unsigned int y, unsigned int z)
 {
     if( x >= CHUNK_SIZE ||
         y >= CHUNK_SIZE ||
