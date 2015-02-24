@@ -17,8 +17,8 @@ our ship space coordinate system is z axis 'up' and right-handed:
 
 within a ship:
 
-* +x is starboard
 * +y is fore
+* +x is starboard
 * +z is up
 
 
