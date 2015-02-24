@@ -17,31 +17,31 @@ main(void)
     for( int i = 0; i<8; ++i ){
         for( int j = 0; j<8; ++j ){
             for( int k = 0; k<8; ++k ){
-                grid_8.contents[i][j][k].type = support;
+                grid_8.contents[i][j][k].type = wall_support;
                 switch(k){
                     case 0:
-                        grid_8.contents[i][j][k].yp = wall;
-                        grid_8.contents[i][j][k].ym = none;
+                        grid_8.contents[i][j][k].yp = surface_wall;
+                        grid_8.contents[i][j][k].ym = surface_none;
                         break;
                     case 1:
-                        grid_8.contents[i][j][k].yp = none;
-                        grid_8.contents[i][j][k].ym = wall;
+                        grid_8.contents[i][j][k].yp = surface_none;
+                        grid_8.contents[i][j][k].ym = surface_wall;
                         break;
                     case 2:
-                        grid_8.contents[i][j][k].xp = wall;
-                        grid_8.contents[i][j][k].xm = none;
+                        grid_8.contents[i][j][k].xp = surface_wall;
+                        grid_8.contents[i][j][k].xm = surface_none;
                         break;
                     case 3:
-                        grid_8.contents[i][j][k].xp = none;
-                        grid_8.contents[i][j][k].xm = wall;
+                        grid_8.contents[i][j][k].xp = surface_none;
+                        grid_8.contents[i][j][k].xm = surface_wall;
                         break;
                     case 4:
-                        grid_8.contents[i][j][k].zp = wall;
-                        grid_8.contents[i][j][k].zm = none;
+                        grid_8.contents[i][j][k].zp = surface_wall;
+                        grid_8.contents[i][j][k].zm = surface_none;
                         break;
                     case 6:
-                        grid_8.contents[i][j][k].zp = none;
-                        grid_8.contents[i][j][k].zm = wall;
+                        grid_8.contents[i][j][k].zp = surface_none;
+                        grid_8.contents[i][j][k].zm = surface_wall;
                         break;
                     case 7:
                     default:
@@ -54,31 +54,31 @@ main(void)
     for( int i = 0; i<8; ++i ){
         for( int j = 0; j<8; ++j ){
             for( int k = 0; k<8; ++k ){
-                assert( grid_8.contents[i][j][k].type == support );
+                assert( grid_8.contents[i][j][k].type == wall_support );
                 switch(k){
                     case 0:
-                        assert( grid_8.contents[i][j][k].yp == wall );
-                        assert( grid_8.contents[i][j][k].ym == none );
+                        assert( grid_8.contents[i][j][k].yp == surface_wall );
+                        assert( grid_8.contents[i][j][k].ym == surface_none );
                         break;
                     case 1:
-                        assert( grid_8.contents[i][j][k].yp == none );
-                        assert( grid_8.contents[i][j][k].ym == wall );
+                        assert( grid_8.contents[i][j][k].yp == surface_none );
+                        assert( grid_8.contents[i][j][k].ym == surface_wall );
                         break;
                     case 2:
-                        assert( grid_8.contents[i][j][k].xp == wall );
-                        assert( grid_8.contents[i][j][k].xm == none );
+                        assert( grid_8.contents[i][j][k].xp == surface_wall );
+                        assert( grid_8.contents[i][j][k].xm == surface_none );
                         break;
                     case 3:
-                        assert( grid_8.contents[i][j][k].xp == none );
-                        assert( grid_8.contents[i][j][k].xm == wall );
+                        assert( grid_8.contents[i][j][k].xp == surface_none );
+                        assert( grid_8.contents[i][j][k].xm == surface_wall );
                         break;
                     case 4:
-                        assert( grid_8.contents[i][j][k].zp == wall );
-                        assert( grid_8.contents[i][j][k].zm == none );
+                        assert( grid_8.contents[i][j][k].zp == surface_wall );
+                        assert( grid_8.contents[i][j][k].zm == surface_none );
                         break;
                     case 6:
-                        assert( grid_8.contents[i][j][k].zp == none );
-                        assert( grid_8.contents[i][j][k].zm == wall );
+                        assert( grid_8.contents[i][j][k].zp == surface_none );
+                        assert( grid_8.contents[i][j][k].zm == surface_wall );
                         break;
                     case 7:
                     default:

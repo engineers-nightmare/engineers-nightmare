@@ -1,13 +1,13 @@
 #pragma once
 
 enum block_type {
-    empty,
-    support
+    block_empty,
+    wall_support
 };
 
 enum surface_type {
-    none,
-    wall
+    surface_none,
+    surface_wall
 };
 
 /* a single block
