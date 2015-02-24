@@ -27,34 +27,34 @@ struct sub_space {
      * the whole sub_space
      * will move across chunks
      */
-    block * get_block(int x, int y, int z);
+    block * get_block(int block_x, int block_y, int block_z);
 
 };
 
 template <int N>
 block *
-sub_space<N>::get_block(int x, int y, int z)
+sub_space<N>::get_block(int block_x, int block_y, int block_z)
 {
     int chunk_x, chunk_y, chunk_z;
 
-    chunk_x = x / CHUNK_SIZE;
-    x = x % CHUNK_SIZE;
+    chunk_x = block_x / CHUNK_SIZE;
+    block_x = block_x % CHUNK_SIZE;
 
-    chunk_y = y / CHUNK_SIZE;
-    y = y % CHUNK_SIZE;
+    chunk_y = block_y / CHUNK_SIZE;
+    block_y = block_y % CHUNK_SIZE;
 
-    chunk_z = z / CHUNK_SIZE;
-    z = z % CHUNK_SIZE;
+    chunk_z = block_z / CHUNK_SIZE;
+    block_z = block_z % CHUNK_SIZE;
 
     /* check bounds */
-    if( chunk_x >= N    ||
-        x >= CHUNK_SIZE ||
-        chunk_y >= N    ||
-        y >= CHUNK_SIZE ||
-        chunk_z >= N    ||
-        z >= CHUNK_SIZE )
+    if( chunk_x >= N          ||
+        block_x >= CHUNK_SIZE ||
+        chunk_y >= N          ||
+        block_y >= CHUNK_SIZE ||
+        chunk_z >= N          ||
+        block_z >= CHUNK_SIZE )
         return 0;
 
-    return this->chunks.contents[chunk_x][chunk_y][chunk_z].get_block(x, y, z);
+    return this->chunks.contents[chunk_x][chunk_y][chunk_z].get_block(block_x, block_y, block_z);
 }
 
