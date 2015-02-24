@@ -50,15 +50,11 @@ block *
 sub_space<N>::get_block(int block_x, int block_y, int block_z)
 {
     /* Within Block coordinates */
-    int wb_x, wb_y, wb_z;
+    int wb_x = block_x % CHUNK_SIZE;
+    int wb_y = block_y % CHUNK_SIZE;
+    int wb_z = block_z % CHUNK_SIZE;
 
     chunk *c;
-
-    wb_x = block_x % CHUNK_SIZE;
-
-    wb_y = block_y % CHUNK_SIZE;
-
-    wb_z = block_z % CHUNK_SIZE;
 
     c = this->get_chunk_containing(block_x, block_y, block_z);
     if( ! c )
@@ -74,13 +70,9 @@ template <int N>
 chunk *
 sub_space<N>::get_chunk_containing(int block_x, int block_y, int block_z)
 {
-    int chunk_x, chunk_y, chunk_z;
-
-    chunk_x = block_x / CHUNK_SIZE;
-
-    chunk_y = block_y / CHUNK_SIZE;
-
-    chunk_z = block_z / CHUNK_SIZE;
+    int chunk_x = block_x / CHUNK_SIZE;
+    int chunk_y = block_y / CHUNK_SIZE;
+    int chunk_z = block_z / CHUNK_SIZE;
 
     return this->get_chunk(chunk_x, chunk_y, chunk_z);
 }
