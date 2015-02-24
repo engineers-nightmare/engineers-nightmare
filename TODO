@@ -1,0 +1,4 @@
+# TODO
+
+* need to decide on consistent terminology for differentiating between the various co-ordinate systems (e.g. chunk co-ords, block co-ords relative to sub_space, block co-ords within chunk)
+
