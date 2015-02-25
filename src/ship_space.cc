@@ -1,4 +1,4 @@
-#include "space.h"
+#include "ship_space.h"
 
 block *
 chunk::get_block(unsigned int x, unsigned int y, unsigned int z)

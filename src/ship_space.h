@@ -19,12 +19,12 @@ struct chunk {
 /* a sub space containing N^3 chunks
  */
 template <unsigned int N>
-struct sub_space {
+struct ship_space {
     grid_3d<chunk, N> chunks;
 
     /* returns a block or null
      * finds the block at the position (x,y,z) within
-     * the whole sub_space
+     * the whole ship_space
      * will move across chunks
      */
     block * get_block(unsigned int block_x, unsigned int block_y, unsigned int block_z);
@@ -42,12 +42,12 @@ struct sub_space {
 
 /* returns a block or null
  * finds the block at the position (x,y,z) within
- * the whole sub_space
+ * the whole ship_space
  * will move across chunks
  */
 template <unsigned int N>
 block *
-sub_space<N>::get_block(unsigned int block_x, unsigned int block_y, unsigned int block_z)
+ship_space<N>::get_block(unsigned int block_x, unsigned int block_y, unsigned int block_z)
 {
     /* Within Block coordinates */
     unsigned int wb_x = block_x % CHUNK_SIZE;
@@ -68,7 +68,7 @@ sub_space<N>::get_block(unsigned int block_x, unsigned int block_y, unsigned int
  */
 template <unsigned int N>
 chunk *
-sub_space<N>::get_chunk_containing(unsigned int block_x, unsigned int block_y, unsigned int block_z)
+ship_space<N>::get_chunk_containing(unsigned int block_x, unsigned int block_y, unsigned int block_z)
 {
     unsigned int chunk_x = block_x / CHUNK_SIZE;
     unsigned int chunk_y = block_y / CHUNK_SIZE;
@@ -82,7 +82,7 @@ sub_space<N>::get_chunk_containing(unsigned int block_x, unsigned int block_y, u
  */
 template <unsigned int N>
 chunk *
-sub_space<N>::get_chunk(unsigned int chunk_x, unsigned int chunk_y, unsigned int chunk_z)
+ship_space<N>::get_chunk(unsigned int chunk_x, unsigned int chunk_y, unsigned int chunk_z)
 {
     if( chunk_x >= N ||
         chunk_y >= N ||

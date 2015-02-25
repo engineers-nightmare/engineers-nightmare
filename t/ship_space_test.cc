@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
-#include "../src/space.h"
+#include "../src/ship_space.h"
 
 /* some more quick and dirty 'testing'
  * mostly checking we compile and nothing
@@ -10,7 +10,7 @@ int
 main(void)
 {
     block *b;
-    sub_space<2> space;
+    ship_space<2> space;
 
     assert( space.get_block(2*CHUNK_SIZE, 2*CHUNK_SIZE, 2*CHUNK_SIZE) == 0 );
 
