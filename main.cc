@@ -3,7 +3,7 @@
 #include <err.h>
 #include <epoxy/gl.h>
 
-#include "common.h"
+#include "src/common.h"
 
 
 #define APP_NAME    "Engineer's Nightmare"

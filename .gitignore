@@ -5,3 +5,4 @@ nightmare
 *.ninja*
 scratch
 *.out
+test_bin
