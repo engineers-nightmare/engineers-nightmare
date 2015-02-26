@@ -9,6 +9,10 @@ build:
     cmake .
     make
 
+test:
+
+    make test
+
 run:
 
     ./nightmare
