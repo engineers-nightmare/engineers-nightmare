@@ -5,4 +5,7 @@ nightmare
 *.ninja*
 scratch
 *.out
+
 test_bin
+libNIGHTMARE.a
+Testing

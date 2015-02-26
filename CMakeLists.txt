@@ -7,13 +7,13 @@ add_executable(nightmare main.cc)
 # this is used below to link both to our main executable
 # as well as to link to each of our tests
 file(GLOB SOURCE src/*.cc)
-add_library(LIBS ${SOURCE})
+add_library(NIGHTMARE ${SOURCE})
 
 include(FindPkgConfig)
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 PKG_SEARCH_MODULE(EPOXY REQUIRED epoxy)
 include_directories(${SDL2_INCLUDE_DIRS} ${EPOXY_INCLUDE_DIRS})
-target_link_libraries(nightmare ${SDL2_LIBRARIES} ${EPOXY_LIBRARIES} LIBS)
+target_link_libraries(nightmare ${SDL2_LIBRARIES} ${EPOXY_LIBRARIES} NIGHTMARE)
 
 # the following is based on
 # http://www.cmake.org/Wiki/CMake/Tutorials/Object_Library
@@ -31,7 +31,7 @@ foreach(test_src ${TESTS_SRCS})
         add_executable(${test_name} ${test_src})
 
         # link to our libs
-        target_link_libraries(${test_name} LIBS)
+        target_link_libraries(${test_name} NIGHTMARE)
 
         # move into test_bin
         set_target_properties(${test_name} PROPERTIES 
