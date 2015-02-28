@@ -89,7 +89,7 @@ ship_space<N>::get_chunk(unsigned int chunk_x, unsigned int chunk_y, unsigned in
         chunk_z >= N )
         return 0;
 
-    return &( this->chunks.contents[chunk_x][chunk_y][chunk_z] );
+    return this->chunks.get(chunk_x, chunk_y, chunk_z);
 }
 
 

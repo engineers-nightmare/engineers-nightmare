@@ -8,6 +8,6 @@ chunk::get_block(unsigned int x, unsigned int y, unsigned int z)
         z >= CHUNK_SIZE )
         return 0;
 
-    return &( this->blocks.contents[x][y][z] );
+    return this->blocks.get(x, y, z);
 }
 
