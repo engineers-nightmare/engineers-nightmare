@@ -2,6 +2,7 @@
 
 #define DEBUG 0
 
+#include <err.h> /* errx */
 #include <stdlib.h> /* calloc, free */
 #include <stdio.h> /* puts, printf */
 
@@ -56,15 +57,8 @@ grid_3d<T>::grid_3d(unsigned int xdim, unsigned int ydim, unsigned int zdim)
 
     this->contents = (T*) calloc(sizeof(T), xdim * ydim * zdim);
 
-    if( ! this->contents ){
-        /* FIXME TODO
-         * signal error case
-         */
-#if DEBUG
-        puts("grid_3d::grid_3d FAILED");
-#endif
-        exit(1);
-    }
+    if( ! this->contents )
+        errx(1, "grid_3d::grid_3d calloc failed");
 
     /* initialise contents */
     for(i=0; i< (this->xd * this->yd * this->zd); ++i){
