@@ -10,7 +10,7 @@ int
 main(void)
 {
     block *b;
-    ship_space<2> space;
+    ship_space space(2, 2, 2);
 
     assert( space.get_block(2*CHUNK_SIZE, 2*CHUNK_SIZE, 2*CHUNK_SIZE) == 0 );
 
