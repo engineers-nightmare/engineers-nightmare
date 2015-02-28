@@ -19,6 +19,10 @@ target_link_libraries(nightmare ${SDL2_LIBRARIES} ${EPOXY_LIBRARIES} NIGHTMARE)
 # http://www.cmake.org/Wiki/CMake/Tutorials/Object_Library
 # http://neyasystems.com/an-engineers-guide-to-unit-testing-cmake-and-boost-unit-tests/
 # http://isti.bitbucket.org/2012/06/01/cmake-check.html
+
+# this enables `make test`
+# please note that you will still have to run make manually first
+# http://stackoverflow.com/questions/733475/cmake-ctest-make-test-doesnt-build-tests
 enable_testing()
 file(GLOB TESTS_SRCS t/*.cc)
 
