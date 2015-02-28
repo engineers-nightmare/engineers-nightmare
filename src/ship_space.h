@@ -3,6 +3,8 @@
 #include "block.h"
 #include "grid.h"
 
+#include <stdio.h>
+
 #define CHUNK_SIZE 8
 
 struct chunk {
@@ -11,8 +13,9 @@ struct chunk {
      * this means a chunk represents
      * 8m^3
      */
-    grid_3d<block, CHUNK_SIZE> blocks;
+    grid_3d<block> blocks;
 
+    chunk(void) : blocks(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE) {}
     block * get_block(unsigned int x, unsigned int y, unsigned int z);
 };
 
@@ -20,7 +23,9 @@ struct chunk {
  */
 template <unsigned int N>
 struct ship_space {
-    grid_3d<chunk, N> chunks;
+    grid_3d<chunk> chunks;
+
+    ship_space(void) : chunks(N, N, N) {}
 
     /* returns a block or null
      * finds the block at the position (x,y,z) within

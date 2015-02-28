@@ -9,7 +9,7 @@
 int
 main(void)
 {
-    grid_3d <block, 8> grid_8;
+    grid_3d <block> grid_8(8, 8, 8);
 
     /* just some gentle testing to make sure nothing
      * obviously broken happens
