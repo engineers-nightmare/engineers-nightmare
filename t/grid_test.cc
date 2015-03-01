@@ -90,8 +90,10 @@ thump(void)
 }
 
 void
-test_extend_z(void)
+test_extend_z_high(void)
 {
+    block * tmp;
+
     grid_3d <block> grid_8(8, 8, 8);
 
     assert( grid_8.get(0,0,0) != 0 );
@@ -101,6 +103,16 @@ test_extend_z(void)
     assert( grid_8.get(7,8,7) == 0 );
     assert( grid_8.get(7,7,8) == 0 );
     assert( grid_8.get(8,8,8) == 0 );
+
+    /* mark some blocks in obvious ways */
+    tmp = grid_8.get(0, 0, 0);
+    assert( tmp != 0 );
+    tmp->type = block_empty;
+
+    tmp = grid_8.get(1, 1, 1);
+    assert( tmp != 0 );
+    tmp->type = block_support;
+
 
     /* grid_3d::extend returns 0 on success */
     assert( grid_8.extend(grid_8.extend_z, grid_8.extend_high, 2) == 0 );
@@ -114,6 +126,15 @@ test_extend_z(void)
     assert( grid_8.get(7,8,9) == 0 );
     assert( grid_8.get(8,8,9) == 0 );
     assert( grid_8.get(7,7,10) == 0 );
+
+    /* check that nothing has moved when it shouldnt */
+    tmp = grid_8.get(0, 0, 0);
+    assert( tmp != 0 );
+    assert( tmp->type == block_empty );
+
+    tmp = grid_8.get(1, 1, 1);
+    assert( tmp != 0 );
+    assert( tmp->type == block_support );
 }
 
 /* some light manual testing of block and grid
@@ -122,6 +143,6 @@ int
 main(void)
 {
     thump();
-    test_extend_z();
+    test_extend_z_high();
 }
 
