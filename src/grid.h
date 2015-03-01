@@ -7,18 +7,17 @@
 #include <stdio.h> /* puts, printf */
 #include <string.h> /* memmove */
 
-/* placement new
- * http://stackoverflow.com/questions/3156778/no-matching-function-for-call-to-operator-new
- * http://isocpp.org/wiki/faq/dtors#placement-new
- */
-#include <new>
-
 /* a 3d grid containing N^3 Ts
+ *
+ * NOTE that grid_3d internally stores a grid of pointers to T
+ * and the grid_3d constructor will automatically also allocate the Ts
+ * the grid_3d destructor will destroy all these allocated Ts
  */
 template <class T>
 struct grid_3d {
     /* contents of grid
-     * 3d array
+     * 3d array of pointers to T
+     *
      * size determined by xy, yz, zd
      * the dimensions being [x][y][z]
      *
@@ -26,7 +25,7 @@ struct grid_3d {
      * you do
      * [ x + (y * xd) + (z * xd * yd) ]
      */
-    T * contents;
+    T ** contents;
 
     /* upper bounds of each dimension */
     unsigned int xd, yd, zd;
@@ -98,17 +97,14 @@ grid_3d<T>::grid_3d(unsigned int xdim, unsigned int ydim, unsigned int zdim)
     printf("grid_3d::grid_3d given xd %u, yd %u, zd %u\n", this->xd, this->yd, this->zd);
 #endif
 
-    this->contents = (T*) calloc(sizeof(T), xdim * ydim * zdim);
+    this->contents = (T**) calloc(sizeof(T*), xdim * ydim * zdim);
 
     if( ! this->contents )
         errx(1, "grid_3d::grid_3d calloc failed");
 
-    /* initialise contents */
+    /* allocate and initialise contents */
     for(i=0; i< (this->xd * this->yd * this->zd); ++i){
-        /* http://isocpp.org/wiki/faq/dtors#placement-new */
-        /* FIXME assuming we do not need to check return value
-         */
-        new( &(this->contents[i]) ) T();
+        this->contents[i] = new T();
     }
 }
 
@@ -116,12 +112,13 @@ template <class T>
 grid_3d<T>::~grid_3d()
 {
     int i=0;
-    /* must call destructor manually on each object */
+
+    /* clean up each sub object */
     for(i=0; i< (this->xd * this->yd * this->zd); ++i){
-        /* http://isocpp.org/wiki/faq/dtors#placement-new */
-        this->contents[i].~T();
+        delete this->contents[i];
     }
 
+    /* clean up allocated region */
     free(this->contents);
 }
 
@@ -145,7 +142,7 @@ grid_3d<T>::get(unsigned int x, unsigned int y, unsigned int z)
         return 0;
     }
 
-    return &( contents[ x + (y * this->xd) + (z * this->xd * this->yd) ] );
+    return contents[ x + (y * this->xd) + (z * this->xd * this->yd) ];
 }
 
 template <class T>
@@ -191,11 +188,11 @@ template <class T>
 int
 grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
 {
-    T * new_contents = 0;
+    T ** new_contents = 0;
     unsigned int new_zd = this->zd + extend_by;
     unsigned int new_size = this->xd * this->yd * new_zd;
 
-    new_contents = (T*) realloc(this->contents, new_size);
+    new_contents = (T**) realloc(this->contents, new_size);
     if( ! new_contents ){
         /* FIXME decide on error handling */
         errx(1, "grid_3d::_extend_z : realloc failed");
@@ -205,7 +202,6 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
     switch( direction ) {
         case extend_high:
             /* no shuffling required */
-            /* FIXME call new() on new elements */
             break;
 
         case extend_low:
@@ -219,6 +215,8 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
             break;
 
     }
+
+    /* FIXME allocate new sub elements and call new() on them */
 
     this->contents = new_contents;
     this->zd = new_zd;
