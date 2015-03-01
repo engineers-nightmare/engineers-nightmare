@@ -3,11 +3,11 @@
 #include "../src/block.h"
 #include "../src/grid.h"
 
-/* some light manual testing of block and grid
+/* thump around a bit hoping to catch
+ * some low hanging fruit
  */
-
-int
-main(void)
+void
+thump(void)
 {
     grid_3d <block> grid_8(8, 8, 8);
 
@@ -87,6 +87,12 @@ main(void)
             }
         }
     }
+}
 
-
+/* some light manual testing of block and grid
+ */
+int
+main(void)
+{
+    thump();
 }
