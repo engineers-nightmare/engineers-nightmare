@@ -4,7 +4,7 @@
 
 #include <err.h> /* errx */
 #include <stdlib.h> /* calloc, free, realloc */
-#include <stdio.h> /* puts, printf */
+#include <stdio.h> /* printf */
 #include <string.h> /* memmove, memset */
 
 /* a 3d grid containing N^3 Ts
@@ -135,12 +135,8 @@ grid_3d<T>::get(unsigned int x, unsigned int y, unsigned int z)
         return 0;
     }
 
-    if( ! contents ){
-#if DEBUG
-        puts("grid_3d::get NO CONTENTS");
-#endif
-        return 0;
-    }
+    if( ! this->contents )
+        errx(1, "grid_3d::get called, but this->contents is empty");
 
     return contents[ x + (y * this->xd) + (z * this->xd * this->yd) ];
 }
@@ -149,6 +145,9 @@ template <class T>
 int
 grid_3d<T>::extend(extend_axis axis, extend_direction direction, unsigned int extend_by)
 {
+    if( ! this->contents )
+        errx(1, "grid_3d::extend called, but this->contents is empty");
+
     switch( axis ){
         case extend_x:
             return this->_extend_x(direction, extend_by);
