@@ -205,6 +205,7 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
     switch( direction ) {
         case extend_high:
             /* no shuffling required */
+            /* FIXME call new() on new elements */
             break;
 
         case extend_low:
