@@ -5,7 +5,7 @@
 #include <err.h> /* errx */
 #include <stdlib.h> /* calloc, free, realloc */
 #include <stdio.h> /* puts, printf */
-#include <string.h> /* memmove */
+#include <string.h> /* memmove, memset */
 
 /* a 3d grid containing N^3 Ts
  *
@@ -188,11 +188,29 @@ template <class T>
 int
 grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
 {
+    /* pointer to new region
+     * we eventually write back to this->contents */
     T ** new_contents = 0;
+
+    /* pointer to just the new sub-area of new_contents */
+    T ** new_region = 0;
+
+    /* various size calculations */
+    unsigned int old_size = this->xd * this->yd * this->zd;
     unsigned int new_zd = this->zd + extend_by;
     unsigned int new_size = this->xd * this->yd * new_zd;
+    unsigned int growth = new_size - old_size;
 
-    new_contents = (T**) realloc(this->contents, new_size);
+    /* counter used for placement new */
+    unsigned int i = 0;
+
+
+    if( extend_by <= 0 ){
+        /* waste of time */
+        return 0;
+    }
+
+    new_contents = (T**) realloc(this->contents, new_size * sizeof(T**));
     if( ! new_contents ){
         /* FIXME decide on error handling */
         errx(1, "grid_3d::_extend_z : realloc failed");
@@ -202,12 +220,27 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
     switch( direction ) {
         case extend_high:
             /* no shuffling required */
+
+            /* point to first element of freshly allocated region
+             * last `growth` elements of new_contents
+             */
+            new_region = &( new_contents[old_size] );
+
             break;
 
         case extend_low:
-            /* shuffling required */
-            /* TODO */
-            errx(1, "grid_3d::_extend_x : extend_low not implemented yet");
+            /* shuffling required
+             * shunt contents down by growth (extend_by * this->yd * this->xd)
+             *
+             * FIXME how does memmove communicate failure
+             */
+            memmove(&(new_contents[growth]), new_contents, old_size * sizeof(T**));
+
+            /* point to first element of now blank region
+             * first `growth` elements of new_contents
+             */
+            new_region = new_contents;
+
             break;
 
         default:
@@ -216,10 +249,19 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
 
     }
 
-    /* FIXME allocate new sub elements and call new() on them */
+    /* memset new region */
+    memset(new_region, 0, growth * sizeof(T*));
+
+    /* allocate and initialise elements in new region
+     * we know there are `growth` items in there
+     */
+    for( i=0; i < growth; ++i ){
+        new_region[i] = new T();
+    }
 
     this->contents = new_contents;
     this->zd = new_zd;
+
     /* success */
     return 0;
 }

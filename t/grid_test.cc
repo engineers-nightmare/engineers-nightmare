@@ -92,9 +92,6 @@ thump(void)
 void
 test_extend_z_high(void)
 {
-    /* FIXME not currently initialising extended memory */
-    return;
-
     block * tmp;
 
     grid_3d <block> grid_8(8, 8, 8);
@@ -139,6 +136,82 @@ test_extend_z_high(void)
     assert( tmp->type == block_support );
 }
 
+void
+test_extend_z_low(void)
+{
+    int i, j, k;
+
+    block * tmp;
+
+    grid_3d <block> grid_8(8, 8, 8);
+
+    assert( grid_8.get(0,0,0) != 0 );
+    assert( grid_8.get(7,7,7) != 0 );
+
+    assert( grid_8.get(8,7,7) == 0 );
+    assert( grid_8.get(7,8,7) == 0 );
+    assert( grid_8.get(7,7,8) == 0 );
+    assert( grid_8.get(8,8,8) == 0 );
+
+    /* mark some blocks in obvious ways */
+    tmp = grid_8.get(0, 0, 0);
+    assert( tmp != 0 );
+    tmp->type = block_empty;
+
+    tmp = grid_8.get(1, 1, 1);
+    assert( tmp != 0 );
+    tmp->type = block_support;
+
+    for( i=0; i<8; ++i ){
+        for( j=0; j<8; ++j ){
+            for( k=0; k<8; ++k ){
+                tmp = grid_8.get(i, j, k);
+                assert( tmp != 0 );
+                if( tmp->type == block_support ){
+                    printf("\nBEFORE block_support found at (%u, %u, %u)\n", i, j, k);
+                }
+            }
+        }
+    }
+
+
+    /* grid_3d::extend returns 0 on success */
+    assert( grid_8.extend(grid_8.extend_z, grid_8.extend_low, 2) == 0 );
+
+    for( i=0; i<8; ++i ){
+        for( j=0; j<8; ++j ){
+            for( k=0; k<10; ++k ){
+                tmp = grid_8.get(i, j, k);
+                assert( tmp != 0 );
+                if( tmp->type == block_support ){
+                    printf("\nAFTER block_support found at (%u, %u, %u)\n", i, j, k);
+                }
+            }
+        }
+    }
+
+    assert( grid_8.get(0,0,0) != 0 );
+    assert( grid_8.get(7,7,7) != 0 );
+    assert( grid_8.get(7,7,8) != 0 );
+    assert( grid_8.get(7,7,9) != 0 );
+
+    assert( grid_8.get(8,7,9) == 0 );
+    assert( grid_8.get(7,8,9) == 0 );
+    assert( grid_8.get(8,8,9) == 0 );
+    assert( grid_8.get(7,7,10) == 0 );
+
+    /* check that things have moved as they should have
+     * NB: z is now 2 further along (as 2 was our extend_by to extend)
+     */
+    tmp = grid_8.get(0, 0, 2);
+    assert( tmp != 0 );
+    assert( tmp->type == block_empty );
+
+    tmp = grid_8.get(1, 1, 3);
+    assert( tmp != 0 );
+    assert( tmp->type == block_support );
+}
+
 /* some light manual testing of block and grid
  */
 int
@@ -146,5 +219,6 @@ main(void)
 {
     thump();
     test_extend_z_high();
+    test_extend_z_low();
 }
 
