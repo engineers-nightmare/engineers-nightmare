@@ -187,6 +187,32 @@ template <class T>
 int
 grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
 {
+    /* extending along Z is the simplest case as each Z is
+     * a contiguous block with dimension (this->xd * this->yd)
+     *
+     * that is to say every element within z=0 can be found via
+     *
+     *  for( int x=0; x < this->xd; ++x ){
+     *      for( int y=0; y < this->yd; ++y ){
+     *          this->contents[ x + (y * xdim) ];
+     *      }
+     *  }
+     *
+     * and every element at z=4 can be found via
+     *
+     *  #DEFINE Z 4
+     *  for( int x=0; x < this->xd; ++x ){
+     *      for( int y=0; y < this->yd; ++y ){
+     *          this->contents[ x + (y * xdim) + (Z * xdim * ydim)  ];
+     *      }
+     *  }
+     *
+     * so extending z is simply a matter of adding extend_by quantities
+     * of (xdim * ydim) at either the end (extend_high) or the front (extend_low)
+     * of this->contents
+     *
+     */
+
     /* pointer to new region
      * we eventually write back to this->contents */
     T ** new_contents = 0;
