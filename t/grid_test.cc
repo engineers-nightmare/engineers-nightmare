@@ -162,33 +162,25 @@ test_extend_z_low(void)
     assert( tmp != 0 );
     tmp->type = block_support;
 
+    /* exhaustively check things are as they should be
+     * NB: this relies on block_empty being the DEFAULT, see block::block
+     */
     for( i=0; i<8; ++i ){
         for( j=0; j<8; ++j ){
             for( k=0; k<8; ++k ){
                 tmp = grid_8.get(i, j, k);
                 assert( tmp != 0 );
-                if( tmp->type == block_support ){
-                    printf("\nBEFORE block_support found at (%u, %u, %u)\n", i, j, k);
+                if( i==1 && j ==1 && k==1 ){
+                    assert( tmp->type == block_support );
+                } else {
+                    assert( tmp->type == block_empty );
                 }
             }
         }
     }
-
 
     /* grid_3d::extend returns 0 on success */
     assert( grid_8.extend(grid_8.extend_z, grid_8.extend_low, 2) == 0 );
-
-    for( i=0; i<8; ++i ){
-        for( j=0; j<8; ++j ){
-            for( k=0; k<10; ++k ){
-                tmp = grid_8.get(i, j, k);
-                assert( tmp != 0 );
-                if( tmp->type == block_support ){
-                    printf("\nAFTER block_support found at (%u, %u, %u)\n", i, j, k);
-                }
-            }
-        }
-    }
 
     assert( grid_8.get(0,0,0) != 0 );
     assert( grid_8.get(7,7,7) != 0 );
@@ -210,6 +202,26 @@ test_extend_z_low(void)
     tmp = grid_8.get(1, 1, 3);
     assert( tmp != 0 );
     assert( tmp->type == block_support );
+
+    /* exhaustively check things are as they should be
+     * NB: this relies on block_empty being the DEFAULT, see block::block
+     */
+    for( i=0; i<8; ++i ){
+        for( j=0; j<8; ++j ){
+            for( k=0; k<10; ++k ){
+                tmp = grid_8.get(i, j, k);
+                assert( tmp != 0 );
+
+                if( i==1 && j ==1 && k==3 ){
+                    assert( tmp->type == block_support );
+                } else {
+                    assert( tmp->type == block_empty );
+                }
+            }
+        }
+    }
+
+
 }
 
 /* some light manual testing of block and grid

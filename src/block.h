@@ -25,14 +25,32 @@ struct block {
      *  on this block 'facing' down the +y axis
      */
 
-    surface_type yp;
-    surface_type ym;
-
     surface_type xp;
     surface_type xm;
 
+    surface_type yp;
+    surface_type ym;
+
     surface_type zp;
     surface_type zm;
+
+    /* manually set everything to default state
+     * do not rely on any default behavior
+     */
+    block(void) :
+        type(block_empty),
+        xp(surface_none),
+        xm(surface_none),
+        yp(surface_none),
+        ym(surface_none),
+        zp(surface_none),
+        zm(surface_none)
+    {}
+
+
+
+
+
 };
 
 
