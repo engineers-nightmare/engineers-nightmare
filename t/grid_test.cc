@@ -89,10 +89,39 @@ thump(void)
     }
 }
 
+void
+test_extend_z(void)
+{
+    grid_3d <block> grid_8(8, 8, 8);
+
+    assert( grid_8.get(0,0,0) != 0 );
+    assert( grid_8.get(7,7,7) != 0 );
+
+    assert( grid_8.get(8,7,7) == 0 );
+    assert( grid_8.get(7,8,7) == 0 );
+    assert( grid_8.get(7,7,8) == 0 );
+    assert( grid_8.get(8,8,8) == 0 );
+
+    /* grid_3d::extend returns 0 on success */
+    assert( grid_8.extend(grid_8.extend_z, grid_8.extend_high, 2) == 0 );
+
+    assert( grid_8.get(0,0,0) != 0 );
+    assert( grid_8.get(7,7,7) != 0 );
+    assert( grid_8.get(7,7,8) != 0 );
+    assert( grid_8.get(7,7,9) != 0 );
+
+    assert( grid_8.get(8,7,9) == 0 );
+    assert( grid_8.get(7,8,9) == 0 );
+    assert( grid_8.get(8,8,9) == 0 );
+    assert( grid_8.get(7,7,10) == 0 );
+}
+
 /* some light manual testing of block and grid
  */
 int
 main(void)
 {
     thump();
+    test_extend_z();
 }
+
