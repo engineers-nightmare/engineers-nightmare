@@ -1,7 +1,7 @@
 #pragma once
 
 #include "block.h"
-#include "fixed_grid.h"
+#include "fixed_cube.h"
 
 #include <stdio.h>
 
@@ -13,9 +13,8 @@ struct chunk {
      * this means a chunk represents
      * 8m^3
      */
-    fixed_grid<block> blocks;
+    fixed_cube<block, CHUNK_SIZE> blocks;
 
-    chunk(void) : blocks(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE) {}
     block * get_block(unsigned int x, unsigned int y, unsigned int z);
 };
 
