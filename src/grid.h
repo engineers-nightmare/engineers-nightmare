@@ -9,14 +9,15 @@
 
 /* a 3d grid containing N^3 Ts
  *
- * NOTE that grid_3d internally stores a grid of pointers to T
- * and the grid_3d constructor will automatically also allocate the Ts
- * the grid_3d destructor will destroy all these allocated Ts
+ * grid_3d internally stores an array of T
+ * grid_3d will NOT call constructor or destructor for the Ts
+ * it will however ensure that the memory is zerod (memset)
+ *
  */
 template <class T>
 struct grid_3d {
     /* contents of grid
-     * 3d array of pointers to T
+     * 3d array of T
      *
      * size determined by xy, yz, zd
      * the dimensions being [x][y][z]
@@ -25,13 +26,15 @@ struct grid_3d {
      * you do
      * [ x + (y * xd) + (z * xd * yd) ]
      */
-    T ** contents;
+    T * contents;
 
     /* upper bounds of each dimension */
     unsigned int xd, yd, zd;
 
+    /* this will zero out the contents but will NOT call a constructor on T */
     grid_3d(unsigned int xdim, unsigned int ydim, unsigned int zdim);
 
+    /* this will free contents but will NOT call a destructor on T */
     ~grid_3d(void);
 
     /* return a *T at coordinates (x, y, z)
@@ -97,27 +100,15 @@ grid_3d<T>::grid_3d(unsigned int xdim, unsigned int ydim, unsigned int zdim)
     printf("grid_3d::grid_3d given xd %u, yd %u, zd %u\n", this->xd, this->yd, this->zd);
 #endif
 
-    this->contents = (T**) calloc(sizeof(T*), xdim * ydim * zdim);
+    this->contents = (T*) calloc(sizeof(T), xdim * ydim * zdim);
 
     if( ! this->contents )
         errx(1, "grid_3d::grid_3d calloc failed");
-
-    /* allocate and initialise contents */
-    for(i=0; i< (this->xd * this->yd * this->zd); ++i){
-        this->contents[i] = new T();
-    }
 }
 
 template <class T>
 grid_3d<T>::~grid_3d()
 {
-    int i=0;
-
-    /* clean up each sub object */
-    for(i=0; i< (this->xd * this->yd * this->zd); ++i){
-        delete this->contents[i];
-    }
-
     /* clean up allocated region */
     free(this->contents);
 }
@@ -138,7 +129,7 @@ grid_3d<T>::get(unsigned int x, unsigned int y, unsigned int z)
     if( ! this->contents )
         errx(1, "grid_3d::get called, but this->contents is empty");
 
-    return contents[ x + (y * this->xd) + (z * this->xd * this->yd) ];
+    return &( contents[ x + (y * this->xd) + (z * this->xd * this->yd) ] );
 }
 
 template <class T>
@@ -229,13 +220,15 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
     /* counter used for placement new */
     unsigned int i = 0;
 
+    /* FIXME gimping temporary for refactoring */
+    errx(1, "grid_3d::_extend_z : refactoring, do not use");
 
     if( extend_by <= 0 ){
         /* waste of time */
         return 0;
     }
 
-    new_contents = (T**) realloc(this->contents, new_size * sizeof(T**));
+    new_contents = (T*) realloc(this->contents, new_size * sizeof(T));
     if( ! new_contents ){
         /* FIXME decide on error handling */
         errx(1, "grid_3d::_extend_z : realloc failed");
@@ -259,7 +252,7 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
              *
              * FIXME how does memmove communicate failure
              */
-            memmove(&(new_contents[growth]), new_contents, old_size * sizeof(T**));
+            memmove(&(new_contents[growth]), new_contents, old_size * sizeof(T));
 
             /* point to first element of now blank region
              * first `growth` elements of new_contents
@@ -275,14 +268,7 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
     }
 
     /* memset new region */
-    memset(new_region, 0, growth * sizeof(T*));
-
-    /* allocate and initialise elements in new region
-     * we know there are `growth` items in there
-     */
-    for( i=0; i < growth; ++i ){
-        new_region[i] = new T();
-    }
+    memset(new_region, 0, growth * sizeof(T));
 
     this->contents = new_contents;
     this->zd = new_zd;

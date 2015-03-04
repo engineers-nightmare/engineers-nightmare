@@ -1,4 +1,5 @@
 #include "ship_space.h"
+#include <new> /* placement new */
 
 block *
 chunk::get_block(unsigned int x, unsigned int y, unsigned int z)
@@ -9,6 +10,27 @@ chunk::get_block(unsigned int x, unsigned int y, unsigned int z)
         return 0;
 
     return this->blocks.get(x, y, z);
+}
+
+ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
+    : chunks(xd, yd, zd)
+{
+    int i=0, j=0, k=0;
+    chunk *c;
+
+    for( i=0; i<xd; ++i ){
+        for( j=0; j<yd; ++j ){
+            for( k=0; k<zd; ++k ){
+                /* call new to construct our blocks */
+                c = chunks.get(i, j, k);
+                if( ! c ){
+                    errx(1, "ship_space::ship_space : failed to initialise chunks");
+                }
+                new (c) chunk();
+            }
+        }
+    }
+
 }
 
 /* returns a block or null

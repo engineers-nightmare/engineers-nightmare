@@ -24,7 +24,7 @@ struct ship_space {
 
     /* a ship_space of xd * yd * zd
      */
-    ship_space(unsigned int xd, unsigned int yd, unsigned int zd) : chunks(xd, yd, zd) {}
+    ship_space(unsigned int xd, unsigned int yd, unsigned int zd);
 
     /* returns a block or null
      * finds the block at the position (x,y,z) within
