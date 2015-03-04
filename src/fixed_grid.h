@@ -9,13 +9,13 @@
 
 /* a 3d grid containing N^3 Ts
  *
- * grid_3d internally stores an array of T
- * grid_3d will NOT call constructor or destructor for the Ts
+ * fixed_grid internally stores an array of T
+ * fixed_grid will NOT call constructor or destructor for the Ts
  * it will however ensure that the memory is zerod (memset)
  *
  */
 template <class T>
-struct grid_3d {
+struct fixed_grid {
     /* contents of grid
      * 3d array of T
      *
@@ -32,10 +32,10 @@ struct grid_3d {
     unsigned int xd, yd, zd;
 
     /* this will zero out the contents but will NOT call a constructor on T */
-    grid_3d(unsigned int xdim, unsigned int ydim, unsigned int zdim);
+    fixed_grid(unsigned int xdim, unsigned int ydim, unsigned int zdim);
 
     /* this will free contents but will NOT call a destructor on T */
-    ~grid_3d(void);
+    ~fixed_grid(void);
 
     /* return a *T at coordinates (x, y, z)
      * or null on error
@@ -89,25 +89,25 @@ private:
 
 
 template <class T>
-grid_3d<T>::grid_3d(unsigned int xdim, unsigned int ydim, unsigned int zdim)
+fixed_grid<T>::fixed_grid(unsigned int xdim, unsigned int ydim, unsigned int zdim)
     : xd(xdim), yd(ydim), zd(zdim), contents(0)
 {
     int i=0;
     void *place;
 
 #if DEBUG
-    printf("grid_3d::grid_3d given xdim %u, ydim %u, zdim %u\n", xdim, ydim, zdim);
-    printf("grid_3d::grid_3d given xd %u, yd %u, zd %u\n", this->xd, this->yd, this->zd);
+    printf("fixed_grid::fixed_grid given xdim %u, ydim %u, zdim %u\n", xdim, ydim, zdim);
+    printf("fixed_grid::fixed_grid given xd %u, yd %u, zd %u\n", this->xd, this->yd, this->zd);
 #endif
 
     this->contents = (T*) calloc(sizeof(T), xdim * ydim * zdim);
 
     if( ! this->contents )
-        errx(1, "grid_3d::grid_3d calloc failed");
+        errx(1, "fixed_grid::fixed_grid calloc failed");
 }
 
 template <class T>
-grid_3d<T>::~grid_3d()
+fixed_grid<T>::~fixed_grid()
 {
     /* clean up allocated region */
     free(this->contents);
@@ -115,29 +115,29 @@ grid_3d<T>::~grid_3d()
 
 template <class T>
 T *
-grid_3d<T>::get(unsigned int x, unsigned int y, unsigned int z)
+fixed_grid<T>::get(unsigned int x, unsigned int y, unsigned int z)
 {
     if( x >= this->xd ||
         y >= this->yd ||
         z >= this->zd ){
 #if DEBUG
-        printf("grid_3d::get OUT OF RANGE: x: %u/%u, y: %u/%u, z: %u/%u\n", x, this->xd, y, this->yd, z, this->zd);
+        printf("fixed_grid::get OUT OF RANGE: x: %u/%u, y: %u/%u, z: %u/%u\n", x, this->xd, y, this->yd, z, this->zd);
 #endif
         return 0;
     }
 
     if( ! this->contents )
-        errx(1, "grid_3d::get called, but this->contents is empty");
+        errx(1, "fixed_grid::get called, but this->contents is empty");
 
     return &( contents[ x + (y * this->xd) + (z * this->xd * this->yd) ] );
 }
 
 template <class T>
 int
-grid_3d<T>::extend(extend_axis axis, extend_direction direction, unsigned int extend_by)
+fixed_grid<T>::extend(extend_axis axis, extend_direction direction, unsigned int extend_by)
 {
     if( ! this->contents )
-        errx(1, "grid_3d::extend called, but this->contents is empty");
+        errx(1, "fixed_grid::extend called, but this->contents is empty");
 
     switch( axis ){
         case extend_x:
@@ -153,30 +153,30 @@ grid_3d<T>::extend(extend_axis axis, extend_direction direction, unsigned int ex
             break;
 
         default:
-            errx(1, "grid_3d::extend : impossible extend_axis supplied");
+            errx(1, "fixed_grid::extend : impossible extend_axis supplied");
             break;
     }
 }
 
 template <class T>
 int
-grid_3d<T>::_extend_x(extend_direction direction, unsigned int extend_by)
+fixed_grid<T>::_extend_x(extend_direction direction, unsigned int extend_by)
 {
-    errx(1, "grid_3d::_extend_x : not implemented yet");
+    errx(1, "fixed_grid::_extend_x : not implemented yet");
     return 0;
 }
 
 template <class T>
 int
-grid_3d<T>::_extend_y(extend_direction direction, unsigned int extend_by)
+fixed_grid<T>::_extend_y(extend_direction direction, unsigned int extend_by)
 {
-    errx(1, "grid_3d::_extend_y : not implemented yet");
+    errx(1, "fixed_grid::_extend_y : not implemented yet");
     return 0;
 }
 
 template <class T>
 int
-grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
+fixed_grid<T>::_extend_z(extend_direction direction, unsigned int extend_by)
 {
     /* extending along Z is the simplest case as each Z is
      * a contiguous block with dimension (this->xd * this->yd)
@@ -221,7 +221,7 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
     unsigned int i = 0;
 
     /* FIXME gimping temporary for refactoring */
-    errx(1, "grid_3d::_extend_z : refactoring, do not use");
+    errx(1, "fixed_grid::_extend_z : refactoring, do not use");
 
     if( extend_by <= 0 ){
         /* waste of time */
@@ -231,7 +231,7 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
     new_contents = (T*) realloc(this->contents, new_size * sizeof(T));
     if( ! new_contents ){
         /* FIXME decide on error handling */
-        errx(1, "grid_3d::_extend_z : realloc failed");
+        errx(1, "fixed_grid::_extend_z : realloc failed");
         return 1;
     }
 
@@ -262,7 +262,7 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
             break;
 
         default:
-            errx(1, "grid_3d::_extend_x : impossible extend_direction supplied");
+            errx(1, "fixed_grid::_extend_x : impossible extend_direction supplied");
             break;
 
     }

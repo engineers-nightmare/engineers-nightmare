@@ -1,7 +1,7 @@
 #pragma once
 
 #include "block.h"
-#include "grid.h"
+#include "fixed_grid.h"
 
 #include <stdio.h>
 
@@ -13,14 +13,14 @@ struct chunk {
      * this means a chunk represents
      * 8m^3
      */
-    grid_3d<block> blocks;
+    fixed_grid<block> blocks;
 
     chunk(void) : blocks(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE) {}
     block * get_block(unsigned int x, unsigned int y, unsigned int z);
 };
 
 struct ship_space {
-    grid_3d<chunk> chunks;
+    fixed_grid<chunk> chunks;
 
     /* a ship_space of xd * yd * zd
      */

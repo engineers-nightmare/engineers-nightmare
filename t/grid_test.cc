@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "../src/block.h"
-#include "../src/grid.h"
+#include "../src/fixed_grid.h"
 
 /* thump around a bit hoping to catch
  * some low hanging fruit
@@ -9,7 +9,7 @@
 void
 thump(void)
 {
-    grid_3d <block> grid_8(8, 8, 8);
+    fixed_grid <block> grid_8(8, 8, 8);
 
     /* just some gentle testing to make sure nothing
      * obviously broken happens
@@ -97,7 +97,7 @@ test_extend_z_high(void)
     /* FIXME moving extend logic out of grid space */
     return;
 
-    grid_3d <block> grid_8(8, 8, 8);
+    fixed_grid <block> grid_8(8, 8, 8);
 
     assert( grid_8.get(0,0,0) != 0 );
     assert( grid_8.get(7,7,7) != 0 );
@@ -116,7 +116,7 @@ test_extend_z_high(void)
     assert( tmp != 0 );
     tmp->type = block_support;
 
-    /* grid_3d::extend returns 0 on success */
+    /* fixed_grid::extend returns 0 on success */
     assert( grid_8.extend(grid_8.extend_z, grid_8.extend_high, 2) == 0 );
 
     assert( grid_8.get(0,0,0) != 0 );
@@ -149,7 +149,7 @@ test_extend_z_low(void)
     /* FIXME moving extend logic out of grid space */
     return;
 
-    grid_3d <block> grid_8(8, 8, 8);
+    fixed_grid <block> grid_8(8, 8, 8);
 
     assert( grid_8.get(0,0,0) != 0 );
     assert( grid_8.get(7,7,7) != 0 );
@@ -185,7 +185,7 @@ test_extend_z_low(void)
         }
     }
 
-    /* grid_3d::extend returns 0 on success */
+    /* fixed_grid::extend returns 0 on success */
     assert( grid_8.extend(grid_8.extend_z, grid_8.extend_low, 2) == 0 );
 
     assert( grid_8.get(0,0,0) != 0 );
