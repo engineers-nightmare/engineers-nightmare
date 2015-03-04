@@ -206,10 +206,10 @@ grid_3d<T>::_extend_z(extend_direction direction, unsigned int extend_by)
 
     /* pointer to new region
      * we eventually write back to this->contents */
-    T ** new_contents = 0;
+    T * new_contents = 0;
 
     /* pointer to just the new sub-area of new_contents */
-    T ** new_region = 0;
+    T * new_region = 0;
 
     /* various size calculations */
     unsigned int old_size = this->xd * this->yd * this->zd;
