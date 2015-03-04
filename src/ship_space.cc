@@ -18,9 +18,12 @@ ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
     int i=0, j=0, k=0;
     chunk *c;
 
-    for( i=0; i<xd; ++i ){
+    /* iterate through in z major / x minor order
+     * yay access patterns
+     */
+    for( k=0; k<zd; ++k ){
         for( j=0; j<yd; ++j ){
-            for( k=0; k<zd; ++k ){
+            for( i=0; i<xd; ++i ){
                 /* call new to construct our blocks */
                 c = chunks.get(i, j, k);
                 if( ! c ){
