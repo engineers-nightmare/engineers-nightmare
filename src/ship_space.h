@@ -1,13 +1,13 @@
 #pragma once
 
 #include "block.h"
-#include "fixed_grid.h"
 #include "chunk.h"
+#include "dynamic_grid.h"
 
 #include <stdio.h>
 
 struct ship_space {
-    fixed_grid<chunk> chunks;
+    dynamic_grid<chunk> chunks;
 
     /* a ship_space of xd * yd * zd
      */
