@@ -3,6 +3,10 @@
 #include <err.h>
 #include <epoxy/gl.h>
 
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 #include "src/common.h"
 
 
@@ -19,6 +23,28 @@ struct wnd {
 } wnd;
 
 
+struct mesh {
+    GLuint vbo;
+    GLuint ibo;
+    GLuint vao;
+    GLuint num_indices;
+};
+
+
+mesh *load_mesh(char const *filename) {
+    aiScene const *scene = aiImportFile(filename, aiProcessPreset_TargetRealtime_MaxQuality);
+    if (!scene)
+        errx(1, "Failed to load mesh %s", filename);
+
+    printf("Mesh %s:\n", filename);
+    printf("\tNumMeshes: %d\n", scene->mNumMeshes);
+
+    aiReleaseImport(scene);
+
+    return 0;
+}
+
+
 void
 gl_debug_callback(GLenum source __unused,
                   GLenum type __unused,
@@ -31,6 +57,7 @@ gl_debug_callback(GLenum source __unused,
     printf("GL: %s\n", message);
 }
 
+mesh *scaffold;
 
 void
 init()
@@ -44,6 +71,8 @@ init()
 
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(gl_debug_callback, NULL);
+
+    scaffold = load_mesh("mesh/initial_scaffold.obj");
 }
 
 
@@ -56,6 +85,7 @@ resize(int width, int height)
     glViewport(0, 0, width, height);
     wnd.width = width;
     wnd.height = height;
+    printf("Resized to %dx%d\n", width, height);
 }
 
 void
