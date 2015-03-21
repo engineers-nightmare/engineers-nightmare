@@ -12,8 +12,9 @@ add_library(NIGHTMARE ${SOURCE})
 include(FindPkgConfig)
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 PKG_SEARCH_MODULE(EPOXY REQUIRED epoxy)
-include_directories(${SDL2_INCLUDE_DIRS} ${EPOXY_INCLUDE_DIRS})
-target_link_libraries(nightmare ${SDL2_LIBRARIES} ${EPOXY_LIBRARIES} NIGHTMARE)
+PKG_SEARCH_MODULE(ASSIMP REQUIRED assimp)
+include_directories(${SDL2_INCLUDE_DIRS} ${EPOXY_INCLUDE_DIRS} ${ASSIMP_INCLUDE_DIRS})
+target_link_libraries(nightmare ${SDL2_LIBRARIES} ${EPOXY_LIBRARIES} ${ASSIMP_LIBRARIES} NIGHTMARE)
 
 # the following is based on
 # http://www.cmake.org/Wiki/CMake/Tutorials/Object_Library
