@@ -33,5 +33,13 @@ GLuint load_shader(char const *vs, char const *fs)
     glDetachShader(prog, fs_obj);
     glDeleteShader(fs_obj);
 
+    /* NOTE: you'd normally want to check that the shader compile & link actually succeeded,
+     * but we're going to rely on KHR_debug as the feedback channel there. As a nice side effect,
+     * we also get to take full advantage of deferred shader compilation if the GL does it
+     * (assuming glLinkProgram doesn't force completion of the individual shader compiles)
+     *
+     * This is all somewhat implementation-specific guesswork... but it's also free.
+     */
+
     return prog;
 }
