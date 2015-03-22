@@ -148,6 +148,7 @@ init()
     glDebugMessageCallback(gl_debug_callback, NULL);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);         /* pointers given by other libs may not be aligned */
+    glEnable(GL_DEPTH_TEST);
 
     scaffold = load_mesh("mesh/initial_scaffold.obj");
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
