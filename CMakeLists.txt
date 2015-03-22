@@ -15,10 +15,7 @@ PKG_SEARCH_MODULE(EPOXY REQUIRED epoxy)
 PKG_SEARCH_MODULE(ASSIMP REQUIRED assimp)
 PKG_SEARCH_MODULE(SDL2_IMAGE REQUIRED SDL2_image)
 
-# bullet physics doesn't ship a .pc for us, so we'll just
-# make things up here:
-set(BULLET_INCLUDE_DIRS )
-set(BULLET_LIBRARIES -lBulletDynamics -lBulletCollision -lLinearMath)
+find_package(Bullet REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIRS}
 					${EPOXY_INCLUDE_DIRS}
