@@ -11,6 +11,7 @@
 #include "src/common.h"
 #include "src/mesh.h"
 #include "src/shader.h"
+#include "src/ship_space.h"
 
 
 #define APP_NAME    "Engineer's Nightmare"
@@ -133,6 +134,7 @@ GLuint simple_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
 texture_set *world_textures;
+ship_space *ship;
 
 void
 init()
@@ -167,6 +169,10 @@ init()
     world_textures->load(0, "textures/scaffold.png");
 
     world_textures->bind(0);
+
+    ship = ship_space::mock_ship_space();
+    if( ! ship )
+        errx(1, "Ship_space::mock_ship_space failed\n");
 }
 
 
