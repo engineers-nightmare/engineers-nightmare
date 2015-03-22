@@ -13,6 +13,31 @@
 #include <vector>
 
 
+static void
+compute_bounds(std::vector<vertex> *verts)
+{
+    float min_x, min_y, min_z;
+    float max_x, max_y, max_z;
+
+    min_x = max_x = (*verts)[0].x;
+    min_y = max_y = (*verts)[0].y;
+    min_z = max_z = (*verts)[0].z;
+
+    std::vector<vertex>::const_iterator it;
+    for (it = ++verts->begin(); it != verts->end(); it++) {
+        if (it->x < min_x) min_x = it->x;
+        if (it->y < min_y) min_y = it->y;
+        if (it->z < min_z) min_z = it->z;
+        if (it->x > max_x) max_x = it->x;
+        if (it->y > max_y) max_y = it->y;
+        if (it->z > max_z) max_z = it->z;
+    }
+
+    printf("\tBounding box: (%2.2f %2.2f %2.2f) (%2.2f %2.2f %2.2f)\n",
+            min_x, min_y, min_z, max_x, max_y, max_z);
+}
+
+
 mesh *load_mesh(char const *filename) {
     aiScene const *scene = aiImportFile(filename, aiProcessPreset_TargetRealtime_MaxQuality);
     if (!scene)
@@ -47,6 +72,7 @@ mesh *load_mesh(char const *filename) {
     }
 
     printf("\tAfter processing: %d verts, %d indices\n", verts.size(), indices.size());
+    compute_bounds(&verts);
 
     aiReleaseImport(scene);
 
