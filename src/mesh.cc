@@ -59,6 +59,7 @@ mesh *load_mesh(char const *filename) {
     glBindBuffer(GL_ARRAY_BUFFER, ret->vbo);
     glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex), &verts[0], GL_STATIC_DRAW);
 
+    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), offsetof(vertex, x));
 
     glGenBuffers(1, &ret->ibo);
