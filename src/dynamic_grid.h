@@ -15,6 +15,14 @@
  * dynamic_grid will NOT call constructor or destructor for the Ts
  * it will however ensure that the memory is zerod (memset)
  *
+ * dynamic grid externally exposes and allows for negative indexes
+ * internally however it is an array, so we store 'offsets' for each axis
+ * to convert between Internal {x y z} and External {x y z}
+ *
+ * functions taking xyz will distinguish between them:
+ *  external: ex, ey, ez
+ *  internal: ix, iy, iz
+ *
  */
 template <class T>
 struct dynamic_grid {
@@ -30,8 +38,11 @@ struct dynamic_grid {
      */
     T * contents;
 
-    /* upper bounds of each dimension */
+    /* size of each dimension */
     unsigned int xd, yd, zd;
+
+    /* offsets within each dimension */
+    unsigned int xo, yo, zo;
 
     /* this will zero out the contents but will NOT call a constructor on T */
     dynamic_grid(unsigned int xdim, unsigned int ydim, unsigned int zdim);
@@ -39,12 +50,12 @@ struct dynamic_grid {
     /* this will free contents but will NOT call a destructor on T */
     ~dynamic_grid(void);
 
-    /* return a *T at coordinates (x, y, z)
+    /* return a *T at external coordinates (x, y, z)
      * or null on error
      *
      * will check bounds
      */
-    T * get(unsigned int x, unsigned int y, unsigned int z);
+    T * get(int ex, int ey, int ez);
 
     /* axis to extend */
     enum extend_axis {
@@ -92,7 +103,7 @@ private:
 
 template <class T>
 dynamic_grid<T>::dynamic_grid(unsigned int xdim, unsigned int ydim, unsigned int zdim)
-    : xd(xdim), yd(ydim), zd(zdim), contents(0)
+    : xd(xdim), yd(ydim), zd(zdim), contents(0), xo(0), yo(0), zo(0)
 {
     int i=0;
     void *place;
@@ -117,13 +128,15 @@ dynamic_grid<T>::~dynamic_grid()
 
 template <class T>
 T *
-dynamic_grid<T>::get(unsigned int x, unsigned int y, unsigned int z)
+dynamic_grid<T>::get(int ex, int ey, int ez)
 {
-    if( x >= this->xd ||
-        y >= this->yd ||
-        z >= this->zd ){
+    /* FIXME need to offset */
+
+    if( ex >= this->xd ||
+        ey >= this->yd ||
+        ez >= this->zd ){
 #if DEBUG
-        printf("dynamic_grid::get OUT OF RANGE: x: %u/%u, y: %u/%u, z: %u/%u\n", x, this->xd, y, this->yd, z, this->zd);
+        printf("dynamic_grid::get OUT OF RANGE: x: %u/%u, y: %u/%u, z: %u/%u\n", ex, this->xd, ey, this->yd, ez, this->zd);
 #endif
         return 0;
     }
@@ -131,7 +144,7 @@ dynamic_grid<T>::get(unsigned int x, unsigned int y, unsigned int z)
     if( ! this->contents )
         errx(1, "dynamic_grid::get called, but this->contents is empty");
 
-    return &( contents[ x + (y * this->xd) + (z * this->xd * this->yd) ] );
+    return &( contents[ ex + (ey * this->xd) + (ez * this->xd * this->yd) ] );
 }
 
 template <class T>
