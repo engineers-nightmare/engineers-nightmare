@@ -3,6 +3,10 @@
 #include <err.h>
 #include <epoxy/gl.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "src/common.h"
 #include "src/mesh.h"
 #include "src/shader.h"
@@ -21,6 +25,46 @@ struct wnd {
 } wnd;
 
 
+/* where T is std140-conforming, and agrees with the shader. */
+template<typename T>
+struct shader_params
+{
+    T val;
+    GLuint bo;
+
+    shader_params() : bo(0)
+    {
+        glGenBuffers(1, &bo);
+        glBindBuffer(GL_UNIFORM_BUFFER, bo);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(T), NULL, GL_DYNAMIC_DRAW);
+    }
+
+    ~shader_params() {
+        glDeleteBuffers(1, &bo);
+    }
+
+    void upload() {
+        /* bind to nonindexed binding point */
+        glBindBuffer(GL_UNIFORM_BUFFER, bo);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(T), &val);
+    }
+
+    void bind(GLuint index) {
+        /* bind to proper index of indexed binding point, for use */
+        glBindBufferBase(GL_UNIFORM_BUFFER, index, bo);
+    }
+};
+
+
+struct per_camera_params {
+    glm::mat4 view_proj_matrix;
+};
+
+struct per_object_params {
+    glm::mat4 world_matrix;
+};
+
+
 void
 gl_debug_callback(GLenum source __unused,
                   GLenum type __unused,
@@ -35,6 +79,8 @@ gl_debug_callback(GLenum source __unused,
 
 mesh *scaffold;
 GLuint simple_shader;
+shader_params<per_camera_params> *per_camera;
+shader_params<per_object_params> *per_object;
 
 void
 init()
@@ -51,6 +97,16 @@ init()
 
     scaffold = load_mesh("mesh/initial_scaffold.obj");
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
+
+    glUseProgram(simple_shader);
+
+    per_camera = new shader_params<per_camera_params>;
+    per_object = new shader_params<per_object_params>;
+
+    per_object->val.world_matrix = glm::mat4(1);    /* identity */
+
+    per_camera->bind(0);
+    per_object->bind(1);
 }
 
 
@@ -76,7 +132,12 @@ update()
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    /* TODO: draw something */
+    glm::mat4 proj = glm::perspective(45.0f, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
+    glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(100, 0, 0), glm::vec3(0, 1, 0));
+    per_camera->val.view_proj_matrix = proj * view;
+    per_camera->upload();
+    per_object->upload();
+
     draw_mesh(scaffold);
 }
 
