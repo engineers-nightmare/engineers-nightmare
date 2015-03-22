@@ -31,12 +31,12 @@ ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
  * will move across chunks
  */
 block *
-ship_space::get_block(unsigned int block_x, unsigned int block_y, unsigned int block_z)
+ship_space::get_block(int block_x, int block_y, int block_z)
 {
     /* Within Block coordinates */
-    unsigned int wb_x = block_x % CHUNK_SIZE;
-    unsigned int wb_y = block_y % CHUNK_SIZE;
-    unsigned int wb_z = block_z % CHUNK_SIZE;
+    int wb_x = block_x % CHUNK_SIZE;
+    int wb_y = block_y % CHUNK_SIZE;
+    int wb_z = block_z % CHUNK_SIZE;
 
     chunk *c;
 
@@ -51,11 +51,11 @@ ship_space::get_block(unsigned int block_x, unsigned int block_y, unsigned int b
  * or null
  */
 chunk *
-ship_space::get_chunk_containing(unsigned int block_x, unsigned int block_y, unsigned int block_z)
+ship_space::get_chunk_containing(int block_x, int block_y, int block_z)
 {
-    unsigned int chunk_x = block_x / CHUNK_SIZE;
-    unsigned int chunk_y = block_y / CHUNK_SIZE;
-    unsigned int chunk_z = block_z / CHUNK_SIZE;
+    int chunk_x = block_x / CHUNK_SIZE;
+    int chunk_y = block_y / CHUNK_SIZE;
+    int chunk_z = block_z / CHUNK_SIZE;
 
     return this->get_chunk(chunk_x, chunk_y, chunk_z);
 }
@@ -64,7 +64,7 @@ ship_space::get_chunk_containing(unsigned int block_x, unsigned int block_y, uns
  * note this is NOT using block coordinates
  */
 chunk *
-ship_space::get_chunk(unsigned int chunk_x, unsigned int chunk_y, unsigned int chunk_z)
+ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
 {
     return this->chunks.get(chunk_x, chunk_y, chunk_z);
 }
