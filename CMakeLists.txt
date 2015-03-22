@@ -14,8 +14,24 @@ PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 PKG_SEARCH_MODULE(EPOXY REQUIRED epoxy)
 PKG_SEARCH_MODULE(ASSIMP REQUIRED assimp)
 PKG_SEARCH_MODULE(SDL2_IMAGE REQUIRED SDL2_image)
-include_directories(${SDL2_INCLUDE_DIRS} ${EPOXY_INCLUDE_DIRS} ${ASSIMP_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
-target_link_libraries(nightmare ${SDL2_LIBRARIES} ${EPOXY_LIBRARIES} ${ASSIMP_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} NIGHTMARE)
+
+# bullet physics doesn't ship a .pc for us, so we'll just
+# make things up here:
+set(BULLET_INCLUDE_DIRS )
+set(BULLET_LIBRARIES -lBulletDynamics -lBulletCollision -lLinearMath)
+
+include_directories(${SDL2_INCLUDE_DIRS}
+					${EPOXY_INCLUDE_DIRS}
+					${ASSIMP_INCLUDE_DIRS}
+					${SDL2_IMAGE_INCLUDE_DIRS}
+					${BULLET_INCLUDE_DIRS})
+target_link_libraries(nightmare
+					${SDL2_LIBRARIES}
+					${EPOXY_LIBRARIES}
+					${ASSIMP_LIBRARIES}
+					${SDL2_IMAGE_LIBRARIES}
+					${BULLET_LIBRARIES}
+					NIGHTMARE)
 
 # the following is based on
 # http://www.cmake.org/Wiki/CMake/Tutorials/Object_Library

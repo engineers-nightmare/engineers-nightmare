@@ -24,5 +24,6 @@ run:
 * libepoxy
 * assimp
 * glm
+* bullet
 
 
