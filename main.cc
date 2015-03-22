@@ -5,6 +5,7 @@
 
 #include "src/common.h"
 #include "src/mesh.h"
+#include "src/shader.h"
 
 
 #define APP_NAME    "Engineer's Nightmare"
@@ -33,6 +34,7 @@ gl_debug_callback(GLenum source __unused,
 }
 
 mesh *scaffold;
+GLuint simple_shader;
 
 void
 init()
@@ -48,6 +50,7 @@ init()
     glDebugMessageCallback(gl_debug_callback, NULL);
 
     scaffold = load_mesh("mesh/initial_scaffold.obj");
+    simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
 }
 
 
