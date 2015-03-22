@@ -69,4 +69,46 @@ ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
     return this->chunks.get(chunk_x, chunk_y, chunk_z);
 }
 
+/* returns a pointer to a new ship space
+ * this ship_space will have a floor and 2 walls of scaffolding
+ * and will otherwise be empty
+ *
+ * returns 0 on error
+ */
+ship_space *
+ship_space::mock_ship_space(void)
+{
+    /* new ship space of 1 chunk ^ 3 */
+    ship_space * ss = new ship_space(1, 1, 1);
+    unsigned int x=0, y=0, z=0;
+    block *b = 0;
+
+    for( z=0; x < 8; ++z ){
+        for( y=0; x < 8; ++y ){
+            for( x=0; x < 8; ++x ){
+
+                b = 0;
+
+                if( z == 0 ){
+                    /* the floor */
+                    b = ss->get_block(x, y, z);
+                } else if( y == 0 ){
+                    /* one wall */
+                    b = ss->get_block(x, y, z);
+                } else if( x == 0 ){
+                    /* the other wall */
+                    b = ss->get_block(x, y, z);
+                }
+
+                if( b ){
+                    /* scaffolding */
+                    b->type = block_support;
+                }
+
+            }
+        }
+    }
+
+    return ss;
+}
 

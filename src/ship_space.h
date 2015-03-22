@@ -29,6 +29,14 @@ struct ship_space {
      * note this is NOT using block coordinates
      */
     chunk * get_chunk(int chunk_x, int chunk_y, int chunk_z);
+
+    /* returns a pointer to a new ship space
+     * this ship_space will have a floor and 2 walls of scaffolding
+     * and will otherwise be empty
+     *
+     * returns 0 on error
+     */
+    static ship_space * mock_ship_space(void);
 };
 
 
