@@ -22,5 +22,5 @@ layout(std140, binding=1) uniform per_object {
 
 void main(void)
 {
-	gl_Position = view_proj_matrix * world_matrix * pos;
+	gl_Position = view_proj_matrix * (world_matrix * pos);
 }
