@@ -19,8 +19,12 @@ layout(std140, binding=1) uniform per_object {
 
 };
 
+out vec3 texcoord;
+
 
 void main(void)
 {
 	gl_Position = view_proj_matrix * (world_matrix * pos);
+    texcoord.z = 0; /* layer */
+    texcoord.xy = pos.xy;   /* TODO: proper triplanar mapping, or gen texcoords cpu-side. */
 }

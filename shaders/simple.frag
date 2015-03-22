@@ -1,8 +1,14 @@
 #version 330 core
+// for sampler bindings.
+#extension GL_ARB_shading_language_420pack: require
+
+in vec3 texcoord;
+
+layout(binding=0) uniform sampler2DArray s_albedo;
 
 layout(location=0) out vec4 color;
 
 void main(void)
 {
-	color = vec4(1,0,0,1);	/* nice and red */
+	color = texture(s_albedo, texcoord);
 }

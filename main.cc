@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <SDL.h>
+#include <SDL_image.h>
 #include <err.h>
 #include <epoxy/gl.h>
 
@@ -15,6 +16,10 @@
 #define APP_NAME    "Engineer's Nightmare"
 #define DEFAULT_WIDTH   1024
 #define DEFAULT_HEIGHT  768
+
+
+#define WORLD_TEXTURE_DIMENSION     32
+#define MAX_WORLD_TEXTURES          64
 
 
 struct wnd {
@@ -65,6 +70,52 @@ struct per_object_params {
 };
 
 
+struct texture_set {
+    GLuint texobj;
+    int dim;
+    int array_size;
+
+    texture_set(int dim, int array_size) : texobj(0), dim(dim), array_size(array_size) {
+        glGenTextures(1, &texobj);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texobj);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY,
+                       1,   /* no mips! I WANT YOUR EYES TO BLEED -- todo, fix this. */
+                       GL_RGBA8, dim, dim, array_size);
+    }
+
+    void bind(int texunit)
+    {
+        glActiveTexture(GL_TEXTURE0 + texunit);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texobj);
+    }
+
+    void load(int slot, char const *filename)
+    {
+        SDL_Surface* surf = IMG_Load( filename );
+
+        if (!surf)
+            errx(1, "Failed to load texture %d:%s", slot, filename);
+        if (surf->w != dim || surf->h != dim)
+            errx(1, "Texture %d:%s is the wrong size: %dx%d but expected %dx%d",
+                    slot, filename, surf->w, surf->h, dim, dim);
+
+        /* bring on DSA... for now, we disturb the tex0 binding */
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texobj);
+
+        /* just blindly upload as if it's RGBA/UNSIGNED_BYTE. TODO: support weirder things */
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
+                        0, 0, slot,
+                        dim, dim, 1,
+                        GL_RGBA,
+                        GL_UNSIGNED_BYTE,
+                        surf->pixels);
+
+        SDL_FreeSurface(surf);
+    }
+};
+
+
 void
 gl_debug_callback(GLenum source __unused,
                   GLenum type __unused,
@@ -81,6 +132,7 @@ mesh *scaffold;
 GLuint simple_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
+texture_set *world_textures;
 
 void
 init()
@@ -95,6 +147,8 @@ init()
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(gl_debug_callback, NULL);
 
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);         /* pointers given by other libs may not be aligned */
+
     scaffold = load_mesh("mesh/initial_scaffold.obj");
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
 
@@ -107,6 +161,11 @@ init()
 
     per_camera->bind(0);
     per_object->bind(1);
+
+    world_textures = new texture_set(WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
+    world_textures->load(0, "textures/scaffold.png");
+
+    world_textures->bind(0);
 }
 
 
