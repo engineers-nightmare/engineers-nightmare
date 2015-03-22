@@ -21,5 +21,7 @@ run:
 
 * SDL2
 * libepoxy
+* assimp
+* glm
 
 
