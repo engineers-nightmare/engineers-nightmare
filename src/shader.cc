@@ -13,6 +13,7 @@ load_stage(GLenum stage, char const *filename)
     GLint len = content.len;
     glShaderSource(shader, 1, (GLchar const **) &content.data, &len);
     glCompileShader(shader);
+    return shader;
 }
 
 GLuint load_shader(char const *vs, char const *fs)
