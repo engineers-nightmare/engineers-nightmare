@@ -20,6 +20,7 @@ run:
 # dependencies
 
 * SDL2
+* SDL2_image
 * libepoxy
 * assimp
 * glm
