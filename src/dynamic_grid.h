@@ -44,8 +44,15 @@ struct dynamic_grid {
     /* offsets within each dimension */
     unsigned int xo, yo, zo;
 
-    /* this will zero out the contents but will NOT call a constructor on T */
+    /* this will zero out the contents but will NOT call a constructor on T
+     * this creates a dynamic grid from 0,0,0 to xdim,ydim,zdim
+     */
     dynamic_grid(unsigned int xdim, unsigned int ydim, unsigned int zdim);
+
+    /* this will zero out the contents but will NOT call a constructor on T
+     * this creates a dynamic grid from xfrom,yfrom,zfrom to xto,yto,zto
+     */
+    dynamic_grid(int xfrom, int xto, int yfrom, int yto, int zfrom, int zto);
 
     /* this will free contents but will NOT call a destructor on T */
     ~dynamic_grid(void);
@@ -79,6 +86,40 @@ dynamic_grid<T>::dynamic_grid(unsigned int xdim, unsigned int ydim, unsigned int
 }
 
 template <class T>
+dynamic_grid<T>::dynamic_grid(int xfrom, int xto, int yfrom, int yto, int zfrom, int zto)
+    : contents(0)
+{
+    int i=0;
+    void *place;
+
+    if( xfrom >= xto ||
+        yfrom >= yto ||
+        zfrom >= zto ){
+        errx(1, "illegal dimensions supplied");
+    }
+
+    this->xd = xto - xfrom;
+    this->yd = yto - yfrom;
+    this->zd = zto - zfrom;
+
+    this->xo = xfrom;
+    this->yo = yfrom;
+    this->zo = zfrom;
+
+#if DEBUG
+    printf("dynamic_grid::dynamic_grid given xd %u, yd %u, zd %u\n", xd, yd, zd);
+    printf("dynamic_grid::dynamic_grid given xd %u, yd %u, zd %u\n", this->xd, this->yd, this->zd);
+#endif
+
+    this->contents = (T*) calloc(sizeof(T), this->xd * this->yd * this->zd);
+
+    if( ! this->contents )
+        errx(1, "dynamic_grid::dynamic_grid calloc failed");
+}
+
+
+
+template <class T>
 dynamic_grid<T>::~dynamic_grid()
 {
     /* clean up allocated region */
@@ -89,13 +130,21 @@ template <class T>
 T *
 dynamic_grid<T>::get(int ex, int ey, int ez)
 {
-    /* FIXME need to offset */
+    /* translate to internal co-ords*/
+   int ix, iy, iz;
+    ix = ex - this->xo;
+    iy = ey - this->yo;
+    iz = ez - this->zo;
 
-    if( ex >= this->xd ||
-        ey >= this->yd ||
-        ez >= this->zd ){
+    if( ix >= this->xd ||
+        iy >= this->yd ||
+        iz >= this->zd ||
+        ix < 0         ||
+        iy < 0         ||
+        iz < 0         ){
+
 #if DEBUG
-        printf("dynamic_grid::get OUT OF RANGE: x: %u/%u, y: %u/%u, z: %u/%u\n", ex, this->xd, ey, this->yd, ez, this->zd);
+        printf("dynamic_grid::get OUT OF RANGE: x: %u/%u, y: %u/%u, z: %u/%u\n", ix, this->xd, iy, this->yd, iz, this->zd);
 #endif
         return 0;
     }
@@ -103,7 +152,7 @@ dynamic_grid<T>::get(int ex, int ey, int ez)
     if( ! this->contents )
         errx(1, "dynamic_grid::get called, but this->contents is empty");
 
-    return &( contents[ ex + (ey * this->xd) + (ez * this->xd * this->yd) ] );
+    return &( contents[ ix + (iy * this->xd) + (iz * this->xd * this->yd) ] );
 }
 
 
