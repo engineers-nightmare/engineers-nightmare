@@ -62,7 +62,13 @@ test_mock_ship_space(void)
                     /* one wall */
                     assert(b->type == block_support);
                 } else if( x == 0 ){
-                    /* the other wall */
+                    /* two wall */
+                    assert(b->type == block_support);
+                } else if( x == 7 ){
+                    /* three wall */
+                    assert(b->type == block_support);
+                } else if( y == 7 ){
+                    /* four wall */
                     assert(b->type == block_support);
                 } else {
                     assert(b->type == block_empty);
