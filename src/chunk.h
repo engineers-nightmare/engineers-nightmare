@@ -3,8 +3,6 @@
 #include "block.h"
 #include "fixed_cube.h"
 
-#include <stdio.h>
-
 #define CHUNK_SIZE 8
 
 struct chunk {

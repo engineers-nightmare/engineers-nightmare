@@ -1,5 +1,4 @@
 #include "chunk.h"
-#include <new> /* placement new */
 
 block *
 chunk::get_block(unsigned int x, unsigned int y, unsigned int z)
