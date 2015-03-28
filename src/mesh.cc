@@ -38,7 +38,8 @@ compute_bounds(std::vector<vertex> *verts)
 }
 
 
-mesh *load_mesh(char const *filename) {
+sw_mesh *
+load_mesh(char const *filename) {
     aiScene const *scene = aiImportFile(filename, aiProcessPreset_TargetRealtime_MaxQuality);
     if (!scene)
         errx(1, "Failed to load mesh %s", filename);
@@ -76,29 +77,43 @@ mesh *load_mesh(char const *filename) {
 
     aiReleaseImport(scene);
 
-    mesh *ret = new mesh;
+    sw_mesh *ret = new sw_mesh;
+    ret->num_vertices = verts.size();
+    ret->num_indices = indices.size();
+    ret->verts = new vertex[verts.size()];
+    memcpy(ret->verts, &verts[0], sizeof(vertex) * verts.size());
+    ret->indices = new unsigned int[indices.size()];
+    memcpy(ret->indices, &indices[0], sizeof(unsigned) * indices.size());
+    return ret;
+}
+
+hw_mesh *
+upload_mesh(sw_mesh *mesh)
+{
+    hw_mesh *ret = new hw_mesh;
 
     glGenVertexArrays(1, &ret->vao);
     glBindVertexArray(ret->vao);
 
     glGenBuffers(1, &ret->vbo);
     glBindBuffer(GL_ARRAY_BUFFER, ret->vbo);
-    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex), &verts[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mesh->num_vertices * sizeof(vertex), mesh->verts, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), offsetof(vertex, x));
 
     glGenBuffers(1, &ret->ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ret->ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned), &indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->num_indices * sizeof(unsigned), mesh->indices, GL_STATIC_DRAW);
 
-    ret->num_indices = indices.size();
+    ret->num_indices = mesh->num_indices;
 
     return ret;
 }
 
 
-void draw_mesh(mesh *m)
+void
+draw_mesh(hw_mesh *m)
 {
     glBindVertexArray(m->vao);
     glDrawElements(GL_TRIANGLES, m->num_indices, GL_UNSIGNED_INT, NULL);

@@ -1,6 +1,6 @@
 #pragma once
 
-struct mesh {
+struct hw_mesh {
     GLuint vbo;
     GLuint ibo;
     GLuint vao;
@@ -15,6 +15,13 @@ struct vertex {
     vertex(float x, float y, float z) : x(x), y(y), z(z) {}
 };
 
+struct sw_mesh {
+    vertex *verts;
+    unsigned int *indices;
+    unsigned int num_vertices;
+    unsigned int num_indices;
+};
 
-mesh *load_mesh(char const *filename);
-void draw_mesh(mesh *m);
+sw_mesh *load_mesh(char const *filename);
+hw_mesh *upload_mesh(sw_mesh *mesh);
+void draw_mesh(hw_mesh *m);
