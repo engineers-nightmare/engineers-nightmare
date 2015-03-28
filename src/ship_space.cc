@@ -83,8 +83,8 @@ ship_space::mock_ship_space(void)
     unsigned int x=0, y=0, z=0;
     block *b = 0;
 
-    for( z=0; x < 8; ++z ){
-        for( y=0; x < 8; ++y ){
+    for( z=0; z < 8; ++z ){
+        for( y=0; y < 8; ++y ){
             for( x=0; x < 8; ++x ){
 
                 b = ss->get_block(x, y, z);
