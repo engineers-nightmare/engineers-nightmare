@@ -189,7 +189,7 @@ init()
 
     player.angle = 0;
     player.elev = 0;
-    player.pos = glm::vec3(3,2,0);
+    player.pos = glm::vec3(3,2,2);
 }
 
 
@@ -225,7 +225,9 @@ update()
     per_camera->upload();
     per_object->upload();
 
-    draw_mesh(scaffold_hw);
+    chunk * ch = ship->get_chunk_containing(0, 0, 0);
+    ch->prepare_render();
+    draw_mesh(ch->render_chunk.mesh);
 }
 
 

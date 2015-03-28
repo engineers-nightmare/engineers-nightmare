@@ -5,7 +5,11 @@
 
 #define CHUNK_SIZE 8
 
+struct hw_mesh;
+
 struct render_chunk {
+    hw_mesh *mesh;
+    bool valid;
 };
 
 struct chunk {
@@ -20,5 +24,7 @@ struct chunk {
     struct render_chunk render_chunk;
 
     block * get_block(unsigned int x, unsigned int y, unsigned int z);
+
+    void prepare_render();
 };
 

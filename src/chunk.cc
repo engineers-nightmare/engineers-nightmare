@@ -1,5 +1,6 @@
 #include "chunk.h"
 
+
 block *
 chunk::get_block(unsigned int x, unsigned int y, unsigned int z)
 {
@@ -10,4 +11,3 @@ chunk::get_block(unsigned int x, unsigned int y, unsigned int z)
 
     return this->blocks.get(x, y, z);
 }
-
