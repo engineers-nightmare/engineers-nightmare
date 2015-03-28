@@ -137,6 +137,13 @@ shader_params<per_object_params> *per_object;
 texture_set *world_textures;
 ship_space *ship;
 
+static struct {
+    float angle;
+    float elev;
+    glm::vec3 pos;
+    glm::vec3 dir;  /* computed */
+} player;
+
 void
 init()
 {
@@ -175,6 +182,10 @@ init()
     ship = ship_space::mock_ship_space();
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
+
+    player.angle = 0;
+    player.elev = 0;
+    player.pos = glm::vec3(3,2,0);
 }
 
 
@@ -200,8 +211,17 @@ update()
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    /* TODO: this is not actually player input. */
+    player.angle += 0.01f;
+
+    player.dir = glm::vec3(
+            cosf(player.angle) * cosf(player.elev),
+            sinf(player.angle) * cosf(player.elev),
+            sinf(player.elev)
+            );
+
     glm::mat4 proj = glm::perspective(45.0f, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
-    glm::mat4 view = glm::lookAt(glm::vec3(3, 2, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    glm::mat4 view = glm::lookAt(player.pos, player.pos + player.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
     per_object->upload();
