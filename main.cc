@@ -22,6 +22,10 @@
 #define WORLD_TEXTURE_DIMENSION     32
 #define MAX_WORLD_TEXTURES          64
 
+#define MOUSE_Y_LIMIT   1.54
+#define MOUSE_X_SENSITIVITY -0.01
+#define MOUSE_Y_SENSITIVITY -0.01
+
 
 struct wnd {
     SDL_Window *ptr;
@@ -209,9 +213,6 @@ update()
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    /* TODO: this is not actually player input. */
-    player.angle += 0.01f;
-
     player.dir = glm::vec3(
             cosf(player.angle) * cosf(player.elev),
             sinf(player.angle) * cosf(player.elev),
@@ -248,7 +249,15 @@ run()
                     resize(e.window.data1, e.window.data2);
                 break;
 
-            /* TODO: mouse input */
+            case SDL_MOUSEMOTION:
+                player.angle += MOUSE_X_SENSITIVITY * e.motion.xrel;
+                player.elev += MOUSE_Y_SENSITIVITY * e.motion.yrel;
+
+                if (player.elev < -MOUSE_Y_LIMIT)
+                    player.elev = -MOUSE_Y_LIMIT;
+                if (player.elev > MOUSE_Y_LIMIT)
+                    player.elev = MOUSE_Y_LIMIT;
+                break;
             }
         }
 
@@ -279,6 +288,8 @@ main(int argc, char **argv)
         errx(1, "Failed to create window.\n");
 
     wnd.gl_ctx = SDL_GL_CreateContext(wnd.ptr);
+
+    SDL_SetRelativeMouseMode(SDL_TRUE);
 
     resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
