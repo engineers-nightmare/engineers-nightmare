@@ -144,6 +144,7 @@ texture_set *world_textures;
 ship_space *ship;
 player player;
 physics *phy;
+unsigned char const *keys;
 
 void
 init()
@@ -231,6 +232,19 @@ update()
 
 
 void
+handle_input()
+{
+    player.move.x = keys[SDL_SCANCODE_D] - keys[SDL_SCANCODE_A];
+    player.move.y = keys[SDL_SCANCODE_W] - keys[SDL_SCANCODE_S];
+
+    /* limit to unit vector */
+    float len = length(player.move);
+    if (len > 0.0f)
+        player.move = player.move / len;
+}
+
+
+void
 run()
 {
     for (;;) {
@@ -261,6 +275,9 @@ run()
                 break;
             }
         }
+
+        /* SDL_PollEvent above has already pumped the input, so current key state is available */
+        handle_input();
 
         /* physics tick */
         phy->tick();
@@ -294,6 +311,7 @@ main(int argc, char **argv)
     wnd.gl_ctx = SDL_GL_CreateContext(wnd.ptr);
 
     SDL_SetRelativeMouseMode(SDL_TRUE);
+    keys = SDL_GetKeyboardState(NULL);
 
     resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
