@@ -1,6 +1,6 @@
 #pragma once
 
-static struct {
+struct player {
     float angle;
     float elev;
     glm::vec3 pos;
