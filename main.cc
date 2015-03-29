@@ -13,6 +13,7 @@
 #include "src/shader.h"
 #include "src/ship_space.h"
 #include "src/player.h"
+#include "src/physics.h"
 
 
 #define APP_NAME    "Engineer's Nightmare"
@@ -142,6 +143,7 @@ shader_params<per_object_params> *per_object;
 texture_set *world_textures;
 ship_space *ship;
 player player;
+physics *phy;
 
 void
 init()
@@ -185,6 +187,8 @@ init()
     player.angle = 0;
     player.elev = 0;
     player.pos = glm::vec3(3,2,2);
+
+    phy= new physics(&player);
 }
 
 
@@ -257,6 +261,9 @@ run()
                 break;
             }
         }
+
+        /* physics tick */
+        phy->tick();
 
         update();
 
