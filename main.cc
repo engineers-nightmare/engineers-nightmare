@@ -12,6 +12,7 @@
 #include "src/mesh.h"
 #include "src/shader.h"
 #include "src/ship_space.h"
+#include "src/player.h"
 
 
 #define APP_NAME    "Engineer's Nightmare"
@@ -140,13 +141,7 @@ shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
 texture_set *world_textures;
 ship_space *ship;
-
-static struct {
-    float angle;
-    float elev;
-    glm::vec3 pos;
-    glm::vec3 dir;  /* computed */
-} player;
+player player;
 
 void
 init()
