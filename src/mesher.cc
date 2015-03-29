@@ -56,9 +56,11 @@ chunk::prepare_render()
     m.num_vertices = verts.size();
     m.num_indices = indices.size();
 
-    /* TODO: what happens to the old one? Can we reuse the memory? Can we avoid creating new BOs all the time? */
-    if (this->render_chunk.mesh)
-        printf("Leaking previous mesh\n");
+    // TODO: try to reuse memory
+    if (this->render_chunk.mesh) {
+        free_mesh(this->render_chunk.mesh);
+        delete this->render_chunk.mesh;
+    }
 
     this->render_chunk.mesh = upload_mesh(&m);
     this->render_chunk.valid = true;

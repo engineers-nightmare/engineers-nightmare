@@ -108,6 +108,9 @@ upload_mesh(sw_mesh *mesh)
 
     ret->num_indices = mesh->num_indices;
 
+    printf("upload_mesh: %p num_indices=%d vram_size=%.1fKB\n", ret,
+            ret->num_indices, (mesh->num_vertices * sizeof(vertex) + mesh->num_indices * sizeof(unsigned)) / 1024.0f);
+
     return ret;
 }
 
@@ -117,4 +120,16 @@ draw_mesh(hw_mesh *m)
 {
     glBindVertexArray(m->vao);
     glDrawElements(GL_TRIANGLES, m->num_indices, GL_UNSIGNED_INT, NULL);
+}
+
+
+void
+free_mesh(hw_mesh *m)
+{
+    /* TODO: try to reuse BO */
+    glDeleteBuffers(1, &m->vbo);
+    glDeleteBuffers(1, &m->ibo);
+    glDeleteVertexArrays(1, &m->vao);
+
+    printf("free_mesh: %p num_indices=%d\n", m, m->num_indices);
 }
