@@ -88,6 +88,8 @@ struct texture_set {
         glTexStorage3D(GL_TEXTURE_2D_ARRAY,
                        1,   /* no mips! I WANT YOUR EYES TO BLEED -- todo, fix this. */
                        GL_RGBA8, dim, dim, array_size);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
 
     void bind(int texunit)
