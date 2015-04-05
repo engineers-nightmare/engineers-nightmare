@@ -131,6 +131,6 @@ physics::tick(){
     this->pl->pos.y = y;
     this->pl->pos.z = z;
 
-    printf("The player is now at x '%f', y '%f', z '%f'\n", x, y, z);
+//    printf("The player is now at x '%f', y '%f', z '%f'\n", x, y, z);
 }
 
