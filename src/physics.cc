@@ -119,6 +119,9 @@ physics::tick(){
 
     this->controller->setWalkDirection(fwd + right);
 
+    if (!pl->last_jump && pl->jump && this->controller->canJump())
+        this->controller->jump();
+
     dynamicsWorld->stepSimulation(1 / 60.f, 10);
 
     btTransform trans = this->ghostObj->getWorldTransform();

@@ -190,6 +190,7 @@ init()
     player.angle = 0;
     player.elev = 0;
     player.pos = glm::vec3(3,2,2);
+    player.last_jump = player.jump = false;
 
     phy= new physics(&player);
 }
@@ -243,6 +244,9 @@ handle_input()
     float len = length(player.move);
     if (len > 0.0f)
         player.move = player.move / len;
+
+    player.last_jump = player.jump;
+    player.jump = keys[SDL_SCANCODE_SPACE];
 }
 
 
