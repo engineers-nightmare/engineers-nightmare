@@ -1,6 +1,8 @@
 #pragma once
 
 #include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <BulletDynamics/Character/btKinematicCharacterController.h>
 
 #include "player.h"
 
@@ -27,10 +29,10 @@ struct physics {
      */
     player *pl;
 
-    /* our players rigid body */
-    btCollisionShape *playerShape;
-    btDefaultMotionState *playerMotionState;
-    btRigidBody *playerRigidBody;
+    /* character control guff */
+    btConvexShape *playerShape;
+    btPairCachingGhostObject *ghostObj;
+    btKinematicCharacterController *controller;
 
     /* our static `floor` */
     btCollisionShape *groundShape;

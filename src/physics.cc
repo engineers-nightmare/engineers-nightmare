@@ -9,6 +9,8 @@
 #define PLAYER_START_Y 4
 #define PLAYER_START_Z 50
 
+#define MOVE_SPEED  0.5
+
 /* a simple constructor hacked together based on
  * http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World
  */
@@ -51,19 +53,22 @@ physics::physics(player *pl){
 
     /* setup player rigid body */
     this->playerShape = new btSphereShape(1);
-    /* we start our player at z50 */
-    this->playerMotionState =
-        new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1),
-                                             btVector3(pl->pos.x,
-                                                       pl->pos.y,
-                                                       pl->pos.z)));
-    btScalar mass = 1;
-    btVector3 playerInertia(0, 0, 0);
-    this->playerShape->calculateLocalInertia(mass, playerInertia);
 
-    btRigidBody::btRigidBodyConstructionInfo playerRigidBodyCI(mass, playerMotionState, playerShape, playerInertia);
-    this->playerRigidBody = new btRigidBody(playerRigidBodyCI);
-    this->dynamicsWorld->addRigidBody(this->playerRigidBody);
+    /* setup the character controller. this gets a bit fiddly. */
+    btTransform startTransform;
+    startTransform.setIdentity();
+    startTransform.setOrigin(btVector3(pl->pos.x, pl->pos.y, pl->pos.z));
+    this->ghostObj = new btPairCachingGhostObject();
+    this->ghostObj->setWorldTransform(startTransform);
+    this->broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+    this->ghostObj->setCollisionShape(this->playerShape);
+    this->ghostObj->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
+    this->controller = new btKinematicCharacterController(this->ghostObj, this->playerShape, btScalar(0.5));
+
+    this->dynamicsWorld->addCollisionObject(this->ghostObj, btBroadphaseProxy::CharacterFilter,
+            btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
+    this->dynamicsWorld->addAction(this->controller);
+    this->controller->setUpAxis(2);
 
 
     /* setup world static floor */
@@ -91,8 +96,8 @@ physics::~physics(){
     delete(this->dynamicsWorld);
 
     delete(this->playerShape);
-    delete(this->playerMotionState);
-    delete(this->playerRigidBody);
+    delete(this->ghostObj);
+    delete(this->controller);
 
     delete(this->groundShape);
     delete(this->groundMotionState);
@@ -103,10 +108,20 @@ void
 physics::tick(){
     double x, y, z;
 
+    double c = cos(this->pl->angle);
+    double s = sin(this->pl->angle);
+
+    btVector3 fwd(c, s, 0);
+    btVector3 right(s, -c, 0);
+
+    fwd *= this->pl->move.y * MOVE_SPEED;
+    right *= this->pl->move.x * MOVE_SPEED;
+
+    this->controller->setWalkDirection(fwd + right);
+
     dynamicsWorld->stepSimulation(1 / 60.f, 10);
 
-    btTransform trans;
-    this->playerRigidBody->getMotionState()->getWorldTransform(trans);
+    btTransform trans = this->ghostObj->getWorldTransform();
     x = trans.getOrigin().getX();
     y = trans.getOrigin().getY();
     z = trans.getOrigin().getZ();
@@ -116,6 +131,6 @@ physics::tick(){
     this->pl->pos.y = y;
     this->pl->pos.z = z;
 
-    // printf("The player is now at x '%f', y '%f', z '%f'\n", x, y, z);
+    printf("The player is now at x '%f', y '%f', z '%f'\n", x, y, z);
 }
 
