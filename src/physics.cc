@@ -52,7 +52,8 @@ physics::physics(player *pl){
 
 
     /* setup player rigid body */
-    this->playerShape = new btSphereShape(1);
+    this->playerShape = new btSphereShape(0.7);
+    float maxStepHeight = 0.5f;
 
     /* setup the character controller. this gets a bit fiddly. */
     btTransform startTransform;
@@ -63,7 +64,7 @@ physics::physics(player *pl){
     this->broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
     this->ghostObj->setCollisionShape(this->playerShape);
     this->ghostObj->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
-    this->controller = new btKinematicCharacterController(this->ghostObj, this->playerShape, btScalar(0.5));
+    this->controller = new btKinematicCharacterController(this->ghostObj, this->playerShape, btScalar(maxStepHeight));
 
     this->dynamicsWorld->addCollisionObject(this->ghostObj, btBroadphaseProxy::CharacterFilter,
             btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
@@ -76,7 +77,7 @@ physics::physics(player *pl){
     this->groundShape = new btStaticPlaneShape(btVector3(0, 0, GROUND_Z), 1);
     this->groundMotionState =
         new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1),
-                                             btVector3(0, 0, GROUND_Z)));
+                                             btVector3(0, 0, 0)));
     btRigidBody::btRigidBodyConstructionInfo
                     groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
     this->groundRigidBody = new btRigidBody(groundRigidBodyCI);
