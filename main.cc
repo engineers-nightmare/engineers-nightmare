@@ -241,7 +241,7 @@ handle_input()
     player.move.y = keys[SDL_SCANCODE_W] - keys[SDL_SCANCODE_S];
 
     /* limit to unit vector */
-    float len = length(player.move);
+    float len = glm::length(player.move);
     if (len > 0.0f)
         player.move = player.move / len;
 
