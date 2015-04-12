@@ -40,7 +40,8 @@ compute_bounds(std::vector<vertex> *verts)
 
 sw_mesh *
 load_mesh(char const *filename) {
-    aiScene const *scene = aiImportFile(filename, aiProcessPreset_TargetRealtime_MaxQuality);
+    aiScene const *scene = aiImportFile(filename, aiProcessPreset_TargetRealtime_MaxQuality |
+            aiProcess_MakeLeftHanded);
     if (!scene)
         errx(1, "Failed to load mesh %s", filename);
 
