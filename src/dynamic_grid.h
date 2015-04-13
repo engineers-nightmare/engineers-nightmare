@@ -63,7 +63,6 @@ struct dynamic_grid {
      * will check bounds
      */
     T * get(int ex, int ey, int ez);
-
 };
 
 

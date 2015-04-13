@@ -1,6 +1,7 @@
 #include "ship_space.h"
 #include <new> /* placement new */
 #include <assert.h>
+#include <math.h>
 
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
     : chunks(xd, yd, zd)
@@ -117,9 +118,75 @@ ship_space::mock_ship_space(void)
 }
 
 
+static float
+max_along_axis(float o, float d)
+{
+    if (d > 0) {
+        return fabsf((ceilf(o) - o)/d);
+    }
+    else {
+        return fabsf((floorf(o) - o)/d);
+    }
+}
+
+
 void
 ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, raycast_info *rc)
 {
     assert(rc);
     rc->hit = false;
+
+    int x = (int)ox;
+    int y = (int)oy;
+    int z = (int)oz;
+
+    if (!this->get_block(x, y, z))
+        return; /* not inside the grid */
+
+    int stepX = dx > 0 ? 1 : -1;
+    int stepY = dy > 0 ? 1 : -1;
+    int stepZ = dz > 0 ? 1 : -1;
+
+    float tDeltaX = fabsf(1/dx);
+    float tDeltaY = fabsf(1/dy);
+    float tDeltaZ = fabsf(1/dz);
+
+    float tMaxX = max_along_axis(ox, dx);
+    float tMaxY = max_along_axis(oy, dy);
+    float tMaxZ = max_along_axis(oz, dz);
+
+    for (;;) {
+        if (tMaxX < tMaxY) {
+            if (tMaxX < tMaxZ) {
+                x += stepX;
+                tMaxX += tDeltaX;
+            }
+            else {
+                z += stepZ;
+                tMaxZ += tDeltaZ;
+            }
+        }
+        else {
+            if (tMaxY < tMaxZ) {
+                y += stepY;
+                tMaxY += tDeltaY;
+            }
+            else {
+                z += stepZ;
+                tMaxZ += tDeltaZ;
+            }
+        }
+
+        block *bl = this->get_block(x, y, z);
+        if (!bl)
+            return;
+
+        if (bl->type != 0) {
+            rc->hit = true;
+            rc->x = x;
+            rc->y = y;
+            rc->z = z;
+            return;
+        }
+    }
 }
