@@ -131,7 +131,7 @@ T *
 dynamic_grid<T>::get(int ex, int ey, int ez)
 {
     /* translate to internal co-ords*/
-   int ix, iy, iz;
+    int ix, iy, iz;
     ix = ex - this->xo;
     iy = ey - this->yo;
     iz = ez - this->zo;
