@@ -234,7 +234,7 @@ update()
 
         if (rc.hit) {
             printf("Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
-            block *bl = ship->get_block(rc.x, rc.y, rc.z);
+            block *bl = rc.block;
 
             /* block removal */
             bl->type = block_empty;

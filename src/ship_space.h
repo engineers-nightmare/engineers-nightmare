@@ -9,6 +9,7 @@
 struct raycast_info {
     bool hit;
     int x, y, z;
+    struct block *block;
 };
 
 struct ship_space {

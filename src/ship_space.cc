@@ -190,6 +190,7 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
             rc->x = x;
             rc->y = y;
             rc->z = z;
+            rc->block = bl;
             return;
         }
     }
