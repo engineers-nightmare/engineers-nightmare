@@ -239,7 +239,7 @@ update()
             /* block removal */
             bl->type = block_empty;
             /* dirty the chunk */
-            ship->get_chunk_containing(0, 0, 0)->render_chunk.valid = false;
+            ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
         } else {
             printf("Raycast: no hit\n");
         }
