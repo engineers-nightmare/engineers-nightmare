@@ -234,6 +234,12 @@ update()
 
         if (rc.hit) {
             printf("Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
+            block *bl = ship->get_block(rc.x, rc.y, rc.z);
+
+            /* block removal */
+            bl->type = block_empty;
+            /* dirty the chunk */
+            ship->get_chunk_containing(0, 0, 0)->render_chunk.valid = false;
         } else {
             printf("Raycast: no hit\n");
         }
