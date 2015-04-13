@@ -8,7 +8,10 @@ struct player {
     glm::vec3 pos;
     glm::vec3 dir;  /* computed */
     glm::vec2 move;
+
     bool last_jump;
     bool jump;
+
+    bool scan;
 };
 

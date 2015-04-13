@@ -228,6 +228,17 @@ update()
     per_camera->upload();
     per_object->upload();
 
+    if (player.scan) {
+        raycast_info rc;
+        ship->raycast(player.pos.x, player.pos.y, player.pos.z, player.dir.x, player.dir.y, player.dir.z, &rc);
+
+        if (rc.hit) {
+            printf("Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
+        } else {
+            printf("Raycast: no hit\n");
+        }
+    }
+
     chunk * ch = ship->get_chunk_containing(0, 0, 0);
     ch->prepare_render();
     draw_mesh(ch->render_chunk.mesh);
@@ -247,6 +258,8 @@ handle_input()
 
     player.last_jump = player.jump;
     player.jump = keys[SDL_SCANCODE_SPACE];
+
+    player.scan = keys[SDL_SCANCODE_E];
 }
 
 

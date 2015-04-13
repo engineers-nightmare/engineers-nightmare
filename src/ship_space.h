@@ -6,6 +6,11 @@
 
 #include <stdio.h>
 
+struct raycast_info {
+    bool hit;
+    int x, y, z;
+};
+
 struct ship_space {
     dynamic_grid<chunk> chunks;
 
@@ -37,6 +42,8 @@ struct ship_space {
      * returns 0 on error
      */
     static ship_space * mock_ship_space(void);
+
+    void raycast(float ox, float oy, float oz, float dx, float dy, float dz, raycast_info *rc);
 };
 
 

@@ -1,5 +1,6 @@
 #include "ship_space.h"
 #include <new> /* placement new */
+#include <assert.h>
 
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
     : chunks(xd, yd, zd)
@@ -115,3 +116,10 @@ ship_space::mock_ship_space(void)
     return ss;
 }
 
+
+void
+ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, raycast_info *rc)
+{
+    assert(rc);
+    rc->hit = false;
+}
