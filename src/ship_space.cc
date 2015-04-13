@@ -133,6 +133,10 @@ max_along_axis(float o, float d)
 void
 ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, raycast_info *rc)
 {
+    /* implementation of the algorithm described in
+     * http://www.cse.yorku.ca/~amana/research/grid.pdf
+     */
+
     assert(rc);
     rc->hit = false;
 
