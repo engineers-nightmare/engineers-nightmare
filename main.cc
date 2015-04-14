@@ -191,6 +191,7 @@ init()
     player.elev = 0;
     player.pos = glm::vec3(3,2,2);
     player.last_jump = player.jump = false;
+    player.last_place = player.place = false;
 
     phy= new physics(&player);
 }
@@ -240,8 +241,25 @@ update()
             bl->type = block_empty;
             /* dirty the chunk */
             ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
-        } else {
-            printf("Raycast: no hit\n");
+        }
+    }
+
+    if (player.place && !player.last_place) {
+        /* only on rising edge */
+        raycast_info rc;
+        ship->raycast(player.pos.x, player.pos.y, player.pos.z, player.dir.x, player.dir.y, player.dir.z, &rc);
+
+        if (rc.hit) {
+            printf("Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
+
+            block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
+
+            /* can only build on the side of an existing scaffold */
+            if (bl && rc.block->type != block_empty) {
+                bl->type = block_support;
+                /* dirty the chunk */
+                ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
+            }
         }
     }
 
@@ -266,6 +284,9 @@ handle_input()
     player.jump = keys[SDL_SCANCODE_SPACE];
 
     player.scan = keys[SDL_SCANCODE_E];
+
+    player.last_place = player.place;
+    player.place = keys[SDL_SCANCODE_R];
 }
 
 

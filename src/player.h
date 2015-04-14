@@ -13,5 +13,8 @@ struct player {
     bool jump;
 
     bool scan;
+
+    bool last_place;
+    bool place;
 };
 

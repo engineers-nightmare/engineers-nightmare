@@ -9,6 +9,7 @@
 struct raycast_info {
     bool hit;
     int x, y, z;
+    int nx, ny, nz;
     struct block *block;
 };
 

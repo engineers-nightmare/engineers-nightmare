@@ -144,6 +144,10 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
     int y = (int)oy;
     int z = (int)oz;
 
+    int nx = 0;
+    int ny = 0;
+    int nz = 0;
+
     if (!this->get_block(x, y, z))
         return; /* not inside the grid */
 
@@ -164,20 +168,32 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
             if (tMaxX < tMaxZ) {
                 x += stepX;
                 tMaxX += tDeltaX;
+                nx = -stepX;
+                ny = 0;
+                nz = 0;
             }
             else {
                 z += stepZ;
                 tMaxZ += tDeltaZ;
+                nx = 0;
+                ny = 0;
+                nz = -stepZ;
             }
         }
         else {
             if (tMaxY < tMaxZ) {
                 y += stepY;
                 tMaxY += tDeltaY;
+                nx = 0;
+                ny = -stepY;
+                nz = 0;
             }
             else {
                 z += stepZ;
                 tMaxZ += tDeltaZ;
+                nx = 0;
+                ny = 0;
+                nz = -stepZ;
             }
         }
 
@@ -191,6 +207,9 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
             rc->y = y;
             rc->z = z;
             rc->block = bl;
+            rc->nx = nx;
+            rc->ny = ny;
+            rc->nz = nz;
             return;
         }
     }
