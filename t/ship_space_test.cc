@@ -73,29 +73,69 @@ test_mock_ship_space(void)
                     assert(b3->type == block_support);
                     assert(b4->type == block_support);
                 } else if( y == 0 ){
-                    /* one wall */
-                    assert(b1->type == block_support);
-                    assert(b2->type == block_support);
-                    assert(b3->type == block_support);
-                    assert(b4->type == block_support);
+                    if( x == 3     && z == 1 ||
+                        x == 3     && z == 2 ||
+                        x == 5     && z == 1 ){
+                        /* a door */
+                        assert(b1->type == block_empty);
+                        assert(b2->type == block_empty);
+                        assert(b3->type == block_empty);
+                        assert(b4->type == block_empty);
+                    } else {
+                        /* a wall */
+                        assert(b1->type == block_support);
+                        assert(b2->type == block_support);
+                        assert(b3->type == block_support);
+                        assert(b4->type == block_support);
+                    }
                 } else if( x == 0 ){
-                    /* two wall */
-                    assert(b1->type == block_support);
-                    assert(b2->type == block_support);
-                    assert(b3->type == block_support);
-                    assert(b4->type == block_support);
+                    if( y == 3     && z == 1 ||
+                        y == 3     && z == 2 ||
+                        y == 5     && z == 1 ){
+                        /* a door */
+                        assert(b1->type == block_empty);
+                        assert(b2->type == block_empty);
+                        assert(b3->type == block_empty);
+                        assert(b4->type == block_empty);
+                    } else {
+                        /* a wall */
+                        assert(b1->type == block_support);
+                        assert(b2->type == block_support);
+                        assert(b3->type == block_support);
+                        assert(b4->type == block_support);
+                    }
                 } else if( x == 7 ){
-                    /* three wall */
-                    assert(b1->type == block_support);
-                    assert(b2->type == block_support);
-                    assert(b3->type == block_support);
-                    assert(b4->type == block_support);
+                    if( y == 3     && z == 1 ||
+                        y == 3     && z == 2 ||
+                        y == 5     && z == 1 ){
+                        /* a door */
+                        assert(b1->type == block_empty);
+                        assert(b2->type == block_empty);
+                        assert(b3->type == block_empty);
+                        assert(b4->type == block_empty);
+                    } else {
+                        /* a wall */
+                        assert(b1->type == block_support);
+                        assert(b2->type == block_support);
+                        assert(b3->type == block_support);
+                        assert(b4->type == block_support);
+                    }
                 } else if( y == 7 ){
-                    /* four wall */
-                    assert(b1->type == block_support);
-                    assert(b2->type == block_support);
-                    assert(b3->type == block_support);
-                    assert(b4->type == block_support);
+                    if( x == 3     && z == 1 ||
+                        x == 3     && z == 2 ||
+                        x == 5     && z == 1 ){
+                        /* a door */
+                        assert(b1->type == block_empty);
+                        assert(b2->type == block_empty);
+                        assert(b3->type == block_empty);
+                        assert(b4->type == block_empty);
+                    } else {
+                        /* a wall */
+                        assert(b1->type == block_support);
+                        assert(b2->type == block_support);
+                        assert(b3->type == block_support);
+                        assert(b4->type == block_support);
+                    }
                 } else {
                     assert(b1->type == block_empty);
                     assert(b2->type == block_empty);

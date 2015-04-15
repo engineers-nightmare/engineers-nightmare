@@ -74,6 +74,7 @@ ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
 /* returns a pointer to a new ship space
  * this ship space will have 2 x 2 rooms and will be 1 room tall
  * each room will have a floor and 4 walls of scaffolding
+ * each room will have some doors on all 4 walls
  * and will otherwise be empty
  *
  * returns 0 on error
@@ -105,29 +106,81 @@ ship_space::mock_ship_space(void)
                     b3->type = block_support;
                     b4->type = block_support;
                 } else if( y == 0 ){
-                    /* one wall */
-                    b1->type = block_support;
-                    b2->type = block_support;
-                    b3->type = block_support;
-                    b4->type = block_support;
+                    /* we want a 2 height door at x == 3
+                     * and a one height door a x == 5
+                     */
+                    if( x == 3     && z == 1 ||
+                        x == 3     && z == 2 ||
+                        x == 5     && z == 1 ){
+                        /* a door */
+                        b1->type = block_empty;
+                        b2->type = block_empty;
+                        b3->type = block_empty;
+                        b4->type = block_empty;
+                    } else {
+                        /* a wall */
+                        b1->type = block_support;
+                        b2->type = block_support;
+                        b3->type = block_support;
+                        b4->type = block_support;
+                    }
                 } else if( x == 0 ){
-                    /* two wall */
-                    b1->type = block_support;
-                    b2->type = block_support;
-                    b3->type = block_support;
-                    b4->type = block_support;
+                    /* we want a 2 height door at y == 3
+                     * and a one height door a y == 5
+                     */
+                    if( y == 3     && z == 1 ||
+                        y == 3     && z == 2 ||
+                        y == 5     && z == 1 ){
+                        /* a wall */
+                        b1->type = block_empty;
+                        b2->type = block_empty;
+                        b3->type = block_empty;
+                        b4->type = block_empty;
+                    } else {
+                        /* a wall */
+                        b1->type = block_support;
+                        b2->type = block_support;
+                        b3->type = block_support;
+                        b4->type = block_support;
+                    }
                 } else if( x == 7 ){
-                    /* three wall */
-                    b1->type = block_support;
-                    b2->type = block_support;
-                    b3->type = block_support;
-                    b4->type = block_support;
+                    /* we want a 2 height door at x == 3
+                     * and a one height door a x == 5
+                     */
+                    if( y == 3     && z == 1 ||
+                        y == 3     && z == 2 ||
+                        y == 5     && z == 1 ){
+                        /* a door */
+                        b1->type = block_empty;
+                        b2->type = block_empty;
+                        b3->type = block_empty;
+                        b4->type = block_empty;
+                    } else {
+                        /* a wall */
+                        b1->type = block_support;
+                        b2->type = block_support;
+                        b3->type = block_support;
+                        b4->type = block_support;
+                    }
                 } else if( y == 7 ){
-                    /* four wall */
-                    b1->type = block_support;
-                    b2->type = block_support;
-                    b3->type = block_support;
-                    b4->type = block_support;
+                    /* we want a 2 height door at y == 3
+                     * and a one height door a y == 5
+                     */
+                    if( x == 3     && z == 1 ||
+                        x == 3     && z == 2 ||
+                        x == 5     && z == 1 ){
+                        /* a door */
+                        b1->type = block_empty;
+                        b2->type = block_empty;
+                        b3->type = block_empty;
+                        b4->type = block_empty;
+                    } else {
+                        /* a wall */
+                        b1->type = block_support;
+                        b2->type = block_support;
+                        b3->type = block_support;
+                        b4->type = block_support;
+                    }
                 } else {
                     b1->type = block_empty;
                     b2->type = block_empty;
