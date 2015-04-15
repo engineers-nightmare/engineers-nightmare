@@ -2,7 +2,10 @@ language: cpp
 
 compiler: gcc
 
+# adding xmbc ppa to get libsdl2-dev
+# http://www.ubuntuupdates.org/package/xbmc/precise/main/base/libsdl2-dev
 before_install:
+    - sudo add-apt-repository ppa:team-xbmc/ppa
     - sudo apt-get update -qq
 
 # NB: this below list must be kept in sync with `README.md`
