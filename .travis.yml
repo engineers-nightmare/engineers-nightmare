@@ -24,7 +24,6 @@ install:
     - sudo dpkg -i libassimp-dev_3.0~dfsg-2_amd64.deb
 
 script:
-    - apt-cache policy libassimp-dev libc6 libgcc1 libstdc++6 zlib1g
     - cmake .
     - make
     - make test
