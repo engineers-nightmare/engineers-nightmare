@@ -26,4 +26,6 @@ run:
 * glm
 * bullet
 
+NB: this above list must be kept in sync with `.travis.yml`
+
 
