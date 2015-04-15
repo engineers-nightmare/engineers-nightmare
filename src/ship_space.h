@@ -38,7 +38,8 @@ struct ship_space {
     chunk * get_chunk(int chunk_x, int chunk_y, int chunk_z);
 
     /* returns a pointer to a new ship space
-     * this ship_space will have a floor and 4 walls of scaffolding
+     * this ship space will have 2 x 2 rooms and will be 1 room tall
+     * each room will have a floor and 4 walls of scaffolding
      * and will otherwise be empty
      *
      * returns 0 on error

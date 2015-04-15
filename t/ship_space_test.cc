@@ -48,30 +48,59 @@ test_mock_ship_space(void)
     ship_space *ss = ship_space::mock_ship_space();
     assert(ss);
 
-    block * b;
+    block * b1 = 0;
+    block * b2 = 0;
+    block * b3 = 0;
+    block * b4 = 0;
 
     for( z=0; z < 8; ++z ){
         for( y=0; y < 8; ++y ){
             for( x=0; x < 8; ++x ){
 
-                b = ss->get_block(x, y, z);
-                assert(b);
+                b1 = ss->get_block(x,   y,   z);
+                b3 = ss->get_block(x,   y+8, z);
+                b2 = ss->get_block(x+8, y,   z);
+                b4 = ss->get_block(x+8, y+8, z);
+
+                assert(b1);
+                assert(b2);
+                assert(b3);
+                assert(b4);
+
                 if( z == 0 ){
-                    assert(b->type == block_support);
+                    assert(b1->type == block_support);
+                    assert(b2->type == block_support);
+                    assert(b3->type == block_support);
+                    assert(b4->type == block_support);
                 } else if( y == 0 ){
                     /* one wall */
-                    assert(b->type == block_support);
+                    assert(b1->type == block_support);
+                    assert(b2->type == block_support);
+                    assert(b3->type == block_support);
+                    assert(b4->type == block_support);
                 } else if( x == 0 ){
                     /* two wall */
-                    assert(b->type == block_support);
+                    assert(b1->type == block_support);
+                    assert(b2->type == block_support);
+                    assert(b3->type == block_support);
+                    assert(b4->type == block_support);
                 } else if( x == 7 ){
                     /* three wall */
-                    assert(b->type == block_support);
+                    assert(b1->type == block_support);
+                    assert(b2->type == block_support);
+                    assert(b3->type == block_support);
+                    assert(b4->type == block_support);
                 } else if( y == 7 ){
                     /* four wall */
-                    assert(b->type == block_support);
+                    assert(b1->type == block_support);
+                    assert(b2->type == block_support);
+                    assert(b3->type == block_support);
+                    assert(b4->type == block_support);
                 } else {
-                    assert(b->type == block_empty);
+                    assert(b1->type == block_empty);
+                    assert(b2->type == block_empty);
+                    assert(b3->type == block_empty);
+                    assert(b4->type == block_empty);
                 }
 
 
