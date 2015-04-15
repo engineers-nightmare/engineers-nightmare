@@ -21,7 +21,7 @@ install:
     - sudo apt-get install -qq libbullet-dev
 
 script:
-    - apt-cache policy libassimp-dev
+    - apt-cache policy libassimp-dev libc6 libgcc1 libstdc++6 zlib1g
     - cmake .
     - make
     - make test
