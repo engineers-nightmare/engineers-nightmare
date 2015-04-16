@@ -14,7 +14,7 @@
 /* a simple constructor hacked together based on
  * http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World
  */
-physics::physics(player *pl){
+physics::physics(player *p){
     /* a broadspace filters out obvious non-colliding pairs
      * before the more expensive collision detection algorithm sees them
      *
@@ -43,7 +43,7 @@ physics::physics(player *pl){
     this->dynamicsWorld->setGravity(btVector3(0, 0, -10));
 
     /* store a pointer to our player so physics can drive his position */
-    this->pl= pl;
+    this->pl= p;
 
     /* set player height to physics height */
     pl->pos.x = PLAYER_START_X;
