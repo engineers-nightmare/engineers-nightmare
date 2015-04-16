@@ -191,7 +191,8 @@ init()
     player.elev = 0;
     player.pos = glm::vec3(3,2,2);
     player.last_jump = player.jump = false;
-    player.last_place = player.place = false;
+    player.selected_slot = 1;
+    player.last_use = player.use = false;
 
     phy= new physics(&player);
 }
@@ -228,36 +229,36 @@ update()
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
 
-    if (player.scan) {
+    /* tool use */
+    if (player.use && !player.last_use) {
         raycast_info rc;
         ship->raycast(player.pos.x, player.pos.y, player.pos.z, player.dir.x, player.dir.y, player.dir.z, &rc);
 
         if (rc.hit) {
-            printf("Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
-            block *bl = rc.block;
 
-            /* block removal */
-            bl->type = block_empty;
-            /* dirty the chunk */
-            ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
-        }
-    }
+            switch (player.selected_slot) {
+            case 1: {
+                    printf("Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
+                    block *bl = rc.block;
 
-    if (player.place && !player.last_place) {
-        /* only on rising edge */
-        raycast_info rc;
-        ship->raycast(player.pos.x, player.pos.y, player.pos.z, player.dir.x, player.dir.y, player.dir.z, &rc);
+                    /* block removal */
+                    bl->type = block_empty;
+                    /* dirty the chunk */
+                    ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
+                } break;
 
-        if (rc.hit) {
-            printf("Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
+            case 2: {
+                    printf("Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
 
-            block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
+                    block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
 
-            /* can only build on the side of an existing scaffold */
-            if (bl && rc.block->type != block_empty) {
-                bl->type = block_support;
-                /* dirty the chunk */
-                ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
+                    /* can only build on the side of an existing scaffold */
+                    if (bl && rc.block->type != block_empty) {
+                        bl->type = block_support;
+                        /* dirty the chunk */
+                        ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
+                    }
+                } break;
             }
         }
     }
@@ -299,10 +300,14 @@ handle_input()
     player.last_jump = player.jump;
     player.jump = keys[SDL_SCANCODE_SPACE];
 
-    player.scan = keys[SDL_SCANCODE_E];
+    player.last_use = player.use;
+    player.use = keys[SDL_SCANCODE_E];
 
-    player.last_place = player.place;
-    player.place = keys[SDL_SCANCODE_R];
+    /* TODO: be less ridiculous */
+    if (keys[SDL_SCANCODE_1])
+        player.selected_slot = 1;
+    if (keys[SDL_SCANCODE_2])
+        player.selected_slot = 2;
 }
 
 
