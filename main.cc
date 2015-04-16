@@ -25,8 +25,8 @@
 #define MAX_WORLD_TEXTURES          64
 
 #define MOUSE_Y_LIMIT   1.54
-#define MOUSE_X_SENSITIVITY -0.01
-#define MOUSE_Y_SENSITIVITY -0.01
+#define MOUSE_X_SENSITIVITY -0.001
+#define MOUSE_Y_SENSITIVITY -0.001
 
 
 struct wnd {
