@@ -227,7 +227,6 @@ update()
     glm::mat4 view = glm::lookAt(player.pos, player.pos + player.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
-    per_object->upload();
 
     if (player.scan) {
         raycast_info rc;
@@ -263,9 +262,26 @@ update()
         }
     }
 
-    chunk * ch = ship->get_chunk_containing(0, 0, 0);
-    ch->prepare_render();
-    draw_mesh(ch->render_chunk.mesh);
+    /* walk all the chunks -- TODO: only walk chunks that might contribute to the view */
+    for (int k = ship->chunks.zo; k < ship->chunks.zo + ship->chunks.zd; k++) {
+        for (int j = ship->chunks.yo; j < ship->chunks.yo + ship->chunks.yd; j++) {
+            for (int i = ship->chunks.xo; i < ship->chunks.xo + ship->chunks.xd; i++) {
+                ship->chunks.get(i, j, k)->prepare_render();
+            }
+        }
+    }
+
+    for (int k = ship->chunks.zo; k < ship->chunks.zo + ship->chunks.zd; k++) {
+        for (int j = ship->chunks.yo; j < ship->chunks.yo + ship->chunks.yd; j++) {
+            for (int i = ship->chunks.xo; i < ship->chunks.xo + ship->chunks.xd; i++) {
+                /* TODO: prepare all the matrices first, and do ONE upload */
+                per_object->val.world_matrix = glm::translate(glm::mat4(1), glm::vec3(
+                            (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE));
+                per_object->upload();
+                draw_mesh(ship->chunks.get(i, j, k)->render_chunk.mesh);
+            }
+        }
+    }
 }
 
 
