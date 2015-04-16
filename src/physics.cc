@@ -9,7 +9,7 @@
 #define PLAYER_START_Y 4
 #define PLAYER_START_Z 50
 
-#define MOVE_SPEED  0.5
+#define MOVE_SPEED  0.05
 
 /* a simple constructor hacked together based on
  * http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World
