@@ -8,6 +8,7 @@
 
 /* TODO: sensible container for these things, once we have variants */
 extern sw_mesh *scaffold_sw;
+extern sw_mesh *x_quad_sw, *y_quad_sw, *z_quad_sw;
 
 
 static void
@@ -46,6 +47,31 @@ chunk::prepare_render()
                 if (b->type == block_support) {
                     // TODO: block detail, variants, types, surfaces
                     stamp_at_offset(&verts, &indices, scaffold_sw, glm::vec3(i, j, k));
+                }
+
+                if (b->surfs[surface_xm] == surface_wall) {
+                    stamp_at_offset(&verts, &indices, x_quad_sw, glm::vec3(i, j, k));
+                }
+
+                if (b->surfs[surface_xp] == surface_wall) {
+
+                    stamp_at_offset(&verts, &indices, x_quad_sw, glm::vec3(i+1, j, k));
+                }
+
+                if (b->surfs[surface_ym] == surface_wall) {
+                    stamp_at_offset(&verts, &indices, y_quad_sw, glm::vec3(i, j, k));
+                }
+
+                if (b->surfs[surface_yp] == surface_wall) {
+                    stamp_at_offset(&verts, &indices, y_quad_sw, glm::vec3(i, j+1, k));
+                }
+
+                if (b->surfs[surface_zm] == surface_wall) {
+                    stamp_at_offset(&verts, &indices, z_quad_sw, glm::vec3(i, j, k));
+                }
+
+                if (b->surfs[surface_zp] == surface_wall) {
+                    stamp_at_offset(&verts, &indices, z_quad_sw, glm::vec3(i, j, k+1));
                 }
             }
 
