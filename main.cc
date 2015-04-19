@@ -310,6 +310,10 @@ handle_input()
         player.selected_slot = 1;
     if (keys[SDL_SCANCODE_2])
         player.selected_slot = 2;
+    if (keys[SDL_SCANCODE_3])
+        player.selected_slot = 3;
+    if (keys[SDL_SCANCODE_4])
+        player.selected_slot = 4;
 }
 
 
