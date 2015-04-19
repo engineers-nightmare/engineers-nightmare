@@ -52,7 +52,7 @@ physics::physics(player *p){
 
 
     /* setup player rigid body */
-    this->playerShape = new btSphereShape(0.7);
+    this->playerShape = new btCapsuleShapeZ(0.35, 0.7);
     float maxStepHeight = 0.5f;
 
     /* setup the character controller. this gets a bit fiddly. */
