@@ -10,6 +10,7 @@
 #define PLAYER_START_Z 50
 
 #define MOVE_SPEED  0.05
+#define AIR_CONTROL_FACTOR 0.25
 
 /* a simple constructor hacked together based on
  * http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World
@@ -115,8 +116,12 @@ physics::tick(){
     btVector3 fwd(c, s, 0);
     btVector3 right(s, -c, 0);
 
-    fwd *= this->pl->move.y * MOVE_SPEED;
-    right *= this->pl->move.x * MOVE_SPEED;
+    float speed = MOVE_SPEED;
+    if (!this->controller->canJump())
+	speed *= AIR_CONTROL_FACTOR;
+
+    fwd *= this->pl->move.y * speed;
+    right *= this->pl->move.x * speed;
 
     this->controller->setWalkDirection(fwd + right);
 
