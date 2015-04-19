@@ -10,6 +10,22 @@ enum surface_type {
     surface_wall
 };
 
+/* 6 surfaces currently, all axis aligned
+ * p stands for plus
+ * m for minus
+ *
+ * so ym is the surface corresponding to the face
+ *  on this block 'facing' down the +y axis
+ */
+enum surface_index {
+    surface_xp,
+    surface_xm,
+    surface_yp,
+    surface_ym,
+    surface_zp,
+    surface_zm,
+};
+
 /* a single block
  * represents a 1m^3 cube
  * for more information see docs/ships-space.md
@@ -17,40 +33,14 @@ enum surface_type {
 struct block {
     block_type type;
 
-    /* 6 surfaces currently, all axis aligned
-     * p stands for plus
-     * m for minus
-     *
-     * so ym is the surface corresponding to the face
-     *  on this block 'facing' down the +y axis
-     */
-
-    surface_type xp;
-    surface_type xm;
-
-    surface_type yp;
-    surface_type ym;
-
-    surface_type zp;
-    surface_type zm;
+    surface_type surfs[6];
 
     /* manually set everything to default state
      * do not rely on any default behavior
      */
     block(void) :
-        type(block_empty),
-        xp(surface_none),
-        xm(surface_none),
-        yp(surface_none),
-        ym(surface_none),
-        zp(surface_none),
-        zm(surface_none)
+        type(block_empty)
     {}
-
-
-
-
-
 };
 
 

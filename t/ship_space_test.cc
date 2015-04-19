@@ -24,7 +24,7 @@ simple(void)
 
     b = space.get_block(0, 8, 0);
     assert(b != 0);
-    b->yp = surface_none;
+    b->type = block_support;
 
 
     /* read some data */
@@ -38,7 +38,7 @@ simple(void)
 
     b = space.get_block(0, 8, 0);
     assert(b != 0);
-    assert(b->yp == surface_none);
+    assert(b->type == block_support);
 }
 
 void
