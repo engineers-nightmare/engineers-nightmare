@@ -138,7 +138,6 @@ gl_debug_callback(GLenum source __unused,
 }
 
 sw_mesh *scaffold_sw;
-hw_mesh *scaffold_hw;
 GLuint simple_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
@@ -165,7 +164,6 @@ init()
     glEnable(GL_DEPTH_TEST);
 
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
-    scaffold_hw = upload_mesh(scaffold_sw);
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
 
     glUseProgram(simple_shader);
