@@ -226,15 +226,17 @@ update()
             sinf(player.elev)
             );
 
+    glm::vec3 eyePos = player.pos + glm::vec3(0, 0, EYE_OFFSET_Z);
+
     glm::mat4 proj = glm::perspective(45.0f, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
-    glm::mat4 view = glm::lookAt(player.pos, player.pos + player.dir, glm::vec3(0, 0, 1));
+    glm::mat4 view = glm::lookAt(eyePos, eyePos + player.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
 
     /* tool use */
     if (player.use && !player.last_use) {
         raycast_info rc;
-        ship->raycast(player.pos.x, player.pos.y, player.pos.z, player.dir.x, player.dir.y, player.dir.z, &rc);
+        ship->raycast(eyePos.x, eyePos.y, eyePos.z, player.dir.x, player.dir.y, player.dir.z, &rc);
 
         if (rc.hit) {
 
