@@ -7,9 +7,18 @@
 
 struct hw_mesh;
 
+class btTriangleMesh;
+class btBvhTriangleMeshShape;
+class btRigidBody;
+
 struct render_chunk {
     hw_mesh *mesh;
     bool valid;
+
+
+    btTriangleMesh *phys_mesh;
+    btBvhTriangleMeshShape *phys_shape;
+    btRigidBody *phys_body;
 };
 
 struct chunk {
@@ -25,6 +34,6 @@ struct chunk {
 
     block * get_block(unsigned int x, unsigned int y, unsigned int z);
 
-    void prepare_render();
+    void prepare_render(int _x, int _y, int _z);
 };
 

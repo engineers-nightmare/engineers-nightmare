@@ -4,7 +4,6 @@
 #include "player.h"
 #include "physics.h"
 
-#define GROUND_Z 1
 #define PLAYER_START_X 4
 #define PLAYER_START_Y 4
 #define PLAYER_START_Z 50
@@ -71,20 +70,6 @@ physics::physics(player *p){
             btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
     this->dynamicsWorld->addAction(this->controller);
     this->controller->setUpAxis(2);
-
-
-    /* setup world static floor */
-    /* we want our plane at z = 1 */
-    this->groundShape = new btStaticPlaneShape(btVector3(0, 0, GROUND_Z), 1);
-    this->groundMotionState =
-        new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1),
-                                             btVector3(0, 0, 0)));
-    btRigidBody::btRigidBodyConstructionInfo
-                    groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
-    this->groundRigidBody = new btRigidBody(groundRigidBodyCI);
-    this->dynamicsWorld->addRigidBody(this->groundRigidBody);
-
-
 }
 
 physics::~physics(){
@@ -100,10 +85,6 @@ physics::~physics(){
     delete(this->playerShape);
     delete(this->ghostObj);
     delete(this->controller);
-
-    delete(this->groundShape);
-    delete(this->groundMotionState);
-    delete(this->groundRigidBody);
 }
 
 void

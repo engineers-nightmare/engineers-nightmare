@@ -294,7 +294,7 @@ update()
     for (int k = ship->chunks.zo; k < ship->chunks.zo + ship->chunks.zd; k++) {
         for (int j = ship->chunks.yo; j < ship->chunks.yo + ship->chunks.yd; j++) {
             for (int i = ship->chunks.xo; i < ship->chunks.xo + ship->chunks.xd; i++) {
-                ship->chunks.get(i, j, k)->prepare_render();
+                ship->chunks.get(i, j, k)->prepare_render(i, j, k);
             }
         }
     }
