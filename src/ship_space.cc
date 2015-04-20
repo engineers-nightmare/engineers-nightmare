@@ -6,25 +6,6 @@
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
     : chunks(xd, yd, zd)
 {
-    int i=0, j=0, k=0;
-    chunk *c;
-
-    /* iterate through in z major / x minor order
-     * yay access patterns
-     */
-    for( k=0; k<zd; ++k ){
-        for( j=0; j<yd; ++j ){
-            for( i=0; i<xd; ++i ){
-                /* call new to construct our blocks */
-                c = chunks.get(i, j, k);
-                if( ! c ){
-                    errx(1, "ship_space::ship_space : failed to initialise chunks");
-                }
-                new (c) chunk();
-            }
-        }
-    }
-
 }
 
 /* returns a block or null
@@ -68,7 +49,8 @@ ship_space::get_chunk_containing(int block_x, int block_y, int block_z)
 chunk *
 ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
 {
-    return this->chunks.get(chunk_x, chunk_y, chunk_z);
+    chunk **c = this->chunks.get(chunk_x, chunk_y, chunk_z);
+    return c ? *c : NULL;
 }
 
 /* returns a pointer to a new ship space
@@ -84,6 +66,11 @@ ship_space::mock_ship_space(void)
 {
     /* new ship space of 2 * 2 * 1*/
     ship_space * ss = new ship_space(2, 2, 1);
+    *ss->chunks.get(0, 0, 0) = new chunk();
+    *ss->chunks.get(1, 0, 0) = new chunk();
+    *ss->chunks.get(0, 1, 0) = new chunk();
+    *ss->chunks.get(1, 1, 0) = new chunk();
+
     unsigned int x=0, y=0, z=0;
     block *b1 = 0;
     block *b2 = 0;

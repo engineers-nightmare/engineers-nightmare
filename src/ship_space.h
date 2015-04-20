@@ -14,7 +14,7 @@ struct raycast_info {
 };
 
 struct ship_space {
-    dynamic_grid<chunk> chunks;
+    dynamic_grid<chunk *> chunks;
 
     /* a ship_space of xd * yd * zd
      */

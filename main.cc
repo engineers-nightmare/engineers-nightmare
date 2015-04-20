@@ -296,7 +296,7 @@ update()
     for (int k = ship->chunks.zo; k < ship->chunks.zo + ship->chunks.zd; k++) {
         for (int j = ship->chunks.yo; j < ship->chunks.yo + ship->chunks.yd; j++) {
             for (int i = ship->chunks.xo; i < ship->chunks.xo + ship->chunks.xd; i++) {
-                ship->chunks.get(i, j, k)->prepare_render(i, j, k);
+                ship->get_chunk(i, j, k)->prepare_render(i, j, k);
             }
         }
     }
@@ -308,7 +308,7 @@ update()
                 per_object->val.world_matrix = glm::translate(glm::mat4(1), glm::vec3(
                             (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE));
                 per_object->upload();
-                draw_mesh(ship->chunks.get(i, j, k)->render_chunk.mesh);
+                draw_mesh(ship->get_chunk(i, j, k)->render_chunk.mesh);
             }
         }
     }

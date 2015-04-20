@@ -7,10 +7,19 @@ simple(void)
 {
     block *b;
     ship_space space(2, 2, 2);
+    *space.chunks.get(0, 0, 0) = new chunk();
+    *space.chunks.get(1, 0, 0) = new chunk();
+    *space.chunks.get(0, 1, 0) = new chunk();
+    *space.chunks.get(1, 1, 0) = new chunk();
+    *space.chunks.get(0, 0, 1) = new chunk();
+    *space.chunks.get(1, 0, 1) = new chunk();
+    *space.chunks.get(0, 1, 1) = new chunk();
+    *space.chunks.get(1, 1, 1) = new chunk();
 
     assert( space.get_block(2*CHUNK_SIZE, 2*CHUNK_SIZE, 2*CHUNK_SIZE) == 0 );
 
     assert( space.get_block(0,0,0) != space.get_block(0,0,1) );
+
 
 
     /* write some data */
