@@ -50,9 +50,6 @@ fixed_cube<T, N>::get(unsigned int x, unsigned int y, unsigned int z)
         return 0;
     }
 
-    if( ! this->contents )
-        errx(1, "fixed_cube::get called, but this->contents is empty");
-
     return &( contents[x][y][z] );
 }
 
