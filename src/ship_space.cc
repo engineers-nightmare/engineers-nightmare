@@ -57,6 +57,7 @@ ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
  * this ship space will have 2 x 2 rooms and will be 1 room tall
  * each room will have a floor and 4 walls of scaffolding
  * each room will have some doors on all 4 walls
+ * there will be a floor of surfaces
  * and will otherwise be empty
  *
  * returns 0 on error
@@ -92,6 +93,11 @@ ship_space::mock_ship_space(void)
                     b2->type = block_support;
                     b3->type = block_support;
                     b4->type = block_support;
+
+                    b1->surfs[surface_zp] = surface_wall;
+                    b2->surfs[surface_zp] = surface_wall;
+                    b3->surfs[surface_zp] = surface_wall;
+                    b3->surfs[surface_zp] = surface_wall;
                 } else if( y == 0 ){
                     /* we want a 2 height door at x == 3
                      * and a one height door a x == 5
