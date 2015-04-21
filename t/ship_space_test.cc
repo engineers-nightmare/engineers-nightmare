@@ -85,7 +85,7 @@ test_mock_ship_space(void)
                     assert(b1->surfs[surface_zp] == surface_wall);
                     assert(b2->surfs[surface_zp] == surface_wall);
                     assert(b3->surfs[surface_zp] == surface_wall);
-                    assert(b3->surfs[surface_zp] == surface_wall);
+                    assert(b4->surfs[surface_zp] == surface_wall);
 
                 } else if( y == 0 ){
                     if( x == 3     && z == 1 ||

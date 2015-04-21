@@ -97,7 +97,7 @@ ship_space::mock_ship_space(void)
                     b1->surfs[surface_zp] = surface_wall;
                     b2->surfs[surface_zp] = surface_wall;
                     b3->surfs[surface_zp] = surface_wall;
-                    b3->surfs[surface_zp] = surface_wall;
+                    b4->surfs[surface_zp] = surface_wall;
 
                 } else if( y == 0 ){
                     /* we want a 2 height door at x == 3
@@ -117,6 +117,11 @@ ship_space::mock_ship_space(void)
                         b2->type = block_support;
                         b3->type = block_support;
                         b4->type = block_support;
+
+                        b1->surfs[surface_yp] = surface_wall;
+                        b2->surfs[surface_yp] = surface_wall;
+                        b3->surfs[surface_yp] = surface_wall;
+                        b3->surfs[surface_yp] = surface_wall;
                     }
                 } else if( x == 0 ){
                     /* we want a 2 height door at y == 3
@@ -136,6 +141,11 @@ ship_space::mock_ship_space(void)
                         b2->type = block_support;
                         b3->type = block_support;
                         b4->type = block_support;
+
+                        b1->surfs[surface_xp] = surface_wall;
+                        b2->surfs[surface_xp] = surface_wall;
+                        b3->surfs[surface_xp] = surface_wall;
+                        b3->surfs[surface_xp] = surface_wall;
                     }
                 } else if( x == 7 ){
                     /* we want a 2 height door at x == 3
@@ -155,6 +165,11 @@ ship_space::mock_ship_space(void)
                         b2->type = block_support;
                         b3->type = block_support;
                         b4->type = block_support;
+
+                        b1->surfs[surface_xm] = surface_wall;
+                        b2->surfs[surface_xm] = surface_wall;
+                        b3->surfs[surface_xm] = surface_wall;
+                        b3->surfs[surface_xm] = surface_wall;
                     }
                 } else if( y == 7 ){
                     /* we want a 2 height door at y == 3
@@ -174,6 +189,11 @@ ship_space::mock_ship_space(void)
                         b2->type = block_support;
                         b3->type = block_support;
                         b4->type = block_support;
+
+                        b1->surfs[surface_ym] = surface_wall;
+                        b2->surfs[surface_ym] = surface_wall;
+                        b3->surfs[surface_ym] = surface_wall;
+                        b3->surfs[surface_ym] = surface_wall;
                     }
                 } else {
                     b1->type = block_empty;
