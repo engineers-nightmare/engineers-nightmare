@@ -118,11 +118,14 @@ ship_space::mock_ship_space(void)
                         b3->type = block_support;
                         b4->type = block_support;
 
-                        /* add surfaces to inside of walls */
-                        b1->surfs[surface_yp] = surface_wall;
-                        b2->surfs[surface_yp] = surface_wall;
-                        b3->surfs[surface_yp] = surface_wall;
-                        b4->surfs[surface_yp] = surface_wall;
+                        if( x != 0 &&
+                            x != 7 ){
+                            /* add surfaces to inside of walls */
+                            b1->surfs[surface_yp] = surface_wall;
+                            b2->surfs[surface_yp] = surface_wall;
+                            b3->surfs[surface_yp] = surface_wall;
+                            b4->surfs[surface_yp] = surface_wall;
+                        }
 
                         /* add surfaces to inside of doorways */
                         if( x == 3 && z == 3 ||
@@ -172,11 +175,14 @@ ship_space::mock_ship_space(void)
                         b3->type = block_support;
                         b4->type = block_support;
 
-                        /* add surfaces to inside of walls */
-                        b1->surfs[surface_xp] = surface_wall;
-                        b2->surfs[surface_xp] = surface_wall;
-                        b3->surfs[surface_xp] = surface_wall;
-                        b4->surfs[surface_xp] = surface_wall;
+                        if( y != 0 &&
+                            y != 7 ){
+                            /* add surfaces to inside of walls */
+                            b1->surfs[surface_xp] = surface_wall;
+                            b2->surfs[surface_xp] = surface_wall;
+                            b3->surfs[surface_xp] = surface_wall;
+                            b4->surfs[surface_xp] = surface_wall;
+                        }
 
                         /* add surfaces to inside of doorways */
                         if( y == 3 && z == 3 ||
@@ -226,11 +232,14 @@ ship_space::mock_ship_space(void)
                         b3->type = block_support;
                         b4->type = block_support;
 
-                        /* add surfaces to inside of walls */
-                        b1->surfs[surface_xm] = surface_wall;
-                        b2->surfs[surface_xm] = surface_wall;
-                        b3->surfs[surface_xm] = surface_wall;
-                        b4->surfs[surface_xm] = surface_wall;
+                        if( y != 0 &&
+                            y != 7 ){
+                            /* add surfaces to inside of walls */
+                            b1->surfs[surface_xm] = surface_wall;
+                            b2->surfs[surface_xm] = surface_wall;
+                            b3->surfs[surface_xm] = surface_wall;
+                            b4->surfs[surface_xm] = surface_wall;
+                        }
 
                         /* add surfaces to inside of doorways */
                         if( y == 3 && z == 3 ||
@@ -280,11 +289,14 @@ ship_space::mock_ship_space(void)
                         b3->type = block_support;
                         b4->type = block_support;
 
-                        /* add surfaces to inside of walls */
-                        b1->surfs[surface_ym] = surface_wall;
-                        b2->surfs[surface_ym] = surface_wall;
-                        b3->surfs[surface_ym] = surface_wall;
-                        b4->surfs[surface_ym] = surface_wall;
+                        if( x != 0 &&
+                            x != 7 ){
+                            /* add surfaces to inside of walls */
+                            b1->surfs[surface_ym] = surface_wall;
+                            b2->surfs[surface_ym] = surface_wall;
+                            b3->surfs[surface_ym] = surface_wall;
+                            b4->surfs[surface_ym] = surface_wall;
+                        }
 
                         /* add surfaces to inside of doorways */
                         if( x == 3 && z == 3 ||
