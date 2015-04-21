@@ -49,6 +49,12 @@ struct ship_space {
     static ship_space * mock_ship_space(void);
 
     void raycast(float ox, float oy, float oz, float dx, float dy, float dz, raycast_info *rc);
+
+    /* resize ship to new dimensions
+     * will ensure every stored chunk is still at the co-ords
+     * of it's pre-resize location
+     */
+    void resize(unsigned int nxd, unsigned int nyd, unsigned int nzd);
 };
 
 

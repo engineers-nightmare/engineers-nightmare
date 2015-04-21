@@ -286,3 +286,13 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
         }
     }
 }
+
+/* resize ship to new dimensions
+ * will ensure every stored chunk is still at the co-ords
+ * of it's pre-resize location
+ */
+void
+ship_space::resize(unsigned int nxd, unsigned int nyd, unsigned int nzd){
+    this->chunks.resize(nxd, nyd, nzd);
+}
+
