@@ -98,6 +98,7 @@ ship_space::mock_ship_space(void)
                     b2->surfs[surface_zp] = surface_wall;
                     b3->surfs[surface_zp] = surface_wall;
                     b3->surfs[surface_zp] = surface_wall;
+
                 } else if( y == 0 ){
                     /* we want a 2 height door at x == 3
                      * and a one height door a x == 5
