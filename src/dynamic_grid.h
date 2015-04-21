@@ -63,6 +63,13 @@ struct dynamic_grid {
      * will check bounds
      */
     T * get(int ex, int ey, int ez);
+
+    /* resize the grid to new dimensions
+     *
+     * this will move everything around to ensure that
+     * items will still be found at their old x, y, z
+     */
+    void resize(int nxd, int nyd, int nzd);
 };
 
 
@@ -154,4 +161,52 @@ dynamic_grid<T>::get(int ex, int ey, int ez)
     return &( contents[ ix + (iy * this->xd) + (iz * this->xd * this->yd) ] );
 }
 
+/* resize the grid to new dimensions
+ *
+ * this will move everything around to ensure that
+ * items will still be found at their old x, y, z
+ */
+template <class T>
+void
+dynamic_grid<T>::resize(int nxd, int nyd, int nzd){
+    /* size of each dimension */
+    unsigned int x = 0,
+                 y = 0,
+                 z = 0;
+
+    T * new_contents = 0;
+
+    if( nxd < this->xd ||
+        nyd < this->yd ||
+        nzd < this->zd ){
+        printf("dynamic_grid::resize: current (%d, %d, %d) asked to shrink to (%d, %d, %d)\n",
+                this->xd, this->yd, this->zd, nxd, nyd, nzd);
+        errx(1, "dynamic_grid::resize does not support shrinking");
+    }
+
+    new_contents = (T*) calloc(sizeof(T), nxd * nyd * nzd);
+
+    if( ! new_contents ){
+        errx(1, "dynamic_grid::resize calloc failed");
+    }
+
+    /* copy everything over */
+    for( z=0; z<zd; ++z ){
+        for( y=0; y<yd; ++y ){
+            for( x=0; x<xd; ++x ){
+                new_contents[ x + (y * nxd) + (z * nxd * nyd) ] = this->contents[ x + (y * this->xd) + (z * this->xd * this->yd) ];
+
+            }
+        }
+    }
+
+    /* nuke our old contents */
+    free(this->contents);
+
+    /* update all our instance variables */
+    this->contents = new_contents;
+    this->xd = nxd;
+    this->yd = nyd;
+    this->zd = nzd;
+}
 

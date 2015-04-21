@@ -41,11 +41,43 @@ test_negative(void)
 
 }
 
+void test_expand(void){
+    int x=0, y=0, z=0;
+    dynamic_grid<int> *dg = new dynamic_grid<int>(2, 2, 2);
+    assert(dg);
+
+    /* set the stage */
+    for( z=0; z<2; ++z ){
+        for( y=0; y<2; ++y ){
+            for( x=0; x<2; ++x ){
+                *dg->get(x, y, z) = x * y * z;
+            }
+        }
+    }
+
+    /* force a resize */
+    dg->resize(2, 3, 4);
+
+    /* check everything is good */
+    for( z=0; z<4; ++z ){
+        for( y=0; y<3; ++y ){
+            for( x=0; x<2; ++x ){
+                if( z < 2 && y < 2 && x < 2 ){
+                    assert( *dg->get(x, y, z) == x * y * z );
+                } else {
+                    assert( *dg->get(x, y, z) == 0 );
+                }
+            }
+        }
+    }
+}
+
 /* some light manual testing of block and grid
  */
 int
 main(void)
 {
     test_negative();
+    test_expand();
 }
 
