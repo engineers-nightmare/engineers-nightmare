@@ -288,6 +288,32 @@ update()
                     ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
 
                 } break;
+
+            case 4: {
+                    printf("Remove surface raycast %d,%d,%d\n", rc.x, rc.y, rc.z);
+                    block *bl = rc.block;
+
+                    /* surface remove */
+                    printf("nx %d ny %d nz %d\n", rc.nx, rc.ny, rc.nz);
+                    int index = 0;
+                    if (rc.nx == 1)
+                        index = 0;
+                    else if (rc.nx == -1)
+                        index = 1;
+                    else if (rc.ny == 1)
+                        index = 2;
+                    else if (rc.ny == -1)
+                        index = 3;
+                    else if (rc.nz == 1)
+                        index = 4;
+                    else if (rc.nz == -1)
+                        index = 5;
+
+                    bl->surfs[index] = surface_none;
+                    ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
+
+                } break;
+
             }
         }
     }
