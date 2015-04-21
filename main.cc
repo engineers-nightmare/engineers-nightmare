@@ -242,17 +242,26 @@ update()
 
             switch (player.selected_slot) {
             case 1: {
-                    printf("Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
+                    printf("Remove block Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
                     block *bl = rc.block;
 
                     /* block removal */
                     bl->type = block_empty;
+
+                    /* strip all surfaces */
+                    bl->surfs[0] = surface_none;
+                    bl->surfs[1] = surface_none;
+                    bl->surfs[2] = surface_none;
+                    bl->surfs[3] = surface_none;
+                    bl->surfs[4] = surface_none;
+                    bl->surfs[5] = surface_none;
+
                     /* dirty the chunk */
                     ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
                 } break;
 
             case 2: {
-                    printf("Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
+                    printf("Add block Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
 
                     block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
 
