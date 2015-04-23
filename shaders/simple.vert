@@ -5,6 +5,7 @@
 
 layout(location=0) in vec4 pos;
 layout(location=1) in int mat;
+layout(location=2) in vec3 norm;
 
 
 layout(std140, binding=0) uniform per_camera {
@@ -27,5 +28,14 @@ void main(void)
 {
 	gl_Position = view_proj_matrix * (world_matrix * pos);
     texcoord.z = mat;
-    texcoord.xy = pos.xy;   /* TODO: proper triplanar mapping, or gen texcoords cpu-side. */
+
+    vec3 n = abs(normalize(norm));
+    /* Quick & dirty triplanar mapping */
+    if (n.x > 0.8) {
+        texcoord.xy = pos.yz;
+    } else if (n.y > 0.8) {
+        texcoord.xy = pos.xz;
+    } else {
+        texcoord.xy = pos.xy;
+    }
 }

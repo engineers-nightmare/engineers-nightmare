@@ -8,6 +8,7 @@
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/config.h>
 
 // HISSSSS
 #include <vector>
@@ -40,8 +41,19 @@ compute_bounds(std::vector<vertex> *verts)
 
 sw_mesh *
 load_mesh(char const *filename) {
-    aiScene const *scene = aiImportFile(filename, aiProcessPreset_TargetRealtime_MaxQuality |
-            aiProcess_MakeLeftHanded);
+
+    static aiPropertyStore* meshImportProps = 0;
+    if (!meshImportProps) {
+        /* FIXME: threading hazard if we want to do concurrent loading */
+        meshImportProps = aiCreatePropertyStore();
+        aiSetImportPropertyInteger(meshImportProps, AI_CONFIG_PP_RVC_FLAGS, aiComponent_NORMALS);
+    }
+
+    aiScene const *scene = aiImportFileExWithProperties(filename, aiProcess_Triangulate |
+            aiProcess_MakeLeftHanded | aiProcess_GenNormals | aiProcess_OptimizeMeshes | aiProcess_RemoveComponent,
+            NULL /* IO */,
+            meshImportProps);
+
     if (!scene)
         errx(1, "Failed to load mesh %s", filename);
 
@@ -61,7 +73,8 @@ load_mesh(char const *filename) {
         int submesh_base = verts.size();
 
         for (int j = 0; j < m->mNumVertices; j++)
-            verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z, 0 /* mat */));
+            verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z,
+                        m->mNormals[j].x, m->mNormals[j].y, m->mNormals[j].z, 0 /* mat */));
 
         for (int j = 0; j < m->mNumFaces; j++) {
             if (m->mFaces[j].mNumIndices != 3)
@@ -105,6 +118,9 @@ upload_mesh(sw_mesh *mesh)
 
     glEnableVertexAttribArray(1);
     glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(vertex), (GLvoid const *)offsetof(vertex, mat));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid const *)offsetof(vertex, nx));
 
     glGenBuffers(1, &ret->ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ret->ibo);

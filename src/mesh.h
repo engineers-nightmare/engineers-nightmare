@@ -10,10 +10,11 @@ struct hw_mesh {
 
 /* TODO: pack this a bit better */
 struct vertex {
-    float x, y, z;
+    float x, y, z, nx, ny, nz;
     int mat;
     vertex() : x(0), y(0), z(0), mat(0) {}
-    vertex(float x, float y, float z, int mat) : x(x), y(y), z(z), mat(mat) {}
+    vertex(float x, float y, float z, float nx, float ny, float nz, int mat)
+        : x(x), y(y), z(z), nx(nx), ny(ny), nz(nz), mat(mat) {}
 };
 
 struct sw_mesh {
