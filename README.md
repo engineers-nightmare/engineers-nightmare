@@ -3,7 +3,18 @@
 A game about keeping a spaceship from falling apart
 
 
-# using
+# current state
+
+This is the view you are greeted with on game start:
+
+![starting](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-start-2015-04-23.png)
+
+And here is a mess I made by removing surfaces and blocks:
+
+![mess](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-mess-2015-04-23.png)
+
+
+# building and running
 
 build:
 
@@ -18,6 +29,7 @@ run:
 
     ./nightmare
 
+
 # dependencies
 
 * SDL2
@@ -29,13 +41,4 @@ run:
 
 NB: this above list must be kept in sync with `.travis.yml`
 
-# current state
-
-This is the view you are greeted with on game start:
-
-![starting](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-start-2015-04-23.png)
-
-And here is a mess I made by removing surfaces and blocks:
-
-![mess](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-mess-2015-04-23.png)
 
