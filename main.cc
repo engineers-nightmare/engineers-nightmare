@@ -238,10 +238,12 @@ update()
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
 
+    /* both tool use and overlays need the raycast itself */
+    raycast_info rc;
+    ship->raycast(eyePos.x, eyePos.y, eyePos.z, player.dir.x, player.dir.y, player.dir.z, &rc);
+
     /* tool use */
     if (player.use && !player.last_use) {
-        raycast_info rc;
-        ship->raycast(eyePos.x, eyePos.y, eyePos.z, player.dir.x, player.dir.y, player.dir.z, &rc);
 
         if (rc.hit) {
 
@@ -351,6 +353,24 @@ update()
                 draw_mesh(ship->get_chunk(i, j, k)->render_chunk.mesh);
             }
         }
+    }
+
+    /* tool preview */
+    switch (player.selected_slot) {
+        case 2: {
+                    if (rc.hit) {
+                        block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
+
+                        /* can only build on the side of an existing scaffold */
+                        if (bl && rc.block->type != block_empty) {
+                            per_object->val.world_matrix = glm::translate(glm::mat4(1),
+                                    glm::vec3(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz));
+                            per_object->upload();
+
+                            draw_mesh(scaffold_hw);
+                        }
+                    }
+                }
     }
 }
 
