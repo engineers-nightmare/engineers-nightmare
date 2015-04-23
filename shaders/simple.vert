@@ -22,11 +22,15 @@ layout(std140, binding=1) uniform per_object {
 };
 
 out vec3 texcoord;
+out float light;
 
+const vec3 lightPos = vec3(4,4,4);
+const float ambientAmount = 0.3;
 
 void main(void)
 {
-	gl_Position = view_proj_matrix * (world_matrix * pos);
+    vec4 world_pos = world_matrix * pos;
+	gl_Position = view_proj_matrix * world_pos;
     texcoord.z = mat;
 
     vec3 n = abs(normalize(norm));
@@ -38,4 +42,10 @@ void main(void)
     } else {
         texcoord.xy = pos.xy;
     }
+
+    /* lighting */
+    vec3 light_dir = lightPos - world_pos.xyz;
+    float lambert = clamp(dot(normalize(light_dir), norm), 0, 1);
+
+    light = ambientAmount + (1 - ambientAmount) * lambert;
 }
