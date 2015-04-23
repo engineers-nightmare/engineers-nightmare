@@ -147,6 +147,7 @@ ship_space *ship;
 player player;
 physics *phy;
 unsigned char const *keys;
+hw_mesh *scaffold_hw;
 
 void
 init()
@@ -170,6 +171,8 @@ init()
     z_quad_sw = load_mesh("mesh/z_quad.obj");
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
 
+    scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
+
     glUseProgram(simple_shader);
 
     per_camera = new shader_params<per_camera_params>;
@@ -181,7 +184,9 @@ init()
     per_object->bind(1);
 
     world_textures = new texture_set(WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
-    world_textures->load(0, "textures/scaffold.png");
+    world_textures->load(0, "textures/white.png");
+    world_textures->load(1, "textures/scaffold.png");
+    world_textures->load(2, "textures/scaffold.png");   /* todo: replace with something else */
 
     world_textures->bind(0);
 
@@ -196,7 +201,7 @@ init()
     player.selected_slot = 1;
     player.last_use = player.use = false;
 
-    phy= new physics(&player);
+    phy = new physics(&player);
 }
 
 

@@ -61,7 +61,7 @@ load_mesh(char const *filename) {
         int submesh_base = verts.size();
 
         for (int j = 0; j < m->mNumVertices; j++)
-            verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z));
+            verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z, 0 /* mat */));
 
         for (int j = 0; j < m->mNumFaces; j++) {
             if (m->mFaces[j].mNumIndices != 3)
@@ -101,7 +101,10 @@ upload_mesh(sw_mesh *mesh)
     glBufferData(GL_ARRAY_BUFFER, mesh->num_vertices * sizeof(vertex), mesh->verts, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), offsetof(vertex, x));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid const *)offsetof(vertex, x));
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(vertex), (GLvoid const *)offsetof(vertex, mat));
 
     glGenBuffers(1, &ret->ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ret->ibo);

@@ -15,7 +15,7 @@ extern sw_mesh *x_quad_sw, *y_quad_sw, *z_quad_sw;
 
 static void
 stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
-                sw_mesh *src, glm::vec3 offset)
+                sw_mesh *src, glm::vec3 offset, int mat)
 {
     unsigned index_base = verts->size();
 
@@ -24,6 +24,7 @@ stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
         v.x += offset.x;
         v.y += offset.y;
         v.z += offset.z;
+        v.mat = mat;
         verts->push_back(v);
     }
 
@@ -51,32 +52,32 @@ chunk::prepare_render(int _x, int _y, int _z)
 
                 if (b->type == block_support) {
                     // TODO: block detail, variants, types, surfaces
-                    stamp_at_offset(&verts, &indices, scaffold_sw, glm::vec3(i, j, k));
+                    stamp_at_offset(&verts, &indices, scaffold_sw, glm::vec3(i, j, k), 1);
                 }
 
                 if (b->surfs[surface_xm] == surface_wall) {
-                    stamp_at_offset(&verts, &indices, x_quad_sw, glm::vec3(i, j, k));
+                    stamp_at_offset(&verts, &indices, x_quad_sw, glm::vec3(i, j, k), 2);
                 }
 
                 if (b->surfs[surface_xp] == surface_wall) {
 
-                    stamp_at_offset(&verts, &indices, x_quad_sw, glm::vec3(i+1, j, k));
+                    stamp_at_offset(&verts, &indices, x_quad_sw, glm::vec3(i+1, j, k), 2);
                 }
 
                 if (b->surfs[surface_ym] == surface_wall) {
-                    stamp_at_offset(&verts, &indices, y_quad_sw, glm::vec3(i, j, k));
+                    stamp_at_offset(&verts, &indices, y_quad_sw, glm::vec3(i, j, k), 2);
                 }
 
                 if (b->surfs[surface_yp] == surface_wall) {
-                    stamp_at_offset(&verts, &indices, y_quad_sw, glm::vec3(i, j+1, k));
+                    stamp_at_offset(&verts, &indices, y_quad_sw, glm::vec3(i, j+1, k), 2);
                 }
 
                 if (b->surfs[surface_zm] == surface_wall) {
-                    stamp_at_offset(&verts, &indices, z_quad_sw, glm::vec3(i, j, k));
+                    stamp_at_offset(&verts, &indices, z_quad_sw, glm::vec3(i, j, k), 2);
                 }
 
                 if (b->surfs[surface_zp] == surface_wall) {
-                    stamp_at_offset(&verts, &indices, z_quad_sw, glm::vec3(i, j, k+1));
+                    stamp_at_offset(&verts, &indices, z_quad_sw, glm::vec3(i, j, k+1), 2);
                 }
             }
 

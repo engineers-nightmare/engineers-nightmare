@@ -11,8 +11,9 @@ struct hw_mesh {
 /* TODO: pack this a bit better */
 struct vertex {
     float x, y, z;
-    vertex() : x(0), y(0), z(0) {}
-    vertex(float x, float y, float z) : x(x), y(y), z(z) {}
+    int mat;
+    vertex() : x(0), y(0), z(0), mat(0) {}
+    vertex(float x, float y, float z, int mat) : x(x), y(y), z(z), mat(mat) {}
 };
 
 struct sw_mesh {
