@@ -25,7 +25,8 @@ out vec3 texcoord;
 out float light;
 
 const vec3 lightPos = vec3(4,4,4);
-const float ambientAmount = 0.3;
+//const float ambientAmount = 0.3;
+const float ambientAmount = 1.0;
 
 void main(void)
 {
