@@ -162,6 +162,8 @@ struct entity
     int x, y, z;
     hw_mesh *mesh;
 
+    /* TODO: phys */
+
     entity(int x, int y, int z, hw_mesh *mesh) : x(x), y(y), z(z), mesh(mesh) {}
 };
 
@@ -332,6 +334,7 @@ update()
                         for (std::vector<entity *>::iterator it = entities.begin(); it != entities.end();) {
                             entity *e = *it;
                             if (e->x == rc.x && e->y == rc.y && e->z == rc.z) {
+                                delete e;
                                 it = entities.erase(it);
                             }
                             else {
