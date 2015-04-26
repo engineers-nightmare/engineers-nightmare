@@ -149,11 +149,16 @@ physics *phy;
 unsigned char const *keys;
 hw_mesh *scaffold_hw;
 
+
 void
 init()
 {
     printf("%s starting up.\n", APP_NAME);
     printf("OpenGL version: %.1f\n", epoxy_gl_version() / 10.0f);
+
+    if (epoxy_gl_version() < 33) {
+        errx(1, "At least OpenGL 3.3 is required\n");
+    }
 
     /* Enable GL debug extension */
     if (!epoxy_has_gl_extension("GL_KHR_debug"))
@@ -161,6 +166,10 @@ init()
 
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(gl_debug_callback, NULL);
+
+    /* Check for ARB_texture_storage */
+    if (!epoxy_has_gl_extension("GL_ARB_texture_storage"))
+        errx(1, "No support for ARB_texture_storage\n");
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);         /* pointers given by other libs may not be aligned */
     glEnable(GL_DEPTH_TEST);
