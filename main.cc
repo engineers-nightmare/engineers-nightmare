@@ -140,7 +140,7 @@ gl_debug_callback(GLenum source __unused,
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *frobnicator_sw;
-GLuint simple_shader;
+GLuint simple_shader, add_overlay_shader, remove_overlay_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
 texture_set *world_textures;
@@ -151,7 +151,6 @@ unsigned char const *keys;
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 hw_mesh *frobnicator_hw;
-hw_mesh *frobnicator_mat_hw;
 
 
 struct entity
@@ -203,11 +202,12 @@ init()
         surfs_hw[i] = upload_mesh(surfs_sw[i]);
 
     frobnicator_sw = load_mesh("mesh/frobnicator.obj");
-    frobnicator_hw = upload_mesh(frobnicator_sw);
     set_mesh_material(frobnicator_sw, 3);
-    frobnicator_mat_hw = upload_mesh(frobnicator_sw);
+    frobnicator_hw = upload_mesh(frobnicator_sw);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
+    add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/simple.frag");
+    remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/simple.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
 
@@ -227,6 +227,7 @@ init()
     world_textures->load(2, "textures/plate.png");
     world_textures->load(3, "textures/frobnicator.png");
     world_textures->load(4, "textures/grate.png");
+    world_textures->load(5, "textures/red.png");
 
     world_textures->bind(0);
 
@@ -445,7 +446,7 @@ update()
 
                     /* TODO: flesh this out a bit */
                     ship->get_chunk_containing(rc.x + rc.nz, rc.y + rc.nz, rc.z + rc.nz)->entities.push_back(
-                        new entity(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz, frobnicator_mat_hw));
+                        new entity(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz, frobnicator_hw));
                 } break;
             }
         }
@@ -495,6 +496,24 @@ update()
 
     /* tool preview */
     switch (player.selected_slot) {
+        case 1: {
+                    if (rc.hit) {
+                        block *bl = rc.block;
+                        if (bl->type != block_empty) {
+                            per_object->val.world_matrix = glm::translate(glm::mat4(1),
+                                    glm::vec3(rc.x, rc.y, rc.z));
+                            per_object->upload();
+
+                            glUseProgram(remove_overlay_shader);
+                            glEnable(GL_POLYGON_OFFSET_FILL);
+                            glPolygonOffset(-0.1, -0.1);
+                            draw_mesh(scaffold_hw);
+                            glPolygonOffset(0, 0);
+                            glDisable(GL_POLYGON_OFFSET_FILL);
+                            glUseProgram(simple_shader);
+                        }
+                    }
+                } break;
         case 2: {
                     if (rc.hit) {
                         block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
@@ -505,7 +524,9 @@ update()
                                     glm::vec3(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz));
                             per_object->upload();
 
+                            glUseProgram(add_overlay_shader);
                             draw_mesh(scaffold_hw);
+                            glUseProgram(simple_shader);
                         }
                     }
                 } break;
@@ -521,11 +542,34 @@ update()
                                     glm::vec3(rc.x, rc.y, rc.z));
                             per_object->upload();
 
+                            glUseProgram(add_overlay_shader);
                             glEnable(GL_POLYGON_OFFSET_FILL);
                             glPolygonOffset(-0.1, -0.1);
                             draw_mesh(surfs_hw[index]);
                             glPolygonOffset(0, 0);
                             glDisable(GL_POLYGON_OFFSET_FILL);
+                            glUseProgram(simple_shader);
+                        }
+                    }
+                } break;
+        case 4: {
+                    if (rc.hit) {
+                        block *bl = ship->get_block(rc.x, rc.y, rc.z);
+                        int index = normal_to_surface_index(&rc);
+
+                        if (bl && bl->surfs[index] != surface_none) {
+
+                            per_object->val.world_matrix = glm::translate(glm::mat4(1),
+                                    glm::vec3(rc.x, rc.y, rc.z));
+                            per_object->upload();
+
+                            glUseProgram(remove_overlay_shader);
+                            glEnable(GL_POLYGON_OFFSET_FILL);
+                            glPolygonOffset(-0.1, -0.1);
+                            draw_mesh(surfs_hw[index]);
+                            glPolygonOffset(0, 0);
+                            glDisable(GL_POLYGON_OFFSET_FILL);
+                            glUseProgram(simple_shader);
                         }
                     }
                 } break;
@@ -539,7 +583,9 @@ update()
                                     glm::vec3(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz));
                             per_object->upload();
 
+//                            glUseProgram(add_overlay_shader);
                             draw_mesh(frobnicator_hw);
+//                            glUseProgram(simple_shader);
                         }
                     }
                 } break;
