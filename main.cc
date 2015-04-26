@@ -341,7 +341,7 @@ update()
                             if (!other_side) {
                                 /* expand: but this should always exist. */
                             }
-                            else if (other_side->type == block_empty) {
+                            else if (other_side->type != block_support) {
                                 /* if the other side has no scaffold, then there is nothing left to support this
                                  * surface pair -- remove it */
                                 bl->surfs[index] = surface_none;
@@ -361,7 +361,7 @@ update()
                     block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
 
                     /* can only build on the side of an existing scaffold */
-                    if (bl && rc.block->type != block_empty) {
+                    if (bl && rc.block->type == block_support) {
                         bl->type = block_support;
                         /* dirty the chunk */
                         ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
@@ -373,22 +373,18 @@ update()
                     block *bl = rc.block;
 
                     int index = normal_to_surface_index(&rc);
+                    block *other_side = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
 
-                    if (bl->surfs[index] == surface_none) {
+                    if (!other_side) {
+                        /* expand ! */
+                    }
+                    else if (bl->surfs[index] == surface_none && (bl->type == block_support || other_side->type == block_support)) {
 
                         bl->surfs[index] = surface_wall;
                         ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
 
-                        /* cause the other side to exist */
-                        block *other_side = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
-
-                        if (!other_side) {
-                            /* expand ! */
-                        }
-                        else {
-                            other_side->surfs[index ^ 1] = surface_wall;
-                            ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
-                        }
+                        other_side->surfs[index ^ 1] = surface_wall;
+                        ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
 
                     }
 
@@ -426,7 +422,7 @@ update()
                     block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
 
                     /* can only build on the side of an existing scaffold */
-                    if (bl && rc.block->type != block_empty) {
+                    if (bl && rc.block->type == block_support) {
                         bl->type = block_entity;
                         /* dirty the chunk -- TODO: do we really have to do this when changing a cell from
                          * empty -> entity? */
@@ -480,7 +476,7 @@ update()
                         block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
 
                         /* can only build on the side of an existing scaffold */
-                        if (bl && rc.block->type != block_empty) {
+                        if (bl && rc.block->type == block_support) {
                             per_object->val.world_matrix = glm::translate(glm::mat4(1),
                                     glm::vec3(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz));
                             per_object->upload();
@@ -508,7 +504,7 @@ update()
                         block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
 
                         /* frobnicator can only be placed in empty space, on a scaffold */
-                        if (bl && rc.block->type != block_empty) {
+                        if (bl && rc.block->type == block_support) {
                             per_object->val.world_matrix = glm::translate(glm::mat4(1),
                                     glm::vec3(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz));
                             per_object->upload();
