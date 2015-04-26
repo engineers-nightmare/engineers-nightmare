@@ -319,8 +319,12 @@ update()
 
                     int index = normal_to_surface_index(&rc);
 
-                    bl->surfs[index] = surface_wall;
-                    ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
+                    if (bl->surfs[index] == surface_none) {
+
+                        bl->surfs[index] = surface_wall;
+                        ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
+
+                    }
 
                 } break;
 
@@ -330,8 +334,12 @@ update()
 
                     int index = normal_to_surface_index(&rc);
 
-                    bl->surfs[index] = surface_none;
-                    ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
+                    if (bl->surfs[index] != surface_none) {
+
+                        bl->surfs[index] = surface_none;
+                        ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
+
+                    }
 
                 } break;
 
