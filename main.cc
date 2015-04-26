@@ -15,6 +15,8 @@
 #include "src/player.h"
 #include "src/physics.h"
 
+#include <vector>       // HISSSSSS, for temp global ent list.
+
 
 #define APP_NAME    "Engineer's Nightmare"
 #define DEFAULT_WIDTH   1024
@@ -139,6 +141,7 @@ gl_debug_callback(GLenum source __unused,
 
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
+sw_mesh *frobnicator_sw;
 GLuint simple_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
@@ -149,6 +152,22 @@ physics *phy;
 unsigned char const *keys;
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
+hw_mesh *frobnicator_hw;
+hw_mesh *frobnicator_mat_hw;
+
+
+struct entity
+{
+    /* TODO: replace this completely, it's silly. */
+    int x, y, z;
+    hw_mesh *mesh;
+
+    entity(int x, int y, int z, hw_mesh *mesh) : x(x), y(y), z(z), mesh(mesh) {}
+};
+
+
+/* all the bads */
+std::vector<entity *> entities;
 
 
 void
@@ -187,6 +206,11 @@ init()
     for (int i = 0; i < 6; i++)
         surfs_hw[i] = upload_mesh(surfs_sw[i]);
 
+    frobnicator_sw = load_mesh("mesh/frobnicator.obj");
+    frobnicator_hw = upload_mesh(frobnicator_sw);
+    set_mesh_material(frobnicator_sw, 3);
+    frobnicator_mat_hw = upload_mesh(frobnicator_sw);
+
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
@@ -205,6 +229,7 @@ init()
     world_textures->load(0, "textures/white.png");
     world_textures->load(1, "textures/scaffold.png");
     world_textures->load(2, "textures/scaffold.png");   /* todo: replace with something else */
+    world_textures->load(3, "textures/frobnicator.png");
 
     world_textures->bind(0);
 
@@ -395,6 +420,22 @@ update()
 
                 } break;
 
+            case 5: {
+                    printf("Add frobnicator entity Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
+
+                    block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
+
+                    /* can only build on the side of an existing scaffold */
+                    if (bl && rc.block->type != block_empty) {
+                        bl->type = block_entity;
+                        /* dirty the chunk -- TODO: do we really have to do this when changing a cell from
+                         * empty -> entity? */
+                        ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
+                    }
+
+                    /* TODO: flesh this out a bit */
+                    entities.push_back(new entity(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz, frobnicator_mat_hw));
+                } break;
             }
         }
     }
@@ -418,6 +459,18 @@ update()
                 draw_mesh(ship->get_chunk(i, j, k)->render_chunk.mesh);
             }
         }
+    }
+
+    /* walk all the entities -- TODO: push them into the ship! */
+    for (int i = 0; i < entities.size(); i++) {
+        entity *e = entities[i];
+
+        /* TODO: batch these matrix uploads too! */
+        per_object->val.world_matrix = glm::translate(glm::mat4(1), glm::vec3(
+            (float)e->x, (float)e->y, (float)e->z));
+        per_object->upload();
+
+        draw_mesh(e->mesh);
     }
 
     /* tool preview */
@@ -447,6 +500,20 @@ update()
                             per_object->upload();
 
                             draw_mesh(surfs_hw[index]);
+                        }
+                    }
+                } break;
+        case 5: {
+                    if (rc.hit) {
+                        block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
+
+                        /* frobnicator can only be placed in empty space, on a scaffold */
+                        if (bl && rc.block->type != block_empty) {
+                            per_object->val.world_matrix = glm::translate(glm::mat4(1),
+                                    glm::vec3(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz));
+                            per_object->upload();
+
+                            draw_mesh(frobnicator_hw);
                         }
                     }
                 } break;
@@ -483,6 +550,8 @@ handle_input()
         player.selected_slot = 3;
     if (keys[SDL_SCANCODE_4])
         player.selected_slot = 4;
+    if (keys[SDL_SCANCODE_5])
+        player.selected_slot = 5;
 }
 
 

@@ -153,3 +153,12 @@ free_mesh(hw_mesh *m)
 
     printf("free_mesh: %p num_indices=%d\n", m, m->num_indices);
 }
+
+
+void
+set_mesh_material(sw_mesh *m, int material)
+{
+    for (int i = 0; i < m->num_vertices; i++) {
+        m->verts[i].mat = material;
+    }
+}

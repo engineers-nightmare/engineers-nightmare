@@ -26,5 +26,6 @@ struct sw_mesh {
 
 sw_mesh *load_mesh(char const *filename);
 hw_mesh *upload_mesh(sw_mesh *mesh);
+void set_mesh_material(sw_mesh *m, int material);
 void draw_mesh(hw_mesh *m);
 void free_mesh(hw_mesh *m);

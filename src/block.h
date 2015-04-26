@@ -2,7 +2,8 @@
 
 enum block_type {
     block_empty,
-    block_support
+    block_support,
+    block_entity,
 };
 
 enum surface_type {
