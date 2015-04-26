@@ -25,8 +25,7 @@ out vec3 texcoord;
 out float light;
 
 const vec3 lightPos = vec3(4,4,4);
-//const float ambientAmount = 0.3;
-const float ambientAmount = 1.0;
+const float ambientAmount = 0.3;
 
 void main(void)
 {
@@ -45,8 +44,12 @@ void main(void)
     }
 
     /* lighting */
-    vec3 light_dir = lightPos - world_pos.xyz;
-    float lambert = clamp(dot(normalize(light_dir), norm), 0, 1);
+	if (mat > 0) {
+		vec3 light_dir = lightPos - world_pos.xyz;
+		float lambert = clamp(dot(normalize(light_dir), norm), 0, 1);
 
-    light = ambientAmount + (1 - ambientAmount) * lambert;
+		light = ambientAmount + (1 - ambientAmount) * lambert;
+	} else {
+		light = 1.0;
+	}
 }

@@ -10,7 +10,7 @@
 
 /* TODO: sensible container for these things, once we have variants */
 extern sw_mesh *scaffold_sw;
-extern sw_mesh *x_quad_sw, *y_quad_sw, *z_quad_sw;
+extern sw_mesh *surfs_sw[6];
 
 
 static void
@@ -55,29 +55,10 @@ chunk::prepare_render(int _x, int _y, int _z)
                     stamp_at_offset(&verts, &indices, scaffold_sw, glm::vec3(i, j, k), 1);
                 }
 
-                if (b->surfs[surface_xm] == surface_wall) {
-                    stamp_at_offset(&verts, &indices, x_quad_sw, glm::vec3(i, j, k), 2);
-                }
-
-                if (b->surfs[surface_xp] == surface_wall) {
-
-                    stamp_at_offset(&verts, &indices, x_quad_sw, glm::vec3(i+1, j, k), 2);
-                }
-
-                if (b->surfs[surface_ym] == surface_wall) {
-                    stamp_at_offset(&verts, &indices, y_quad_sw, glm::vec3(i, j, k), 2);
-                }
-
-                if (b->surfs[surface_yp] == surface_wall) {
-                    stamp_at_offset(&verts, &indices, y_quad_sw, glm::vec3(i, j+1, k), 2);
-                }
-
-                if (b->surfs[surface_zm] == surface_wall) {
-                    stamp_at_offset(&verts, &indices, z_quad_sw, glm::vec3(i, j, k), 2);
-                }
-
-                if (b->surfs[surface_zp] == surface_wall) {
-                    stamp_at_offset(&verts, &indices, z_quad_sw, glm::vec3(i, j, k+1), 2);
+                for (int surf = 0; surf < 6; surf++) {
+                    if (b->surfs[surf] == surface_wall) {
+                        stamp_at_offset(&verts, &indices, surfs_sw[surf], glm::vec3(i, j, k), 2);
+                    }
                 }
             }
 

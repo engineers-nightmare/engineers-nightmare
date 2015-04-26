@@ -138,7 +138,7 @@ gl_debug_callback(GLenum source __unused,
 }
 
 sw_mesh *scaffold_sw;
-sw_mesh *x_quad_sw, *y_quad_sw, *z_quad_sw;
+sw_mesh *surfs_sw[6];
 GLuint simple_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
@@ -166,9 +166,14 @@ init()
     glEnable(GL_DEPTH_TEST);
 
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
-    x_quad_sw = load_mesh("mesh/x_quad.obj");
-    y_quad_sw = load_mesh("mesh/y_quad.obj");
-    z_quad_sw = load_mesh("mesh/z_quad.obj");
+
+    surfs_sw[surface_xp] = load_mesh("mesh/x_quad_p.obj");
+    surfs_sw[surface_xm] = load_mesh("mesh/x_quad.obj");
+    surfs_sw[surface_yp] = load_mesh("mesh/y_quad_p.obj");
+    surfs_sw[surface_ym] = load_mesh("mesh/y_quad.obj");
+    surfs_sw[surface_zp] = load_mesh("mesh/z_quad_p.obj");
+    surfs_sw[surface_zm] = load_mesh("mesh/z_quad.obj");
+
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
@@ -202,6 +207,9 @@ init()
     player.last_use = player.use = false;
 
     phy = new physics(&player);
+
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
 }
 
 
