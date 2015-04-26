@@ -583,9 +583,12 @@ update()
                                     glm::vec3(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz));
                             per_object->upload();
 
-//                            glUseProgram(add_overlay_shader);
                             draw_mesh(frobnicator_hw);
-//                            glUseProgram(simple_shader);
+
+                            /* draw a block overlay as well around the frobnicator */
+                            glUseProgram(add_overlay_shader);
+                            draw_mesh(scaffold_hw);
+                            glUseProgram(simple_shader);
                         }
                     }
                 } break;
