@@ -232,12 +232,24 @@ resize(int width, int height)
     printf("Resized to %dx%d\n", width, height);
 }
 
+
+int
+normal_to_surface_index(raycast_info const *rc)
+{
+    if (rc->nx == 1) return 0;
+    if (rc->nx == -1) return 1;
+    if (rc->ny == 1) return 2;
+    if (rc->ny == -1) return 3;
+    if (rc->nz == 1) return 4;
+    if (rc->nz == -1) return 5;
+
+    return 0;   /* unreachable */
+}
+
+
 void
 update()
 {
-    /* TODO: incorporate user input */
-    /* TODO: step simulation */
-
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -301,21 +313,7 @@ update()
                     printf("Add surface raycast %d,%d,%d\n", rc.x, rc.y, rc.z);
                     block *bl = rc.block;
 
-                    /* surface add */
-                    printf("nx %d ny %d nz %d\n", rc.nx, rc.ny, rc.nz);
-                    int index = 0;
-                    if (rc.nx == 1)
-                        index = 0;
-                    else if (rc.nx == -1)
-                        index = 1;
-                    else if (rc.ny == 1)
-                        index = 2;
-                    else if (rc.ny == -1)
-                        index = 3;
-                    else if (rc.nz == 1)
-                        index = 4;
-                    else if (rc.nz == -1)
-                        index = 5;
+                    int index = normal_to_surface_index(&rc);
 
                     bl->surfs[index] = surface_wall;
                     ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
@@ -326,21 +324,7 @@ update()
                     printf("Remove surface raycast %d,%d,%d\n", rc.x, rc.y, rc.z);
                     block *bl = rc.block;
 
-                    /* surface remove */
-                    printf("nx %d ny %d nz %d\n", rc.nx, rc.ny, rc.nz);
-                    int index = 0;
-                    if (rc.nx == 1)
-                        index = 0;
-                    else if (rc.nx == -1)
-                        index = 1;
-                    else if (rc.ny == 1)
-                        index = 2;
-                    else if (rc.ny == -1)
-                        index = 3;
-                    else if (rc.nz == 1)
-                        index = 4;
-                    else if (rc.nz == -1)
-                        index = 5;
+                    int index = normal_to_surface_index(&rc);
 
                     bl->surfs[index] = surface_none;
                     ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
