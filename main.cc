@@ -518,7 +518,11 @@ update()
                                     glm::vec3(rc.x, rc.y, rc.z));
                             per_object->upload();
 
+                            glEnable(GL_POLYGON_OFFSET_FILL);
+                            glPolygonOffset(-0.1, -0.1);
                             draw_mesh(surfs_hw[index]);
+                            glPolygonOffset(0, 0);
+                            glDisable(GL_POLYGON_OFFSET_FILL);
                         }
                     }
                 } break;
