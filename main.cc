@@ -148,6 +148,7 @@ player player;
 physics *phy;
 unsigned char const *keys;
 hw_mesh *scaffold_hw;
+hw_mesh *surfs_hw[6];
 
 
 void
@@ -182,6 +183,9 @@ init()
     surfs_sw[surface_ym] = load_mesh("mesh/y_quad.obj");
     surfs_sw[surface_zp] = load_mesh("mesh/z_quad_p.obj");
     surfs_sw[surface_zm] = load_mesh("mesh/z_quad.obj");
+
+    for (int i = 0; i < 6; i++)
+        surfs_hw[i] = upload_mesh(surfs_sw[i]);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
 
@@ -371,7 +375,21 @@ update()
                             draw_mesh(scaffold_hw);
                         }
                     }
-                }
+                } break;
+        case 3: {
+                    if (rc.hit) {
+                        block *bl = ship->get_block(rc.x, rc.y, rc.z);
+                        int index = normal_to_surface_index(&rc);
+
+                        if (bl && bl->surfs[index] == 0) {
+                            per_object->val.world_matrix = glm::translate(glm::mat4(1),
+                                    glm::vec3(rc.x, rc.y, rc.z));
+                            per_object->upload();
+
+                            draw_mesh(surfs_hw[index]);
+                        }
+                    }
+                } break;
     }
 }
 
