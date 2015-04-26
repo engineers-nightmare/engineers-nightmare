@@ -489,8 +489,9 @@ update()
                     if (rc.hit) {
                         block *bl = ship->get_block(rc.x, rc.y, rc.z);
                         int index = normal_to_surface_index(&rc);
+                        block *other_side = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
 
-                        if (bl && bl->surfs[index] == 0) {
+                        if (bl && bl->surfs[index] == surface_none && (bl->type == block_support || (other_side && other_side->type == block_support))) {
                             per_object->val.world_matrix = glm::translate(glm::mat4(1),
                                     glm::vec3(rc.x, rc.y, rc.z));
                             per_object->upload();
