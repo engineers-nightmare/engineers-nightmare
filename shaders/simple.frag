@@ -12,4 +12,7 @@ layout(location=0) out vec4 color;
 void main(void)
 {
 	color = texture(s_albedo, texcoord) * light;
+
+    if (color.a == 0)
+        discard;
 }

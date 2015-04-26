@@ -42,6 +42,8 @@ chunk::prepare_render(int _x, int _y, int _z)
     if (this->render_chunk.valid)
         return;     // nothing to do here.
 
+    static const int surface_type_to_material[] = { 0, 2, 4 };
+
     std::vector<vertex> verts;
     std::vector<unsigned> indices;
 
@@ -56,8 +58,9 @@ chunk::prepare_render(int _x, int _y, int _z)
                 }
 
                 for (int surf = 0; surf < 6; surf++) {
-                    if (b->surfs[surf] == surface_wall) {
-                        stamp_at_offset(&verts, &indices, surfs_sw[surf], glm::vec3(i, j, k), 2);
+                    if (b->surfs[surf] != surface_none) {
+                        stamp_at_offset(&verts, &indices, surfs_sw[surf], glm::vec3(i, j, k),
+                                surface_type_to_material[b->surfs[surf]]);
                     }
                 }
             }

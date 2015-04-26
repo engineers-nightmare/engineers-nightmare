@@ -224,8 +224,9 @@ init()
     world_textures = new texture_set(WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
     world_textures->load(0, "textures/white.png");
     world_textures->load(1, "textures/scaffold.png");
-    world_textures->load(2, "textures/scaffold.png");   /* todo: replace with something else */
+    world_textures->load(2, "textures/plate.png");
     world_textures->load(3, "textures/frobnicator.png");
+    world_textures->load(4, "textures/grate.png");
 
     world_textures->bind(0);
 
@@ -380,6 +381,7 @@ update()
                     }
                 } break;
 
+            case 6:
             case 3: {
                     printf("Add surface raycast %d,%d,%d\n", rc.x, rc.y, rc.z);
                     block *bl = rc.block;
@@ -392,7 +394,7 @@ update()
                     }
                     else if (bl->surfs[index] == surface_none && (bl->type == block_support || other_side->type == block_support)) {
 
-                        bl->surfs[index] = surface_wall;
+                        bl->surfs[index] = player.selected_slot == 3 ? surface_wall : surface_grate;
                         ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
 
                         other_side->surfs[index ^ 1] = surface_wall;
@@ -507,6 +509,7 @@ update()
                         }
                     }
                 } break;
+        case 6:
         case 3: {
                     if (rc.hit) {
                         block *bl = ship->get_block(rc.x, rc.y, rc.z);
@@ -575,6 +578,8 @@ handle_input()
         player.selected_slot = 4;
     if (keys[SDL_SCANCODE_5])
         player.selected_slot = 5;
+    if (keys[SDL_SCANCODE_6])
+        player.selected_slot = 6;
 }
 
 

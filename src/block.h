@@ -8,7 +8,8 @@ enum block_type {
 
 enum surface_type {
     surface_none,
-    surface_wall
+    surface_wall,
+    surface_grate,
 };
 
 /* 6 surfaces currently, all axis aligned
