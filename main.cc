@@ -324,6 +324,13 @@ update()
                         bl->surfs[index] = surface_wall;
                         ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
 
+                        /* cause the other side to exist */
+                        block *other_side = ship->get_block(rc.x + rc.nz, rc.y + rc.ny, rc.z + rc.nz);
+
+                        if (!other_side) {
+                            /* expand ! */
+                        }
+
                     }
 
                 } break;
