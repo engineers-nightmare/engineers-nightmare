@@ -327,6 +327,19 @@ update()
                     printf("Remove block Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
                     block *bl = rc.block;
 
+                    /* if there was a block entity here, find and remove it */
+                    if (bl->type == block_entity) {
+                        for (std::vector<entity *>::iterator it = entities.begin(); it != entities.end();) {
+                            entity *e = *it;
+                            if (e->x == rc.x && e->y == rc.y && e->z == rc.z) {
+                                it = entities.erase(it);
+                            }
+                            else {
+                                it++;
+                            }
+                        }
+                    }
+
                     /* block removal */
                     bl->type = block_empty;
 
