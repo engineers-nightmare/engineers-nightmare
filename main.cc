@@ -252,6 +252,22 @@ normal_to_surface_index(raycast_info const *rc)
 
 
 void
+surface_index_to_normal(int index, int *nx, int *ny, int *nz)
+{
+    *nx = *ny = *nz = 0;
+
+    switch (index) {
+        case 0: *nx = 1; break;
+        case 1: *nx = -1; break;
+        case 2: *ny = 1; break;
+        case 3: *ny = -1; break;
+        case 4: *nz = 1; break;
+        case 5: *nz = -1; break;
+    }
+}
+
+
+void
 update()
 {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -288,13 +304,26 @@ update()
                     /* block removal */
                     bl->type = block_empty;
 
-                    /* strip all surfaces */
-                    bl->surfs[0] = surface_none;
-                    bl->surfs[1] = surface_none;
-                    bl->surfs[2] = surface_none;
-                    bl->surfs[3] = surface_none;
-                    bl->surfs[4] = surface_none;
-                    bl->surfs[5] = surface_none;
+                    /* strip any orphaned surfaces */
+                    for (int index = 0; index < 6; index++) {
+                        if (bl->surfs[index]) {
+
+                            int sx, sy, sz;
+                            surface_index_to_normal(index, &sx, &sy, &sz);
+                            block *other_side = ship->get_block(rc.x + sx, rc.y + sy, rc.z + sz);
+
+                            if (!other_side) {
+                                /* expand: but this should always exist. */
+                            }
+                            else if (other_side->type == block_empty) {
+                                /* if the other side has no scaffold, then there is nothing left to support this
+                                 * surface pair -- remove it */
+                                bl->surfs[index] = surface_none;
+                                other_side->surfs[index ^ 1] = surface_none;
+                                ship->get_chunk_containing(rc.x + sx, rc.y + sy, rc.z + sz)->render_chunk.valid = false;
+                            }
+                        }
+                    }
 
                     /* dirty the chunk */
                     ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
@@ -325,10 +354,14 @@ update()
                         ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
 
                         /* cause the other side to exist */
-                        block *other_side = ship->get_block(rc.x + rc.nz, rc.y + rc.ny, rc.z + rc.nz);
+                        block *other_side = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
 
                         if (!other_side) {
                             /* expand ! */
+                        }
+                        else {
+                            other_side->surfs[index ^ 1] = surface_wall;
+                            ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
                         }
 
                     }
@@ -345,6 +378,17 @@ update()
 
                         bl->surfs[index] = surface_none;
                         ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
+
+                        /* cause the other side to exist */
+                        block *other_side = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
+
+                        if (!other_side) {
+                            /* expand: note: we shouldn't ever actually have to do this... */
+                        }
+                        else {
+                            other_side->surfs[index ^ 1] = surface_none;
+                            ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
+                        }
 
                     }
 
