@@ -3,9 +3,12 @@
 #include "block.h"
 #include "fixed_cube.h"
 
+#include <vector>
+
 #define CHUNK_SIZE 8
 
 struct hw_mesh;
+struct entity;
 
 class btTriangleMesh;
 class btBvhTriangleMeshShape;
@@ -31,6 +34,9 @@ struct chunk {
 
     /* rendering information */
     struct render_chunk render_chunk;
+
+    /* entities */
+    std::vector<entity *> entities;
 
     block * get_block(unsigned int x, unsigned int y, unsigned int z);
 

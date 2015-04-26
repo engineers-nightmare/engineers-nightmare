@@ -15,8 +15,6 @@
 #include "src/player.h"
 #include "src/physics.h"
 
-#include <vector>       // HISSSSSS, for temp global ent list.
-
 
 #define APP_NAME    "Engineer's Nightmare"
 #define DEFAULT_WIDTH   1024
@@ -166,10 +164,6 @@ struct entity
 
     entity(int x, int y, int z, hw_mesh *mesh) : x(x), y(y), z(z), mesh(mesh) {}
 };
-
-
-/* all the bads */
-std::vector<entity *> entities;
 
 
 void
@@ -331,11 +325,13 @@ update()
 
                     /* if there was a block entity here, find and remove it */
                     if (bl->type == block_entity) {
-                        for (std::vector<entity *>::iterator it = entities.begin(); it != entities.end();) {
+                        chunk *ch = ship->get_chunk_containing(rc.x, rc.y, rc.z);
+
+                        for (std::vector<entity *>::iterator it = ch->entities.begin(); it != ch->entities.end();) {
                             entity *e = *it;
                             if (e->x == rc.x && e->y == rc.y && e->z == rc.z) {
                                 delete e;
-                                it = entities.erase(it);
+                                it = ch->entities.erase(it);
                             }
                             else {
                                 it++;
@@ -446,7 +442,8 @@ update()
                     }
 
                     /* TODO: flesh this out a bit */
-                    entities.push_back(new entity(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz, frobnicator_mat_hw));
+                    ship->get_chunk_containing(rc.x + rc.nz, rc.y + rc.nz, rc.z + rc.nz)->entities.push_back(
+                        new entity(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz, frobnicator_mat_hw));
                 } break;
             }
         }
@@ -473,16 +470,25 @@ update()
         }
     }
 
-    /* walk all the entities -- TODO: push them into the ship! */
-    for (int i = 0; i < entities.size(); i++) {
-        entity *e = entities[i];
+    /* walk all the entities in the (visible) chunks */
+    for (int k = ship->chunks.zo; k < ship->chunks.zo + ship->chunks.zd; k++) {
+        for (int j = ship->chunks.yo; j < ship->chunks.yo + ship->chunks.yd; j++) {
+            for (int i = ship->chunks.xo; i < ship->chunks.xo + ship->chunks.xd; i++) {
+                chunk *ch = ship->get_chunk(i, j, k);
+                if (ch) {
+                    for (std::vector<entity *>::const_iterator it = ch->entities.begin(); it != ch->entities.end(); it++) {
+                        entity *e = *it;
 
-        /* TODO: batch these matrix uploads too! */
-        per_object->val.world_matrix = glm::translate(glm::mat4(1), glm::vec3(
-            (float)e->x, (float)e->y, (float)e->z));
-        per_object->upload();
+                        /* TODO: batch these matrix uploads too! */
+                        per_object->val.world_matrix = glm::translate(glm::mat4(1), glm::vec3(
+                            (float)e->x, (float)e->y, (float)e->z));
+                        per_object->upload();
 
-        draw_mesh(e->mesh);
+                        draw_mesh(e->mesh);
+                    }
+                }
+            }
+        }
     }
 
     /* tool preview */
