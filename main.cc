@@ -218,6 +218,7 @@ init()
     player.last_jump = player.jump = false;
     player.selected_slot = 1;
     player.last_use = player.use = false;
+    player.last_reset = player.reset = false;
 
     phy = new physics(&player);
 
@@ -469,6 +470,9 @@ handle_input()
 
     player.last_use = player.use;
     player.use = keys[SDL_SCANCODE_E];
+
+    player.last_reset = player.reset;
+    player.reset = keys[SDL_SCANCODE_R];
 
     /* TODO: be less ridiculous */
     if (keys[SDL_SCANCODE_1])

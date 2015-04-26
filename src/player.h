@@ -18,5 +18,8 @@ struct player {
 
     bool last_use;
     bool use;
+
+    bool last_reset;
+    bool reset;
 };
 

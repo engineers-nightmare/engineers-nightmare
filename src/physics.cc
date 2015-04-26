@@ -99,7 +99,7 @@ physics::tick(){
 
     float speed = MOVE_SPEED;
     if (!this->controller->canJump())
-	speed *= AIR_CONTROL_FACTOR;
+        speed *= AIR_CONTROL_FACTOR;
 
     fwd *= this->pl->move.y * speed;
     right *= this->pl->move.x * speed;
@@ -109,6 +109,13 @@ physics::tick(){
     if (!pl->last_jump && pl->jump && this->controller->canJump())
         this->controller->jump();
 
+    if (!pl->last_reset && pl->reset) {
+        /* reset position (for debug) */
+        btTransform trans = this->ghostObj->getWorldTransform();
+        trans.setOrigin(btVector3(PLAYER_START_X, PLAYER_START_Y, PLAYER_START_Z));
+        this->ghostObj->setWorldTransform(trans);
+    }
+
     dynamicsWorld->stepSimulation(1 / 60.f, 10);
 
     btTransform trans = this->ghostObj->getWorldTransform();
@@ -116,11 +123,8 @@ physics::tick(){
     y = trans.getOrigin().getY();
     z = trans.getOrigin().getZ();
 
-    /* FIXME assign trans x, y, z to player */
     this->pl->pos.x = x;
     this->pl->pos.y = y;
     this->pl->pos.z = z;
-
-//    printf("The player is now at x '%f', y '%f', z '%f'\n", x, y, z);
 }
 
