@@ -9,6 +9,7 @@ struct player {
     float elev;
     glm::vec3 pos;
     glm::vec3 dir;  /* computed */
+    glm::vec3 eye;  /* computed */
     glm::vec2 move;
 
     int selected_slot;
