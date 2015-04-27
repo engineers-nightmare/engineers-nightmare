@@ -434,6 +434,9 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
             rc->nx = nx;
             rc->ny = ny;
             rc->nz = nz;
+            rc->px = x + nx;
+            rc->py = y + ny;
+            rc->pz = z + nz;
             return;
         }
     }

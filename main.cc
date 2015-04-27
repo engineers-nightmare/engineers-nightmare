@@ -302,24 +302,24 @@ struct add_block_tool : public tool
 {
     virtual void use(raycast_info *rc)
     {
-        block *bl = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         /* can only build on the side of an existing scaffold */
         if (bl && rc->block->type == block_support) {
             bl->type = block_support;
             /* dirty the chunk */
-            ship->get_chunk_containing(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz)->render_chunk.valid = false;
+            ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
         }
     }
 
     virtual void preview(raycast_info *rc)
     {
-        block *bl = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         /* can only build on the side of an existing scaffold */
         if (bl && rc->block->type == block_support) {
             per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                    glm::vec3(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz));
+                    glm::vec3(rc->px, rc->py, rc->pz));
             per_object->upload();
 
             glUseProgram(add_overlay_shader);
@@ -361,7 +361,11 @@ struct remove_block_tool : public tool
 
                 int sx, sy, sz;
                 surface_index_to_normal(index, &sx, &sy, &sz);
-                block *other_side = ship->get_block(rc->x + sx, rc->y + sy, rc->z + sz);
+
+                int rx = rc->x + sx;
+                int ry = rc->y + sy;
+                int rz = rc->z + sz;
+                block *other_side = ship->get_block(rx, ry, rz);
 
                 if (!other_side) {
                     /* expand: but this should always exist. */
@@ -371,7 +375,7 @@ struct remove_block_tool : public tool
                      * surface pair -- remove it */
                     bl->surfs[index] = surface_none;
                     other_side->surfs[index ^ 1] = surface_none;
-                    ship->get_chunk_containing(rc->x + sx, rc->y + sy, rc->z + sz)->render_chunk.valid = false;
+                    ship->get_chunk_containing(rx, ry, rz)->render_chunk.valid = false;
                 }
             }
         }
@@ -410,7 +414,7 @@ struct add_surface_tool : public tool
         block *bl = rc->block;
 
         int index = normal_to_surface_index(rc);
-        block *other_side = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
         if (!other_side) {
             /* expand ! */
@@ -421,7 +425,7 @@ struct add_surface_tool : public tool
             ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
 
             other_side->surfs[index ^ 1] = surface_wall;
-            ship->get_chunk_containing(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz)->render_chunk.valid = false;
+            ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
 
         }
     }
@@ -430,7 +434,7 @@ struct add_surface_tool : public tool
     {
         block *bl = ship->get_block(rc->x, rc->y, rc->z);
         int index = normal_to_surface_index(rc);
-        block *other_side = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
         if (bl && bl->surfs[index] == surface_none && (bl->type == block_support || (other_side && other_side->type == block_support))) {
             per_object->val.world_matrix = glm::translate(glm::mat4(1),
@@ -463,14 +467,14 @@ struct remove_surface_tool : public tool
             ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
 
             /* cause the other side to exist */
-            block *other_side = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+            block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
             if (!other_side) {
                 /* expand: note: we shouldn't ever actually have to do this... */
             }
             else {
                 other_side->surfs[index ^ 1] = surface_none;
-                ship->get_chunk_containing(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz)->render_chunk.valid = false;
+                ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
             }
 
         }
@@ -505,29 +509,30 @@ struct add_block_entity_tool : public tool
 
     virtual void use(raycast_info *rc)
     {
-        block *bl = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         /* can only build on the side of an existing scaffold */
         if (bl && rc->block->type == block_support) {
             bl->type = block_entity;
             /* dirty the chunk -- TODO: do we really have to do this when changing a cell from
              * empty -> entity? */
-            ship->get_chunk_containing(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz)->render_chunk.valid = false;
+            ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
         }
 
         /* TODO: flesh this out a bit */
-        ship->get_chunk_containing(rc->x + rc->nz, rc->y + rc->nz, rc->z + rc->nz)->entities.push_back(
-            new entity(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz, frobnicator_hw));
+        ship->get_chunk_containing(rc->px, rc->py, rc->pz)->entities.push_back(
+            new entity(rc->px, rc->py, rc->pz, frobnicator_hw)
+            );
     }
 
     virtual void preview(raycast_info *rc)
     {
-        block *bl = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         /* frobnicator can only be placed in empty space, on a scaffold */
         if (bl && rc->block->type == block_support) {
             per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                    glm::vec3(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz));
+                    glm::vec3(rc->px, rc->py, rc->pz));
             per_object->upload();
 
             draw_mesh(frobnicator_hw);
