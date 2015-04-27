@@ -82,10 +82,10 @@ test_mock_ship_space(void)
                     assert(b3->type == block_support);
                     assert(b4->type == block_support);
 
-                    assert(b1->surfs[surface_zp] == surface_wall);
-                    assert(b2->surfs[surface_zp] == surface_wall);
-                    assert(b3->surfs[surface_zp] == surface_wall);
-                    assert(b4->surfs[surface_zp] == surface_wall);
+                    b1->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
+                    b2->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
+                    b3->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
+                    b4->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
 
                 } else if( y == 0 ){
                     if( x == 3     && z == 1 ||
