@@ -311,6 +311,9 @@ struct add_block_tool : public tool
     {
         if (rc->inside) return; /* n/a */
 
+        /* ensure we can access this x,y,z */
+        ship->ensure_block(rc->px, rc->py, rc->pz);
+
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         /* can only build on the side of an existing scaffold */
