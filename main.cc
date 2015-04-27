@@ -499,13 +499,55 @@ struct remove_surface_tool : public tool
 };
 
 
+struct add_block_entity_tool : public tool
+{
+    /* TODO: ent type */
+
+    virtual void use(raycast_info *rc)
+    {
+        block *bl = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+
+        /* can only build on the side of an existing scaffold */
+        if (bl && rc->block->type == block_support) {
+            bl->type = block_entity;
+            /* dirty the chunk -- TODO: do we really have to do this when changing a cell from
+             * empty -> entity? */
+            ship->get_chunk_containing(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz)->render_chunk.valid = false;
+        }
+
+        /* TODO: flesh this out a bit */
+        ship->get_chunk_containing(rc->x + rc->nz, rc->y + rc->nz, rc->z + rc->nz)->entities.push_back(
+            new entity(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz, frobnicator_hw));
+    }
+
+    virtual void preview(raycast_info *rc)
+    {
+        block *bl = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+
+        /* frobnicator can only be placed in empty space, on a scaffold */
+        if (bl && rc->block->type == block_support) {
+            per_object->val.world_matrix = glm::translate(glm::mat4(1),
+                    glm::vec3(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz));
+            per_object->upload();
+
+            draw_mesh(frobnicator_hw);
+
+            /* draw a block overlay as well around the frobnicator */
+            glUseProgram(add_overlay_shader);
+            draw_mesh(scaffold_hw);
+            glUseProgram(simple_shader);
+        }
+    }
+};
+
+
 tool *tools[] = {
     NULL,   /* tool 0 isnt a tool (currently) */
     new place_block_tool(),
     new remove_block_tool(),
     new add_surface_tool(surface_wall),
     new remove_surface_tool(),
-    NULL,
+    new add_block_entity_tool(),
     new add_surface_tool(surface_grate),
 };
 
@@ -538,31 +580,9 @@ update()
     if (player.use && !player.last_use) {
 
         if (rc.hit) {
-
-            if (player.selected_slot < sizeof(tools)/sizeof(*tools)) {
-                tool *t = tools[player.selected_slot];
-                if (t)
-                    t->use(&rc);
-            }
-
-            switch (player.selected_slot) {
-            case 5: {
-                    printf("Add frobnicator entity Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
-
-                    block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
-
-                    /* can only build on the side of an existing scaffold */
-                    if (bl && rc.block->type == block_support) {
-                        bl->type = block_entity;
-                        /* dirty the chunk -- TODO: do we really have to do this when changing a cell from
-                         * empty -> entity? */
-                        ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
-                    }
-
-                    /* TODO: flesh this out a bit */
-                    ship->get_chunk_containing(rc.x + rc.nz, rc.y + rc.nz, rc.z + rc.nz)->entities.push_back(
-                        new entity(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz, frobnicator_hw));
-                } break;
+            tool *t = tools[player.selected_slot];
+            if (t) {
+                t->use(&rc);
             }
         }
     }
@@ -617,33 +637,10 @@ update()
 
     /* tool preview */
     if (rc.hit) {
-        if (player.selected_slot < sizeof(tools)/sizeof(*tools)) {
-            tool *t = tools[player.selected_slot];
-            if (t)
-                t->preview(&rc);
+        tool *t = tools[player.selected_slot];
+        if (t) {
+            t->preview(&rc);
         }
-    }
-
-    switch (player.selected_slot) {
-        case 5: {
-                    if (rc.hit) {
-                        block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
-
-                        /* frobnicator can only be placed in empty space, on a scaffold */
-                        if (bl && rc.block->type == block_support) {
-                            per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                                    glm::vec3(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz));
-                            per_object->upload();
-
-                            draw_mesh(frobnicator_hw);
-
-                            /* draw a block overlay as well around the frobnicator */
-                            glUseProgram(add_overlay_shader);
-                            draw_mesh(scaffold_hw);
-                            glUseProgram(simple_shader);
-                        }
-                    }
-                } break;
     }
 }
 
