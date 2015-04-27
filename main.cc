@@ -298,7 +298,7 @@ struct tool
 };
 
 
-struct place_block_tool : public tool
+struct add_block_tool : public tool
 {
     virtual void use(raycast_info *rc)
     {
@@ -543,7 +543,7 @@ struct add_block_entity_tool : public tool
 
 tool *tools[] = {
     NULL,   /* tool 0 isnt a tool (currently) */
-    new place_block_tool(),
+    new add_block_tool(),
     new remove_block_tool(),
     new add_surface_tool(surface_wall),
     new remove_surface_tool(),
