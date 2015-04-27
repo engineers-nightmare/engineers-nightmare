@@ -449,12 +449,62 @@ struct add_surface_tool : public tool
 };
 
 
+struct remove_surface_tool : public tool
+{
+    virtual void use(raycast_info *rc)
+    {
+        block *bl = rc->block;
+
+        int index = normal_to_surface_index(rc);
+
+        if (bl->surfs[index] != surface_none) {
+
+            bl->surfs[index] = surface_none;
+            ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
+
+            /* cause the other side to exist */
+            block *other_side = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+
+            if (!other_side) {
+                /* expand: note: we shouldn't ever actually have to do this... */
+            }
+            else {
+                other_side->surfs[index ^ 1] = surface_none;
+                ship->get_chunk_containing(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz)->render_chunk.valid = false;
+            }
+
+        }
+    }
+
+    virtual void preview(raycast_info *rc)
+    {
+        block *bl = ship->get_block(rc->x, rc->y, rc->z);
+        int index = normal_to_surface_index(rc);
+
+        if (bl && bl->surfs[index] != surface_none) {
+
+            per_object->val.world_matrix = glm::translate(glm::mat4(1),
+                    glm::vec3(rc->x, rc->y, rc->z));
+            per_object->upload();
+
+            glUseProgram(remove_overlay_shader);
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(-0.1, -0.1);
+            draw_mesh(surfs_hw[index]);
+            glPolygonOffset(0, 0);
+            glDisable(GL_POLYGON_OFFSET_FILL);
+            glUseProgram(simple_shader);
+        }
+    }
+};
+
+
 tool *tools[] = {
     NULL,   /* tool 0 isnt a tool (currently) */
     new place_block_tool(),
     new remove_block_tool(),
     new add_surface_tool(surface_wall),
-    NULL,
+    new remove_surface_tool(),
     NULL,
     new add_surface_tool(surface_grate),
 };
@@ -496,33 +546,6 @@ update()
             }
 
             switch (player.selected_slot) {
-
-            case 4: {
-                    printf("Remove surface raycast %d,%d,%d\n", rc.x, rc.y, rc.z);
-                    block *bl = rc.block;
-
-                    int index = normal_to_surface_index(&rc);
-
-                    if (bl->surfs[index] != surface_none) {
-
-                        bl->surfs[index] = surface_none;
-                        ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
-
-                        /* cause the other side to exist */
-                        block *other_side = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
-
-                        if (!other_side) {
-                            /* expand: note: we shouldn't ever actually have to do this... */
-                        }
-                        else {
-                            other_side->surfs[index ^ 1] = surface_none;
-                            ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
-                        }
-
-                    }
-
-                } break;
-
             case 5: {
                     printf("Add frobnicator entity Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
 
@@ -602,27 +625,6 @@ update()
     }
 
     switch (player.selected_slot) {
-        case 4: {
-                    if (rc.hit) {
-                        block *bl = ship->get_block(rc.x, rc.y, rc.z);
-                        int index = normal_to_surface_index(&rc);
-
-                        if (bl && bl->surfs[index] != surface_none) {
-
-                            per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                                    glm::vec3(rc.x, rc.y, rc.z));
-                            per_object->upload();
-
-                            glUseProgram(remove_overlay_shader);
-                            glEnable(GL_POLYGON_OFFSET_FILL);
-                            glPolygonOffset(-0.1, -0.1);
-                            draw_mesh(surfs_hw[index]);
-                            glPolygonOffset(0, 0);
-                            glDisable(GL_POLYGON_OFFSET_FILL);
-                            glUseProgram(simple_shader);
-                        }
-                    }
-                } break;
         case 5: {
                     if (rc.hit) {
                         block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
