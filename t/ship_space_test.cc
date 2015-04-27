@@ -165,6 +165,58 @@ test_mock_ship_space(void)
 
 }
 
+void
+ensure(void)
+{
+    ship_space space(1, 1, 1);
+
+    /* check for chunk within range */
+    assert( space.chunks.get(0, 0, 0) );
+
+    /* check for chunks outside range */
+    assert( 0 == space.chunks.get(0, 0, 1) );
+    assert( 0 == space.chunks.get(0, 1, 0) );
+    assert( 0 == space.chunks.get(1, 0, 0) );
+
+    /* check that current within blocks are not instantiated */
+    assert( 0 == space.get_block(0,0,0) );
+    assert( 0 == space.get_block(4,3,1) );
+    assert( 0 == space.get_block(7,7,7) );
+
+    /* instantiate existing chunks */
+    *space.chunks.get(0, 0, 0) = new chunk();
+    assert( space.chunks.get(0, 0, 0) );
+    assert( *space.chunks.get(0, 0, 0) );
+
+    /* check for blocks within range */
+    assert( space.get_block(0,0,0) );
+    assert( space.get_block(4,3,1) );
+    assert( space.get_block(7,7,7) );
+
+    /* check for blocks outside range */
+    assert( 0 == space.get_block(3,16,16) );
+    assert( 0 == space.get_block(7,7,8) );
+    assert( 0 == space.get_block(8,8,8) );
+
+
+    /* our space currently contains blocks 0..7 for all 3 dims
+     * force a resize to allow for 0..32 along on z dim
+     * this should not modify the existing chunk
+     * and should only instantiate 1 new chunk
+     */
+    space.ensure_block(7, 7, 32);
+
+    /* check that we did not instantiate any other chunks */
+    assert( 0 == space.get_block(3,16,16) );
+    assert( 0 == space.get_block(7,7,8) );
+    assert( 0 == space.get_block(8,8,8) );
+    assert( 0 == space.get_block(7,7,24) );
+
+    /* check we did instantiate the right chunk */
+    assert( space.get_block(7,7,32) );
+
+}
+
 /* some more quick and dirty 'testing'
  * mostly checking we compile and nothing
  * blows up obviously
@@ -174,4 +226,5 @@ main(void)
 {
     simple();
     test_mock_ship_space();
+    ensure();
 }

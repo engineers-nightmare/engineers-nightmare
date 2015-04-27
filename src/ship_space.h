@@ -50,6 +50,15 @@ struct ship_space {
 
     void raycast(float ox, float oy, float oz, float dx, float dy, float dz, raycast_info *rc);
 
+    /* ensure that the specified block_{x,y,z} can be fetched with a get_block
+     *
+     * this will trigger a resize and will instantiate a new containing chunk
+     * if necessary
+     *
+     * this will not instantiate or modify any other chunks
+     */
+    void ensure_block(int block_x, int block_y, int block_z);
+
     /* deprecated interface: will be dead soon
      *
      * resize ship to new dimensions
@@ -57,6 +66,7 @@ struct ship_space {
      * of it's pre-resize location
      */
     void _resize(unsigned int nxd, unsigned int nyd, unsigned int nzd);
+
 };
 
 

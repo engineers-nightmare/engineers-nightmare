@@ -450,3 +450,69 @@ ship_space::_resize(unsigned int nxd, unsigned int nyd, unsigned int nzd){
     this->chunks.resize(nxd, nyd, nzd);
 }
 
+/* ensure that the specified block_{x,y,z} can be fetched with a get_block
+ *
+ * this will trigger a resize and will instantiate a new containing chunk
+ * if necessary
+ *
+ * this will not instantiate or modify any other chunks
+ */
+void
+ship_space::ensure_block(int block_x, int block_y, int block_z){
+    /* convert block to co-ords of containing chunk */
+    unsigned int chunk_x = block_x / CHUNK_SIZE,
+                 chunk_y = block_y / CHUNK_SIZE,
+                 chunk_z = block_z / CHUNK_SIZE;
+
+    /* convert block co-ords to dims */
+    unsigned int d_x = chunk_x + 1,
+                 d_y = chunk_y + 1,
+                 d_z = chunk_z + 1;
+
+    /* for each x,y,z keep the larger of:
+     *  current dim size
+     *  requested dim size
+     *
+     * asking resize to stay the same size is a no-op
+     * but asking it to shrink is a fatal error
+     */
+    unsigned int desired_xd = d_x > chunks.xd ? d_x : chunks.xd,
+                 desired_yd = d_y > chunks.yd ? d_y : chunks.yd,
+                 desired_zd = d_z > chunks.zd ? d_z : chunks.zd;
+
+    /* check if we need to resize */
+    if( ! chunks.within(chunk_x, chunk_y, chunk_z) ){
+        /* FIXME still no ability to deal with negative resizes */
+
+        /* worst case this is safe if our resize is not needed
+         * as it will no-op
+         */
+        this->chunks.resize(desired_xd, desired_yd, desired_zd);
+    }
+
+    /* need to now make sure our chunk is instantiated */
+
+    /* capture our potential chunk */
+    chunk **c = this->chunks.get(chunk_x, chunk_y, chunk_z);
+
+    /* check we didn't get back garbage */
+    if( ! c ){
+        /* get returned null, die */
+        printf("ship_space::ensure chunks.get(%d, %d, %d) returned null\n",
+                chunk_x, chunk_y, chunk_z);
+        errx(1, "ship_space::ensure chunks.get failed");
+    }
+
+    /* if null then instantiate */
+    if( ! *c ){
+        /* instantiate our chunk */
+        *c = new chunk();
+    }
+
+    /* we are now all good
+     * our DG contains the needed chunks
+     * and the desired chunk is instantiated
+     */
+}
+
+
