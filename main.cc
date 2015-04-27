@@ -586,19 +586,15 @@ update()
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
 
+    tool *t = tools[player.selected_slot];
+
     /* both tool use and overlays need the raycast itself */
     raycast_info rc;
     ship->raycast(player.eye.x, player.eye.y, player.eye.z, player.dir.x, player.dir.y, player.dir.z, &rc);
 
     /* tool use */
-    if (player.use && !player.last_use) {
-
-        if (rc.hit) {
-            tool *t = tools[player.selected_slot];
-            if (t) {
-                t->use(&rc);
-            }
-        }
+    if (player.use && !player.last_use && rc.hit && t) {
+        t->use(&rc);
     }
 
     /* walk all the chunks -- TODO: only walk chunks that might contribute to the view */
@@ -649,11 +645,8 @@ update()
     }
 
     /* tool preview */
-    if (rc.hit) {
-        tool *t = tools[player.selected_slot];
-        if (t) {
-            t->preview(&rc);
-        }
+    if (rc.hit && t) {
+        t->preview(&rc);
     }
 }
 
