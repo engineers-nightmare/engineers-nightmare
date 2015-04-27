@@ -14,7 +14,8 @@
 /* a simple constructor hacked together based on
  * http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World
  */
-physics::physics(player *p){
+physics::physics(player *p)
+{
     /* a broadspace filters out obvious non-colliding pairs
      * before the more expensive collision detection algorithm sees them
      *
@@ -72,7 +73,8 @@ physics::physics(player *p){
     this->controller->setUpAxis(2);
 }
 
-physics::~physics(){
+physics::~physics()
+{
     delete(this->broadphase);
 
     delete(this->collisionConfiguration);
@@ -88,7 +90,8 @@ physics::~physics(){
 }
 
 void
-physics::tick(){
+physics::tick()
+{
     double x, y, z;
 
     double c = cos(this->pl->angle);

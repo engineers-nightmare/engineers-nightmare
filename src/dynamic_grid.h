@@ -176,7 +176,8 @@ dynamic_grid<T>::get(int ex, int ey, int ez)
  */
 template <class T>
 void
-dynamic_grid<T>::resize(int nxd, int nyd, int nzd){
+dynamic_grid<T>::resize(int nxd, int nyd, int nzd)
+{
     /* size of each dimension */
     unsigned int x = 0,
                  y = 0,
@@ -238,7 +239,8 @@ dynamic_grid<T>::resize(int nxd, int nyd, int nzd){
  */
 template <class T>
 bool
-dynamic_grid<T>::within(int ex, int ey, int ez){
+dynamic_grid<T>::within(int ex, int ey, int ez)
+{
     /* translate to internal co-ords*/
     int ix, iy, iz;
     ix = ex - this->xo;

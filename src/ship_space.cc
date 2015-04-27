@@ -446,7 +446,8 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
  * of it's pre-resize location
  */
 void
-ship_space::_resize(unsigned int nxd, unsigned int nyd, unsigned int nzd){
+ship_space::_resize(unsigned int nxd, unsigned int nyd, unsigned int nzd)
+{
     this->chunks.resize(nxd, nyd, nzd);
 }
 
@@ -458,7 +459,8 @@ ship_space::_resize(unsigned int nxd, unsigned int nyd, unsigned int nzd){
  * this will not instantiate or modify any other chunks
  */
 void
-ship_space::ensure_block(int block_x, int block_y, int block_z){
+ship_space::ensure_block(int block_x, int block_y, int block_z)
+{
     /* convert block to co-ords of containing chunk */
     unsigned int chunk_x = block_x / CHUNK_SIZE,
                  chunk_y = block_y / CHUNK_SIZE,

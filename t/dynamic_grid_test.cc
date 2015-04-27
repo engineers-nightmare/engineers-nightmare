@@ -41,7 +41,8 @@ test_negative(void)
 
 }
 
-void test_expand(void){
+void test_expand(void)
+{
     int x=0, y=0, z=0;
     dynamic_grid<int> *dg = new dynamic_grid<int>(2, 2, 2);
     assert(dg);
