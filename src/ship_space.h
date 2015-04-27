@@ -8,6 +8,7 @@
 
 struct raycast_info {
     bool hit;
+    bool inside;
     int x, y, z;            /* the block we hit */
     int nx, ny, nz;         /* the face normal we hit */
     int px, py, pz;         /* the block along the normal */

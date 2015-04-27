@@ -375,6 +375,8 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
     if (!this->get_block(x, y, z))
         return; /* not inside the grid */
 
+    rc->inside = this->get_block(x, y, z)->type != block_empty;
+
     int stepX = dx > 0 ? 1 : -1;
     int stepY = dy > 0 ? 1 : -1;
     int stepZ = dz > 0 ? 1 : -1;
@@ -425,7 +427,7 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
         if (!bl)
             return;
 
-        if (bl->type != block_empty) {
+        if (bl->type != block_empty ^ rc->inside) {
             rc->hit = true;
             rc->x = x;
             rc->y = y;

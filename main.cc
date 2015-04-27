@@ -309,6 +309,8 @@ struct add_block_tool : public tool
 {
     virtual void use(raycast_info *rc)
     {
+        if (rc->inside) return; /* n/a */
+
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         /* can only build on the side of an existing scaffold */
@@ -321,6 +323,8 @@ struct add_block_tool : public tool
 
     virtual void preview(raycast_info *rc)
     {
+        if (rc->inside) return; /* n/a */
+
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         /* can only build on the side of an existing scaffold */
@@ -340,6 +344,8 @@ struct remove_block_tool : public tool
 {
     virtual void use(raycast_info *rc)
     {
+        if (rc->inside) return; /* n/a */
+
         block *bl = rc->block;
 
         /* if there was a block entity here, find and remove it */
@@ -392,6 +398,8 @@ struct remove_block_tool : public tool
 
     virtual void preview(raycast_info *rc)
     {
+        if (rc->inside) return; /* n/a */
+
         block *bl = rc->block;
         if (bl->type != block_empty) {
             per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
@@ -414,7 +422,7 @@ struct add_surface_tool : public tool
     surface_type st;
     add_surface_tool(surface_type st) : st(st) {}
 
-    bool can_place(block *bl, block *other, int index)
+    bool can_use(block *bl, block *other, int index)
     {
         if (!bl) return false;
         if (bl->surfs[index] != surface_none) return false; /* already a surface here */
@@ -431,7 +439,7 @@ struct add_surface_tool : public tool
         if (!other_side) {
             /* expand ! */
         }
-        else if (can_place(bl, other_side, index)) {
+        else if (can_use(bl, other_side, index)) {
 
             bl->surfs[index] = this->st;
             ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
@@ -448,7 +456,7 @@ struct add_surface_tool : public tool
         int index = normal_to_surface_index(rc);
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
-        if (can_place(bl, other_side, index)) {
+        if (can_use(bl, other_side, index)) {
             per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
             per_object->upload();
 
@@ -519,6 +527,8 @@ struct add_block_entity_tool : public tool
 
     virtual void use(raycast_info *rc)
     {
+        if (rc->inside) return; /* n/a */
+
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         /* can only build on the side of an existing scaffold */
@@ -537,6 +547,8 @@ struct add_block_entity_tool : public tool
 
     virtual void preview(raycast_info *rc)
     {
+        if (rc->inside) return; /* n/a */
+
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         /* frobnicator can only be placed in empty space, on a scaffold */
