@@ -291,6 +291,13 @@ surface_index_to_normal(int index, int *nx, int *ny, int *nz)
 }
 
 
+glm::mat4
+mat_position(float x, float y, float z)
+{
+    return glm::translate(glm::mat4(1), glm::vec3(x, y, z));
+}
+
+
 struct tool
 {
     virtual void use(raycast_info *rc) = 0;
@@ -318,8 +325,7 @@ struct add_block_tool : public tool
 
         /* can only build on the side of an existing scaffold */
         if (bl && rc->block->type == block_support) {
-            per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                    glm::vec3(rc->px, rc->py, rc->pz));
+            per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
             per_object->upload();
 
             glUseProgram(add_overlay_shader);
@@ -388,8 +394,7 @@ struct remove_block_tool : public tool
     {
         block *bl = rc->block;
         if (bl->type != block_empty) {
-            per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                    glm::vec3(rc->x, rc->y, rc->z));
+            per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
             per_object->upload();
 
             glUseProgram(remove_overlay_shader);
@@ -409,6 +414,13 @@ struct add_surface_tool : public tool
     surface_type st;
     add_surface_tool(surface_type st) : st(st) {}
 
+    bool can_place(block *bl, block *other, int index)
+    {
+        if (!bl) return false;
+        if (bl->surfs[index] != surface_none) return false; /* already a surface here */
+        return bl->type == block_support || (other && other->type == block_support);
+    }
+
     virtual void use(raycast_info *rc)
     {
         block *bl = rc->block;
@@ -419,7 +431,7 @@ struct add_surface_tool : public tool
         if (!other_side) {
             /* expand ! */
         }
-        else if (bl->surfs[index] == surface_none && (bl->type == block_support || other_side->type == block_support)) {
+        else if (can_place(bl, other_side, index)) {
 
             bl->surfs[index] = this->st;
             ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
@@ -436,9 +448,8 @@ struct add_surface_tool : public tool
         int index = normal_to_surface_index(rc);
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
-        if (bl && bl->surfs[index] == surface_none && (bl->type == block_support || (other_side && other_side->type == block_support))) {
-            per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                    glm::vec3(rc->x, rc->y, rc->z));
+        if (can_place(bl, other_side, index)) {
+            per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
             per_object->upload();
 
             glUseProgram(add_overlay_shader);
@@ -487,8 +498,7 @@ struct remove_surface_tool : public tool
 
         if (bl && bl->surfs[index] != surface_none) {
 
-            per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                    glm::vec3(rc->x, rc->y, rc->z));
+            per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
             per_object->upload();
 
             glUseProgram(remove_overlay_shader);
@@ -531,8 +541,7 @@ struct add_block_entity_tool : public tool
 
         /* frobnicator can only be placed in empty space, on a scaffold */
         if (bl && rc->block->type == block_support) {
-            per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                    glm::vec3(rc->px, rc->py, rc->pz));
+            per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
             per_object->upload();
 
             draw_mesh(frobnicator_hw);
@@ -610,8 +619,8 @@ update()
                 /* TODO: prepare all the matrices first, and do ONE upload */
                 chunk *ch = ship->get_chunk(i, j, k);
                 if (ch) {
-                    per_object->val.world_matrix = glm::translate(glm::mat4(1), glm::vec3(
-                                (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE));
+                    per_object->val.world_matrix = mat_position(
+                                (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
                     per_object->upload();
                     draw_mesh(ch->render_chunk.mesh);
                 }
@@ -629,8 +638,7 @@ update()
                         entity *e = *it;
 
                         /* TODO: batch these matrix uploads too! */
-                        per_object->val.world_matrix = glm::translate(glm::mat4(1), glm::vec3(
-                            (float)e->x, (float)e->y, (float)e->z));
+                        per_object->val.world_matrix = mat_position(e->x, e->y, e->z);
                         per_object->upload();
 
                         draw_mesh(e->mesh);
