@@ -330,9 +330,80 @@ struct place_block_tool : public tool
 };
 
 
+struct remove_block_tool : public tool
+{
+    virtual void use(raycast_info *rc)
+    {
+        block *bl = rc->block;
+
+        /* if there was a block entity here, find and remove it */
+        if (bl->type == block_entity) {
+            chunk *ch = ship->get_chunk_containing(rc->x, rc->y, rc->z);
+
+            for (std::vector<entity *>::iterator it = ch->entities.begin(); it != ch->entities.end();) {
+                entity *e = *it;
+                if (e->x == rc->x && e->y == rc->y && e->z == rc->z) {
+                    delete e;
+                    it = ch->entities.erase(it);
+                }
+                else {
+                    it++;
+                }
+            }
+        }
+
+        /* block removal */
+        bl->type = block_empty;
+
+        /* strip any orphaned surfaces */
+        for (int index = 0; index < 6; index++) {
+            if (bl->surfs[index]) {
+
+                int sx, sy, sz;
+                surface_index_to_normal(index, &sx, &sy, &sz);
+                block *other_side = ship->get_block(rc->x + sx, rc->y + sy, rc->z + sz);
+
+                if (!other_side) {
+                    /* expand: but this should always exist. */
+                }
+                else if (other_side->type != block_support) {
+                    /* if the other side has no scaffold, then there is nothing left to support this
+                     * surface pair -- remove it */
+                    bl->surfs[index] = surface_none;
+                    other_side->surfs[index ^ 1] = surface_none;
+                    ship->get_chunk_containing(rc->x + sx, rc->y + sy, rc->z + sz)->render_chunk.valid = false;
+                }
+            }
+        }
+
+        /* dirty the chunk */
+        ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
+    }
+
+    virtual void preview(raycast_info *rc)
+    {
+        block *bl = rc->block;
+        if (bl->type != block_empty) {
+            per_object->val.world_matrix = glm::translate(glm::mat4(1),
+                    glm::vec3(rc->x, rc->y, rc->z));
+            per_object->upload();
+
+            glUseProgram(remove_overlay_shader);
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(-0.1, -0.1);
+            draw_mesh(scaffold_hw);
+            glPolygonOffset(0, 0);
+            glDisable(GL_POLYGON_OFFSET_FILL);
+            glUseProgram(simple_shader);
+        }
+    }
+};
+
+
 tool *tools[] = {
     NULL,   /* tool 0 isnt a tool (currently) */
     new place_block_tool(),
+    new remove_block_tool(),
 };
 
 
@@ -372,54 +443,6 @@ update()
             }
 
             switch (player.selected_slot) {
-            case 2: {
-                    printf("Remove block Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
-                    block *bl = rc.block;
-
-                    /* if there was a block entity here, find and remove it */
-                    if (bl->type == block_entity) {
-                        chunk *ch = ship->get_chunk_containing(rc.x, rc.y, rc.z);
-
-                        for (std::vector<entity *>::iterator it = ch->entities.begin(); it != ch->entities.end();) {
-                            entity *e = *it;
-                            if (e->x == rc.x && e->y == rc.y && e->z == rc.z) {
-                                delete e;
-                                it = ch->entities.erase(it);
-                            }
-                            else {
-                                it++;
-                            }
-                        }
-                    }
-
-                    /* block removal */
-                    bl->type = block_empty;
-
-                    /* strip any orphaned surfaces */
-                    for (int index = 0; index < 6; index++) {
-                        if (bl->surfs[index]) {
-
-                            int sx, sy, sz;
-                            surface_index_to_normal(index, &sx, &sy, &sz);
-                            block *other_side = ship->get_block(rc.x + sx, rc.y + sy, rc.z + sz);
-
-                            if (!other_side) {
-                                /* expand: but this should always exist. */
-                            }
-                            else if (other_side->type != block_support) {
-                                /* if the other side has no scaffold, then there is nothing left to support this
-                                 * surface pair -- remove it */
-                                bl->surfs[index] = surface_none;
-                                other_side->surfs[index ^ 1] = surface_none;
-                                ship->get_chunk_containing(rc.x + sx, rc.y + sy, rc.z + sz)->render_chunk.valid = false;
-                            }
-                        }
-                    }
-
-                    /* dirty the chunk */
-                    ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
-                } break;
-
             case 6:
             case 3: {
                     printf("Add surface raycast %d,%d,%d\n", rc.x, rc.y, rc.z);
@@ -548,24 +571,6 @@ update()
     }
 
     switch (player.selected_slot) {
-        case 2: {
-                    if (rc.hit) {
-                        block *bl = rc.block;
-                        if (bl->type != block_empty) {
-                            per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                                    glm::vec3(rc.x, rc.y, rc.z));
-                            per_object->upload();
-
-                            glUseProgram(remove_overlay_shader);
-                            glEnable(GL_POLYGON_OFFSET_FILL);
-                            glPolygonOffset(-0.1, -0.1);
-                            draw_mesh(scaffold_hw);
-                            glPolygonOffset(0, 0);
-                            glDisable(GL_POLYGON_OFFSET_FILL);
-                            glUseProgram(simple_shader);
-                        }
-                    }
-                } break;
         case 6:
         case 3: {
                     if (rc.hit) {
