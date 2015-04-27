@@ -384,10 +384,10 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
     int ny = 0;
     int nz = 0;
 
-    if (!this->get_block(x, y, z))
-        return; /* not inside the grid */
+    block *bl = 0;
 
-    rc->inside = this->get_block(x, y, z)->type != block_empty;
+    bl = this->get_block(x,y,z);
+    rc->inside = bl ? bl->type != block_empty : 0;
 
     int stepX = dx > 0 ? 1 : -1;
     int stepY = dy > 0 ? 1 : -1;
@@ -401,7 +401,10 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
     float tMaxY = max_along_axis(oy, dy);
     float tMaxZ = max_along_axis(oz, dz);
 
-    for (;;) {
+    /* this counting here ensures our reach distance
+     * FIXME this will need to be tweaked
+     */
+    for (int i = 0; i <= 3; ++i) {
         if (tMaxX < tMaxY) {
             if (tMaxX < tMaxZ) {
                 x += stepX;
@@ -435,9 +438,15 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
             }
         }
 
-        block *bl = this->get_block(x, y, z);
-        if (!bl)
-            return;
+        bl = this->get_block(x, y, z);
+        if (!bl){
+            /* if there is no block then we are outside the grid
+             * we still want to keep stepping until we either
+             * hit a block within the grid or exceed our maximum
+             * reach
+             */
+            continue;
+        }
 
         if (bl->type != block_empty ^ rc->inside) {
             rc->hit = true;
