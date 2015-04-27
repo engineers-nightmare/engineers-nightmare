@@ -200,20 +200,35 @@ ensure(void)
 
 
     /* our space currently contains blocks 0..7 for all 3 dims
-     * force a resize to allow for 0..32 along on z dim
+     * force a resize to allow for 0..31 along on z dim
      * this should not modify the existing chunk
      * and should only instantiate 1 new chunk
      */
-    space.ensure_block(7, 7, 32);
+    space.ensure_block(7, 7, 31);
 
     /* check that we did not instantiate any other chunks */
     assert( 0 == space.get_block(3,16,16) );
     assert( 0 == space.get_block(7,7,8) );
     assert( 0 == space.get_block(8,8,8) );
-    assert( 0 == space.get_block(7,7,24) );
+    assert( 0 == space.get_block(7,7,23) );
+    assert( 0 == space.get_block(0,0,-1) );
+    assert( 0 == space.get_block(0,0,-7) );
 
     /* check we did instantiate the right chunk */
-    assert( space.get_block(7,7,32) );
+    assert( space.get_block(7,7,24) );
+    assert( space.get_block(7,7,31) );
+
+
+    /* now ensure into the negative */
+    space.ensure_block(0, 0, -1);
+
+    /* do some checking */
+    assert( space.get_block(0,0,-1) );
+    assert( space.get_block(0,0,-7) );
+
+    /* and check some error cases */
+    assert( 0 == space.get_block(0,0,-8) );
+    assert( 0 == space.get_block(0,-1,0) );
 
 }
 

@@ -61,14 +61,6 @@ struct ship_space {
      */
     void ensure_block(int block_x, int block_y, int block_z);
 
-    /* deprecated interface: will be dead soon
-     *
-     * resize ship to new dimensions
-     * will ensure every stored chunk is still at the co-ords
-     * of it's pre-resize location
-     */
-    void _resize(unsigned int nxd, unsigned int nyd, unsigned int nzd);
-
 };
 
 

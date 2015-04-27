@@ -47,6 +47,7 @@ fixed_cube<T, N>::get(unsigned int x, unsigned int y, unsigned int z)
 #if DEBUG
         printf("fixed_cube::get OUT OF RANGE: x: %u/%u, y: %u/%u, z: %u/%u\n", x, N, y, N, z, N);
 #endif
+        puts("cube get out of range");
         return 0;
     }
 

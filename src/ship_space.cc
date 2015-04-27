@@ -17,15 +17,16 @@ block *
 ship_space::get_block(int block_x, int block_y, int block_z)
 {
     /* Within Block coordinates */
-    int wb_x = block_x % CHUNK_SIZE;
-    int wb_y = block_y % CHUNK_SIZE;
-    int wb_z = block_z % CHUNK_SIZE;
+    int wb_x = abs(block_x % CHUNK_SIZE);
+    int wb_y = abs(block_y % CHUNK_SIZE);
+    int wb_z = abs(block_z % CHUNK_SIZE);
 
     chunk *c;
 
     c = this->get_chunk_containing(block_x, block_y, block_z);
-    if( ! c )
+    if( ! c ){
         return 0;
+    }
 
     return c->get_block(wb_x, wb_y, wb_z);
 }
@@ -39,6 +40,17 @@ ship_space::get_chunk_containing(int block_x, int block_y, int block_z)
     int chunk_x = block_x / CHUNK_SIZE;
     int chunk_y = block_y / CHUNK_SIZE;
     int chunk_z = block_z / CHUNK_SIZE;
+
+    /* if we had negative chunk_{x,y,z} then we need
+     * to adjust for the 0 bias of /
+     *
+     * say (0,0,-1) / 8 will become (0, 0, 0)
+     * when we really want it to stay (0, 0, -1)
+     *
+     */
+    chunk_x -= block_x < 0 ? 1 : 0;
+    chunk_y -= block_y < 0 ? 1 : 0;
+    chunk_z -= block_z < 0 ? 1 : 0;
 
     return this->get_chunk(chunk_x, chunk_y, chunk_z);
 }
@@ -444,18 +456,6 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
     }
 }
 
-/* deprecated interface: will be dead soon
- *
- * resize ship to new dimensions
- * will ensure every stored chunk is still at the co-ords
- * of it's pre-resize location
- */
-void
-ship_space::_resize(unsigned int nxd, unsigned int nyd, unsigned int nzd)
-{
-    this->chunks.resize(nxd, nyd, nzd);
-}
-
 /* ensure that the specified block_{x,y,z} can be fetched with a get_block
  *
  * this will trigger a resize and will instantiate a new containing chunk
@@ -466,36 +466,27 @@ ship_space::_resize(unsigned int nxd, unsigned int nyd, unsigned int nzd)
 void
 ship_space::ensure_block(int block_x, int block_y, int block_z)
 {
-    /* convert block to co-ords of containing chunk */
-    unsigned int chunk_x = block_x / CHUNK_SIZE,
-                 chunk_y = block_y / CHUNK_SIZE,
-                 chunk_z = block_z / CHUNK_SIZE;
-
-    /* convert block co-ords to dims */
-    unsigned int d_x = chunk_x + 1,
-                 d_y = chunk_y + 1,
-                 d_z = chunk_z + 1;
-
-    /* for each x,y,z keep the larger of:
-     *  current dim size
-     *  requested dim size
-     *
-     * asking resize to stay the same size is a no-op
-     * but asking it to shrink is a fatal error
+    /* convert block to co-ords of containing chunk
+     * the result of this may be negative and that is okay
+     * as dynamic_grid handles the offsets for us
      */
-    unsigned int desired_xd = d_x > chunks.xd ? d_x : chunks.xd,
-                 desired_yd = d_y > chunks.yd ? d_y : chunks.yd,
-                 desired_zd = d_z > chunks.zd ? d_z : chunks.zd;
+    int chunk_x = block_x / CHUNK_SIZE,
+        chunk_y = block_y / CHUNK_SIZE,
+        chunk_z = block_z / CHUNK_SIZE;
 
-    /* check if we need to resize */
-    if( ! chunks.within(chunk_x, chunk_y, chunk_z) ){
-        /* FIXME still no ability to deal with negative resizes */
+    /* if we had negative chunk_{x,y,z} then we need
+     * to adjust for the 0 bias of /
+     *
+     * say (0,0,-1) / 8 will become (0, 0, 0)
+     * when we really want it to stay (0, 0, -1)
+     *
+     */
+    chunk_x -= block_x < 0 ? 1 : 0;
+    chunk_y -= block_y < 0 ? 1 : 0;
+    chunk_z -= block_z < 0 ? 1 : 0;
 
-        /* worst case this is safe if our resize is not needed
-         * as it will no-op
-         */
-        this->chunks.resize(desired_xd, desired_yd, desired_zd);
-    }
+    /* guarantee we have the size we need */
+    this->chunks.ensure(chunk_x, chunk_y, chunk_z);
 
     /* need to now make sure our chunk is instantiated */
 

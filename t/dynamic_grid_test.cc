@@ -45,7 +45,9 @@ void test_expand(void)
 {
     int x=0, y=0, z=0;
     dynamic_grid<int> *dg = new dynamic_grid<int>(2, 2, 2);
+    int *i = 0;
     assert(dg);
+
 
     /* set the stage */
     for( z=0; z<2; ++z ){
@@ -57,16 +59,19 @@ void test_expand(void)
     }
 
     /* force a resize */
-    dg->resize(2, 3, 4);
+    dg->ensure(2, 3, 4);
 
     /* check everything is good */
     for( z=0; z<4; ++z ){
         for( y=0; y<3; ++y ){
             for( x=0; x<2; ++x ){
+                i = dg->get(x, y, z);
+                assert(i);
+
                 if( z < 2 && y < 2 && x < 2 ){
-                    assert( *dg->get(x, y, z) == x * y * z );
+                    assert( *i == x * y * z );
                 } else {
-                    assert( *dg->get(x, y, z) == 0 );
+                    assert( *i == 0 );
                 }
             }
         }
