@@ -291,6 +291,51 @@ surface_index_to_normal(int index, int *nx, int *ny, int *nz)
 }
 
 
+struct tool
+{
+    virtual void use(raycast_info *rc) = 0;
+    virtual void preview(raycast_info *rc) = 0;
+};
+
+
+struct place_block_tool : public tool
+{
+    virtual void use(raycast_info *rc)
+    {
+        block *bl = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+
+        /* can only build on the side of an existing scaffold */
+        if (bl && rc->block->type == block_support) {
+            bl->type = block_support;
+            /* dirty the chunk */
+            ship->get_chunk_containing(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz)->render_chunk.valid = false;
+        }
+    }
+
+    virtual void preview(raycast_info *rc)
+    {
+        block *bl = ship->get_block(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz);
+
+        /* can only build on the side of an existing scaffold */
+        if (bl && rc->block->type == block_support) {
+            per_object->val.world_matrix = glm::translate(glm::mat4(1),
+                    glm::vec3(rc->x + rc->nx, rc->y + rc->ny, rc->z + rc->nz));
+            per_object->upload();
+
+            glUseProgram(add_overlay_shader);
+            draw_mesh(scaffold_hw);
+            glUseProgram(simple_shader);
+        }
+    }
+};
+
+
+tool *tools[] = {
+    NULL,   /* tool 0 isnt a tool (currently) */
+    new place_block_tool(),
+};
+
+
 void
 update()
 {
@@ -320,8 +365,14 @@ update()
 
         if (rc.hit) {
 
+            if (player.selected_slot < sizeof(tools)/sizeof(*tools)) {
+                tool *t = tools[player.selected_slot];
+                if (t)
+                    t->use(&rc);
+            }
+
             switch (player.selected_slot) {
-            case 1: {
+            case 2: {
                     printf("Remove block Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
                     block *bl = rc.block;
 
@@ -367,19 +418,6 @@ update()
 
                     /* dirty the chunk */
                     ship->get_chunk_containing(rc.x, rc.y, rc.z)->render_chunk.valid = false;
-                } break;
-
-            case 2: {
-                    printf("Add block Raycast: %d,%d,%d\n", rc.x, rc.y, rc.z);
-
-                    block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
-
-                    /* can only build on the side of an existing scaffold */
-                    if (bl && rc.block->type == block_support) {
-                        bl->type = block_support;
-                        /* dirty the chunk */
-                        ship->get_chunk_containing(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz)->render_chunk.valid = false;
-                    }
                 } break;
 
             case 6:
@@ -501,8 +539,16 @@ update()
     }
 
     /* tool preview */
+    if (rc.hit) {
+        if (player.selected_slot < sizeof(tools)/sizeof(*tools)) {
+            tool *t = tools[player.selected_slot];
+            if (t)
+                t->preview(&rc);
+        }
+    }
+
     switch (player.selected_slot) {
-        case 1: {
+        case 2: {
                     if (rc.hit) {
                         block *bl = rc.block;
                         if (bl->type != block_empty) {
@@ -516,22 +562,6 @@ update()
                             draw_mesh(scaffold_hw);
                             glPolygonOffset(0, 0);
                             glDisable(GL_POLYGON_OFFSET_FILL);
-                            glUseProgram(simple_shader);
-                        }
-                    }
-                } break;
-        case 2: {
-                    if (rc.hit) {
-                        block *bl = ship->get_block(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz);
-
-                        /* can only build on the side of an existing scaffold */
-                        if (bl && rc.block->type == block_support) {
-                            per_object->val.world_matrix = glm::translate(glm::mat4(1),
-                                    glm::vec3(rc.x + rc.nx, rc.y + rc.ny, rc.z + rc.nz));
-                            per_object->upload();
-
-                            glUseProgram(add_overlay_shader);
-                            draw_mesh(scaffold_hw);
                             glUseProgram(simple_shader);
                         }
                     }
