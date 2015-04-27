@@ -64,6 +64,14 @@ struct dynamic_grid {
      */
     T * get(int ex, int ey, int ez);
 
+    /* check if the given co-ords are contained within this DG
+     * this is needed as a DG may be sparse
+     *
+     * returns true if co-ords are contained within
+     * returns false otherwise
+     */
+    bool within(int ex, int ey, int ez);
+
     /* resize the grid to new dimensions
      *
      * this will move everything around to ensure that
@@ -176,12 +184,24 @@ dynamic_grid<T>::resize(int nxd, int nyd, int nzd){
 
     T * new_contents = 0;
 
+    /* check if we were asked to shrink */
     if( nxd < this->xd ||
         nyd < this->yd ||
         nzd < this->zd ){
+
+        /* shrinking is unsupported */
         printf("dynamic_grid::resize: current (%d, %d, %d) asked to shrink to (%d, %d, %d)\n",
                 this->xd, this->yd, this->zd, nxd, nyd, nzd);
         errx(1, "dynamic_grid::resize does not support shrinking");
+    }
+
+    /* check if we were asked to do nothing */
+    if( nxd == this->xd &&
+        nyd == this->yd &&
+        nzd == this->zd ){
+
+        /* nothing to do */
+        return;
     }
 
     new_contents = (T*) calloc(sizeof(T), nxd * nyd * nzd);
@@ -209,4 +229,34 @@ dynamic_grid<T>::resize(int nxd, int nyd, int nzd){
     this->yd = nyd;
     this->zd = nzd;
 }
+
+/* check if the given co-ords are contained within this DG
+ * this is needed as a DG may be sparse
+ *
+ * returns true if co-ords are contained within
+ * returns false otherwise
+ */
+template <class T>
+bool
+dynamic_grid<T>::within(int ex, int ey, int ez){
+    /* translate to internal co-ords*/
+    int ix, iy, iz;
+    ix = ex - this->xo;
+    iy = ey - this->yo;
+    iz = ez - this->zo;
+
+    /* check if not within space */
+    if( ix >= this->xd ||
+        iy >= this->yd ||
+        iz >= this->zd ||
+        ix < 0         ||
+        iy < 0         ||
+        iz < 0         ){
+        return false;
+    }
+
+    /* otherwise it is contained within */
+    return true;
+}
+
 
