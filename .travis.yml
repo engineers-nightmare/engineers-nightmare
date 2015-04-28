@@ -8,13 +8,16 @@ before_install:
     - sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu precise-getdeb games" > /etc/apt/sources.list.d/getdeb.list'
     - sudo add-apt-repository -y ppa:zoogie/sdl2-snapshots # libsdl2-dev, libsdl2-image-dev
     - sudo apt-add-repository -y ppa:sfttech/random # libepoxy-dev
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test # sane g++ for c++11
     - sudo apt-get update -qq
 
 # NB: this below list must be kept in sync with `README.md`
 install:
-    - sudo apt-get install -qq build-essential cmake libsdl2-dev libsdl2-image-dev libepoxy-dev libglm-dev libbullet-dev libfreetype6-dev
+    - sudo apt-get install -qq build-essential gcc-4.8 g++-4.8 cmake libsdl2-dev libsdl2-image-dev libepoxy-dev libglm-dev libbullet-dev libfreetype6-dev
     - wget http://launchpadlibrarian.net/157997579/libassimp3_3.0~dfsg-2_amd64.deb http://launchpadlibrarian.net/157997580/libassimp-dev_3.0~dfsg-2_amd64.deb
     - sudo dpkg -i libassimp3_3.0~dfsg-2_amd64.deb libassimp-dev_3.0~dfsg-2_amd64.deb
+    # taken from http://gearchicken.com/wordpress/?p=105
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
 
 script:
     - cmake .
