@@ -19,7 +19,7 @@ stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
 {
     unsigned index_base = verts->size();
 
-    for (int i = 0; i < src->num_vertices; i++) {
+    for (unsigned int i = 0; i < src->num_vertices; i++) {
         vertex v = src->verts[i];
         v.x += offset.x;
         v.y += offset.y;
@@ -28,7 +28,7 @@ stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
         verts->push_back(v);
     }
 
-    for (int i = 0; i < src->num_indices; i++)
+    for (unsigned int i = 0; i < src->num_indices; i++)
         indices->push_back(index_base + src->indices[i]);
 }
 

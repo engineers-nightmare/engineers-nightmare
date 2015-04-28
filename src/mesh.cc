@@ -63,7 +63,7 @@ load_mesh(char const *filename) {
     std::vector<vertex> verts;
     std::vector<unsigned> indices;
 
-    for (int i = 0; i < scene->mNumMeshes; i++) {
+    for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh const *m = scene->mMeshes[i];
         if (!m->mFaces)
             errx(1, "Submesh %d is not indexed.\n");
@@ -72,11 +72,11 @@ load_mesh(char const *filename) {
         // NOTE: we assume that all mesh origins coincide, so we're not applying transforms here
         int submesh_base = verts.size();
 
-        for (int j = 0; j < m->mNumVertices; j++)
+        for (unsigned int j = 0; j < m->mNumVertices; j++)
             verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z,
                         m->mNormals[j].x, m->mNormals[j].y, m->mNormals[j].z, 0 /* mat */));
 
-        for (int j = 0; j < m->mNumFaces; j++) {
+        for (unsigned int j = 0; j < m->mNumFaces; j++) {
             if (m->mFaces[j].mNumIndices != 3)
                 errx(1, "Submesh %d face %d isnt a tri (%d indices)\n", i, j, m->mFaces[j].mNumIndices);
 
@@ -158,7 +158,7 @@ free_mesh(hw_mesh *m)
 void
 set_mesh_material(sw_mesh *m, int material)
 {
-    for (int i = 0; i < m->num_vertices; i++) {
+    for (unsigned int i = 0; i < m->num_vertices; i++) {
         m->verts[i].mat = material;
     }
 }

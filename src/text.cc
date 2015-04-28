@@ -37,7 +37,7 @@ texture_atlas::add_bitmap(unsigned char *src, int pitch, unsigned width, unsigne
 
     unsigned char *dest = buf + x + y * TEXT_ATLAS_WIDTH;
 
-    for (int r = 0; r < height; r++) {
+    for (unsigned int r = 0; r < height; r++) {
         memcpy(dest, src, width);
         src += pitch;
         dest += TEXT_ATLAS_WIDTH;
