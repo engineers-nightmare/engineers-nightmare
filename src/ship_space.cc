@@ -115,9 +115,9 @@ ship_space::mock_ship_space(void)
                     /* we want a 2 height door at x == 3
                      * and a one height door a x == 5
                      */
-                    if( x == 3     && z == 1 ||
-                        x == 3     && z == 2 ||
-                        x == 5     && z == 1 ){
+                    if( (x == 3     && z == 1) ||
+                        (x == 3     && z == 2) ||
+                        (x == 5     && z == 1) ){
                         /* a door */
                         b1->type = block_empty;
                         b2->type = block_empty;
@@ -140,26 +140,26 @@ ship_space::mock_ship_space(void)
                         }
 
                         /* add surfaces to inside of doorways */
-                        if( x == 3 && z == 3 ||
-                            x == 5 && z == 2 ){
+                        if( (x == 3 && z == 3) ||
+                            (x == 5 && z == 2) ){
                             /* tops */
                             b1->surfs[surface_zm] = surface_wall;
                             b2->surfs[surface_zm] = surface_wall;
                             b3->surfs[surface_zm] = surface_wall;
                             b4->surfs[surface_zm] = surface_wall;
                         }
-                        if( x == 2 && z == 1 ||
-                            x == 2 && z == 2 ||
-                            x == 4 && z == 1 ){
+                        if( (x == 2 && z == 1) ||
+                            (x == 2 && z == 2) ||
+                            (x == 4 && z == 1) ){
                             /* minus */
                             b1->surfs[surface_xp] = surface_wall;
                             b2->surfs[surface_xp] = surface_wall;
                             b3->surfs[surface_xp] = surface_wall;
                             b4->surfs[surface_xp] = surface_wall;
                         }
-                        if( x == 4 && z == 2 ||
-                            x == 4 && z == 1 ||
-                            x == 6 && z == 1 ){
+                        if( (x == 4 && z == 2) ||
+                            (x == 4 && z == 1) ||
+                            (x == 6 && z == 1) ){
                             /* plus */
                             b1->surfs[surface_xm] = surface_wall;
                             b2->surfs[surface_xm] = surface_wall;
@@ -172,9 +172,9 @@ ship_space::mock_ship_space(void)
                     /* we want a 2 height door at y == 3
                      * and a one height door a y == 5
                      */
-                    if( y == 3     && z == 1 ||
-                        y == 3     && z == 2 ||
-                        y == 5     && z == 1 ){
+                    if( (y == 3     && z == 1) ||
+                        (y == 3     && z == 2) ||
+                        (y == 5     && z == 1) ){
                         /* a wall */
                         b1->type = block_empty;
                         b2->type = block_empty;
@@ -197,26 +197,26 @@ ship_space::mock_ship_space(void)
                         }
 
                         /* add surfaces to inside of doorways */
-                        if( y == 3 && z == 3 ||
-                            y == 5 && z == 2 ){
+                        if( (y == 3 && z == 3) ||
+                            (y == 5 && z == 2) ){
                             /* tops */
                             b1->surfs[surface_zm] = surface_wall;
                             b2->surfs[surface_zm] = surface_wall;
                             b3->surfs[surface_zm] = surface_wall;
                             b4->surfs[surface_zm] = surface_wall;
                         }
-                        if( y == 2 && z == 1 ||
-                            y == 2 && z == 2 ||
-                            y == 4 && z == 1 ){
+                        if( (y == 2 && z == 1) ||
+                            (y == 2 && z == 2) ||
+                            (y == 4 && z == 1) ){
                             /* minus */
                             b1->surfs[surface_yp] = surface_wall;
                             b2->surfs[surface_yp] = surface_wall;
                             b3->surfs[surface_yp] = surface_wall;
                             b4->surfs[surface_yp] = surface_wall;
                         }
-                        if( y == 4 && z == 2 ||
-                            y == 4 && z == 1 ||
-                            y == 6 && z == 1 ){
+                        if( (y == 4 && z == 2) ||
+                            (y == 4 && z == 1) ||
+                            (y == 6 && z == 1) ){
                             /* plus */
                             b1->surfs[surface_ym] = surface_wall;
                             b2->surfs[surface_ym] = surface_wall;
@@ -229,9 +229,9 @@ ship_space::mock_ship_space(void)
                     /* we want a 2 height door at x == 3
                      * and a one height door a x == 5
                      */
-                    if( y == 3     && z == 1 ||
-                        y == 3     && z == 2 ||
-                        y == 5     && z == 1 ){
+                    if( (y == 3     && z == 1) ||
+                        (y == 3     && z == 2) ||
+                        (y == 5     && z == 1) ){
                         /* a door */
                         b1->type = block_empty;
                         b2->type = block_empty;
@@ -254,26 +254,26 @@ ship_space::mock_ship_space(void)
                         }
 
                         /* add surfaces to inside of doorways */
-                        if( y == 3 && z == 3 ||
-                            y == 5 && z == 2 ){
+                        if( (y == 3 && z == 3) ||
+                            (y == 5 && z == 2) ){
                             /* tops */
                             b1->surfs[surface_zm] = surface_wall;
                             b2->surfs[surface_zm] = surface_wall;
                             b3->surfs[surface_zm] = surface_wall;
                             b4->surfs[surface_zm] = surface_wall;
                         }
-                        if( y == 2 && z == 1 ||
-                            y == 2 && z == 2 ||
-                            y == 4 && z == 1 ){
+                        if( (y == 2 && z == 1) ||
+                            (y == 2 && z == 2) ||
+                            (y == 4 && z == 1) ){
                             /* minus */
                             b1->surfs[surface_yp] = surface_wall;
                             b2->surfs[surface_yp] = surface_wall;
                             b3->surfs[surface_yp] = surface_wall;
                             b4->surfs[surface_yp] = surface_wall;
                         }
-                        if( y == 4 && z == 2 ||
-                            y == 4 && z == 1 ||
-                            y == 6 && z == 1 ){
+                        if( (y == 4 && z == 2) ||
+                            (y == 4 && z == 1) ||
+                            (y == 6 && z == 1) ){
                             /* plus */
                             b1->surfs[surface_ym] = surface_wall;
                             b2->surfs[surface_ym] = surface_wall;
@@ -286,9 +286,9 @@ ship_space::mock_ship_space(void)
                     /* we want a 2 height door at y == 3
                      * and a one height door a y == 5
                      */
-                    if( x == 3     && z == 1 ||
-                        x == 3     && z == 2 ||
-                        x == 5     && z == 1 ){
+                    if( (x == 3     && z == 1) ||
+                        (x == 3     && z == 2) ||
+                        (x == 5     && z == 1) ){
                         /* a door */
                         b1->type = block_empty;
                         b2->type = block_empty;
@@ -311,26 +311,26 @@ ship_space::mock_ship_space(void)
                         }
 
                         /* add surfaces to inside of doorways */
-                        if( x == 3 && z == 3 ||
-                            x == 5 && z == 2 ){
+                        if( (x == 3 && z == 3) ||
+                            (x == 5 && z == 2) ){
                             /* tops */
                             b1->surfs[surface_zm] = surface_wall;
                             b2->surfs[surface_zm] = surface_wall;
                             b3->surfs[surface_zm] = surface_wall;
                             b4->surfs[surface_zm] = surface_wall;
                         }
-                        if( x == 2 && z == 1 ||
-                            x == 2 && z == 2 ||
-                            x == 4 && z == 1 ){
+                        if( (x == 2 && z == 1) ||
+                            (x == 2 && z == 2) ||
+                            (x == 4 && z == 1) ){
                             /* minus */
                             b1->surfs[surface_xp] = surface_wall;
                             b2->surfs[surface_xp] = surface_wall;
                             b3->surfs[surface_xp] = surface_wall;
                             b4->surfs[surface_xp] = surface_wall;
                         }
-                        if( x == 4 && z == 2 ||
-                            x == 4 && z == 1 ||
-                            x == 6 && z == 1 ){
+                        if( (x == 4 && z == 2) ||
+                            (x == 4 && z == 1) ||
+                            (x == 6 && z == 1) ){
                             /* plus */
                             b1->surfs[surface_xm] = surface_wall;
                             b2->surfs[surface_xm] = surface_wall;

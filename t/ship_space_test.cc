@@ -88,9 +88,9 @@ test_mock_ship_space(void)
                     b4->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
 
                 } else if( y == 0 ){
-                    if( x == 3     && z == 1 ||
-                        x == 3     && z == 2 ||
-                        x == 5     && z == 1 ){
+                    if( (x == 3     && z == 1) ||
+                        (x == 3     && z == 2) ||
+                        (x == 5     && z == 1) ){
                         /* a door */
                         assert(b1->type == block_empty);
                         assert(b2->type == block_empty);
@@ -104,9 +104,9 @@ test_mock_ship_space(void)
                         assert(b4->type == block_support);
                     }
                 } else if( x == 0 ){
-                    if( y == 3     && z == 1 ||
-                        y == 3     && z == 2 ||
-                        y == 5     && z == 1 ){
+                    if( (y == 3     && z == 1) ||
+                        (y == 3     && z == 2) ||
+                        (y == 5     && z == 1) ){
                         /* a door */
                         assert(b1->type == block_empty);
                         assert(b2->type == block_empty);
@@ -120,9 +120,9 @@ test_mock_ship_space(void)
                         assert(b4->type == block_support);
                     }
                 } else if( x == 7 ){
-                    if( y == 3     && z == 1 ||
-                        y == 3     && z == 2 ||
-                        y == 5     && z == 1 ){
+                    if( (y == 3     && z == 1) ||
+                        (y == 3     && z == 2) ||
+                        (y == 5     && z == 1) ){
                         /* a door */
                         assert(b1->type == block_empty);
                         assert(b2->type == block_empty);
@@ -136,9 +136,9 @@ test_mock_ship_space(void)
                         assert(b4->type == block_support);
                     }
                 } else if( y == 7 ){
-                    if( x == 3     && z == 1 ||
-                        x == 3     && z == 2 ||
-                        x == 5     && z == 1 ){
+                    if( (x == 3     && z == 1) ||
+                        (x == 3     && z == 2) ||
+                        (x == 5     && z == 1) ){
                         /* a door */
                         assert(b1->type == block_empty);
                         assert(b2->type == block_empty);
