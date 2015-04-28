@@ -7,11 +7,11 @@ A game about keeping a spaceship from falling apart
 
 This is the view you are greeted with on game start (consider this a cry for help with art)
 
-![starting](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-start-2015-04-24.png)
+![starting](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-start-2015-04-28.png)
 
 And here is a mess I made by removing surfaces and blocks:
 
-![mess](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-mess-2015-04-24.png)
+![mess](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-mess-2015-04-28.png)
 
 
 # Building and running
