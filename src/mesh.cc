@@ -14,31 +14,6 @@
 #include <vector>
 
 
-static void
-compute_bounds(std::vector<vertex> *verts)
-{
-    float min_x, min_y, min_z;
-    float max_x, max_y, max_z;
-
-    min_x = max_x = (*verts)[0].x;
-    min_y = max_y = (*verts)[0].y;
-    min_z = max_z = (*verts)[0].z;
-
-    std::vector<vertex>::const_iterator it;
-    for (it = ++verts->begin(); it != verts->end(); it++) {
-        if (it->x < min_x) min_x = it->x;
-        if (it->y < min_y) min_y = it->y;
-        if (it->z < min_z) min_z = it->z;
-        if (it->x > max_x) max_x = it->x;
-        if (it->y > max_y) max_y = it->y;
-        if (it->z > max_z) max_z = it->z;
-    }
-
-    printf("\tBounding box: (%2.2f %2.2f %2.2f) (%2.2f %2.2f %2.2f)\n",
-            min_x, min_y, min_z, max_x, max_y, max_z);
-}
-
-
 sw_mesh *
 load_mesh(char const *filename) {
 
@@ -66,7 +41,7 @@ load_mesh(char const *filename) {
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh const *m = scene->mMeshes[i];
         if (!m->mFaces)
-            errx(1, "Submesh %d is not indexed.\n");
+            errx(1, "Submesh %u is not indexed.\n", i);
 
         // when we have many submeshes we need to rebase the indices.
         // NOTE: we assume that all mesh origins coincide, so we're not applying transforms here
@@ -78,7 +53,7 @@ load_mesh(char const *filename) {
 
         for (unsigned int j = 0; j < m->mNumFaces; j++) {
             if (m->mFaces[j].mNumIndices != 3)
-                errx(1, "Submesh %d face %d isnt a tri (%d indices)\n", i, j, m->mFaces[j].mNumIndices);
+                errx(1, "Submesh %u face %u isnt a tri (%u indices)\n", i, j, m->mFaces[j].mNumIndices);
 
             indices.push_back(m->mFaces[j].mIndices[0] + submesh_base);
             indices.push_back(m->mFaces[j].mIndices[1] + submesh_base);
@@ -86,8 +61,7 @@ load_mesh(char const *filename) {
         }
     }
 
-    printf("\tAfter processing: %d verts, %d indices\n", verts.size(), indices.size());
-    compute_bounds(&verts);
+    printf("\tAfter processing: %zu verts, %zu indices\n", verts.size(), indices.size());
 
     aiReleaseImport(scene);
 
