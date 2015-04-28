@@ -404,7 +404,7 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
     /* this counting here ensures our reach distance
      * FIXME this will need to be tweaked
      */
-    for (int i = 0; i <= 3; ++i) {
+    for (int i = 0; i < 6; ++i) {
         if (tMaxX < tMaxY) {
             if (tMaxX < tMaxZ) {
                 x += stepX;
