@@ -11,13 +11,58 @@
 #define TEXT_ATLAS_HEIGHT   512
 
 
-text_renderer::text_renderer(char const *font, int size)
-    : tex(0), bo(0), bo_vertex_count(0), bo_capacity(0), vao(0), verts()
+texture_atlas::texture_atlas()
+    : tex(0), x(0), y(0), h(0)
 {
-    /* load the font into metrics array + texture */
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT);
+
+    buf = new unsigned char[TEXT_ATLAS_WIDTH * TEXT_ATLAS_HEIGHT];
+}
+
+
+void
+texture_atlas::add_bitmap(unsigned char *src, int pitch, unsigned width, unsigned height, int *out_x, int *out_y)
+{
+    /* overflow to next row */
+    if (x + width > TEXT_ATLAS_WIDTH) {
+        y += h;
+        x = 0;
+        h = 0;
+    }
+
+    /* adjust height of atlas row */
+    h = std::max(h, height);
+
+    unsigned char *dest = buf + x + y * TEXT_ATLAS_WIDTH;
+
+    for (int r = 0; r < height; r++) {
+        memcpy(dest, src, width);
+        src += pitch;
+        dest += TEXT_ATLAS_WIDTH;
+    }
+
+    *out_x = x;
+    *out_y = y;
+
+    x += width;
+}
+
+
+void
+texture_atlas::upload()
+{
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT, GL_RED, GL_UNSIGNED_BYTE, buf);
+}
+
+
+text_renderer::text_renderer(char const *font, int size)
+    : bo(0), bo_vertex_count(0), bo_capacity(0), vao(0), verts()
+{
+    /* load the font into metrics array + texture */
+    atlas = new texture_atlas();
 
     FT_Library ft_library;
     if (FT_Init_FreeType(&ft_library))
@@ -29,12 +74,6 @@ text_renderer::text_renderer(char const *font, int size)
 
     FT_Set_Pixel_Sizes(ft_face, 0, size);
 
-    unsigned char *buf = new unsigned char[TEXT_ATLAS_WIDTH * TEXT_ATLAS_HEIGHT];
-
-    unsigned x = 0;
-    unsigned y = 0;
-    unsigned h = 0;
-
     for (int i = 0; i < 256; i++) {
         metrics *m = &ms[i];
 
@@ -42,39 +81,18 @@ text_renderer::text_renderer(char const *font, int size)
         FT_Load_Char(ft_face, i, FT_LOAD_TARGET_NORMAL | FT_LOAD_RENDER);
         FT_Bitmap const *bitmap = &ft_face->glyph->bitmap;
 
-        /* overflow to next row */
-        if (x + bitmap->width > TEXT_ATLAS_WIDTH) {
-            y += h;
-            x = 0;
-            h = 0;
-        }
+        atlas->add_bitmap(bitmap->buffer, bitmap->pitch, bitmap->width, bitmap->rows,
+            &m->x, &m->y);
 
-        /* adjust height of atlas row */
-        h = std::max(h, bitmap->rows);
-
-        unsigned char *src = bitmap->buffer;
-        unsigned char *dest = buf + x + y * TEXT_ATLAS_WIDTH;
-
-        for (int r = 0; r < bitmap->rows; r++) {
-            memcpy(dest, src, bitmap->width);
-            src += bitmap->pitch;
-            dest += TEXT_ATLAS_WIDTH;
-        }
-
-        m->x = x;
-        m->y = y;
         m->w = bitmap->width;
         m->h = bitmap->rows;
 
         m->xoffset = ft_face->glyph->bitmap_left;
         m->advance = ft_face->glyph->linearHoriAdvance / 65536.0f;   /* 16.16 -> float */
         m->yoffset = ft_face->glyph->bitmap_top;
-
-        x += bitmap->width;
     }
 
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT, GL_RED, GL_UNSIGNED_BYTE, buf);
-    delete [] buf;
+    atlas->upload();
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -187,6 +205,6 @@ void
 text_renderer::draw()
 {
     glBindVertexArray(vao);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    glBindTexture(GL_TEXTURE_2D, atlas->tex);
     glDrawArrays(GL_TRIANGLES, 0, bo_vertex_count);
 }
