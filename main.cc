@@ -29,6 +29,8 @@
 #define MOUSE_X_SENSITIVITY -0.001
 #define MOUSE_Y_SENSITIVITY -0.001
 
+// 1 for ordinary use, -1 to invert mouse. TODO: settings...
+#define MOUSE_INVERT_LOOK 1
 
 struct wnd {
     SDL_Window *ptr;
@@ -796,7 +798,7 @@ run()
 
             case SDL_MOUSEMOTION:
                 player.angle += MOUSE_X_SENSITIVITY * e.motion.xrel;
-                player.elev += MOUSE_Y_SENSITIVITY * e.motion.yrel;
+                player.elev += MOUSE_Y_SENSITIVITY * MOUSE_INVERT_LOOK * e.motion.yrel;
 
                 if (player.elev < -MOUSE_Y_LIMIT)
                     player.elev = -MOUSE_Y_LIMIT;
