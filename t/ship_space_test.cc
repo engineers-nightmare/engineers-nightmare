@@ -208,7 +208,7 @@ ensure(void)
     assert( space.get_block(0,0,-7) );
 
     /* and check some error cases */
-    assert( 0 == space.get_block(0,0,-8) );
+    assert( 0 == space.get_block(0,0,-9) );
     assert( 0 == space.get_block(0,-1,0) );
 
 }
