@@ -29,7 +29,7 @@ struct texture_atlas
     texture_atlas();
     void add_bitmap(unsigned char *src, int pitch, unsigned width, unsigned height, int *out_x, int *out_y);
     void upload();
-    void bind();
+    void bind(int texunit);
 };
 
 

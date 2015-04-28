@@ -58,6 +58,14 @@ texture_atlas::upload()
 }
 
 
+void
+texture_atlas::bind(int texunit)
+{
+    glActiveTexture(GL_TEXTURE0 + texunit);
+    glBindTexture(GL_TEXTURE_2D, tex);
+}
+
+
 text_renderer::text_renderer(char const *font, int size)
     : bo(0), bo_vertex_count(0), bo_capacity(0), vao(0), verts()
 {
@@ -205,6 +213,6 @@ void
 text_renderer::draw()
 {
     glBindVertexArray(vao);
-    glBindTexture(GL_TEXTURE_2D, atlas->tex);
+    atlas->bind(0);
     glDrawArrays(GL_TRIANGLES, 0, bo_vertex_count);
 }
