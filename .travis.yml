@@ -12,7 +12,7 @@ before_install:
 
 # NB: this below list must be kept in sync with `README.md`
 install:
-    - sudo apt-get install -qq build-essential cmake libsdl2-dev libsdl2-image-dev libepoxy-dev libglm-dev libbullet-dev
+    - sudo apt-get install -qq build-essential cmake libsdl2-dev libsdl2-image-dev libepoxy-dev libglm-dev libbullet-dev libfreetype6-dev
     - wget http://launchpadlibrarian.net/157997579/libassimp3_3.0~dfsg-2_amd64.deb http://launchpadlibrarian.net/157997580/libassimp-dev_3.0~dfsg-2_amd64.deb
     - sudo dpkg -i libassimp3_3.0~dfsg-2_amd64.deb libassimp-dev_3.0~dfsg-2_amd64.deb
 

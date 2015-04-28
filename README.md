@@ -32,12 +32,13 @@ run:
 
 # Dependencies
 
-* SDL2
-* SDL2_image
-* libepoxy
-* assimp
-* glm
-* bullet
+ * assimp
+ * bullet
+ * freetype6
+ * glm
+ * libepoxy
+ * SDL2
+ * SDL2_image
 
 NB: this above list must be kept in sync with `.travis.yml`
 
