@@ -34,6 +34,36 @@ ship_space::ship_space(void)
 {
 }
 
+
+static void
+split_coord(int p, int *out_block, int *out_chunk)
+{
+    /* NOTE: There are a number of attractive-looking symmetries which are
+     * just plain wrong. */
+    int block, chunk;
+
+    if (p < 0) {
+        /* negative space is not a mirror of positive:
+         * chunk -1 spans blocks -8..-1;
+         * chunk -2 spans blocks -16..-9 */
+        chunk = (p - CHUNK_SIZE + 1) / CHUNK_SIZE;
+    } else {
+        /* positive halfspace has no rocket science. */
+        chunk = p / CHUNK_SIZE;
+    }
+
+    /* the within-chunk offset is just the difference between the minimum block
+     * in the chunk and the requested one, regardless of which halfspace we're in. */
+    block = p - CHUNK_SIZE * chunk;
+
+    /* write the outputs which were requested */
+    if (out_block)
+        *out_block = block;
+    if (out_chunk)
+        *out_chunk = chunk;
+}
+
+
 /* returns a block or null
  * finds the block at the position (x,y,z) within
  * the whole ship_space
@@ -43,13 +73,15 @@ block *
 ship_space::get_block(int block_x, int block_y, int block_z)
 {
     /* Within Block coordinates */
-    int wb_x = abs(block_x % CHUNK_SIZE);
-    int wb_y = abs(block_y % CHUNK_SIZE);
-    int wb_z = abs(block_z % CHUNK_SIZE);
+    int wb_x, wb_y, wb_z;
+    int chunk_x, chunk_y, chunk_z;
 
-    chunk *c;
+    split_coord(block_x, &wb_x, &chunk_x);
+    split_coord(block_y, &wb_y, &chunk_y);
+    split_coord(block_z, &wb_z, &chunk_z);
 
-    c = this->get_chunk_containing(block_x, block_y, block_z);
+    chunk *c = this->get_chunk(chunk_x, chunk_y, chunk_z);
+
     if( ! c ){
         return 0;
     }
@@ -63,20 +95,11 @@ ship_space::get_block(int block_x, int block_y, int block_z)
 chunk *
 ship_space::get_chunk_containing(int block_x, int block_y, int block_z)
 {
-    int chunk_x = block_x / CHUNK_SIZE;
-    int chunk_y = block_y / CHUNK_SIZE;
-    int chunk_z = block_z / CHUNK_SIZE;
+    int chunk_x, chunk_y, chunk_z;
 
-    /* if we had negative chunk_{x,y,z} then we need
-     * to adjust for the 0 bias of /
-     *
-     * say (0,0,-1) / 8 will become (0, 0, 0)
-     * when we really want it to stay (0, 0, -1)
-     *
-     */
-    chunk_x -= block_x < 0 ? 1 : 0;
-    chunk_y -= block_y < 0 ? 1 : 0;
-    chunk_z -= block_z < 0 ? 1 : 0;
+    split_coord(block_x, NULL, &chunk_x);
+    split_coord(block_y, NULL, &chunk_y);
+    split_coord(block_z, NULL, &chunk_z);
 
     return this->get_chunk(chunk_x, chunk_y, chunk_z);
 }
@@ -501,23 +524,11 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
 void
 ship_space::ensure_block(int block_x, int block_y, int block_z)
 {
-    /* convert block to co-ords of containing chunk
-     * the result of this may be negative and that is okay
-     */
-    int chunk_x = block_x / CHUNK_SIZE,
-        chunk_y = block_y / CHUNK_SIZE,
-        chunk_z = block_z / CHUNK_SIZE;
+    int chunk_x, chunk_y, chunk_z;
 
-    /* if we had negative chunk_{x,y,z} then we need
-     * to adjust for the 0 bias of /
-     *
-     * say (0,0,-1) / 8 will become (0, 0, 0)
-     * when we really want it to stay (0, 0, -1)
-     *
-     */
-    chunk_x -= block_x < 0 ? 1 : 0;
-    chunk_y -= block_y < 0 ? 1 : 0;
-    chunk_z -= block_z < 0 ? 1 : 0;
+    split_coord(block_x, NULL, &chunk_x);
+    split_coord(block_y, NULL, &chunk_y);
+    split_coord(block_z, NULL, &chunk_z);
 
     /* guarantee we have the size we need */
     this->ensure_chunk(chunk_x, chunk_y, chunk_z);
