@@ -254,7 +254,7 @@ init()
     {
         float w = 0;
         float h = 0;
-        char const *str = "Engineer's Nightmare M2 -- in which text is rendered.";
+        char const *str = "Engineer's Nightmare M2 -- in which text is rendered.\nAlso, newlines.";
         text->measure(str, &w, &h);
         text->add(str, -w/2, 400);
     }

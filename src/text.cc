@@ -100,7 +100,15 @@ text_renderer::add(char const *str, float x, float y)
 {
     float r = 1, g = 1, b = 1;  /* initial color */
 
+    float xx = x;
+
     for (; *str; str++) {
+        if (*str == '\n') {
+            y -= 24;
+            xx = x;
+            continue;
+        }
+
         metrics *m = &ms[*str];
 
         float u0 = m->x / (float)TEXT_ATLAS_WIDTH;
@@ -108,13 +116,13 @@ text_renderer::add(char const *str, float x, float y)
         float v0 = m->y / (float)TEXT_ATLAS_HEIGHT;
         float v1 = (m->y + m->h) / (float)TEXT_ATLAS_HEIGHT;
 
-        x += m->xoffset;
+        xx += m->xoffset;
         float yy = y + m->yoffset;
 
-        text_vertex p0 = { x, yy, u0, v0, r, g, b };
-        text_vertex p1 = { x + m->w, yy, u1, v0, r, g, b };
-        text_vertex p2 = { x + m->w, yy - m->h, u1, v1, r, g, b };
-        text_vertex p3 = { x, yy - m->h, u0, v1, r, g, b };
+        text_vertex p0 = { xx, yy, u0, v0, r, g, b };
+        text_vertex p1 = { xx + m->w, yy, u1, v0, r, g, b };
+        text_vertex p2 = { xx + m->w, yy - m->h, u1, v1, r, g, b };
+        text_vertex p3 = { xx, yy - m->h, u0, v1, r, g, b };
 
         verts.push_back(p0);
         verts.push_back(p1);
@@ -124,7 +132,7 @@ text_renderer::add(char const *str, float x, float y)
         verts.push_back(p2);
         verts.push_back(p3);
 
-        x += m->advance;
+        xx += m->advance;
     }
 }
 
@@ -132,11 +140,21 @@ text_renderer::add(char const *str, float x, float y)
 void
 text_renderer::measure(char const *str, float *x, float *y)
 {
+    float xx = *x;
+
     for (; *str; str++) {
+        if (*str == '\n') {
+            *x = std::max(*x, xx);
+            xx = 0;
+            continue;
+        }
+
         metrics *m = &ms[*str];
 
-        *x += m->xoffset + m->advance;
+        xx += m->xoffset + m->advance;
     }
+
+    *x = std::max(*x, xx);
 }
 
 
