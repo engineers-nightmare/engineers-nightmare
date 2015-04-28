@@ -22,5 +22,7 @@ struct player {
 
     bool last_reset;
     bool reset;
+
+    bool ui_dirty;
 };
 

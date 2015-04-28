@@ -243,6 +243,7 @@ init()
     player.selected_slot = 1;
     player.last_use = player.use = false;
     player.last_reset = player.reset = false;
+    player.ui_dirty = true;
 
     phy = new physics(&player);
 
@@ -250,17 +251,6 @@ init()
     glFrontFace(GL_CW);
 
     text = new text_renderer("fonts/pixelmix.ttf", 16);
-
-    {
-        float w = 0;
-        float h = 0;
-        char const *str = "Engineer's Nightmare M2 -- in which text is rendered.\nAlso, newlines.";
-        text->measure(str, &w, &h);
-        text->add(str, -w/2, 400);
-    }
-
-
-    text->upload();
 }
 
 
@@ -316,6 +306,7 @@ struct tool
 {
     virtual void use(raycast_info *rc) = 0;
     virtual void preview(raycast_info *rc) = 0;
+    virtual void get_description(char *str) = 0;
 };
 
 
@@ -353,6 +344,11 @@ struct add_block_tool : public tool
             draw_mesh(scaffold_hw);
             glUseProgram(simple_shader);
         }
+    }
+
+    virtual void get_description(char *str)
+    {
+        strcpy(str, "Place Scaffolding");
     }
 };
 
@@ -431,6 +427,11 @@ struct remove_block_tool : public tool
             glUseProgram(simple_shader);
         }
     }
+
+    virtual void get_description(char *str)
+    {
+        strcpy(str, "Remove Scaffolding");
+    }
 };
 
 
@@ -486,6 +487,11 @@ struct add_surface_tool : public tool
             glUseProgram(simple_shader);
         }
     }
+
+    virtual void get_description(char *str)
+    {
+        sprintf(str, "Place surface type %d\n", (int)st);
+    }
 };
 
 
@@ -535,6 +541,11 @@ struct remove_surface_tool : public tool
             glUseProgram(simple_shader);
         }
     }
+
+    virtual void get_description(char *str)
+    {
+        strcpy(str, "Remove surface");
+    }
 };
 
 
@@ -581,6 +592,11 @@ struct add_block_entity_tool : public tool
             glUseProgram(simple_shader);
         }
     }
+
+    virtual void get_description(char *str)
+    {
+        strcpy(str, "Place Frobnicator");
+    }
 };
 
 
@@ -593,6 +609,27 @@ tool *tools[] = {
     new add_block_entity_tool(),
     new add_surface_tool(surface_grate),
 };
+
+
+void
+rebuild_ui()
+{
+    text->reset();
+
+    /* Tool name down the bottom */
+    tool *t = tools[player.selected_slot];
+
+    if (t) {
+        float w = 0;
+        float h = 0;
+        char buf[256];
+        t->get_description(buf);
+        text->measure(buf, &w, &h);
+        text->add(buf, -w/2, -400);
+    }
+
+    text->upload();
+}
 
 
 void
@@ -680,6 +717,15 @@ update()
         t->preview(&rc);
     }
 
+
+    if (player.ui_dirty) {
+        rebuild_ui();
+        player.ui_dirty = false;
+    }
+
+
+    text->upload();
+
     glDisable(GL_DEPTH_TEST);
 
     glUseProgram(ui_shader);
@@ -687,6 +733,14 @@ update()
     glUseProgram(simple_shader);
 
     glEnable(GL_DEPTH_TEST);
+}
+
+
+void
+set_slot(int slot)
+{
+    player.selected_slot = slot;
+    player.ui_dirty = true;
 }
 
 
@@ -711,18 +765,12 @@ handle_input()
     player.reset = keys[SDL_SCANCODE_R];
 
     /* TODO: be less ridiculous */
-    if (keys[SDL_SCANCODE_1])
-        player.selected_slot = 1;
-    if (keys[SDL_SCANCODE_2])
-        player.selected_slot = 2;
-    if (keys[SDL_SCANCODE_3])
-        player.selected_slot = 3;
-    if (keys[SDL_SCANCODE_4])
-        player.selected_slot = 4;
-    if (keys[SDL_SCANCODE_5])
-        player.selected_slot = 5;
-    if (keys[SDL_SCANCODE_6])
-        player.selected_slot = 6;
+    if (keys[SDL_SCANCODE_1]) set_slot(1);
+    if (keys[SDL_SCANCODE_2]) set_slot(2);
+    if (keys[SDL_SCANCODE_3]) set_slot(3);
+    if (keys[SDL_SCANCODE_4]) set_slot(4);
+    if (keys[SDL_SCANCODE_5]) set_slot(5);
+    if (keys[SDL_SCANCODE_6]) set_slot(6);
 }
 
 
