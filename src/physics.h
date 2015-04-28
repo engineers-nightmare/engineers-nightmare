@@ -4,7 +4,10 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <BulletDynamics/Character/btKinematicCharacterController.h>
 
-#include "player.h"
+
+/* in player.h */
+struct player;
+
 
 /* a simple physics world hacked together by referencing
  * http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World
@@ -19,14 +22,6 @@ struct physics {
     btSequentialImpulseConstraintSolver *solver;
     btDiscreteDynamicsWorld *dynamicsWorld;
 
-    /* a pointer to our player object in main
-     * static struct {
-     *      float angle;
-     *      float elev;
-     *      glm::vec3 pos;
-     *      glm::vec3 dir;
-     * } player;
-     */
     player *pl;
 
     /* character control guff */
