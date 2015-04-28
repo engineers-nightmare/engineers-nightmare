@@ -135,7 +135,7 @@ text_renderer::add(char const *str, float x, float y)
             continue;
         }
 
-        metrics *m = &ms[*str];
+        metrics *m = &ms[(unsigned) *str];
 
         float u0 = m->x / (float)TEXT_ATLAS_WIDTH;
         float u1 = (m->x + m->w) / (float)TEXT_ATLAS_WIDTH;
@@ -175,7 +175,7 @@ text_renderer::measure(char const *str, float *x, float *y)
             continue;
         }
 
-        metrics *m = &ms[*str];
+        metrics *m = &ms[(unsigned) *str];
 
         xx += m->xoffset + m->advance;
     }
