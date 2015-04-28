@@ -336,7 +336,7 @@ struct add_block_tool : public tool
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         /* can only build on the side of an existing scaffold */
-        if (bl && rc->block->type == block_support) {
+        if ((!bl || bl->type == block_empty) && rc->block->type == block_support) {
             per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
             per_object->upload();
 
