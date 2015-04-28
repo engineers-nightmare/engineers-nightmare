@@ -3,7 +3,7 @@ project(nightmare)
 
 # from http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
 if(UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -DGLM_FORCE_RADIANS")
 endif()
 
 add_executable(nightmare main.cc)
