@@ -1,5 +1,6 @@
 #include <err.h>
 #include <epoxy/gl.h>
+#include <stdio.h>
 
 #include "shader.h"
 #include "blob.h"
@@ -41,6 +42,8 @@ GLuint load_shader(char const *vs, char const *fs)
      *
      * This is all somewhat implementation-specific guesswork... but it's also free.
      */
+
+    printf("Loaded shader vs:%s fs:%s\n", vs, fs);
 
     return prog;
 }

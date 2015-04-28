@@ -14,6 +14,7 @@
 #include "src/ship_space.h"
 #include "src/player.h"
 #include "src/physics.h"
+#include "src/text.h"
 
 
 #define APP_NAME    "Engineer's Nightmare"
@@ -140,7 +141,7 @@ gl_debug_callback(GLenum source __unused,
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *frobnicator_sw;
-GLuint simple_shader, add_overlay_shader, remove_overlay_shader;
+GLuint simple_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
 texture_set *world_textures;
@@ -151,6 +152,7 @@ unsigned char const *keys;
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 hw_mesh *frobnicator_hw;
+text_renderer *text;
 
 
 struct entity
@@ -208,6 +210,7 @@ init()
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/simple.frag");
     remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/simple.frag");
+    ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
 
@@ -229,8 +232,6 @@ init()
     world_textures->load(4, "textures/grate.png");
     world_textures->load(5, "textures/red.png");
 
-    world_textures->bind(0);
-
     ship = ship_space::mock_ship_space();
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
@@ -247,6 +248,19 @@ init()
 
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CW);
+
+    text = new text_renderer("fonts/pixelmix.ttf", 16);
+
+    {
+        float w = 0;
+        float h = 0;
+        char const *str = "Engineer's Nightmare M2 -- in which text is rendered.";
+        text->measure(str, &w, &h);
+        text->add(str, -w/2, 400);
+    }
+
+
+    text->upload();
 }
 
 
@@ -612,6 +626,8 @@ update()
         t->use(&rc);
     }
 
+    world_textures->bind(0);
+
     /* walk all the chunks -- TODO: only walk chunks that might contribute to the view */
     for (int k = ship->chunks.zo; k < ship->chunks.zo + ship->chunks.zd; k++) {
         for (int j = ship->chunks.yo; j < ship->chunks.yo + ship->chunks.yd; j++) {
@@ -663,6 +679,14 @@ update()
     if (rc.hit && t) {
         t->preview(&rc);
     }
+
+    glDisable(GL_DEPTH_TEST);
+
+    glUseProgram(ui_shader);
+    text->draw();
+    glUseProgram(simple_shader);
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 
