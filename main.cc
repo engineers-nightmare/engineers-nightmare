@@ -666,9 +666,9 @@ update()
     world_textures->bind(0);
 
     /* walk all the chunks -- TODO: only walk chunks that might contribute to the view */
-    for (int k = ship->chunks.zo; k < ship->chunks.zo + ship->chunks.zd; k++) {
-        for (int j = ship->chunks.yo; j < ship->chunks.yo + ship->chunks.yd; j++) {
-            for (int i = ship->chunks.xo; i < ship->chunks.xo + ship->chunks.xd; i++) {
+    for (int k = ship->min_z; k <= ship->max_z; k++) {
+        for (int j = ship->min_y; j <= ship->max_y; j++) {
+            for (int i = ship->min_x; i <= ship->max_x; i++) {
                 chunk *ch = ship->get_chunk(i, j, k);
                 if (ch) {
                     ch->prepare_render(i, j, k);
@@ -677,9 +677,9 @@ update()
         }
     }
 
-    for (int k = ship->chunks.zo; k < ship->chunks.zo + ship->chunks.zd; k++) {
-        for (int j = ship->chunks.yo; j < ship->chunks.yo + ship->chunks.yd; j++) {
-            for (int i = ship->chunks.xo; i < ship->chunks.xo + ship->chunks.xd; i++) {
+    for (int k = ship->min_z; k <= ship->max_z; k++) {
+        for (int j = ship->min_y; j <= ship->max_y; j++) {
+            for (int i = ship->min_x; i <= ship->max_x; i++) {
                 /* TODO: prepare all the matrices first, and do ONE upload */
                 chunk *ch = ship->get_chunk(i, j, k);
                 if (ch) {
@@ -693,9 +693,9 @@ update()
     }
 
     /* walk all the entities in the (visible) chunks */
-    for (int k = ship->chunks.zo; k < ship->chunks.zo + ship->chunks.zd; k++) {
-        for (int j = ship->chunks.yo; j < ship->chunks.yo + ship->chunks.yd; j++) {
-            for (int i = ship->chunks.xo; i < ship->chunks.xo + ship->chunks.xd; i++) {
+    for (int k = ship->min_z; k <= ship->max_z; k++) {
+        for (int j = ship->min_y; j <= ship->max_y; j++) {
+            for (int i = ship->min_x; i <= ship->max_x; i++) {
                 chunk *ch = ship->get_chunk(i, j, k);
                 if (ch) {
                     for (std::vector<entity *>::const_iterator it = ch->entities.begin(); it != ch->entities.end(); it++) {

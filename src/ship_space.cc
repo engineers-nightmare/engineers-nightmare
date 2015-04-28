@@ -3,8 +3,34 @@
 #include <assert.h>
 #include <math.h>
 
+/* create a ship space of x * y * z instantiated chunks */
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
-    : chunks(xd, yd, zd)
+    : min_x(0), min_y(0), min_z(0)
+{
+    unsigned int x = 0,
+                 y = 0,
+                 z = 0;
+
+    for( x = 0; x < xd; ++x ){
+        for( y = 0; y < yd; ++y ){
+            for( z = 0; z < zd; ++z ){
+                glm::ivec3 v(x, y, z);
+                this->chunks[v] = new chunk();
+            }
+        }
+    }
+
+    /* dim is exclusive, max is inclusive
+     * so subtract 1 and store
+     */
+    this->max_x = xd - 1;
+    this->max_y = yd - 1;
+    this->max_z = zd - 1;
+}
+
+/* create an empty ship_space */
+ship_space::ship_space(void)
+    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0)
 {
 }
 
@@ -61,8 +87,13 @@ ship_space::get_chunk_containing(int block_x, int block_y, int block_z)
 chunk *
 ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
 {
-    chunk **c = this->chunks.get(chunk_x, chunk_y, chunk_z);
-    return c ? *c : NULL;
+    glm::ivec3 v(chunk_x, chunk_y, chunk_z);
+
+    if( this->chunks.count(v) ){
+        return this->chunks[v];
+    }
+
+    return NULL;
 }
 
 /* returns a pointer to a new ship space
@@ -79,10 +110,6 @@ ship_space::mock_ship_space(void)
 {
     /* new ship space of 2 * 2 * 1*/
     ship_space * ss = new ship_space(2, 2, 1);
-    *ss->chunks.get(0, 0, 0) = new chunk();
-    *ss->chunks.get(1, 0, 0) = new chunk();
-    *ss->chunks.get(0, 1, 0) = new chunk();
-    *ss->chunks.get(1, 1, 0) = new chunk();
 
     unsigned int x=0, y=0, z=0;
     block *b1 = 0;
@@ -467,8 +494,7 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
 
 /* ensure that the specified block_{x,y,z} can be fetched with a get_block
  *
- * this will trigger a resize and will instantiate a new containing chunk
- * if necessary
+ * this will instantiate a new containing chunk if necessary
  *
  * this will not instantiate or modify any other chunks
  */
@@ -477,7 +503,6 @@ ship_space::ensure_block(int block_x, int block_y, int block_z)
 {
     /* convert block to co-ords of containing chunk
      * the result of this may be negative and that is okay
-     * as dynamic_grid handles the offsets for us
      */
     int chunk_x = block_x / CHUNK_SIZE,
         chunk_y = block_y / CHUNK_SIZE,
@@ -495,31 +520,45 @@ ship_space::ensure_block(int block_x, int block_y, int block_z)
     chunk_z -= block_z < 0 ? 1 : 0;
 
     /* guarantee we have the size we need */
-    this->chunks.ensure(chunk_x, chunk_y, chunk_z);
+    this->ensure_chunk(chunk_x, chunk_y, chunk_z);
+}
 
-    /* need to now make sure our chunk is instantiated */
+/* ensure that the specified chunk exists
+ *
+ * this will instantiate a new chunk if necessary
+ *
+ * this will not instantiate or modify any other chunks
+ */
+void
+ship_space::ensure_chunk(int chunk_x, int chunk_y, int chunk_z)
+{
+    glm::ivec3 v(chunk_x, chunk_y, chunk_z);
 
-    /* capture our potential chunk */
-    chunk **c = this->chunks.get(chunk_x, chunk_y, chunk_z);
+    /* if count is 0 then we do not contain this key */
+    if( ! this->chunks.count(v) ){
+        /* if this is an insert then we need to also
+         * keep track of our min/max bounds
+         */
+        this->_maintain_bounds(chunk_x, chunk_y, chunk_z);
 
-    /* check we didn't get back garbage */
-    if( ! c ){
-        /* get returned null, die */
-        printf("ship_space::ensure chunks.get(%d, %d, %d) returned null\n",
-                chunk_x, chunk_y, chunk_z);
-        errx(1, "ship_space::ensure chunks.get failed");
+        /* operator[] will create an element */
+        this->chunks[v] = new chunk();
     }
+}
 
-    /* if null then instantiate */
-    if( ! *c ){
-        /* instantiate our chunk */
-        *c = new chunk();
-    }
+/* internal method which updated {min,max}_{x,y,z}
+ * if the {x,y,z}_seen values are lower/higher
+ */
+void
+ship_space::_maintain_bounds(int x_seen, int y_seen, int z_seen)
+{
+    this->min_x = std::min(min_x, x_seen);
+    this->min_y = std::min(min_y, y_seen);
+    this->min_z = std::min(min_z, z_seen);
 
-    /* we are now all good
-     * our DG contains the needed chunks
-     * and the desired chunk is instantiated
-     */
+    this->max_x = std::max(max_x, x_seen);
+    this->max_y = std::max(max_y, y_seen);
+    this->max_z = std::max(max_z, z_seen);
 }
 
 
