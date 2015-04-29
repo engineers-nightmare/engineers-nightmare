@@ -84,21 +84,22 @@ struct texture_set {
     GLuint texobj;
     int dim;
     int array_size;
+    GLenum target;
 
-    texture_set(int dim, int array_size) : texobj(0), dim(dim), array_size(array_size) {
+    texture_set(GLenum target, int dim, int array_size) : texobj(0), dim(dim), array_size(array_size), target(target) {
         glGenTextures(1, &texobj);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texobj);
-        glTexStorage3D(GL_TEXTURE_2D_ARRAY,
+        glBindTexture(target, texobj);
+        glTexStorage3D(target,
                        1,   /* no mips! I WANT YOUR EYES TO BLEED -- todo, fix this. */
                        GL_RGBA8, dim, dim, array_size);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
 
     void bind(int texunit)
     {
         glActiveTexture(GL_TEXTURE0 + texunit);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texobj);
+        glBindTexture(target, texobj);
     }
 
     void load(int slot, char const *filename)
@@ -113,13 +114,13 @@ struct texture_set {
 
         /* bring on DSA... for now, we disturb the tex0 binding */
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texobj);
+        glBindTexture(target, texobj);
 
         /* just blindly upload as if it's RGBA/UNSIGNED_BYTE. TODO: support weirder things */
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
+        glTexSubImage3D(target, 0,
                         0, 0, slot,
                         dim, dim, 1,
-                        GL_RGBA,
+                        surf->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB,
                         GL_UNSIGNED_BYTE,
                         surf->pixels);
 
@@ -144,9 +145,11 @@ sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *frobnicator_sw;
 GLuint simple_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
+GLuint sky_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
 texture_set *world_textures;
+texture_set *skybox;
 ship_space *ship;
 player player;
 physics *phy;
@@ -213,6 +216,7 @@ init()
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/simple.frag");
     remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/simple.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
+    sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
 
@@ -226,13 +230,21 @@ init()
     per_camera->bind(0);
     per_object->bind(1);
 
-    world_textures = new texture_set(WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
+    world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
     world_textures->load(0, "textures/white.png");
     world_textures->load(1, "textures/scaffold.png");
     world_textures->load(2, "textures/plate.png");
     world_textures->load(3, "textures/frobnicator.png");
     world_textures->load(4, "textures/grate.png");
     world_textures->load(5, "textures/red.png");
+
+    skybox = new texture_set(GL_TEXTURE_CUBE_MAP_ARRAY, 2048, 6);
+    skybox->load(0, "textures/sky_right1.png");
+    skybox->load(1, "textures/sky_left2.png");
+    skybox->load(2, "textures/sky_top3.png");
+    skybox->load(3, "textures/sky_bottom4.png");
+    skybox->load(4, "textures/sky_front5.png");
+    skybox->load(5, "textures/sky_back6.png");
 
     ship = ship_space::mock_ship_space();
     if( ! ship )
@@ -718,6 +730,12 @@ update()
     if (rc.hit && t) {
         t->preview(&rc);
     }
+
+
+    /* draw the sky */
+    glUseProgram(sky_shader);
+    skybox->bind(0);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 
 
     if (player.ui_dirty) {
