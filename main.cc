@@ -468,10 +468,12 @@ struct add_surface_tool : public tool
         int index = normal_to_surface_index(rc);
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
-        if (!other_side) {
-            /* expand ! */
-        }
-        else if (can_use(bl, other_side, index)) {
+        if (can_use(bl, other_side, index)) {
+
+            if (!other_side) {
+                ship->ensure_block(rc->px, rc->py, rc->pz);
+                other_side = ship->get_block(rc->px, rc->py, rc->pz);
+            }
 
             bl->surfs[index] = this->st;
             ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
