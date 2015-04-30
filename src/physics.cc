@@ -53,7 +53,7 @@ physics::physics(player *p)
 
 
     /* setup player rigid body */
-    this->playerShape = new btCapsuleShapeZ(0.35, 0.7);
+    this->playerShape = new btCapsuleShapeZ(0.35, 0.3);
     float maxStepHeight = 0.5f;
 
     /* setup the character controller. this gets a bit fiddly. */
@@ -102,7 +102,7 @@ physics::tick()
     btVector3 right(s, -c, 0);
 
     float speed = MOVE_SPEED;
-    if (!this->controller->canJump())
+    if (!this->controller->onGround())
         speed *= AIR_CONTROL_FACTOR;
 
     fwd *= this->pl->move.y * speed;
@@ -110,14 +110,12 @@ physics::tick()
 
     this->controller->setWalkDirection(fwd + right);
 
-    if (!pl->last_jump && pl->jump && this->controller->canJump())
+    if (!pl->last_jump && pl->jump && this->controller->onGround())
         this->controller->jump();
 
     if (!pl->last_reset && pl->reset) {
         /* reset position (for debug) */
-        btTransform trans = this->ghostObj->getWorldTransform();
-        trans.setOrigin(btVector3(PLAYER_START_X, PLAYER_START_Y, PLAYER_START_Z));
-        this->ghostObj->setWorldTransform(trans);
+        this->controller->warp(btVector3(PLAYER_START_X, PLAYER_START_Y, PLAYER_START_Z));
     }
 
     dynamicsWorld->stepSimulation(1 / 60.f, 10);
