@@ -24,5 +24,8 @@ struct player {
     bool reset;
 
     bool ui_dirty;
+
+    /* used within physics to toggle gravity */
+    bool disable_gravity;
 };
 

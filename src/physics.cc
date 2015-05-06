@@ -66,7 +66,6 @@ physics::physics(player *p)
     this->ghostObj->setCollisionShape(this->playerShape);
     this->ghostObj->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
     this->controller = new btKinematicCharacterController(this->ghostObj, this->playerShape, btScalar(maxStepHeight));
-    this->controller->setGravity(0);
 
     this->dynamicsWorld->addCollisionObject(this->ghostObj, btBroadphaseProxy::CharacterFilter,
             btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
@@ -100,6 +99,16 @@ physics::tick()
 
     btVector3 fwd(c, s, 0);
     btVector3 right(s, -c, 0);
+
+    /* toggle gravity based on player->disable_gravity */
+    if( this->pl->disable_gravity ){
+        this->controller->setGravity(0);
+    } else {
+        /* http://bulletphysics.org/Bullet/BulletFull/btKinematicCharacterController_8cpp_source.html : 144
+         * 3G acceleration.
+         */
+        this->controller->setGravity(9.8 * 3);
+    }
 
     float speed = MOVE_SPEED;
     if (!this->controller->onGround())

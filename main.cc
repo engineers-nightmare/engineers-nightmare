@@ -258,6 +258,7 @@ init()
     player.last_use = player.use = false;
     player.last_reset = player.reset = false;
     player.ui_dirty = true;
+    player.disable_gravity = false;
 
     phy = new physics(&player);
 
@@ -785,6 +786,16 @@ handle_input()
 
     player.last_reset = player.reset;
     player.reset = keys[SDL_SCANCODE_R];
+
+    /* G enables gravity */
+    if( keys[SDL_SCANCODE_G] ){
+        player.disable_gravity = 1;
+    }
+
+    /* H re-enables gravity */
+    if( keys[SDL_SCANCODE_H] ){
+        player.disable_gravity = 0;
+    }
 
     /* TODO: be less ridiculous */
     if (keys[SDL_SCANCODE_1]) set_slot(1);
