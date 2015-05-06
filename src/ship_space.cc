@@ -426,9 +426,13 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
     assert(rc);
     rc->hit = false;
 
-    int x = (int)ox;
-    int y = (int)oy;
-    int z = (int)oz;
+    /* if less than 0 we need to subtract one
+     * as float truncation will bias
+     * towards 0
+     */
+    int x = (int)(ox < 0 ? ox - 1: ox);
+    int y = (int)(oy < 0 ? oy - 1: oy);
+    int z = (int)(oz < 0 ? oz - 1: oz);
 
     int nx = 0;
     int ny = 0;
