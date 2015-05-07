@@ -29,11 +29,6 @@ struct physics {
     btPairCachingGhostObject *ghostObj;
     btKinematicCharacterController *controller;
 
-    /* our static `floor` */
-    btCollisionShape *groundShape;
-    btDefaultMotionState *groundMotionState;
-    btRigidBody *groundRigidBody;
-
     /* initialise our physics state */
     physics(player *pl);
 
