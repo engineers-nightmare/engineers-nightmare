@@ -74,8 +74,7 @@ build_static_physics_setup(int _x, int _y, int _z, sw_mesh const * src,
     else {
         /* Rigid body doesn't exist yet -- build one, along with all th motionstate junk */
         btDefaultMotionState *ms = new btDefaultMotionState(
-            btTransform(btQuaternion(0, 0, 0, 1),
-                        btVector3(_x * CHUNK_SIZE, _y * CHUNK_SIZE, _z * CHUNK_SIZE)));
+            btTransform(btQuaternion(0, 0, 0, 1), btVector3(_x, _y, _z)));
         btRigidBody::btRigidBodyConstructionInfo
                     ci(0, ms, new_shape, btVector3(0, 0, 0));
         *rb = new btRigidBody(ci);
@@ -138,7 +137,9 @@ chunk::prepare_render(int _x, int _y, int _z)
     this->render_chunk.mesh = upload_mesh(&m);
     this->render_chunk.valid = true;
 
-    build_static_physics_setup(_x, _y, _z, &m,
+    build_static_physics_setup(_x * CHUNK_SIZE,
+                               _y * CHUNK_SIZE,
+                               _z * CHUNK_SIZE, &m,
                                &this->render_chunk.phys_mesh,
                                &this->render_chunk.phys_shape,
                                &this->render_chunk.phys_body);
