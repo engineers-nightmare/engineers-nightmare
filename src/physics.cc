@@ -53,8 +53,8 @@ physics::physics(player *p)
 
 
     /* setup player rigid body */
-    this->standShape = new btCylinderShapeZ(btVector3(0.35, 0.35, 0.5));
-    this->crouchShape = new btCapsuleShapeZ(0.35, 0.0);//btVector3(0.35, 0.35, 0.25));
+    this->standShape = new btCapsuleShapeZ(0.35, 0.6);
+    this->crouchShape = new btCapsuleShapeZ(0.35, 0.0);
     float maxStepHeight = 0.15f;
 
     /* setup the character controller. this gets a bit fiddly. */
@@ -130,7 +130,7 @@ physics::tick()
     }
 
     if (!pl->last_crouch && pl->crouch) {
-        this->controller->crouch();
+        this->controller->crouch(this->dynamicsWorld);
         printf("Begin crouch!\n");
     }
 

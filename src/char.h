@@ -171,7 +171,9 @@ ATTRIBUTE_ALIGNED16(class) en_char_controller : public btCharacterControllerInte
         bool onGround () const;
         void setUpInterpolate (bool value);
 
-        void crouch();      /* game -> CC: signal start of crouching */
+        void crouch(btCollisionWorld *collisionWorld);      /* game -> CC: signal start of crouching */
         void crouchEnd();   /* game -> CC: signal end of crouching */
+
+        bool can_stand(btCollisionWorld *collisionWorld);
 };
 
