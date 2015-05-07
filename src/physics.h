@@ -45,3 +45,7 @@ struct sw_mesh;
 void
 build_static_physics_setup(int _x, int _y, int _z, sw_mesh const * src,
                            btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);
+
+
+void
+teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);

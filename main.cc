@@ -166,9 +166,21 @@ struct entity
     int x, y, z;
     hw_mesh *mesh;
 
-    /* TODO: phys */
+    btTriangleMesh *phys_mesh;
+    btCollisionShape *phys_shape;
+    btRigidBody *phys_body;
 
-    entity(int x, int y, int z, hw_mesh *mesh) : x(x), y(y), z(z), mesh(mesh) {}
+    entity(int x, int y, int z, sw_mesh *sw, hw_mesh *mesh)
+        : x(x), y(y), z(z), mesh(mesh), phys_mesh(0), phys_shape(0), phys_body(0)
+    {
+        build_static_physics_setup(x, y, z, sw,
+                &phys_mesh, &phys_shape, &phys_body);
+    }
+
+    ~entity()
+    {
+        teardown_static_physics_setup(&phys_mesh, &phys_shape, &phys_body);
+    }
 };
 
 
@@ -586,7 +598,7 @@ struct add_block_entity_tool : public tool
 
         /* TODO: flesh this out a bit */
         ship->get_chunk_containing(rc->px, rc->py, rc->pz)->entities.push_back(
-            new entity(rc->px, rc->py, rc->pz, frobnicator_hw)
+            new entity(rc->px, rc->py, rc->pz, frobnicator_sw, frobnicator_hw)
             );
     }
 

@@ -93,6 +93,29 @@ build_static_physics_setup(int _x, int _y, int _z, sw_mesh const * src,
 
 
 void
+teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb)
+{
+    /* cleanly teardown a static physics object such that build_static_physics_setup() will
+     * properly reconstruct everything */
+
+    if (*rb) {
+        phy->dynamicsWorld->removeRigidBody(*rb);
+        delete *rb;
+        *rb = NULL;
+    }
+
+    if (*shape) {
+        delete *shape;
+        *shape = NULL;
+    }
+
+    if (*mesh)
+        delete *mesh;
+    *mesh = NULL;
+}
+
+
+void
 chunk::prepare_render(int _x, int _y, int _z)
 {
     if (this->render_chunk.valid)
