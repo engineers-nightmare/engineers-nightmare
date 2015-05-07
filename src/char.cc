@@ -163,6 +163,7 @@ en_char_controller::en_char_controller (btPairCachingGhostObject* ghostObject,
     m_currentStepOffset = 0;
     full_drop = false;
     bounce_fix = false;
+    try_stand = false;
 }
 
 en_char_controller::~en_char_controller ()
@@ -689,6 +690,9 @@ void en_char_controller::playerStep (  btCollisionWorld* collisionWorld, btScala
     }
     stepDown (collisionWorld, dt);
 
+    if (try_stand)
+        stand(collisionWorld);
+
     // printf("\n");
 
     xform.setOrigin (m_currentPosition);
@@ -783,12 +787,27 @@ void en_char_controller::crouch()
     /* game -> CC: signal start of crouching. this always succeeds, so just do it now. */
     m_ghostObject->setCollisionShape(m_crouchShape);
     m_currentShape = m_crouchShape;
+
+    try_stand = false;
+
+    /* TODO: adjust position to avoid bouncing */
 }
 
 
 void en_char_controller::crouchEnd()
 {
     /* game -> CC: signal end of crouching. this can be blocked, but let's just hack it for now. */
+    try_stand = true;
+}
+
+
+void en_char_controller::stand(btCollisionWorld *collisionWorld)
+{
+    /* CC internal: stand up if we are crouching, unblocked, and want to stand. */
     m_ghostObject->setCollisionShape(m_standShape);
     m_currentShape = m_standShape;
+
+    try_stand = false;
+
+    /* TODO: adjust position to avoid bouncing */
 }

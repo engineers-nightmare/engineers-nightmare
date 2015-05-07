@@ -83,6 +83,7 @@ ATTRIBUTE_ALIGNED16(class) en_char_controller : public btCharacterControllerInte
         bool  m_interpolateUp;
         bool  full_drop;
         bool  bounce_fix;
+        bool try_stand;
 
         btVector3 computeReflectionDirection (const btVector3& direction, const btVector3& normal);
         btVector3 parallelComponent (const btVector3& direction, const btVector3& normal);
@@ -93,6 +94,8 @@ ATTRIBUTE_ALIGNED16(class) en_char_controller : public btCharacterControllerInte
         void updateTargetPositionBasedOnCollision (const btVector3& hit_normal, btScalar tangentMag = btScalar(0.0), btScalar normalMag = btScalar(1.0));
         void stepForwardAndStrafe (btCollisionWorld* collisionWorld, const btVector3& walkMove);
         void stepDown (btCollisionWorld* collisionWorld, btScalar dt);
+        void stand(btCollisionWorld *collisionWorld);
+
     public:
 
         BT_DECLARE_ALIGNED_ALLOCATOR();
