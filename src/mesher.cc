@@ -37,6 +37,49 @@ extern physics *phy;
 
 
 void
+build_static_physics_setup(int _x, int _y, int _z, sw_mesh const * src,
+                           btTriangleMesh **mesh, btBvhTriangleMeshShape **shape, btRigidBody **rb)
+{
+    // physics! This is a pretty stupid way to do it, but can redo...
+    btTriangleMesh *phys = new btTriangleMesh();
+    phys->preallocateVertices(src->num_vertices);
+    phys->preallocateIndices(src->num_indices);
+
+    for (auto x = src->indices; x < src->indices + src->num_indices; /* */) {
+        vertex v1 = src->verts[*x++];
+        vertex v2 = src->verts[*x++];
+        vertex v3 = src->verts[*x++];
+
+        phys->addTriangle(btVector3(v1.x, v1.y, v1.z),
+                          btVector3(v2.x, v2.y, v2.z),
+                          btVector3(v3.x, v3.y, v3.z));
+    }
+
+    btBvhTriangleMeshShape *new_shape = new btBvhTriangleMeshShape(phys, true, true);
+
+    if (*rb)
+        (*rb)->setCollisionShape(new_shape);
+    else {
+        btDefaultMotionState *ms = new btDefaultMotionState(
+            btTransform(btQuaternion(0, 0, 0, 1),
+                        btVector3(_x * CHUNK_SIZE, _y * CHUNK_SIZE, _z * CHUNK_SIZE)));
+        btRigidBody::btRigidBodyConstructionInfo
+                    ci(0, ms, new_shape, btVector3(0, 0, 0));
+        *rb = new btRigidBody(ci);
+        phy->dynamicsWorld->addRigidBody(*rb);
+    }
+
+    if (*shape)
+        delete *shape;
+    *shape = new_shape;
+
+    if (*mesh)
+        delete *mesh;
+    *mesh = phys;
+}
+
+
+void
 chunk::prepare_render(int _x, int _y, int _z)
 {
     if (this->render_chunk.valid)
@@ -81,41 +124,9 @@ chunk::prepare_render(int _x, int _y, int _z)
     this->render_chunk.mesh = upload_mesh(&m);
     this->render_chunk.valid = true;
 
-    // physics! This is a pretty stupid way to do it, but can redo...
-    btTriangleMesh *phys = new btTriangleMesh();
-    phys->preallocateVertices(verts.size());
-    phys->preallocateIndices(indices.size());
-
-    for (std::vector<unsigned>::const_iterator x = indices.begin(); x != indices.end();) {
-        vertex v1 = verts[*x++];
-        vertex v2 = verts[*x++];
-        vertex v3 = verts[*x++];
-
-        phys->addTriangle(btVector3(v1.x, v1.y, v1.z),
-                          btVector3(v2.x, v2.y, v2.z),
-                          btVector3(v3.x, v3.y, v3.z));
-    }
-
-    btBvhTriangleMeshShape *shape = new btBvhTriangleMeshShape(phys, true, true);
-
-    if (this->render_chunk.phys_body)
-        this->render_chunk.phys_body->setCollisionShape(shape);
-    else {
-        btDefaultMotionState *ms = new btDefaultMotionState(
-            btTransform(btQuaternion(0, 0, 0, 1),
-                        btVector3(_x * CHUNK_SIZE, _y * CHUNK_SIZE, _z * CHUNK_SIZE)));
-        btRigidBody::btRigidBodyConstructionInfo
-                    ci(0, ms, shape, btVector3(0, 0, 0));
-        this->render_chunk.phys_body = new btRigidBody(ci);
-        phy->dynamicsWorld->addRigidBody(this->render_chunk.phys_body);
-    }
-
-    if (this->render_chunk.phys_shape)
-        delete this->render_chunk.phys_shape;
-    this->render_chunk.phys_shape = shape;
-
-    if (this->render_chunk.phys_mesh)
-        delete this->render_chunk.phys_mesh;
-    this->render_chunk.phys_mesh = phys;
+    build_static_physics_setup(_x, _y, _z, &m,
+                               &this->render_chunk.phys_mesh,
+                               &this->render_chunk.phys_shape,
+                               &this->render_chunk.phys_body);
 }
 
