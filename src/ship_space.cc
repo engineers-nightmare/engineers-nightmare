@@ -161,6 +161,27 @@ ship_space::mock_ship_space(void)
                     b3->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
                     b4->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
 
+                    b1->surfs[surface_zm] = surface_wall;
+                    b2->surfs[surface_zm] = surface_wall;
+                    b3->surfs[surface_zm] = surface_wall;
+                    b4->surfs[surface_zm] = surface_wall;
+
+                    if( x == 0 ){
+                        b1->surfs[surface_xm] = surface_wall;
+                        b2->surfs[surface_xm] = surface_wall;
+                    } else if( x == 7 ){
+                        b3->surfs[surface_xp] = surface_wall;
+                        b4->surfs[surface_xp] = surface_wall;
+                    }
+
+                    if( y == 0 ){
+                        b1->surfs[surface_ym] = surface_wall;
+                        b3->surfs[surface_ym] = surface_wall;
+                    } else if( y == 7 ){
+                        b2->surfs[surface_yp] = surface_wall;
+                        b4->surfs[surface_yp] = surface_wall;
+                    }
+
                 } else if( y == 0 ){
                     /* we want a 2 height door at x == 3
                      * and a one height door a x == 5
@@ -179,6 +200,17 @@ ship_space::mock_ship_space(void)
                         b2->type = block_support;
                         b3->type = block_support;
                         b4->type = block_support;
+
+                        /* add surfaces to the external outside of walls */
+                        b1->surfs[surface_ym] = surface_wall;
+                        b3->surfs[surface_ym] = surface_wall;
+                        if( x == 0 ){
+                            b1->surfs[surface_xm] = surface_wall;
+                            b2->surfs[surface_xm] = surface_wall;
+                        } else if( x == 7 ) {
+                            b3->surfs[surface_xp] = surface_wall;
+                            b4->surfs[surface_xp] = surface_wall;
+                        }
 
                         if( x != 0 &&
                             x != 7 ){
@@ -237,6 +269,14 @@ ship_space::mock_ship_space(void)
                         b3->type = block_support;
                         b4->type = block_support;
 
+                        /* add surfaces to external outside of walls */
+                        b1->surfs[surface_xm] = surface_wall;
+                        b2->surfs[surface_xm] = surface_wall;
+                        if( y == 7 ){
+                            b2->surfs[surface_yp] = surface_wall;
+                            b4->surfs[surface_yp] = surface_wall;
+                        }
+
                         if( y != 0 &&
                             y != 7 ){
                             /* add surfaces to inside of walls */
@@ -294,6 +334,14 @@ ship_space::mock_ship_space(void)
                         b3->type = block_support;
                         b4->type = block_support;
 
+                        /* add surfaces to external outside of walls */
+                        b3->surfs[surface_xp] = surface_wall;
+                        b4->surfs[surface_xp] = surface_wall;
+                        if( x == 7 ){
+                            b2->surfs[surface_yp] = surface_wall;
+                            b4->surfs[surface_yp] = surface_wall;
+                        }
+
                         if( y != 0 &&
                             y != 7 ){
                             /* add surfaces to inside of walls */
@@ -350,6 +398,10 @@ ship_space::mock_ship_space(void)
                         b2->type = block_support;
                         b3->type = block_support;
                         b4->type = block_support;
+
+                        /* add surfaces to external outside of walls */
+                        b2->surfs[surface_yp] = surface_wall;
+                        b4->surfs[surface_yp] = surface_wall;
 
                         if( x != 0 &&
                             x != 7 ){
