@@ -38,11 +38,9 @@ class btPairCachingGhostObject;
 ATTRIBUTE_ALIGNED16(class) en_char_controller : public btCharacterControllerInterface
 {
     protected:
-
-        btScalar m_halfHeight;
-
         btPairCachingGhostObject* m_ghostObject;
-        btConvexShape*	m_convexShape;//is also in m_ghostObject, but it needs to be convex, so we store it here to avoid upcast
+        btConvexShape *m_currentShape;
+        btConvexShape *m_standShape, *m_crouchShape;
 
         btScalar m_verticalVelocity;
         btScalar m_verticalOffset;
@@ -99,7 +97,10 @@ ATTRIBUTE_ALIGNED16(class) en_char_controller : public btCharacterControllerInte
 
         BT_DECLARE_ALIGNED_ALLOCATOR();
 
-        en_char_controller (btPairCachingGhostObject* ghostObject,btConvexShape* convexShape,btScalar stepHeight, int upAxis = 1);
+        en_char_controller (btPairCachingGhostObject* ghostObject,
+                btConvexShape* standShape,
+                btConvexShape *crouchShape,
+                btScalar stepHeight, int upAxis = 1);
         ~en_char_controller ();
 
 
@@ -166,5 +167,8 @@ ATTRIBUTE_ALIGNED16(class) en_char_controller : public btCharacterControllerInte
 
         bool onGround () const;
         void setUpInterpolate (bool value);
+
+        void crouch();      /* game -> CC: signal start of crouching */
+        void crouchEnd();   /* game -> CC: signal end of crouching */
 };
 

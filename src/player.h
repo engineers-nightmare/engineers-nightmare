@@ -26,6 +26,9 @@ struct player {
     bool last_left_button;
     bool left_button;
 
+    bool last_crouch;
+    bool crouch;
+
     bool ui_dirty;
 
     /* used within physics to toggle gravity */

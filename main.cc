@@ -271,6 +271,7 @@ init()
     player.last_use = player.use = false;
     player.last_reset = player.reset = false;
     player.last_left_button = player.left_button = false;
+    player.last_crouch = player.crouch = false;
     player.ui_dirty = true;
     player.disable_gravity = false;
 
@@ -801,6 +802,9 @@ handle_input()
 
     player.last_reset = player.reset;
     player.reset = keys[SDL_SCANCODE_R];
+
+    player.last_crouch = player.crouch;
+    player.crouch = keys[SDL_SCANCODE_LCTRL];
 
     /* G enables gravity */
     if( keys[SDL_SCANCODE_G] ){

@@ -134,7 +134,10 @@ btVector3 en_char_controller::perpindicularComponent (const btVector3& direction
     return direction - parallelComponent(direction, normal);
 }
 
-en_char_controller::en_char_controller (btPairCachingGhostObject* ghostObject,btConvexShape* convexShape,btScalar stepHeight, int upAxis)
+en_char_controller::en_char_controller (btPairCachingGhostObject* ghostObject,
+                                        btConvexShape *standShape,
+                                        btConvexShape *crouchShape,
+                                        btScalar stepHeight, int upAxis)
 {
     m_upAxis = upAxis;
     m_addedMargin = 0.02;
@@ -143,7 +146,9 @@ en_char_controller::en_char_controller (btPairCachingGhostObject* ghostObject,bt
     m_ghostObject = ghostObject;
     m_stepHeight = stepHeight;
     m_turnAngle = btScalar(0.0);
-    m_convexShape=convexShape;	
+    m_standShape = standShape;
+    m_crouchShape = crouchShape;
+    m_currentShape = standShape;
     m_useWalkDirection = true;	// use walk direction by default, legacy behavior
     m_velocityTimeInterval = 0.0;
     m_verticalVelocity = 0.0;
@@ -180,7 +185,7 @@ bool en_char_controller::recoverFromPenetration ( btCollisionWorld* collisionWor
     // paircache and the ghostobject's internal paircache at the same time.    /BW
 
     btVector3 minAabb, maxAabb;
-    m_convexShape->getAabb(m_ghostObject->getWorldTransform(), minAabb,maxAabb);
+    m_currentShape->getAabb(m_ghostObject->getWorldTransform(), minAabb,maxAabb);
     collisionWorld->getBroadphase()->setAabb(m_ghostObject->getBroadphaseHandle(), 
             minAabb, 
             maxAabb, 
@@ -254,7 +259,7 @@ void en_char_controller::stepUp ( btCollisionWorld* world)
     end.setIdentity ();
 
     /* FIXME: Handle penetration properly */
-    start.setOrigin (m_currentPosition + getUpAxisDirections()[m_upAxis] * (m_convexShape->getMargin() + m_addedMargin));
+    start.setOrigin (m_currentPosition + getUpAxisDirections()[m_upAxis] * (m_currentShape->getMargin() + m_addedMargin));
     end.setOrigin (m_targetPosition);
 
     btKinematicClosestNotMeConvexResultCallback callback (m_ghostObject, -getUpAxisDirections()[m_upAxis], btScalar(0.7071));
@@ -263,11 +268,11 @@ void en_char_controller::stepUp ( btCollisionWorld* world)
 
     if (m_useGhostObjectSweepTest)
     {
-        m_ghostObject->convexSweepTest (m_convexShape, start, end, callback, world->getDispatchInfo().m_allowedCcdPenetration);
+        m_ghostObject->convexSweepTest (m_currentShape, start, end, callback, world->getDispatchInfo().m_allowedCcdPenetration);
     }
     else
     {
-        world->convexSweepTest (m_convexShape, start, end, callback);
+        world->convexSweepTest (m_currentShape, start, end, callback);
     }
 
     if (callback.hasHit())
@@ -363,19 +368,19 @@ void en_char_controller::stepForwardAndStrafe ( btCollisionWorld* collisionWorld
         callback.m_collisionFilterMask = getGhostObject()->getBroadphaseHandle()->m_collisionFilterMask;
 
 
-        btScalar margin = m_convexShape->getMargin();
-        m_convexShape->setMargin(margin + m_addedMargin);
+        btScalar margin = m_currentShape->getMargin();
+        m_currentShape->setMargin(margin + m_addedMargin);
 
 
         if (m_useGhostObjectSweepTest)
         {
-            m_ghostObject->convexSweepTest (m_convexShape, start, end, callback, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
+            m_ghostObject->convexSweepTest (m_currentShape, start, end, callback, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
         } else
         {
-            collisionWorld->convexSweepTest (m_convexShape, start, end, callback, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
+            collisionWorld->convexSweepTest (m_currentShape, start, end, callback, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
         }
 
-        m_convexShape->setMargin(margin);
+        m_currentShape->setMargin(margin);
 
 
         fraction -= callback.m_closestHitFraction;
@@ -462,21 +467,21 @@ void en_char_controller::stepDown ( btCollisionWorld* collisionWorld, btScalar d
 
         if (m_useGhostObjectSweepTest)
         {
-            m_ghostObject->convexSweepTest (m_convexShape, start, end, callback, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
+            m_ghostObject->convexSweepTest (m_currentShape, start, end, callback, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
 
             if (!callback.hasHit())
             {
                 //test a double fall height, to see if the character should interpolate it's fall (full) or not (partial)
-                m_ghostObject->convexSweepTest (m_convexShape, start, end_double, callback2, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
+                m_ghostObject->convexSweepTest (m_currentShape, start, end_double, callback2, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
             }
         } else
         {
-            collisionWorld->convexSweepTest (m_convexShape, start, end, callback, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
+            collisionWorld->convexSweepTest (m_currentShape, start, end, callback, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
 
             if (!callback.hasHit())
             {
                 //test a double fall height, to see if the character should interpolate it's fall (large) or not (small)
-                collisionWorld->convexSweepTest (m_convexShape, start, end_double, callback2, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
+                collisionWorld->convexSweepTest (m_currentShape, start, end_double, callback2, collisionWorld->getDispatchInfo().m_allowedCcdPenetration);
             }
         }
 
@@ -770,4 +775,20 @@ void en_char_controller::debugDraw(btIDebugDraw* debugDrawer)
 void en_char_controller::setUpInterpolate(bool value)
 {
     m_interpolateUp = value;
+}
+
+
+void en_char_controller::crouch()
+{
+    /* game -> CC: signal start of crouching. this always succeeds, so just do it now. */
+    m_ghostObject->setCollisionShape(m_crouchShape);
+    m_currentShape = m_crouchShape;
+}
+
+
+void en_char_controller::crouchEnd()
+{
+    /* game -> CC: signal end of crouching. this can be blocked, but let's just hack it for now. */
+    m_ghostObject->setCollisionShape(m_standShape);
+    m_currentShape = m_standShape;
 }

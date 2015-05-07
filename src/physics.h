@@ -25,7 +25,8 @@ struct physics {
     player *pl;
 
     /* character control guff */
-    btConvexShape *playerShape;
+    btConvexShape *standShape;
+    btConvexShape *crouchShape;
     btPairCachingGhostObject *ghostObj;
     en_char_controller *controller;
 

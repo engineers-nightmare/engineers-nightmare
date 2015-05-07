@@ -53,7 +53,8 @@ physics::physics(player *p)
 
 
     /* setup player rigid body */
-    this->playerShape = new btCylinderShapeZ(btVector3(0.35, 0.35, 0.5));
+    this->standShape = new btCylinderShapeZ(btVector3(0.35, 0.35, 0.5));
+    this->crouchShape = new btCapsuleShapeZ(0.35, 0.0);//btVector3(0.35, 0.35, 0.25));
     float maxStepHeight = 0.5f;
 
     /* setup the character controller. this gets a bit fiddly. */
@@ -63,9 +64,9 @@ physics::physics(player *p)
     this->ghostObj = new btPairCachingGhostObject();
     this->ghostObj->setWorldTransform(startTransform);
     this->broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
-    this->ghostObj->setCollisionShape(this->playerShape);
+    this->ghostObj->setCollisionShape(this->standShape);
     this->ghostObj->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
-    this->controller = new en_char_controller(this->ghostObj, this->playerShape, btScalar(maxStepHeight));
+    this->controller = new en_char_controller(this->ghostObj, this->standShape, this->crouchShape, btScalar(maxStepHeight));
 
     this->dynamicsWorld->addCollisionObject(this->ghostObj, btBroadphaseProxy::CharacterFilter,
             btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
@@ -84,7 +85,8 @@ physics::~physics()
 
     delete(this->dynamicsWorld);
 
-    delete(this->playerShape);
+    delete(this->standShape);
+    delete(this->crouchShape);
     delete(this->ghostObj);
     delete(this->controller);
 }
@@ -125,6 +127,16 @@ physics::tick()
     if (!pl->last_reset && pl->reset) {
         /* reset position (for debug) */
         this->controller->warp(btVector3(PLAYER_START_X, PLAYER_START_Y, PLAYER_START_Z));
+    }
+
+    if (!pl->last_crouch && pl->crouch) {
+        this->controller->crouch();
+        printf("Begin crouch!\n");
+    }
+
+    if (pl->last_crouch && !pl->crouch) {
+        this->controller->crouchEnd();
+        printf("End crouch!\n");
     }
 
     dynamicsWorld->stepSimulation(1 / 60.f, 10);
