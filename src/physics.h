@@ -2,7 +2,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
-#include <BulletDynamics/Character/btKinematicCharacterController.h>
+#include "char.h"
 
 
 /* in player.h */
@@ -27,7 +27,7 @@ struct physics {
     /* character control guff */
     btConvexShape *playerShape;
     btPairCachingGhostObject *ghostObj;
-    btKinematicCharacterController *controller;
+    en_char_controller *controller;
 
     /* initialise our physics state */
     physics(player *pl);

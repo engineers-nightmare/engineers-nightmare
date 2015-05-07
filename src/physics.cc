@@ -65,7 +65,7 @@ physics::physics(player *p)
     this->broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
     this->ghostObj->setCollisionShape(this->playerShape);
     this->ghostObj->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
-    this->controller = new btKinematicCharacterController(this->ghostObj, this->playerShape, btScalar(maxStepHeight));
+    this->controller = new en_char_controller(this->ghostObj, this->playerShape, btScalar(maxStepHeight));
 
     this->dynamicsWorld->addCollisionObject(this->ghostObj, btBroadphaseProxy::CharacterFilter,
             btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
