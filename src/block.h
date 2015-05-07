@@ -10,6 +10,7 @@ enum surface_type {
     surface_none,
     surface_wall,
     surface_grate,
+    surface_text,
 };
 
 /* 6 surfaces currently, all axis aligned

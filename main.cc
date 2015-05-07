@@ -249,6 +249,7 @@ init()
     world_textures->load(3, "textures/frobnicator.png");
     world_textures->load(4, "textures/grate.png");
     world_textures->load(5, "textures/red.png");
+    world_textures->load(6, "textures/text_example.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP_ARRAY, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
@@ -638,6 +639,7 @@ tool *tools[] = {
     new remove_surface_tool(),
     new add_block_entity_tool(),
     new add_surface_tool(surface_grate),
+    new add_surface_tool(surface_text),
 };
 
 
@@ -817,6 +819,7 @@ handle_input()
     if (keys[SDL_SCANCODE_4]) set_slot(4);
     if (keys[SDL_SCANCODE_5]) set_slot(5);
     if (keys[SDL_SCANCODE_6]) set_slot(6);
+    if (keys[SDL_SCANCODE_7]) set_slot(7);
 
     /* Current state of the mouse buttons. */
     unsigned int mouse_buttons = SDL_GetRelativeMouseState(NULL, NULL);

@@ -121,7 +121,7 @@ chunk::prepare_render(int _x, int _y, int _z)
     if (this->render_chunk.valid)
         return;     // nothing to do here.
 
-    static const int surface_type_to_material[] = { 0, 2, 4 };
+    static const int surface_type_to_material[] = { 0, 2, 4, 6 };
 
     std::vector<vertex> verts;
     std::vector<unsigned> indices;
