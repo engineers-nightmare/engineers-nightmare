@@ -131,12 +131,10 @@ physics::tick()
 
     if (!pl->last_crouch && pl->crouch) {
         this->controller->crouch(this->dynamicsWorld);
-        printf("Begin crouch!\n");
     }
 
     if (pl->last_crouch && !pl->crouch) {
         this->controller->crouchEnd();
-        printf("End crouch!\n");
     }
 
     dynamicsWorld->stepSimulation(1 / 60.f, 10);

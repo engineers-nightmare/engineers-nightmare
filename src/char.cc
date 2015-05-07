@@ -785,10 +785,14 @@ void en_char_controller::setUpInterpolate(bool value)
 void en_char_controller::crouch(btCollisionWorld *collisionWorld)
 {
     /* game -> CC: signal start of crouching. this always succeeds, so just do it now. */
+    try_stand = false;
+
+    if (m_currentShape == m_crouchShape)
+        return;
+
     m_ghostObject->setCollisionShape(m_crouchShape);
     m_currentShape = m_crouchShape;
 
-    try_stand = false;
 
     /* adjust position to avoid bouncing */
     btTransform & transform = m_ghostObject->getWorldTransform();
@@ -809,12 +813,10 @@ bool en_char_controller::can_stand(btCollisionWorld *collisionWorld)
 {
     /* already standing */
     if (m_currentShape == m_standShape) {
-        printf("already standing\n");
         return true;
     }
 
     /* check if there's room above us. this is similar to the stepUp support. */
-    printf("pos: x=%f y=%f z=%f\n", m_currentPosition.getX(), m_currentPosition.getY(), m_currentPosition.getZ());
     btTransform start, end;
     start.setIdentity();
     end.setIdentity();
@@ -822,7 +824,7 @@ bool en_char_controller::can_stand(btCollisionWorld *collisionWorld)
     btVector3 endOrigin = m_currentPosition + btVector3(0, 0, +0.6);    /* hack */
     end.setOrigin(endOrigin);
 
-    btKinematicClosestNotMeConvexResultCallback callback(m_ghostObject, getUpAxisDirections()[m_upAxis],
+    btKinematicClosestNotMeConvexResultCallback callback(m_ghostObject, -getUpAxisDirections()[m_upAxis],
             m_maxSlopeCosine);
 
     callback.m_collisionFilterGroup = m_ghostObject->getBroadphaseHandle()->m_collisionFilterGroup;
@@ -837,11 +839,8 @@ bool en_char_controller::can_stand(btCollisionWorld *collisionWorld)
 
 void en_char_controller::stand(btCollisionWorld *collisionWorld)
 {
-    printf("Trying to stand\n");
-
     /* CC internal: stand up if we are crouching, unblocked, and want to stand. */
     if (!can_stand(collisionWorld)) {
-        printf("Blocked...\n");
         return;
     }
 
@@ -853,8 +852,6 @@ void en_char_controller::stand(btCollisionWorld *collisionWorld)
     /* adjust position to avoid bouncing */
     btTransform & transform = m_ghostObject->getWorldTransform();
     transform.setOrigin(transform.getOrigin() + btVector3(0, 0, +0.3)); /* hack */
-
-    printf("Stand done\n");
 
     reset(collisionWorld);
 }
