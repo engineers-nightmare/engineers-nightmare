@@ -55,7 +55,7 @@ physics::physics(player *p)
     /* setup player rigid body */
     this->standShape = new btCylinderShapeZ(btVector3(0.35, 0.35, 0.5));
     this->crouchShape = new btCapsuleShapeZ(0.35, 0.0);//btVector3(0.35, 0.35, 0.25));
-    float maxStepHeight = 0.5f;
+    float maxStepHeight = 0.15f;
 
     /* setup the character controller. this gets a bit fiddly. */
     btTransform startTransform;
