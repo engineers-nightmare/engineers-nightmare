@@ -33,13 +33,19 @@ void main(void)
 	gl_Position = view_proj_matrix * world_pos;
     texcoord.z = mat;
 
-    vec3 n = abs(normalize(norm));
+    vec3 n = normalize(norm);
     /* Quick & dirty triplanar mapping */
     if (n.x > 0.8) {
-        texcoord.xy = pos.yz;
+        texcoord.xy = vec2(-pos.y, -pos.z);
+	} else if (n.x < -0.8) {
+        texcoord.xy = vec2(pos.y, -pos.z);
     } else if (n.y > 0.8) {
-        texcoord.xy = pos.xz;
-    } else {
+        texcoord.xy = vec2(pos.x, -pos.z);
+	} else if (n.y < -0.8) {
+		texcoord.xy = vec2(-pos.x, -pos.z);
+    } else if (n.z < -0.8) {
+		texcoord.xy = vec2(pos.x, -pos.y);
+	} else {
         texcoord.xy = pos.xy;
     }
 
