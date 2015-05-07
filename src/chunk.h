@@ -11,7 +11,7 @@ struct hw_mesh;
 struct entity;
 
 class btTriangleMesh;
-class btBvhTriangleMeshShape;
+class btCollisionShape;
 class btRigidBody;
 
 struct render_chunk {
@@ -20,7 +20,7 @@ struct render_chunk {
 
 
     btTriangleMesh *phys_mesh;
-    btBvhTriangleMeshShape *phys_shape;
+    btCollisionShape *phys_shape;
     btRigidBody *phys_body;
 };
 

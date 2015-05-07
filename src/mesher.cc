@@ -38,28 +38,41 @@ extern physics *phy;
 
 void
 build_static_physics_setup(int _x, int _y, int _z, sw_mesh const * src,
-                           btTriangleMesh **mesh, btBvhTriangleMeshShape **shape, btRigidBody **rb)
+                           btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb)
 {
-    // physics! This is a pretty stupid way to do it, but can redo...
-    btTriangleMesh *phys = new btTriangleMesh();
-    phys->preallocateVertices(src->num_vertices);
-    phys->preallocateIndices(src->num_indices);
+    btTriangleMesh *phys = NULL;
+    btCollisionShape *new_shape = NULL;
 
-    for (auto x = src->indices; x < src->indices + src->num_indices; /* */) {
-        vertex v1 = src->verts[*x++];
-        vertex v2 = src->verts[*x++];
-        vertex v3 = src->verts[*x++];
+    if (src->num_indices) {
+        /* If we have some content in our mesh, transfer it to bullet */
+        phys = new btTriangleMesh();
+        phys->preallocateVertices(src->num_vertices);
+        phys->preallocateIndices(src->num_indices);
 
-        phys->addTriangle(btVector3(v1.x, v1.y, v1.z),
-                          btVector3(v2.x, v2.y, v2.z),
-                          btVector3(v3.x, v3.y, v3.z));
+        for (auto x = src->indices; x < src->indices + src->num_indices; /* */) {
+            vertex v1 = src->verts[*x++];
+            vertex v2 = src->verts[*x++];
+            vertex v3 = src->verts[*x++];
+
+            phys->addTriangle(btVector3(v1.x, v1.y, v1.z),
+                              btVector3(v2.x, v2.y, v2.z),
+                              btVector3(v3.x, v3.y, v3.z));
+        }
+
+        new_shape = new btBvhTriangleMeshShape(phys, true, true);
+    }
+    else {
+        /* Empty mesh, just provide an empty shape. A zero-size mesh provokes a segfault inside
+         * bullet, so avoid that. */
+        new_shape = new btEmptyShape();
     }
 
-    btBvhTriangleMeshShape *new_shape = new btBvhTriangleMeshShape(phys, true, true);
-
-    if (*rb)
+    if (*rb) {
+        /* We already have a rigid body set up; just swap out its collision shape. */
         (*rb)->setCollisionShape(new_shape);
+    }
     else {
+        /* Rigid body doesn't exist yet -- build one, along with all th motionstate junk */
         btDefaultMotionState *ms = new btDefaultMotionState(
             btTransform(btQuaternion(0, 0, 0, 1),
                         btVector3(_x * CHUNK_SIZE, _y * CHUNK_SIZE, _z * CHUNK_SIZE)));
@@ -69,6 +82,7 @@ build_static_physics_setup(int _x, int _y, int _z, sw_mesh const * src,
         phy->dynamicsWorld->addRigidBody(*rb);
     }
 
+    /* Throw away any old objects we've replaced. */
     if (*shape)
         delete *shape;
     *shape = new_shape;
