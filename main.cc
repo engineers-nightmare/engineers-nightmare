@@ -494,7 +494,7 @@ struct add_surface_tool : public tool
             bl->surfs[index] = this->st;
             ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
 
-            other_side->surfs[index ^ 1] = surface_wall;
+            other_side->surfs[index ^ 1] = this->st;
             ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
 
         }
