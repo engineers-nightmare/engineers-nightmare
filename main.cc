@@ -269,6 +269,7 @@ init()
     player.selected_slot = 1;
     player.last_use = player.use = false;
     player.last_reset = player.reset = false;
+    player.last_left_button = player.left_button = false;
     player.ui_dirty = true;
     player.disable_gravity = false;
 
@@ -688,7 +689,7 @@ update()
     ship->raycast(player.eye.x, player.eye.y, player.eye.z, player.dir.x, player.dir.y, player.dir.z, &rc);
 
     /* tool use */
-    if (player.use && !player.last_use && rc.hit && t) {
+    if (player.left_button && !player.last_left_button && rc.hit && t) {
         t->use(&rc);
     }
 
@@ -816,6 +817,11 @@ handle_input()
     if (keys[SDL_SCANCODE_4]) set_slot(4);
     if (keys[SDL_SCANCODE_5]) set_slot(5);
     if (keys[SDL_SCANCODE_6]) set_slot(6);
+
+    /* Current state of the mouse buttons. */
+    unsigned int mouse_buttons = SDL_GetRelativeMouseState(NULL, NULL);
+    player.last_left_button = player.left_button;
+    player.left_button = mouse_buttons & SDL_BUTTON(1);
 }
 
 

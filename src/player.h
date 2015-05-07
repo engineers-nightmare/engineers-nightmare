@@ -23,6 +23,9 @@ struct player {
     bool last_reset;
     bool reset;
 
+    bool last_left_button;
+    bool left_button;
+
     bool ui_dirty;
 
     /* used within physics to toggle gravity */
