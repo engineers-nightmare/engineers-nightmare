@@ -654,19 +654,25 @@ rebuild_ui()
     float w = 0;
     float h = 0;
     char buf[256];
+    char buf2[512];
 
     /* Tool name down the bottom */
     tool *t = tools[player.selected_slot];
 
     if (t) {
         t->get_description(buf);
-        text->measure(buf, &w, &h);
-        text->add(buf, -w/2, -400);
     }
+    else {
+        strcpy(buf, "(empty hands)");
+    }
+
+    sprintf(buf2, "Left mouse button: %s", buf);
+    text->measure(buf2, &w, &h);
+    text->add(buf2, -w/2, -400);
 
     /* Gravity state (temp) */
     w = 0; h = 0;
-    sprintf(buf, "Gravity: %s", player.disable_gravity ? "OFF" : "ON");
+    sprintf(buf, "Gravity: %s (G to toggle)", player.disable_gravity ? "OFF" : "ON");
     text->measure(buf, &w, &h);
     text->add(buf, -w/2, -430);
 
