@@ -175,5 +175,6 @@ ATTRIBUTE_ALIGNED16(class) en_char_controller : public btCharacterControllerInte
         void crouchEnd();   /* game -> CC: signal end of crouching */
 
         bool can_stand(btCollisionWorld *collisionWorld);
+        bool isCrouching();
 };
 

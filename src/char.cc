@@ -802,6 +802,12 @@ void en_char_controller::crouch(btCollisionWorld *collisionWorld)
 }
 
 
+bool en_char_controller::isCrouching()
+{
+    return m_currentShape == m_crouchShape;
+}
+
+
 void en_char_controller::crouchEnd()
 {
     /* game -> CC: signal end of crouching. this can be blocked, but let's just hack it for now. */
