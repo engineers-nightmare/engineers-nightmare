@@ -651,17 +651,24 @@ rebuild_ui()
 {
     text->reset();
 
+    float w = 0;
+    float h = 0;
+    char buf[256];
+
     /* Tool name down the bottom */
     tool *t = tools[player.selected_slot];
 
     if (t) {
-        float w = 0;
-        float h = 0;
-        char buf[256];
         t->get_description(buf);
         text->measure(buf, &w, &h);
         text->add(buf, -w/2, -400);
     }
+
+    /* Gravity state (temp) */
+    w = 0; h = 0;
+    sprintf(buf, "Gravity: %s", player.disable_gravity ? "OFF" : "ON");
+    text->measure(buf, &w, &h);
+    text->add(buf, -w/2, -430);
 
     text->upload();
 }
@@ -811,11 +818,13 @@ handle_input()
     /* G enables gravity */
     if( keys[SDL_SCANCODE_G] ){
         player.disable_gravity = 1;
+        player.ui_dirty = true;
     }
 
     /* H re-enables gravity */
     if( keys[SDL_SCANCODE_H] ){
         player.disable_gravity = 0;
+        player.ui_dirty = true;
     }
 
     if (keys[SDL_SCANCODE_1]) set_slot(1);
