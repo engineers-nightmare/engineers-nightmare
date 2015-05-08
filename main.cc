@@ -162,6 +162,7 @@ struct entity_type
 {
     sw_mesh *sw;
     hw_mesh *hw;
+    char const *name;
 };
 
 
@@ -231,6 +232,7 @@ init()
     entity_types[0].sw = load_mesh("mesh/frobnicator.obj");
     set_mesh_material(entity_types[0].sw, 3);
     entity_types[0].hw = upload_mesh(entity_types[0].sw);
+    entity_types[0].name = "Frobnicator";
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/simple.frag");
@@ -637,7 +639,7 @@ struct add_block_entity_tool : public tool
 
     virtual void get_description(char *str)
     {
-        strcpy(str, "Place Frobnicator");
+        sprintf(str, "Place %s", type->name);
     }
 };
 
