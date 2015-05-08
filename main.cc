@@ -591,7 +591,9 @@ struct remove_surface_tool : public tool
 
 struct add_block_entity_tool : public tool
 {
-    /* TODO: ent type */
+    entity_type *type;
+
+    add_block_entity_tool(entity_type *type) : type(type) {}
 
     virtual void use(raycast_info *rc)
     {
@@ -609,7 +611,7 @@ struct add_block_entity_tool : public tool
 
         /* TODO: flesh this out a bit */
         ship->get_chunk_containing(rc->px, rc->py, rc->pz)->entities.push_back(
-            new entity(rc->px, rc->py, rc->pz, &entity_types[0])
+            new entity(rc->px, rc->py, rc->pz, type)
             );
     }
 
@@ -624,7 +626,7 @@ struct add_block_entity_tool : public tool
             per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
             per_object->upload();
 
-            draw_mesh(entity_types[0].hw);
+            draw_mesh(type->hw);
 
             /* draw a block overlay as well around the frobnicator */
             glUseProgram(add_overlay_shader);
@@ -646,7 +648,7 @@ tool *tools[] = {
     new remove_block_tool(),
     new add_surface_tool(surface_wall),
     new remove_surface_tool(),
-    new add_block_entity_tool(),
+    new add_block_entity_tool(&entity_types[0]),
     new add_surface_tool(surface_grate),
     new add_surface_tool(surface_text),
     NULL,
