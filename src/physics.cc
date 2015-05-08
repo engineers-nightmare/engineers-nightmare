@@ -8,7 +8,8 @@
 #define PLAYER_START_Y 4
 #define PLAYER_START_Z 1.5
 
-#define MOVE_SPEED  0.05
+#define MOVE_SPEED  0.07
+#define CROUCH_FACTOR 0.4
 #define AIR_CONTROL_FACTOR 0.25
 
 /* a simple constructor hacked together based on
@@ -115,6 +116,8 @@ physics::tick()
     float speed = MOVE_SPEED;
     if (!this->controller->onGround())
         speed *= AIR_CONTROL_FACTOR;
+    else if (this->controller->isCrouching())
+        speed *= CROUCH_FACTOR;
 
     fwd *= this->pl->move.y * speed;
     right *= this->pl->move.x * speed;
