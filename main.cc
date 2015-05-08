@@ -143,7 +143,6 @@ gl_debug_callback(GLenum source __unused,
 
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
-sw_mesh *frobnicator_sw;
 GLuint simple_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
 GLuint sky_shader;
 shader_params<per_camera_params> *per_camera;
@@ -156,24 +155,33 @@ physics *phy;
 unsigned char const *keys;
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
-hw_mesh *frobnicator_hw;
 text_renderer *text;
+
+
+struct entity_type
+{
+    sw_mesh *sw;
+    hw_mesh *hw;
+};
+
+
+entity_type entity_types[1];
 
 
 struct entity
 {
     /* TODO: replace this completely, it's silly. */
     int x, y, z;
-    hw_mesh *mesh;
+    entity_type *type;
 
     btTriangleMesh *phys_mesh;
     btCollisionShape *phys_shape;
     btRigidBody *phys_body;
 
-    entity(int x, int y, int z, sw_mesh *sw, hw_mesh *mesh)
-        : x(x), y(y), z(z), mesh(mesh), phys_mesh(0), phys_shape(0), phys_body(0)
+    entity(int x, int y, int z, entity_type *type)
+        : x(x), y(y), z(z), type(type), phys_mesh(0), phys_shape(0), phys_body(0)
     {
-        build_static_physics_setup(x, y, z, sw,
+        build_static_physics_setup(x, y, z, type->sw,
                 &phys_mesh, &phys_shape, &phys_body);
     }
 
@@ -220,9 +228,9 @@ init()
     for (int i = 0; i < 6; i++)
         surfs_hw[i] = upload_mesh(surfs_sw[i]);
 
-    frobnicator_sw = load_mesh("mesh/frobnicator.obj");
-    set_mesh_material(frobnicator_sw, 3);
-    frobnicator_hw = upload_mesh(frobnicator_sw);
+    entity_types[0].sw = load_mesh("mesh/frobnicator.obj");
+    set_mesh_material(entity_types[0].sw, 3);
+    entity_types[0].hw = upload_mesh(entity_types[0].sw);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/simple.frag");
@@ -601,7 +609,7 @@ struct add_block_entity_tool : public tool
 
         /* TODO: flesh this out a bit */
         ship->get_chunk_containing(rc->px, rc->py, rc->pz)->entities.push_back(
-            new entity(rc->px, rc->py, rc->pz, frobnicator_sw, frobnicator_hw)
+            new entity(rc->px, rc->py, rc->pz, &entity_types[0])
             );
     }
 
@@ -616,7 +624,7 @@ struct add_block_entity_tool : public tool
             per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
             per_object->upload();
 
-            draw_mesh(frobnicator_hw);
+            draw_mesh(entity_types[0].hw);
 
             /* draw a block overlay as well around the frobnicator */
             glUseProgram(add_overlay_shader);
@@ -753,7 +761,7 @@ update()
                         per_object->val.world_matrix = mat_position(e->x, e->y, e->z);
                         per_object->upload();
 
-                        draw_mesh(e->mesh);
+                        draw_mesh(e->type->hw);
                     }
                 }
             }
