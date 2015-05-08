@@ -166,7 +166,7 @@ struct entity_type
 };
 
 
-entity_type entity_types[1];
+entity_type entity_types[2];
 
 
 struct entity
@@ -234,6 +234,11 @@ init()
     entity_types[0].hw = upload_mesh(entity_types[0].sw);
     entity_types[0].name = "Frobnicator";
 
+    entity_types[1].sw = load_mesh("mesh/panel_4x4.obj");
+    set_mesh_material(entity_types[1].sw, 7);
+    entity_types[1].hw = upload_mesh(entity_types[1].sw);
+    entity_types[1].name = "Display Panel (4x4)";
+
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/simple.frag");
     remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/simple.frag");
@@ -260,6 +265,7 @@ init()
     world_textures->load(4, "textures/grate.png");
     world_textures->load(5, "textures/red.png");
     world_textures->load(6, "textures/text_example.png");
+    world_textures->load(7, "textures/display.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP_ARRAY, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
@@ -649,11 +655,11 @@ tool *tools[] = {
     new add_block_tool(),
     new remove_block_tool(),
     new add_surface_tool(surface_wall),
-    new remove_surface_tool(),
-    new add_block_entity_tool(&entity_types[0]),
     new add_surface_tool(surface_grate),
     new add_surface_tool(surface_text),
-    NULL,
+    new remove_surface_tool(),
+    new add_block_entity_tool(&entity_types[0]),
+    new add_block_entity_tool(&entity_types[1]),
     NULL,
 };
 
