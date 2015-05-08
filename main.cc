@@ -641,6 +641,8 @@ tool *tools[] = {
     new add_block_entity_tool(),
     new add_surface_tool(surface_grate),
     new add_surface_tool(surface_text),
+    NULL,
+    NULL,
 };
 
 
@@ -816,7 +818,6 @@ handle_input()
         player.disable_gravity = 0;
     }
 
-    /* TODO: be less ridiculous */
     if (keys[SDL_SCANCODE_1]) set_slot(1);
     if (keys[SDL_SCANCODE_2]) set_slot(2);
     if (keys[SDL_SCANCODE_3]) set_slot(3);
@@ -824,6 +825,8 @@ handle_input()
     if (keys[SDL_SCANCODE_5]) set_slot(5);
     if (keys[SDL_SCANCODE_6]) set_slot(6);
     if (keys[SDL_SCANCODE_7]) set_slot(7);
+    if (keys[SDL_SCANCODE_8]) set_slot(8);
+    if (keys[SDL_SCANCODE_9]) set_slot(9);
 
     /* Current state of the mouse buttons. */
     unsigned int mouse_buttons = SDL_GetRelativeMouseState(NULL, NULL);
