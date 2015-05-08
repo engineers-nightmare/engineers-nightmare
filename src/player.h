@@ -29,6 +29,9 @@ struct player {
     bool last_crouch;
     bool crouch;
 
+    bool last_gravity;
+    bool gravity;
+
     bool ui_dirty;
 
     /* used within physics to toggle gravity */

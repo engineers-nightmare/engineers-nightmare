@@ -103,14 +103,19 @@ physics::tick()
     btVector3 fwd(c, s, 0);
     btVector3 right(s, -c, 0);
 
-    /* toggle gravity based on player->disable_gravity */
-    if( this->pl->disable_gravity ){
-        this->controller->setGravity(0);
-    } else {
-        /* http://bulletphysics.org/Bullet/BulletFull/btKinematicCharacterController_8cpp_source.html : 144
-         * 3G acceleration.
-         */
-        this->controller->setGravity(9.8 * 3);
+    if (!pl->last_gravity && pl->gravity) {
+        pl->disable_gravity ^= true;
+
+        if( this->pl->disable_gravity ){
+            this->controller->setGravity(0);
+        } else {
+            /* http://bulletphysics.org/Bullet/BulletFull/btKinematicCharacterController_8cpp_source.html : 144
+             * 3G acceleration.
+             */
+            this->controller->setGravity(9.8 * 3);
+        }
+
+        pl->ui_dirty = true;
     }
 
     float speed = MOVE_SPEED;

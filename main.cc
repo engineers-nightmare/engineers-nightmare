@@ -815,17 +815,8 @@ handle_input()
     player.last_crouch = player.crouch;
     player.crouch = keys[SDL_SCANCODE_LCTRL];
 
-    /* G enables gravity */
-    if( keys[SDL_SCANCODE_G] ){
-        player.disable_gravity = 1;
-        player.ui_dirty = true;
-    }
-
-    /* H re-enables gravity */
-    if( keys[SDL_SCANCODE_H] ){
-        player.disable_gravity = 0;
-        player.ui_dirty = true;
-    }
+    player.last_gravity = player.gravity;
+    player.gravity = keys[SDL_SCANCODE_G];
 
     if (keys[SDL_SCANCODE_1]) set_slot(1);
     if (keys[SDL_SCANCODE_2]) set_slot(2);
