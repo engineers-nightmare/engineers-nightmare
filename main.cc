@@ -184,6 +184,9 @@ struct entity
     {
         build_static_physics_setup(x, y, z, type->sw,
                 &phys_mesh, &phys_shape, &phys_body);
+
+        /* so that we can get back to the entity from a phys raycast */
+        phys_body->setUserPointer(this);
     }
 
     ~entity()
