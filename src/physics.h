@@ -44,8 +44,11 @@ struct sw_mesh;
 
 
 void
-build_static_physics_setup(int _x, int _y, int _z, sw_mesh const * src,
-                           btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);
+build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBody **rb);
+
+
+void
+build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisionShape **shape);
 
 
 void

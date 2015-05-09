@@ -182,8 +182,8 @@ struct entity
     entity(int x, int y, int z, entity_type *type)
         : x(x), y(y), z(z), type(type), phys_mesh(0), phys_shape(0), phys_body(0)
     {
-        build_static_physics_setup(x, y, z, type->sw,
-                &phys_mesh, &phys_shape, &phys_body);
+        build_static_physics_mesh(type->sw, &phys_mesh, &phys_shape);
+        build_static_physics_rb(x, y, z, phys_shape, &phys_body);
 
         /* so that we can get back to the entity from a phys raycast */
         phys_body->setUserPointer(this);

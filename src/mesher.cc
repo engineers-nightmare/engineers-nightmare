@@ -37,8 +37,26 @@ extern physics *phy;
 
 
 void
-build_static_physics_setup(int _x, int _y, int _z, sw_mesh const * src,
-                           btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb)
+build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBody **rb)
+{
+    if (*rb) {
+        /* We already have a rigid body set up; just swap out its collision shape. */
+        (*rb)->setCollisionShape(shape);
+    }
+    else {
+        /* Rigid body doesn't exist yet -- build one, along with all th motionstate junk */
+        btDefaultMotionState *ms = new btDefaultMotionState(
+            btTransform(btQuaternion(0, 0, 0, 1), btVector3(x, y, z)));
+        btRigidBody::btRigidBodyConstructionInfo
+                    ci(0, ms, shape, btVector3(0, 0, 0));
+        *rb = new btRigidBody(ci);
+        phy->dynamicsWorld->addRigidBody(*rb);
+    }
+}
+
+
+void
+build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisionShape **shape)
 {
     btTriangleMesh *phys = NULL;
     btCollisionShape *new_shape = NULL;
@@ -65,20 +83,6 @@ build_static_physics_setup(int _x, int _y, int _z, sw_mesh const * src,
         /* Empty mesh, just provide an empty shape. A zero-size mesh provokes a segfault inside
          * bullet, so avoid that. */
         new_shape = new btEmptyShape();
-    }
-
-    if (*rb) {
-        /* We already have a rigid body set up; just swap out its collision shape. */
-        (*rb)->setCollisionShape(new_shape);
-    }
-    else {
-        /* Rigid body doesn't exist yet -- build one, along with all th motionstate junk */
-        btDefaultMotionState *ms = new btDefaultMotionState(
-            btTransform(btQuaternion(0, 0, 0, 1), btVector3(_x, _y, _z)));
-        btRigidBody::btRigidBodyConstructionInfo
-                    ci(0, ms, new_shape, btVector3(0, 0, 0));
-        *rb = new btRigidBody(ci);
-        phy->dynamicsWorld->addRigidBody(*rb);
     }
 
     /* Throw away any old objects we've replaced. */
@@ -160,11 +164,14 @@ chunk::prepare_render(int _x, int _y, int _z)
     this->render_chunk.mesh = upload_mesh(&m);
     this->render_chunk.valid = true;
 
-    build_static_physics_setup(_x * CHUNK_SIZE,
-                               _y * CHUNK_SIZE,
-                               _z * CHUNK_SIZE, &m,
-                               &this->render_chunk.phys_mesh,
-                               &this->render_chunk.phys_shape,
-                               &this->render_chunk.phys_body);
+    build_static_physics_mesh(&m,
+                              &this->render_chunk.phys_mesh,
+                              &this->render_chunk.phys_shape);
+
+    build_static_physics_rb(_x * CHUNK_SIZE,
+                            _y * CHUNK_SIZE,
+                            _z * CHUNK_SIZE,
+                            this->render_chunk.phys_shape,
+                            &this->render_chunk.phys_body);
 }
 
