@@ -53,3 +53,10 @@ build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisio
 
 void
 teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);
+
+
+struct entity;
+
+entity *
+phys_raycast(float ox, float oy, float oz, float dx, float dy, float dz, float max_distance,
+             btCollisionObject *ignore, btCollisionWorld *world);

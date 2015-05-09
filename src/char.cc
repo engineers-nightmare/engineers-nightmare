@@ -24,6 +24,8 @@
 #include "BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h"
 #include "BulletCollision/CollisionDispatch/btCollisionWorld.h"
 #include "LinearMath/btDefaultMotionState.h"
+
+#include "physics.h"
 #include "char.h"
 
 
@@ -860,4 +862,25 @@ void en_char_controller::stand(btCollisionWorld *collisionWorld)
     transform.setOrigin(transform.getOrigin() + btVector3(0, 0, +0.3)); /* hack */
 
     reset(collisionWorld);
+}
+
+
+/* Not part of CC, but reuses the same callbacks etc. */
+entity *
+phys_raycast(float ox, float oy, float oz, float dx, float dy, float dz, float max_distance,
+             btCollisionObject *ignore, btCollisionWorld *world)
+{
+    btVector3 start(ox, oy, oz);
+    btVector3 end(ox + max_distance * dx,
+                  oy + max_distance * dy,
+                  oz + max_distance * dz);
+
+    btKinematicClosestNotMeRayResultCallback callback(ignore);
+    world->rayTest(start, end, callback);
+
+    if (callback.hasHit()) {
+        return (entity *) callback.m_collisionObject->getUserPointer();
+    }
+
+    return NULL;
 }

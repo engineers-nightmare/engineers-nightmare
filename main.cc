@@ -192,6 +192,13 @@ struct entity
     {
         teardown_static_physics_setup(NULL, NULL, &phys_body);
     }
+
+    void use()
+    {
+        /* used by the player */
+        printf("player using the %s at %d %d %d\n",
+               type->name, x, y, z);
+    }
 };
 
 
@@ -748,6 +755,15 @@ update()
     /* tool use */
     if (player.left_button && !player.last_left_button && rc.hit && t) {
         t->use(&rc);
+    }
+
+    /* interact with ents */
+    entity *hit_ent = phys_raycast(player.eye.x, player.eye.y, player.eye.z,
+                                   player.dir.x, player.dir.y, player.dir.z,
+                                   2 /* dist */, phy->ghostObj, phy->dynamicsWorld);
+
+    if (player.use && !player.last_use && hit_ent) {
+        hit_ent->use();
     }
 
     world_textures->bind(0);
