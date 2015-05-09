@@ -163,6 +163,8 @@ struct entity_type
     sw_mesh *sw;
     hw_mesh *hw;
     char const *name;
+    btTriangleMesh *phys_mesh;
+    btCollisionShape *phys_shape;
 };
 
 
@@ -175,15 +177,12 @@ struct entity
     int x, y, z;
     entity_type *type;
 
-    btTriangleMesh *phys_mesh;
-    btCollisionShape *phys_shape;
     btRigidBody *phys_body;
 
     entity(int x, int y, int z, entity_type *type)
-        : x(x), y(y), z(z), type(type), phys_mesh(0), phys_shape(0), phys_body(0)
+        : x(x), y(y), z(z), type(type), phys_body(0)
     {
-        build_static_physics_mesh(type->sw, &phys_mesh, &phys_shape);
-        build_static_physics_rb(x, y, z, phys_shape, &phys_body);
+        build_static_physics_rb(x, y, z, type->phys_shape, &phys_body);
 
         /* so that we can get back to the entity from a phys raycast */
         phys_body->setUserPointer(this);
@@ -191,7 +190,7 @@ struct entity
 
     ~entity()
     {
-        teardown_static_physics_setup(&phys_mesh, &phys_shape, &phys_body);
+        teardown_static_physics_setup(NULL, NULL, &phys_body);
     }
 };
 
@@ -236,11 +235,13 @@ init()
     set_mesh_material(entity_types[0].sw, 3);
     entity_types[0].hw = upload_mesh(entity_types[0].sw);
     entity_types[0].name = "Frobnicator";
+    build_static_physics_mesh(entity_types[0].sw, &entity_types[0].phys_mesh, &entity_types[0].phys_shape);
 
     entity_types[1].sw = load_mesh("mesh/panel_4x4.obj");
     set_mesh_material(entity_types[1].sw, 7);
     entity_types[1].hw = upload_mesh(entity_types[1].sw);
     entity_types[1].name = "Display Panel (4x4)";
+    build_static_physics_mesh(entity_types[1].sw, &entity_types[1].phys_mesh, &entity_types[1].phys_shape);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/simple.frag");
