@@ -654,6 +654,23 @@ struct add_block_entity_tool : public tool
 };
 
 
+struct empty_hands_tool : public tool
+{
+    virtual void use(raycast_info *rc)
+    {
+    }
+
+    virtual void preview(raycast_info *rc)
+    {
+    }
+
+    virtual void get_description(char *str)
+    {
+        strcpy(str, "(empty hands)");
+    }
+};
+
+
 tool *tools[] = {
     NULL,   /* tool 0 isnt a tool (currently) */
     new add_block_tool(),
@@ -664,7 +681,7 @@ tool *tools[] = {
     new remove_surface_tool(),
     new add_block_entity_tool(&entity_types[0]),
     new add_block_entity_tool(&entity_types[1]),
-    NULL,
+    new empty_hands_tool(),
 };
 
 
@@ -685,7 +702,7 @@ rebuild_ui()
         t->get_description(buf);
     }
     else {
-        strcpy(buf, "(empty hands)");
+        strcpy(buf, "(no tool)");
     }
 
     sprintf(buf2, "Left mouse button: %s", buf);
