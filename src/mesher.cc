@@ -102,20 +102,21 @@ teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, b
     /* cleanly teardown a static physics object such that build_static_physics_setup() will
      * properly reconstruct everything */
 
-    if (*rb) {
+    if (rb && *rb) {
         phy->dynamicsWorld->removeRigidBody(*rb);
         delete *rb;
         *rb = NULL;
     }
 
-    if (*shape) {
+    if (shape && *shape) {
         delete *shape;
         *shape = NULL;
     }
 
-    if (*mesh)
+    if (mesh && *mesh) {
         delete *mesh;
-    *mesh = NULL;
+        *mesh = NULL;
+    }
 }
 
 
