@@ -2,6 +2,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <glm/glm.hpp>
 #include "char.h"
 
 
@@ -45,6 +46,9 @@ struct sw_mesh;
 
 void
 build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBody **rb);
+
+void
+build_static_physics_rb_mat(glm::mat4 *m, btCollisionShape *shape, btRigidBody **rb);
 
 
 void

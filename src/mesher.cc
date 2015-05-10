@@ -56,6 +56,26 @@ build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBod
 
 
 void
+build_static_physics_rb_mat(glm::mat4 *m, btCollisionShape *shape, btRigidBody **rb)
+{
+    if (*rb) {
+        /* We already have a rigid body set up; just swap out its collision shape. */
+        (*rb)->setCollisionShape(shape);
+    }
+    else {
+        /* Rigid body doesn't exist yet -- build one, along with all th motionstate junk */
+        btTransform t;
+        t.setFromOpenGLMatrix((float *)m);
+        btDefaultMotionState *ms = new btDefaultMotionState(t);
+        btRigidBody::btRigidBodyConstructionInfo
+                    ci(0, ms, shape, btVector3(0, 0, 0));
+        *rb = new btRigidBody(ci);
+        phy->dynamicsWorld->addRigidBody(*rb);
+    }
+}
+
+
+void
 build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisionShape **shape)
 {
     btTriangleMesh *phys = NULL;

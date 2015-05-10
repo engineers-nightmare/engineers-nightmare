@@ -158,6 +158,35 @@ hw_mesh *surfs_hw[6];
 text_renderer *text;
 
 
+glm::mat4
+mat_position(float x, float y, float z)
+{
+    return glm::translate(glm::mat4(1), glm::vec3(x, y, z));
+}
+
+glm::mat4
+mat_block_face(int x, int y, int z, int face)
+{
+    switch (face) {
+    case surface_zp:
+        return glm::rotate(glm::translate(glm::mat4(1), glm::vec3(x, y + 1, z + 1)), (float)M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+    case surface_zm:
+        return glm::translate(glm::mat4(1), glm::vec3(x, y, z));
+    case surface_xp:
+        return glm::rotate(glm::translate(glm::mat4(1), glm::vec3(x + 1, y, z)), -(float)M_PI/2, glm::vec3(0.0f, 1.0f, 0.0f));
+    case surface_xm:
+        return glm::rotate(glm::translate(glm::mat4(1), glm::vec3(x, y, z + 1)), (float)M_PI/2, glm::vec3(0.0f, 1.0f, 0.0f));
+    case surface_yp:
+        return glm::rotate(glm::translate(glm::mat4(1), glm::vec3(x, y + 1, z)), (float)M_PI/2, glm::vec3(1.0f, 0.0f, 0.0f));
+    case surface_ym:
+        return glm::rotate(glm::translate(glm::mat4(1), glm::vec3(x, y, z + 1)), -(float)M_PI/2, glm::vec3(1.0f, 0.0f, 0.0f));
+
+    default:
+        return glm::mat4(1);    /* unreachable */
+    }
+}
+
+
 struct entity_type
 {
     sw_mesh *sw;
@@ -178,11 +207,14 @@ struct entity
     entity_type *type;
     btRigidBody *phys_body;
     int face;
+    glm::mat4 mat;
 
     entity(int x, int y, int z, entity_type *type, int face)
         : x(x), y(y), z(z), type(type), phys_body(0), face(face)
     {
-        build_static_physics_rb(x, y, z, type->phys_shape, &phys_body);
+        mat = mat_block_face(x, y, z, face);
+
+        build_static_physics_rb_mat(&mat, type->phys_shape, &phys_body);
 
         /* so that we can get back to the entity from a phys raycast */
         phys_body->setUserPointer(this);
@@ -349,13 +381,6 @@ surface_index_to_normal(int index, int *nx, int *ny, int *nz)
         case 4: *nz = 1; break;
         case 5: *nz = -1; break;
     }
-}
-
-
-glm::mat4
-mat_position(float x, float y, float z)
-{
-    return glm::translate(glm::mat4(1), glm::vec3(x, y, z));
 }
 
 
@@ -715,7 +740,7 @@ struct add_surface_entity_tool : public tool
         int index = normal_to_surface_index(rc);
 
         if (bl->surfs[index] != surface_none) {
-            per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
+            per_object->val.world_matrix = mat_block_face(rc->px, rc->py, rc->pz, index ^ 1);
             per_object->upload();
 
             draw_mesh(type->hw);
@@ -886,7 +911,7 @@ update()
                         entity *e = *it;
 
                         /* TODO: batch these matrix uploads too! */
-                        per_object->val.world_matrix = mat_position(e->x, e->y, e->z);
+                        per_object->val.world_matrix = e->mat;
                         per_object->upload();
 
                         draw_mesh(e->type->hw);

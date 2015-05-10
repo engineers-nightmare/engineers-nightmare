@@ -33,25 +33,26 @@ void main(void)
 	gl_Position = view_proj_matrix * world_pos;
     texcoord.z = mat;
 
-    vec3 n = normalize(norm);
+    vec3 n = normalize(mat3(world_matrix) * norm);
+
     /* Quick & dirty triplanar mapping */
     if (n.x > 0.8) {
-        texcoord.xy = vec2(-pos.y, -pos.z);
+        texcoord.xy = vec2(-world_pos.y, -world_pos.z);
 	} else if (n.x < -0.8) {
-        texcoord.xy = vec2(pos.y, -pos.z);
+        texcoord.xy = vec2(world_pos.y, -world_pos.z);
     } else if (n.y > 0.8) {
-        texcoord.xy = vec2(pos.x, -pos.z);
+        texcoord.xy = vec2(world_pos.x, -world_pos.z);
 	} else if (n.y < -0.8) {
-		texcoord.xy = vec2(-pos.x, -pos.z);
+		texcoord.xy = vec2(-world_pos.x, -world_pos.z);
     } else if (n.z < -0.8) {
-		texcoord.xy = vec2(pos.x, -pos.y);
+		texcoord.xy = vec2(world_pos.x, -world_pos.y);
 	} else {
-        texcoord.xy = pos.xy;
+        texcoord.xy = world_pos.xy;
     }
 
     /* lighting */
     vec3 light_dir = lightPos - world_pos.xyz;
-    float lambert = clamp(dot(normalize(light_dir), norm), 0, 1);
+    float lambert = clamp(dot(normalize(light_dir), n), 0, 1);
 
     light = ambientAmount + (1 - ambientAmount) * lambert;
 }
