@@ -176,11 +176,11 @@ struct entity
     /* TODO: replace this completely, it's silly. */
     int x, y, z;
     entity_type *type;
-
     btRigidBody *phys_body;
+    int face;
 
-    entity(int x, int y, int z, entity_type *type)
-        : x(x), y(y), z(z), type(type), phys_body(0)
+    entity(int x, int y, int z, entity_type *type, int face)
+        : x(x), y(y), z(z), type(type), phys_body(0), face(face)
     {
         build_static_physics_rb(x, y, z, type->phys_shape, &phys_body);
 
@@ -630,7 +630,7 @@ struct add_block_entity_tool : public tool
 
         /* TODO: flesh this out a bit */
         ship->get_chunk_containing(rc->px, rc->py, rc->pz)->entities.push_back(
-            new entity(rc->px, rc->py, rc->pz, type)
+            new entity(rc->px, rc->py, rc->pz, type, surface_zm)
             );
     }
 
@@ -679,7 +679,7 @@ struct add_surface_entity_tool : public tool
              * a surface facing into it */
             assert(ch);
             ch->entities.push_back(
-                new entity(rc->px, rc->py, rc->pz, type)
+                new entity(rc->px, rc->py, rc->pz, type, index ^ 1)
                 );
         }
     }
