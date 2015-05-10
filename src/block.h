@@ -27,6 +27,8 @@ enum surface_index {
     surface_ym,
     surface_zp,
     surface_zm,
+
+    face_count,
 };
 
 /* a single block
@@ -36,14 +38,8 @@ enum surface_index {
 struct block {
     block_type type;
 
-    surface_type surfs[6];
-
-    /* manually set everything to default state
-     * do not rely on any default behavior
-     */
-    block(void) :
-        type(block_empty)
-    {}
+    surface_type surfs[face_count];
+    unsigned short surf_space[face_count];
 };
 
 

@@ -450,9 +450,12 @@ remove_ents_from_surface(int x, int y, int z, int face)
         }
     }
 
+    block *bl = ship->get_block(x, y, z);
+    assert(bl);
+
+    bl->surf_space[face] = 0;   /* we've popped *everything* off, it must be empty now */
+
     if (face == surface_zm) {
-        block *bl = ship->get_block(x, y, z);
-        assert(bl);
 
         if (bl->type == block_entity)
             bl->type = block_empty;
@@ -474,6 +477,10 @@ struct remove_block_tool : public tool
          * ents are "attached" to the zm surface */
         if (bl->type == block_entity) {
             remove_ents_from_surface(rc->x, rc->y, rc->z, surface_zm);
+
+            for (int face = 0; face < face_count; face++) {
+                bl->surf_space[face] = 0;   /* we've just thrown away the block ent */
+            }
         }
 
         /* block removal */
@@ -669,6 +676,12 @@ struct add_block_entity_tool : public tool
 
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
+        if (bl) {
+            for (int face = 0; face < face_count; face++)
+                if (bl->surf_space[face])
+                    return;
+        }
+
         /* can only build on the side of an existing scaffold */
         if (bl && rc->block->type == block_support) {
             bl->type = block_entity;
@@ -681,6 +694,12 @@ struct add_block_entity_tool : public tool
         ship->get_chunk_containing(rc->px, rc->py, rc->pz)->entities.push_back(
             new entity(rc->px, rc->py, rc->pz, type, surface_zm)
             );
+
+        if (bl) {
+            /* consume ALL the space on the surfaces */
+            for (int face = 0; face < face_count; face++)
+                bl->surf_space[face] = ~0;
+        }
     }
 
     virtual void preview(raycast_info *rc)
@@ -688,6 +707,12 @@ struct add_block_entity_tool : public tool
         if (rc->inside) return; /* n/a */
 
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
+
+        if (bl) {
+            for (int face = 0; face < face_count; face++)
+                if (bl->surf_space[face])
+                    return;
+        }
 
         /* frobnicator can only be placed in empty space, on a scaffold */
         if (bl && rc->block->type == block_support) {
@@ -722,15 +747,27 @@ struct add_surface_entity_tool : public tool
 
         int index = normal_to_surface_index(rc);
 
-        if (bl->surfs[index] != surface_none) {
-            chunk *ch = ship->get_chunk_containing(rc->px, rc->py, rc->pz);
-            /* the chunk we're placing into is guaranteed to exist, because there's
-             * a surface facing into it */
-            assert(ch);
-            ch->entities.push_back(
-                new entity(rc->px, rc->py, rc->pz, type, index ^ 1)
-                );
+        if (bl->surfs[index] == surface_none)
+            return;
+
+        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
+        unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
+
+        if (other_side->surf_space[index ^ 1] & required_space) {
+            /* no room on the surface */
+            return;
         }
+
+        chunk *ch = ship->get_chunk_containing(rc->px, rc->py, rc->pz);
+        /* the chunk we're placing into is guaranteed to exist, because there's
+         * a surface facing into it */
+        assert(ch);
+        ch->entities.push_back(
+            new entity(rc->px, rc->py, rc->pz, type, index ^ 1)
+            );
+
+        /* take the space. */
+        other_side->surf_space[index ^ 1] |= required_space;
     }
 
     virtual void preview(raycast_info *rc)
@@ -739,25 +776,35 @@ struct add_surface_entity_tool : public tool
 
         int index = normal_to_surface_index(rc);
 
-        if (bl->surfs[index] != surface_none) {
-            per_object->val.world_matrix = mat_block_face(rc->px, rc->py, rc->pz, index ^ 1);
-            per_object->upload();
+        if (bl->surfs[index] == surface_none)
+            return;
 
-            draw_mesh(type->hw);
+        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
-            /* draw a surface overlay here too */
-            /* TODO: sub-block placement granularity -- will need a different overlay */
-            per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
-            per_object->upload();
+        unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
 
-            glUseProgram(add_overlay_shader);
-            glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(-0.1, -0.1);
-            draw_mesh(surfs_hw[index]);
-            glPolygonOffset(0, 0);
-            glDisable(GL_POLYGON_OFFSET_FILL);
-            glUseProgram(simple_shader);
+        if (other_side->surf_space[index ^ 1] & required_space) {
+            /* no room on the surface */
+            return;
         }
+
+        per_object->val.world_matrix = mat_block_face(rc->px, rc->py, rc->pz, index ^ 1);
+        per_object->upload();
+
+        draw_mesh(type->hw);
+
+        /* draw a surface overlay here too */
+        /* TODO: sub-block placement granularity -- will need a different overlay */
+        per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
+        per_object->upload();
+
+        glUseProgram(add_overlay_shader);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(-0.1, -0.1);
+        draw_mesh(surfs_hw[index]);
+        glPolygonOffset(0, 0);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glUseProgram(simple_shader);
     }
 
     virtual void get_description(char *str)
