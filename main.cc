@@ -1006,11 +1006,57 @@ set_slot(int slot)
 }
 
 
+enum key_action {
+    action_left,
+    action_right,
+    action_forward,
+    action_back,
+    action_jump,
+    action_use,
+    action_reset,
+    action_crouch,
+    action_gravity,
+    action_slot1,
+    action_slot2,
+    action_slot3,
+    action_slot4,
+    action_slot5,
+    action_slot6,
+    action_slot7,
+    action_slot8,
+    action_slot9,
+
+    num_actions,
+};
+
+
+static unsigned bindings[num_actions] = {
+    [action_left] = SDL_SCANCODE_A,
+    [action_right] = SDL_SCANCODE_D,
+    [action_forward] = SDL_SCANCODE_W,
+    [action_back] = SDL_SCANCODE_S,
+    [action_jump] = SDL_SCANCODE_SPACE,
+    [action_use] = SDL_SCANCODE_E,
+    [action_reset] = SDL_SCANCODE_R,
+    [action_crouch] = SDL_SCANCODE_LCTRL,
+    [action_gravity] = SDL_SCANCODE_G,
+    [action_slot1] = SDL_SCANCODE_1,
+    [action_slot2] = SDL_SCANCODE_2,
+    [action_slot3] = SDL_SCANCODE_3,
+    [action_slot4] = SDL_SCANCODE_4,
+    [action_slot5] = SDL_SCANCODE_5,
+    [action_slot6] = SDL_SCANCODE_6,
+    [action_slot7] = SDL_SCANCODE_7,
+    [action_slot8] = SDL_SCANCODE_8,
+    [action_slot9] = SDL_SCANCODE_9,
+};
+
+
 void
 handle_input()
 {
-    player.move.x = keys[SDL_SCANCODE_D] - keys[SDL_SCANCODE_A];
-    player.move.y = keys[SDL_SCANCODE_W] - keys[SDL_SCANCODE_S];
+    player.move.x = keys[bindings[action_right]] - keys[bindings[action_left]];
+    player.move.y = keys[bindings[action_forward]] - keys[bindings[action_back]];
 
     /* limit to unit vector */
     float len = glm::length(player.move);
@@ -1018,29 +1064,29 @@ handle_input()
         player.move = player.move / len;
 
     player.last_jump = player.jump;
-    player.jump = keys[SDL_SCANCODE_SPACE];
+    player.jump = keys[bindings[action_jump]];
 
     player.last_use = player.use;
-    player.use = keys[SDL_SCANCODE_E];
+    player.use = keys[bindings[action_use]];
 
     player.last_reset = player.reset;
-    player.reset = keys[SDL_SCANCODE_R];
+    player.reset = keys[bindings[action_reset]];
 
     player.last_crouch = player.crouch;
-    player.crouch = keys[SDL_SCANCODE_LCTRL];
+    player.crouch = keys[bindings[action_crouch]];
 
     player.last_gravity = player.gravity;
-    player.gravity = keys[SDL_SCANCODE_G];
+    player.gravity = keys[bindings[action_gravity]];
 
-    if (keys[SDL_SCANCODE_1]) set_slot(1);
-    if (keys[SDL_SCANCODE_2]) set_slot(2);
-    if (keys[SDL_SCANCODE_3]) set_slot(3);
-    if (keys[SDL_SCANCODE_4]) set_slot(4);
-    if (keys[SDL_SCANCODE_5]) set_slot(5);
-    if (keys[SDL_SCANCODE_6]) set_slot(6);
-    if (keys[SDL_SCANCODE_7]) set_slot(7);
-    if (keys[SDL_SCANCODE_8]) set_slot(8);
-    if (keys[SDL_SCANCODE_9]) set_slot(9);
+    if (keys[bindings[action_slot1]]) set_slot(1);
+    if (keys[bindings[action_slot2]]) set_slot(2);
+    if (keys[bindings[action_slot3]]) set_slot(3);
+    if (keys[bindings[action_slot4]]) set_slot(4);
+    if (keys[bindings[action_slot5]]) set_slot(5);
+    if (keys[bindings[action_slot6]]) set_slot(6);
+    if (keys[bindings[action_slot7]]) set_slot(7);
+    if (keys[bindings[action_slot8]]) set_slot(8);
+    if (keys[bindings[action_slot9]]) set_slot(9);
 
     /* Current state of the mouse buttons. */
     unsigned int mouse_buttons = SDL_GetRelativeMouseState(NULL, NULL);
