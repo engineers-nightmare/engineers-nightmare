@@ -661,6 +661,63 @@ struct add_block_entity_tool : public tool
 };
 
 
+struct add_surface_entity_tool : public tool
+{
+    entity_type *type;
+
+    add_surface_entity_tool(entity_type *type) : type(type) {}
+
+    virtual void use(raycast_info *rc)
+    {
+        block *bl = rc->block;
+
+        int index = normal_to_surface_index(rc);
+
+        if (bl->surfs[index] != surface_none) {
+            chunk *ch = ship->get_chunk_containing(rc->px, rc->py, rc->pz);
+            /* the chunk we're placing into is guaranteed to exist, because there's
+             * a surface facing into it */
+            assert(ch);
+            ch->entities.push_back(
+                new entity(rc->px, rc->py, rc->pz, type)
+                );
+        }
+    }
+
+    virtual void preview(raycast_info *rc)
+    {
+        block *bl = rc->block;
+
+        int index = normal_to_surface_index(rc);
+
+        if (bl->surfs[index] != surface_none) {
+            per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
+            per_object->upload();
+
+            draw_mesh(type->hw);
+
+            /* draw a surface overlay here too */
+            /* TODO: sub-block placement granularity -- will need a different overlay */
+            per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
+            per_object->upload();
+
+            glUseProgram(add_overlay_shader);
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(-0.1, -0.1);
+            draw_mesh(surfs_hw[index]);
+            glPolygonOffset(0, 0);
+            glDisable(GL_POLYGON_OFFSET_FILL);
+            glUseProgram(simple_shader);
+        }
+    }
+
+    virtual void get_description(char *str)
+    {
+        sprintf(str, "Place %s on surface", type->name);
+    }
+};
+
+
 struct empty_hands_tool : public tool
 {
     virtual void use(raycast_info *rc)
@@ -687,7 +744,7 @@ tool *tools[] = {
     new add_surface_tool(surface_text),
     new remove_surface_tool(),
     new add_block_entity_tool(&entity_types[0]),
-    new add_block_entity_tool(&entity_types[1]),
+    new add_surface_entity_tool(&entity_types[1]),
     new empty_hands_tool(),
 };
 
