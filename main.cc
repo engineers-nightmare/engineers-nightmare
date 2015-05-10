@@ -410,6 +410,33 @@ struct add_block_tool : public tool
 };
 
 
+void
+remove_ents_from_surface(int x, int y, int z, int face)
+{
+    chunk *ch = ship->get_chunk_containing(x, y, z);
+    for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
+        entity *e = *it;
+        if (e->x == x && e->y == y && e->z == z && e->face == face) {
+            delete e;
+            it = ch->entities.erase(it);
+        }
+        else {
+            it++;
+        }
+    }
+
+    if (face == surface_zm) {
+        block *bl = ship->get_block(x, y, z);
+        assert(bl);
+
+        if (bl->type == block_entity)
+            bl->type = block_empty;
+
+        ch->render_chunk.valid = false;
+    }
+}
+
+
 struct remove_block_tool : public tool
 {
     virtual void use(raycast_info *rc)
@@ -418,20 +445,10 @@ struct remove_block_tool : public tool
 
         block *bl = rc->block;
 
-        /* if there was a block entity here, find and remove it */
+        /* if there was a block entity here, find and remove it. block
+         * ents are "attached" to the zm surface */
         if (bl->type == block_entity) {
-            chunk *ch = ship->get_chunk_containing(rc->x, rc->y, rc->z);
-
-            for (std::vector<entity *>::iterator it = ch->entities.begin(); it != ch->entities.end();) {
-                entity *e = *it;
-                if (e->x == rc->x && e->y == rc->y && e->z == rc->z) {
-                    delete e;
-                    it = ch->entities.erase(it);
-                }
-                else {
-                    it++;
-                }
-            }
+            remove_ents_from_surface(rc->x, rc->y, rc->z, surface_zm);
         }
 
         /* block removal */
@@ -458,6 +475,10 @@ struct remove_block_tool : public tool
                     bl->surfs[index] = surface_none;
                     other_side->surfs[index ^ 1] = surface_none;
                     ship->get_chunk_containing(rx, ry, rz)->render_chunk.valid = false;
+
+                    /* pop any dependent ents */
+                    remove_ents_from_surface(rc->x, rc->y, rc->z, index);
+                    remove_ents_from_surface(rx, ry, rz, index ^ 1);
                 }
             }
         }
@@ -578,6 +599,9 @@ struct remove_surface_tool : public tool
                 ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
             }
 
+            /* remove any ents using the surface */
+            remove_ents_from_surface(rc->px, rc->py, rc->pz, index ^ 1);
+            remove_ents_from_surface(rc->x, rc->y, rc->z, index);
         }
     }
 
