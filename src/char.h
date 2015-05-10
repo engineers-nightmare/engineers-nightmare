@@ -142,6 +142,8 @@ ATTRIBUTE_ALIGNED16(class) en_char_controller : public btCharacterControllerInte
                 btScalar timeInterval);
 
         void reset ( btCollisionWorld* collisionWorld );
+        void reset () {}    /* w/a 2.81. we don't actually care about this -- nobody
+                               will call it via the cc interface. */
         void warp (const btVector3& origin);
 
         void preStep (  btCollisionWorld* collisionWorld);
