@@ -119,6 +119,59 @@ ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
     return NULL;
 }
 
+/* given the x, y, z of a block and the surface we are interested in,
+ * find the co-ords the correspond to the block along the normal of that surace
+ *
+ * tx, ty, and tz are out params
+ */
+static void
+find_neighbour(int fx, int fy, int fz, enum surface_index si, int *tx, int *ty, int *tz){
+    if( ! tx ||
+        ! ty ||
+        ! tz ){
+        errx(1, "ship_space.c: find_neighbour tx, ty or tz null");
+        return;
+    }
+
+    *tx = fx;
+    *ty = fy;
+    *tz = fz;
+
+    switch( si ){
+        case surface_xp:
+            ++*tx;
+            break;
+
+        case surface_xm:
+            --*tx;
+            break;
+
+        case surface_yp:
+            ++*ty;
+            break;
+
+        case surface_ym:
+            --*ty;
+            break;
+
+        case surface_zp:
+            ++*tz;
+            break;
+
+        case surface_zm:
+            --*tz;
+            break;
+
+        case face_count:
+            errx(1, "ship_space.c: find_neighbour supplied surface_index of type 'face_count'");
+            break;
+
+        default:
+            errx(1, "ship_space.c: find_neighbour supplied surface_index of unknown type");
+            break;
+    }
+}
+
 /* returns a pointer to a new ship space
  * this ship space will have 2 x 2 rooms and will be 1 room tall
  * each room will have a floor and 4 walls of scaffolding
@@ -166,22 +219,6 @@ ship_space::mock_ship_space(void)
                     b3->surfs[surface_zm] = surface_wall;
                     b4->surfs[surface_zm] = surface_wall;
 
-                    if( x == 0 ){
-                        b1->surfs[surface_xm] = surface_wall;
-                        b2->surfs[surface_xm] = surface_wall;
-                    } else if( x == 7 ){
-                        b3->surfs[surface_xp] = surface_wall;
-                        b4->surfs[surface_xp] = surface_wall;
-                    }
-
-                    if( y == 0 ){
-                        b1->surfs[surface_ym] = surface_wall;
-                        b3->surfs[surface_ym] = surface_wall;
-                    } else if( y == 7 ){
-                        b2->surfs[surface_yp] = surface_wall;
-                        b4->surfs[surface_yp] = surface_wall;
-                    }
-
                 } else if( y == 0 ){
                     /* we want a 2 height door at x == 3
                      * and a one height door a x == 5
@@ -200,17 +237,6 @@ ship_space::mock_ship_space(void)
                         b2->type = block_support;
                         b3->type = block_support;
                         b4->type = block_support;
-
-                        /* add surfaces to the external outside of walls */
-                        b1->surfs[surface_ym] = surface_wall;
-                        b3->surfs[surface_ym] = surface_wall;
-                        if( x == 0 ){
-                            b1->surfs[surface_xm] = surface_wall;
-                            b2->surfs[surface_xm] = surface_wall;
-                        } else if( x == 7 ) {
-                            b3->surfs[surface_xp] = surface_wall;
-                            b4->surfs[surface_xp] = surface_wall;
-                        }
 
                         if( x != 0 &&
                             x != 7 ){
@@ -269,14 +295,6 @@ ship_space::mock_ship_space(void)
                         b3->type = block_support;
                         b4->type = block_support;
 
-                        /* add surfaces to external outside of walls */
-                        b1->surfs[surface_xm] = surface_wall;
-                        b2->surfs[surface_xm] = surface_wall;
-                        if( y == 7 ){
-                            b2->surfs[surface_yp] = surface_wall;
-                            b4->surfs[surface_yp] = surface_wall;
-                        }
-
                         if( y != 0 &&
                             y != 7 ){
                             /* add surfaces to inside of walls */
@@ -334,14 +352,6 @@ ship_space::mock_ship_space(void)
                         b3->type = block_support;
                         b4->type = block_support;
 
-                        /* add surfaces to external outside of walls */
-                        b3->surfs[surface_xp] = surface_wall;
-                        b4->surfs[surface_xp] = surface_wall;
-                        if( x == 7 ){
-                            b2->surfs[surface_yp] = surface_wall;
-                            b4->surfs[surface_yp] = surface_wall;
-                        }
-
                         if( y != 0 &&
                             y != 7 ){
                             /* add surfaces to inside of walls */
@@ -398,10 +408,6 @@ ship_space::mock_ship_space(void)
                         b2->type = block_support;
                         b3->type = block_support;
                         b4->type = block_support;
-
-                        /* add surfaces to external outside of walls */
-                        b2->surfs[surface_yp] = surface_wall;
-                        b4->surfs[surface_yp] = surface_wall;
 
                         if( x != 0 &&
                             x != 7 ){
