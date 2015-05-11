@@ -172,6 +172,49 @@ find_neighbour(int fx, int fy, int fz, enum surface_index si, int *tx, int *ty, 
     }
 }
 
+/* returns a block
+ * finds the block at the position (x,y,z) within
+ * the whole ship_space
+ * will move across chunks
+ * will call ensure_block if needed
+ */
+block *
+ship_space::ensure_and_get_block(int block_x, int block_y, int block_z){
+    block *b = 0;
+
+    this->ensure_block(block_x, block_y, block_z);
+    b = this->get_block(block_x, block_y, block_z);
+
+    if( ! b ){
+        errx(1, "ship_space::ensure_and_get_block: call to get_block failed");
+    }
+
+    return b;
+}
+
+/* returns the neighbour of a block along a given suface's normal
+ * finds the block at the position (x,y,z) within
+ * the whole ship_space
+ * will move across chunks
+ * will call ensure_block if needed
+ */
+block *
+ship_space::get_block_neighbour(int block_x, int block_y, int block_z, enum surface_index si){
+    int tx, ty, tz;
+    find_neighbour(block_x, block_y, block_z, si, &tx, &ty, &tz);
+    return this->ensure_and_get_block(tx, ty, tz);
+}
+
+/* I am lazy
+ * we plan to nuke mock ship space once we have map loading/saving
+ *
+ * Set Neighbour for block N
+ */
+#define sn1(si, type) (ss->get_block_neighbour(x,   y,   z, si)->surfs[si ^ 1] = type)
+#define sn2(si, type) (ss->get_block_neighbour(x,   y+8, z, si)->surfs[si ^ 1] = type)
+#define sn3(si, type) (ss->get_block_neighbour(x+8, y,   z, si)->surfs[si ^ 1] = type)
+#define sn4(si, type) (ss->get_block_neighbour(x+8, y+8, z, si)->surfs[si ^ 1] = type)
+
 /* returns a pointer to a new ship space
  * this ship space will have 2 x 2 rooms and will be 1 room tall
  * each room will have a floor and 4 walls of scaffolding
@@ -193,6 +236,8 @@ ship_space::mock_ship_space(void)
     block *b3 = 0;
     block *b4 = 0;
 
+    /* LET THIS SERVE AS MOTIVATION FOR NEEDING MAP LOAD AND SAVE */
+
     for( z=0; z < 8; ++z ){
         for( y=0; y < 8; ++y ){
             for( x=0; x < 8; ++x ){
@@ -210,14 +255,22 @@ ship_space::mock_ship_space(void)
                     b4->type = block_support;
 
                     b1->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
+                    sn1(surface_zp, ((x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall));
                     b2->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
+                    sn2(surface_zp, ((x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall));
                     b3->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
+                    sn3(surface_zp, ((x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall));
                     b4->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
+                    sn4(surface_zp, ((x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall));
 
                     b1->surfs[surface_zm] = surface_wall;
+                    sn1(surface_zm, surface_wall);
                     b2->surfs[surface_zm] = surface_wall;
+                    sn2(surface_zm, surface_wall);
                     b3->surfs[surface_zm] = surface_wall;
+                    sn3(surface_zm, surface_wall);
                     b4->surfs[surface_zm] = surface_wall;
+                    sn4(surface_zm, surface_wall);
 
                 } else if( y == 0 ){
                     /* we want a 2 height door at x == 3
@@ -242,9 +295,13 @@ ship_space::mock_ship_space(void)
                             x != 7 ){
                             /* add surfaces to inside of walls */
                             b1->surfs[surface_yp] = surface_wall;
+                            sn1(surface_yp, surface_wall);
                             b2->surfs[surface_yp] = surface_wall;
+                            sn2(surface_yp, surface_wall);
                             b3->surfs[surface_yp] = surface_wall;
+                            sn3(surface_yp, surface_wall);
                             b4->surfs[surface_yp] = surface_wall;
+                            sn4(surface_yp, surface_wall);
                         }
 
                         /* add surfaces to inside of doorways */
@@ -252,27 +309,39 @@ ship_space::mock_ship_space(void)
                             (x == 5 && z == 2) ){
                             /* tops */
                             b1->surfs[surface_zm] = surface_wall;
+                            sn1(surface_zm, surface_wall);
                             b2->surfs[surface_zm] = surface_wall;
+                            sn2(surface_zm, surface_wall);
                             b3->surfs[surface_zm] = surface_wall;
+                            sn3(surface_zm, surface_wall);
                             b4->surfs[surface_zm] = surface_wall;
+                            sn4(surface_zm, surface_wall);
                         }
                         if( (x == 2 && z == 1) ||
                             (x == 2 && z == 2) ||
                             (x == 4 && z == 1) ){
                             /* minus */
                             b1->surfs[surface_xp] = surface_wall;
+                            sn1(surface_xp, surface_wall);
                             b2->surfs[surface_xp] = surface_wall;
+                            sn2(surface_xp, surface_wall);
                             b3->surfs[surface_xp] = surface_wall;
+                            sn3(surface_xp, surface_wall);
                             b4->surfs[surface_xp] = surface_wall;
+                            sn4(surface_xp, surface_wall);
                         }
                         if( (x == 4 && z == 2) ||
                             (x == 4 && z == 1) ||
                             (x == 6 && z == 1) ){
                             /* plus */
                             b1->surfs[surface_xm] = surface_wall;
+                            sn1(surface_xm, surface_wall);
                             b2->surfs[surface_xm] = surface_wall;
+                            sn2(surface_xm, surface_wall);
                             b3->surfs[surface_xm] = surface_wall;
+                            sn3(surface_xm, surface_wall);
                             b4->surfs[surface_xm] = surface_wall;
+                            sn4(surface_xm, surface_wall);
                         }
 
                     }
@@ -283,7 +352,7 @@ ship_space::mock_ship_space(void)
                     if( (y == 3     && z == 1) ||
                         (y == 3     && z == 2) ||
                         (y == 5     && z == 1) ){
-                        /* a wall */
+                        /* a door */
                         b1->type = block_empty;
                         b2->type = block_empty;
                         b3->type = block_empty;
@@ -299,9 +368,13 @@ ship_space::mock_ship_space(void)
                             y != 7 ){
                             /* add surfaces to inside of walls */
                             b1->surfs[surface_xp] = surface_wall;
+                            sn1(surface_xp, surface_wall);
                             b2->surfs[surface_xp] = surface_wall;
+                            sn2(surface_xp, surface_wall);
                             b3->surfs[surface_xp] = surface_wall;
+                            sn3(surface_xp, surface_wall);
                             b4->surfs[surface_xp] = surface_wall;
+                            sn4(surface_xp, surface_wall);
                         }
 
                         /* add surfaces to inside of doorways */
@@ -309,27 +382,39 @@ ship_space::mock_ship_space(void)
                             (y == 5 && z == 2) ){
                             /* tops */
                             b1->surfs[surface_zm] = surface_wall;
+                            sn1(surface_zm, surface_wall);
                             b2->surfs[surface_zm] = surface_wall;
+                            sn2(surface_zm, surface_wall);
                             b3->surfs[surface_zm] = surface_wall;
+                            sn3(surface_zm, surface_wall);
                             b4->surfs[surface_zm] = surface_wall;
+                            sn4(surface_zm, surface_wall);
                         }
                         if( (y == 2 && z == 1) ||
                             (y == 2 && z == 2) ||
                             (y == 4 && z == 1) ){
                             /* minus */
                             b1->surfs[surface_yp] = surface_wall;
+                            sn1(surface_yp, surface_wall);
                             b2->surfs[surface_yp] = surface_wall;
+                            sn2(surface_yp, surface_wall);
                             b3->surfs[surface_yp] = surface_wall;
+                            sn3(surface_yp, surface_wall);
                             b4->surfs[surface_yp] = surface_wall;
+                            sn4(surface_yp, surface_wall);
                         }
                         if( (y == 4 && z == 2) ||
                             (y == 4 && z == 1) ||
                             (y == 6 && z == 1) ){
                             /* plus */
                             b1->surfs[surface_ym] = surface_wall;
+                            sn1(surface_ym, surface_wall);
                             b2->surfs[surface_ym] = surface_wall;
+                            sn2(surface_ym, surface_wall);
                             b3->surfs[surface_ym] = surface_wall;
+                            sn3(surface_ym, surface_wall);
                             b4->surfs[surface_ym] = surface_wall;
+                            sn4(surface_ym, surface_wall);
                         }
 
                     }
@@ -356,9 +441,13 @@ ship_space::mock_ship_space(void)
                             y != 7 ){
                             /* add surfaces to inside of walls */
                             b1->surfs[surface_xm] = surface_wall;
+                            sn1(surface_xm, surface_wall);
                             b2->surfs[surface_xm] = surface_wall;
+                            sn2(surface_xm, surface_wall);
                             b3->surfs[surface_xm] = surface_wall;
+                            sn3(surface_xm, surface_wall);
                             b4->surfs[surface_xm] = surface_wall;
+                            sn4(surface_xm, surface_wall);
                         }
 
                         /* add surfaces to inside of doorways */
@@ -366,27 +455,39 @@ ship_space::mock_ship_space(void)
                             (y == 5 && z == 2) ){
                             /* tops */
                             b1->surfs[surface_zm] = surface_wall;
+                            sn1(surface_zm, surface_wall);
                             b2->surfs[surface_zm] = surface_wall;
+                            sn2(surface_zm, surface_wall);
                             b3->surfs[surface_zm] = surface_wall;
+                            sn3(surface_zm, surface_wall);
                             b4->surfs[surface_zm] = surface_wall;
+                            sn4(surface_zm, surface_wall);
                         }
                         if( (y == 2 && z == 1) ||
                             (y == 2 && z == 2) ||
                             (y == 4 && z == 1) ){
                             /* minus */
                             b1->surfs[surface_yp] = surface_wall;
+                            sn1(surface_yp, surface_wall);
                             b2->surfs[surface_yp] = surface_wall;
+                            sn2(surface_yp, surface_wall);
                             b3->surfs[surface_yp] = surface_wall;
+                            sn3(surface_yp, surface_wall);
                             b4->surfs[surface_yp] = surface_wall;
+                            sn4(surface_yp, surface_wall);
                         }
                         if( (y == 4 && z == 2) ||
                             (y == 4 && z == 1) ||
                             (y == 6 && z == 1) ){
                             /* plus */
                             b1->surfs[surface_ym] = surface_wall;
+                            sn1(surface_ym, surface_wall);
                             b2->surfs[surface_ym] = surface_wall;
+                            sn2(surface_ym, surface_wall);
                             b3->surfs[surface_ym] = surface_wall;
+                            sn3(surface_ym, surface_wall);
                             b4->surfs[surface_ym] = surface_wall;
+                            sn4(surface_ym, surface_wall);
                         }
 
                     }
@@ -413,9 +514,13 @@ ship_space::mock_ship_space(void)
                             x != 7 ){
                             /* add surfaces to inside of walls */
                             b1->surfs[surface_ym] = surface_wall;
+                            sn1(surface_ym, surface_wall);
                             b2->surfs[surface_ym] = surface_wall;
+                            sn2(surface_ym, surface_wall);
                             b3->surfs[surface_ym] = surface_wall;
+                            sn3(surface_ym, surface_wall);
                             b4->surfs[surface_ym] = surface_wall;
+                            sn4(surface_ym, surface_wall);
                         }
 
                         /* add surfaces to inside of doorways */
@@ -423,27 +528,39 @@ ship_space::mock_ship_space(void)
                             (x == 5 && z == 2) ){
                             /* tops */
                             b1->surfs[surface_zm] = surface_wall;
+                            sn1(surface_zm, surface_wall);
                             b2->surfs[surface_zm] = surface_wall;
+                            sn2(surface_zm, surface_wall);
                             b3->surfs[surface_zm] = surface_wall;
+                            sn3(surface_zm, surface_wall);
                             b4->surfs[surface_zm] = surface_wall;
+                            sn4(surface_zm, surface_wall);
                         }
                         if( (x == 2 && z == 1) ||
                             (x == 2 && z == 2) ||
                             (x == 4 && z == 1) ){
                             /* minus */
                             b1->surfs[surface_xp] = surface_wall;
+                            sn1(surface_xp, surface_wall);
                             b2->surfs[surface_xp] = surface_wall;
+                            sn2(surface_xp, surface_wall);
                             b3->surfs[surface_xp] = surface_wall;
+                            sn3(surface_xp, surface_wall);
                             b4->surfs[surface_xp] = surface_wall;
+                            sn4(surface_xp, surface_wall);
                         }
                         if( (x == 4 && z == 2) ||
                             (x == 4 && z == 1) ||
                             (x == 6 && z == 1) ){
                             /* plus */
                             b1->surfs[surface_xm] = surface_wall;
+                            sn1(surface_xm, surface_wall);
                             b2->surfs[surface_xm] = surface_wall;
+                            sn2(surface_xm, surface_wall);
                             b3->surfs[surface_xm] = surface_wall;
+                            sn3(surface_xm, surface_wall);
                             b4->surfs[surface_xm] = surface_wall;
+                            sn4(surface_xm, surface_wall);
                         }
 
                     }
