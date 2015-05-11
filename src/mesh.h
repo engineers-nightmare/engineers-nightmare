@@ -1,5 +1,8 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtc/packing.hpp>
+
 struct hw_mesh {
     GLuint vbo;
     GLuint ibo;
@@ -10,11 +13,18 @@ struct hw_mesh {
 
 /* TODO: pack this a bit better */
 struct vertex {
-    float x, y, z, nx, ny, nz;
-    int mat;
+    float x, y, z;
+    uint32_t normal_packed;
+    uint16_t mat;
+
     vertex() : x(0), y(0), z(0), mat(0) {}
+
     vertex(float x, float y, float z, float nx, float ny, float nz, int mat)
-        : x(x), y(y), z(z), nx(nx), ny(ny), nz(nz), mat(mat) {}
+        : x(x), y(y), z(z),
+          normal_packed(glm::packSnorm3x10_1x2(glm::vec4(nx, ny, nz, 0))),
+          mat(mat)
+    {
+    }
 };
 
 struct sw_mesh {

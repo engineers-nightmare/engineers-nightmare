@@ -340,6 +340,8 @@ init()
     glFrontFace(GL_CW);
 
     text = new text_renderer("fonts/pixelmix.ttf", 16);
+
+    printf("World vertex size: %zu bytes\n", sizeof(vertex));
 }
 
 
