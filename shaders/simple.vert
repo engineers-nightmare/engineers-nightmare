@@ -21,11 +21,10 @@ layout(std140, binding=1) uniform per_object {
 
 };
 
-out vec3 texcoord;
-out float light;
 
-const vec3 lightPos = vec3(4,4,4);
-const float ambientAmount = 0.3;
+out vec3 texcoord;
+out vec3 ws_pos;
+out vec3 ws_norm;
 
 void main(void)
 {
@@ -50,9 +49,6 @@ void main(void)
         texcoord.xy = world_pos.xy;
     }
 
-    /* lighting */
-    vec3 light_dir = lightPos - world_pos.xyz;
-    float lambert = clamp(dot(normalize(light_dir), n), 0, 1);
-
-    light = ambientAmount + (1 - ambientAmount) * lambert;
+    ws_pos = world_pos.xyz;
+    ws_norm = n;
 }

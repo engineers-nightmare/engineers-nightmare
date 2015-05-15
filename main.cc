@@ -3,6 +3,7 @@
 #include <SDL_image.h>
 #include <err.h>
 #include <epoxy/gl.h>
+#include <algorithm>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -129,6 +130,41 @@ struct texture_set {
 };
 
 
+struct light_field {
+    GLuint texobj;
+    unsigned char data[128*128*128];
+
+    light_field() : texobj(0) {
+        glGenTextures(1, &texobj);
+        glBindTexture(GL_TEXTURE_3D, texobj);
+        glTexStorage3D(GL_TEXTURE_3D, 1, GL_R8, 128, 128, 128);
+    }
+
+    void bind(int texunit)
+    {
+        glActiveTexture(GL_TEXTURE0 + texunit);
+        glBindTexture(GL_TEXTURE_3D, texobj);
+    }
+
+    void upload()
+    {
+        /* TODO: toroidal addressing + partial updates, to make these uploads VERY small */
+        /* TODO: experiment with buffer texture rather than 3D, so we can have the light field
+         * persistently mapped in our address space */
+
+        /* DSA would be nice -- for now, we'll just disturb the tex0 binding */
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_3D, texobj);
+
+        glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0,
+                        128, 128, 128,
+                        GL_RED,
+                        GL_UNSIGNED_BYTE,
+                        data);
+    }
+};
+
+
 void
 gl_debug_callback(GLenum source __unused,
                   GLenum type __unused,
@@ -156,6 +192,7 @@ unsigned char const *keys;
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 text_renderer *text;
+light_field *light;
 
 
 glm::mat4
@@ -197,7 +234,7 @@ struct entity_type
 };
 
 
-entity_type entity_types[2];
+entity_type entity_types[3];
 
 
 struct entity
@@ -232,6 +269,135 @@ struct entity
                type->name, x, y, z);
     }
 };
+
+
+void
+set_light_level(int x, int y, int z, int level)
+{
+    if (x < 0 || x >= 128) return;
+    if (y < 0 || y >= 128) return;
+    if (z < 0 || z >= 128) return;
+
+    int p = x + y * 128 + z * 128 * 128;
+    if (level < 0) level = 0;
+    if (level > 255) level = 255;
+    light->data[p] = level;
+}
+
+
+unsigned char
+get_light_level(int x, int y, int z)
+{
+    if (x < 0 || x >= 128) return 0;
+    if (y < 0 || y >= 128) return 0;
+    if (z < 0 || z >= 128) return 0;
+
+    return light->data[x + y*128 + z*128*128];
+}
+
+
+const int light_atten = 50;
+/* as far as we can ever light from a light source */
+const int max_light_prop = (255 + light_atten - 1) / light_atten;
+
+bool need_lightfield_update = false;
+glm::ivec3 lightfield_update_mins;
+glm::ivec3 lightfield_update_maxs;
+
+
+void
+mark_lightfield_update(int x, int y, int z)
+{
+    glm::ivec3 center = glm::ivec3(x, y, z);
+    glm::ivec3 half_extent = glm::ivec3(max_light_prop, max_light_prop, max_light_prop);
+    if (need_lightfield_update) {
+        lightfield_update_mins = center - half_extent;
+        lightfield_update_maxs = center + half_extent;
+    }
+    else {
+        lightfield_update_mins = glm::min(lightfield_update_mins,
+                center - half_extent);
+        lightfield_update_maxs = glm::max(lightfield_update_maxs,
+                center + half_extent);
+        need_lightfield_update = true;
+    }
+}
+
+
+void
+update_lightfield()
+{
+    if (!need_lightfield_update) {
+        /* nothing to do here */
+        return;
+    }
+
+    /* TODO: opt for case where we're JUST adding light -- no need to clear & rebuild */
+    /* This is general enough to cope with occluders & lights being added and removed. */
+
+    /* 1. remove all existing light in the box */
+    for (int k = lightfield_update_mins.z; k <= lightfield_update_maxs.z; k++)
+        for (int j = lightfield_update_mins.y; j <= lightfield_update_maxs.y; j++)
+            for (int i = lightfield_update_mins.x; i <= lightfield_update_maxs.x; i++)
+                set_light_level(i, j, k, 0);
+
+    /* 2. inject sources. the box is guaranteed to be big enough for max propagation
+     * for all sources we'll add here. */
+    /* TODO: inject only required sources. */
+    for (int k = ship->min_z; k <= ship->max_z; k++) {
+        for (int j = ship->min_y; j <= ship->max_y; j++) {
+            for (int i = ship->min_x; i <= ship->max_x; i++) {
+                chunk *ch = ship->get_chunk(i, j, k);
+                if (ch) {
+                    for (std::vector<entity *>::const_iterator it = ch->entities.begin(); it != ch->entities.end(); it++) {
+                        entity *e = *it;
+                        /* TODO: only some entities should do this. */
+                        if (e->type == &entity_types[2]) {
+                            set_light_level(e->x, e->y, e->z, 255);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /* 3. propagate max_light_prop times. this is guaranteed to be enough to cover
+     * the sources' area of influence. */
+    for (int pass = 0; pass < max_light_prop; pass++) {
+        for (int k = lightfield_update_mins.z; k <= lightfield_update_maxs.z; k++) {
+            for (int j = lightfield_update_mins.y; j <= lightfield_update_maxs.y; j++) {
+                for (int i = lightfield_update_mins.x; i <= lightfield_update_maxs.x; i++) {
+                    int level = get_light_level(i, j, k);
+
+                    block *b = ship->get_block(i, j, k);
+                    if (!b)
+                        continue;
+
+                    if (!b->surfs[surface_xm])
+                        level = std::max(level, get_light_level(i - 1, j, k) - light_atten);
+                    if (!b->surfs[surface_xp])
+                        level = std::max(level, get_light_level(i + 1, j, k) - light_atten);
+
+                    if (!b->surfs[surface_ym])
+                        level = std::max(level, get_light_level(i, j - 1, k) - light_atten);
+                    if (!b->surfs[surface_yp])
+                        level = std::max(level, get_light_level(i, j + 1, k) - light_atten);
+
+                    if (!b->surfs[surface_zm])
+                        level = std::max(level, get_light_level(i, j, k - 1) - light_atten);
+                    if (!b->surfs[surface_zp])
+                        level = std::max(level, get_light_level(i, j, k + 1) - light_atten);
+
+                    set_light_level(i, j, k, level);
+                }
+            }
+        }
+    }
+
+    /* All done. */
+    light->upload();
+    need_lightfield_update = false;
+}
 
 
 void
@@ -282,9 +448,15 @@ init()
     entity_types[1].name = "Display Panel (4x4)";
     build_static_physics_mesh(entity_types[1].sw, &entity_types[1].phys_mesh, &entity_types[1].phys_shape);
 
+    entity_types[2].sw = load_mesh("mesh/panel_4x4.obj");
+    set_mesh_material(entity_types[2].sw, 8);
+    entity_types[2].hw = upload_mesh(entity_types[2].sw);
+    entity_types[2].name = "Light (4x4)";
+    build_static_physics_mesh(entity_types[2].sw, &entity_types[2].phys_mesh, &entity_types[2].phys_shape);
+
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
-    add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/simple.frag");
-    remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/simple.frag");
+    add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/unlit.frag");
+    remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/unlit.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
 
@@ -309,6 +481,7 @@ init()
     world_textures->load(5, "textures/red.png");
     world_textures->load(6, "textures/text_example.png");
     world_textures->load(7, "textures/display.png");
+    world_textures->load(8, "textures/light.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP_ARRAY, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
@@ -342,6 +515,13 @@ init()
     text = new text_renderer("fonts/pixelmix.ttf", 16);
 
     printf("World vertex size: %zu bytes\n", sizeof(vertex));
+
+    light = new light_field();
+    light->bind(1);
+
+    /* put some crap in the lightfield */
+    memset(light->data, 0, sizeof(light->data));
+    light->upload();
 }
 
 
@@ -410,6 +590,7 @@ struct add_block_tool : public tool
             bl->type = block_support;
             /* dirty the chunk */
             ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
+            mark_lightfield_update(rc->px, rc->py, rc->pz);
         }
     }
 
@@ -513,12 +694,15 @@ struct remove_block_tool : public tool
                     /* pop any dependent ents */
                     remove_ents_from_surface(rc->x, rc->y, rc->z, index);
                     remove_ents_from_surface(rx, ry, rz, index ^ 1);
+
+                    mark_lightfield_update(rx, ry, rz);
                 }
             }
         }
 
         /* dirty the chunk */
         ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
+        mark_lightfield_update(rc->x, rc->y, rc->z);
     }
 
     virtual void preview(raycast_info *rc)
@@ -579,6 +763,9 @@ struct add_surface_tool : public tool
             other_side->surfs[index ^ 1] = this->st;
             ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
 
+            mark_lightfield_update(rc->x, rc->y, rc->z);
+            mark_lightfield_update(rc->px, rc->py, rc->pz);
+
         }
     }
 
@@ -636,6 +823,9 @@ struct remove_surface_tool : public tool
             /* remove any ents using the surface */
             remove_ents_from_surface(rc->px, rc->py, rc->pz, index ^ 1);
             remove_ents_from_surface(rc->x, rc->y, rc->z, index);
+
+            mark_lightfield_update(rc->x, rc->y, rc->z);
+            mark_lightfield_update(rc->px, rc->py, rc->pz);
         }
     }
 
@@ -770,6 +960,9 @@ struct add_surface_entity_tool : public tool
 
         /* take the space. */
         other_side->surf_space[index ^ 1] |= required_space;
+
+        /* mark lighting for rebuild around this point */
+        mark_lightfield_update(rc->px, rc->py, rc->pz);
     }
 
     virtual void preview(raycast_info *rc)
@@ -843,7 +1036,7 @@ tool *tools[] = {
     new remove_surface_tool(),
     new add_block_entity_tool(&entity_types[0]),
     new add_surface_entity_tool(&entity_types[1]),
-    new empty_hands_tool(),
+    new add_surface_entity_tool(&entity_types[2]),
 };
 
 
@@ -931,6 +1124,9 @@ update()
     if (player.use && !player.last_use && hit_ent) {
         hit_ent->use();
     }
+
+    /* rebuild lighting if needed */
+    update_lightfield();
 
     world_textures->bind(0);
 

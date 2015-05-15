@@ -22,7 +22,6 @@ layout(std140, binding=1) uniform per_object {
 };
 
 out vec3 texcoord;
-out float light;
 
 void main(void)
 {
@@ -39,7 +38,4 @@ void main(void)
     } else {
         texcoord.xy = pos.xy;
     }
-
-    /* lighting */
-	light = 1.0;
 }
