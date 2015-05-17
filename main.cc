@@ -349,8 +349,7 @@ update_lightfield()
             for (int i = ship->min_x; i <= ship->max_x; i++) {
                 chunk *ch = ship->get_chunk(i, j, k);
                 if (ch) {
-                    for (std::vector<entity *>::const_iterator it = ch->entities.begin(); it != ch->entities.end(); it++) {
-                        entity *e = *it;
+                    for (auto e : ch->entities) {
                         /* TODO: only some entities should do this. */
                         if (e->type == &entity_types[2]) {
                             set_light_level(e->x, e->y, e->z, 255);
@@ -1163,9 +1162,7 @@ update()
             for (int i = ship->min_x; i <= ship->max_x; i++) {
                 chunk *ch = ship->get_chunk(i, j, k);
                 if (ch) {
-                    for (std::vector<entity *>::const_iterator it = ch->entities.begin(); it != ch->entities.end(); it++) {
-                        entity *e = *it;
-
+                    for (auto e : ch->entities) {
                         /* TODO: batch these matrix uploads too! */
                         per_object->val.world_matrix = e->mat;
                         per_object->upload();
