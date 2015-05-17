@@ -193,6 +193,7 @@ hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 text_renderer *text;
 light_field *light;
+entity *use_entity = 0;
 
 
 glm::mat4
@@ -1070,6 +1071,8 @@ rebuild_ui()
         strcpy(buf, "(no tool)");
     }
 
+    add_text_with_outline(".", 0, 0);
+
     sprintf(buf2, "Left mouse button: %s", buf);
     text->measure(buf2, &w, &h);
     add_text_with_outline(buf2, -w/2, -400);
@@ -1079,6 +1082,14 @@ rebuild_ui()
     sprintf(buf, "Gravity: %s (G to toggle)", player.disable_gravity ? "OFF" : "ON");
     text->measure(buf, &w, &h);
     add_text_with_outline(buf, -w/2, -430);
+
+    /* Use key affordance */
+    if (use_entity) {
+        sprintf(buf2, "(E) Use the %s", use_entity->type->name);
+        w = 0; h = 0;
+        text->measure(buf2, &w, &h);
+        add_text_with_outline(buf2, -w/2, -200);
+    }
 
     text->upload();
 }
@@ -1119,6 +1130,11 @@ update()
     entity *hit_ent = phys_raycast(player.eye.x, player.eye.y, player.eye.z,
                                    player.dir.x, player.dir.y, player.dir.z,
                                    2 /* dist */, phy->ghostObj, phy->dynamicsWorld);
+
+    if (hit_ent != use_entity) {
+        use_entity = hit_ent;
+        player.ui_dirty = true;
+    }
 
     if (player.use && !player.last_use && hit_ent) {
         hit_ent->use();
