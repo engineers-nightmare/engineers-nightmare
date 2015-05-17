@@ -48,7 +48,7 @@ struct text_renderer
 
     texture_atlas *atlas;
 
-    void add(char const *str, float x, float y);
+    void add(char const *str, float x, float y, float r, float g, float b);
     void measure(char const *str, float *x, float *y);
     void upload();
     void reset();

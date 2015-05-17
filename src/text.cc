@@ -17,6 +17,8 @@ texture_atlas::texture_atlas()
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     buf = new unsigned char[TEXT_ATLAS_WIDTH * TEXT_ATLAS_HEIGHT];
 }
@@ -122,10 +124,8 @@ text_renderer::text_renderer(char const *font, int size)
 
 
 void
-text_renderer::add(char const *str, float x, float y)
+text_renderer::add(char const *str, float x, float y, float r, float g, float b)
 {
-    float r = 1, g = 1, b = 1;  /* initial color */
-
     float xx = x;
 
     for (; *str; str++) {

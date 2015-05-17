@@ -848,6 +848,17 @@ tool *tools[] = {
 
 
 void
+add_text_with_outline(char const *s, float x, float y)
+{
+    text->add(s, x - 2, y, 0, 0, 0);
+    text->add(s, x + 2, y, 0, 0, 0);
+    text->add(s, x, y - 2, 0, 0, 0);
+    text->add(s, x, y + 2, 0, 0, 0);
+    text->add(s, x, y, 1, 1, 1);
+}
+
+
+void
 rebuild_ui()
 {
     text->reset();
@@ -869,13 +880,13 @@ rebuild_ui()
 
     sprintf(buf2, "Left mouse button: %s", buf);
     text->measure(buf2, &w, &h);
-    text->add(buf2, -w/2, -400);
+    add_text_with_outline(buf2, -w/2, -400);
 
     /* Gravity state (temp) */
     w = 0; h = 0;
     sprintf(buf, "Gravity: %s (G to toggle)", player.disable_gravity ? "OFF" : "ON");
     text->measure(buf, &w, &h);
-    text->add(buf, -w/2, -430);
+    add_text_with_outline(buf, -w/2, -430);
 
     text->upload();
 }
