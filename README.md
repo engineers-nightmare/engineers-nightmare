@@ -5,13 +5,11 @@ A game about keeping a spaceship from falling apart
 
 # Current state
 
-This is the view you are greeted with on game start (consider this a cry for help with art)
+So far, have implemented solid player movement, including jumping and crouching, crawling inside blocks, etc; tools for
+placing and removing block scaffolding, surfaces of several types, block-mounted and surface-mounted entities of several
+types; Lightfield propagated from certain entities.
 
-![starting](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-start-2015-04-28.png)
-
-And here is a mess I made by removing surfaces and blocks:
-
-![mess](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-mess-2015-04-28.png)
+![example](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-2015-05-18-1.png)
 
 
 # Building and running
