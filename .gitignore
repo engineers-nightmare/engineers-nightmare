@@ -9,3 +9,7 @@ scratch
 test_bin
 libNIGHTMARE.a
 Testing
+
+# Sublime Text
+# workspace files are user-specific
+*.sublime-workspace
