@@ -1,7 +1,13 @@
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_image.h>
-#include <err.h>
+
+#ifndef _WIN32
+#include <err.h> /* errx */
+#else
+#include "src/winerr.h"
+#endif
+
 #include <epoxy/gl.h>
 #include <algorithm>
 
@@ -166,13 +172,13 @@ struct light_field {
 
 
 void
-gl_debug_callback(GLenum source __unused,
-                  GLenum type __unused,
-                  GLenum id __unused,
-                  GLenum severity __unused,
-                  GLsizei length __unused,
+gl_debug_callback(GLenum /*source __unused*/,
+                  GLenum /*type __unused*/,
+                  GLenum /*id __unused*/,
+                  GLenum /*severity __unused*/,
+                  GLsizei /*length __unused*/,
                   GLchar const *message,
-                  void const *userParam __unused)
+                  void const * /*userParam __unused*/)
 {
     printf("GL: %s\n", message);
 }
@@ -414,8 +420,8 @@ init()
     if (!epoxy_has_gl_extension("GL_KHR_debug"))
         errx(1, "No support for GL debugging, life isn't worth it.\n");
 
-    glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(gl_debug_callback, NULL);
+    //glEnable(GL_DEBUG_OUTPUT);
+    //glDebugMessageCallback(gl_debug_callback, NULL);
 
     /* Check for ARB_texture_storage */
     if (!epoxy_has_gl_extension("GL_ARB_texture_storage"))
@@ -514,7 +520,7 @@ init()
 
     text = new text_renderer("fonts/pixelmix.ttf", 16);
 
-    printf("World vertex size: %zu bytes\n", sizeof(vertex));
+    printf("World vertex size: %u bytes\n", sizeof(vertex));
 
     light = new light_field();
     light->bind(1);
@@ -1253,24 +1259,24 @@ enum key_action {
 
 
 static unsigned bindings[num_actions] = {
-    [action_left] = SDL_SCANCODE_A,
-    [action_right] = SDL_SCANCODE_D,
-    [action_forward] = SDL_SCANCODE_W,
-    [action_back] = SDL_SCANCODE_S,
-    [action_jump] = SDL_SCANCODE_SPACE,
-    [action_use] = SDL_SCANCODE_E,
-    [action_reset] = SDL_SCANCODE_R,
-    [action_crouch] = SDL_SCANCODE_LCTRL,
-    [action_gravity] = SDL_SCANCODE_G,
-    [action_slot1] = SDL_SCANCODE_1,
-    [action_slot2] = SDL_SCANCODE_2,
-    [action_slot3] = SDL_SCANCODE_3,
-    [action_slot4] = SDL_SCANCODE_4,
-    [action_slot5] = SDL_SCANCODE_5,
-    [action_slot6] = SDL_SCANCODE_6,
-    [action_slot7] = SDL_SCANCODE_7,
-    [action_slot8] = SDL_SCANCODE_8,
-    [action_slot9] = SDL_SCANCODE_9,
+    /*[action_left]    =*/ SDL_SCANCODE_A,
+    /*[action_right]   =*/ SDL_SCANCODE_D,
+    /*[action_forward] =*/ SDL_SCANCODE_W,
+    /*[action_back]    =*/ SDL_SCANCODE_S,
+    /*[action_jump]    =*/ SDL_SCANCODE_SPACE,
+    /*[action_use]     =*/ SDL_SCANCODE_E,
+    /*[action_reset]   =*/ SDL_SCANCODE_R,
+    /*[action_crouch]  =*/ SDL_SCANCODE_LCTRL,
+    /*[action_gravity] =*/ SDL_SCANCODE_G,
+    /*[action_slot1]   =*/ SDL_SCANCODE_1,
+    /*[action_slot2]   =*/ SDL_SCANCODE_2,
+    /*[action_slot3]   =*/ SDL_SCANCODE_3,
+    /*[action_slot4]   =*/ SDL_SCANCODE_4,
+    /*[action_slot5]   =*/ SDL_SCANCODE_5,
+    /*[action_slot6]   =*/ SDL_SCANCODE_6,
+    /*[action_slot7]   =*/ SDL_SCANCODE_7,
+    /*[action_slot8]   =*/ SDL_SCANCODE_8,
+    /*[action_slot9]   =*/ SDL_SCANCODE_9,
 };
 
 

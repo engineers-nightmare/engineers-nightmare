@@ -1,5 +1,11 @@
 #include <stdio.h>
-#include <err.h>
+
+#ifndef _WIN32
+#include <err.h> /* errx */
+#else
+#include "winerr.h"
+#endif
+
 #include <epoxy/gl.h>
 
 #include "common.h"
@@ -61,7 +67,7 @@ load_mesh(char const *filename) {
         }
     }
 
-    printf("\tAfter processing: %zu verts, %zu indices\n", verts.size(), indices.size());
+    printf("\tAfter processing: %u verts, %u indices\n", verts.size(), indices.size());
 
     aiReleaseImport(scene);
 

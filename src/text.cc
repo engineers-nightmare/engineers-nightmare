@@ -4,7 +4,12 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <stdlib.h>
-#include <err.h>
+
+#ifndef _WIN32
+#include <err.h> /* errx */
+#else
+#include "winerr.h"
+#endif
 
 
 #define TEXT_ATLAS_WIDTH    512

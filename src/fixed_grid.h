@@ -2,7 +2,12 @@
 
 #define DEBUG 0
 
+#ifndef _WIN32
 #include <err.h> /* errx */
+#else
+#include "winerr.h"
+#endif
+
 #include <stdlib.h> /* calloc, free, realloc */
 #include <stdio.h> /* printf */
 #include <string.h> /* memmove, memset */

@@ -1,4 +1,9 @@
-#include <err.h>
+#ifndef _WIN32
+#include <err.h> /* errx */
+#else
+#include "winerr.h"
+#endif
+
 #include <epoxy/gl.h>
 #include <stdio.h>
 

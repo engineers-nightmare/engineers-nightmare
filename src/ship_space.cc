@@ -3,6 +3,10 @@
 #include <assert.h>
 #include <math.h>
 
+#ifdef _WIN32
+#include <algorithm>
+#endif // _WIN32
+
 /* create a ship space of x * y * z instantiated chunks */
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
     : min_x(0), min_y(0), min_z(0)
