@@ -32,6 +32,8 @@ struct player {
     bool last_gravity;
     bool gravity;
 
+    bool menu_requested = false;
+
     bool ui_dirty;
 
     /* used within physics to toggle gravity */

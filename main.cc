@@ -39,6 +39,10 @@
 // 1 for ordinary use, -1 to invert mouse. TODO: settings...
 #define MOUSE_INVERT_LOOK 1
 
+void configureBindings();
+
+bool exit_requested = false;
+
 struct wnd {
     SDL_Window *ptr;
     SDL_GLContext gl_ctx;
@@ -504,6 +508,8 @@ init()
     ship = ship_space::mock_ship_space();
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
+
+    configureBindings();
 
     player.angle = 0;
     player.elev = 0;
@@ -1127,6 +1133,12 @@ update()
 
     tool *t = tools[player.selected_slot];
 
+    /* no menu. exit for now */
+    if (player.menu_requested) {
+        exit_requested = true;
+        player.menu_requested = false;
+    }
+
     /* both tool use and overlays need the raycast itself */
     raycast_info rc;
     ship->raycast(player.eye.x, player.eye.y, player.eye.z, player.dir.x, player.dir.y, player.dir.z, &rc);
@@ -1245,6 +1257,7 @@ enum key_action {
     action_back,
     action_jump,
     action_use,
+    action_menu,
     action_reset,
     action_crouch,
     action_gravity,
@@ -1288,6 +1301,8 @@ static unsigned bindings[num_actions] = {
 void
 handle_input()
 {
+    if (keys[bindings[action_menu]]) player.menu_requested = true;
+
     player.move.x = keys[bindings[action_right]] - keys[bindings[action_left]];
     player.move.y = keys[bindings[action_forward]] - keys[bindings[action_back]];
 
@@ -1369,6 +1384,8 @@ run()
         update();
 
         SDL_GL_SwapWindow(wnd.ptr);
+
+        if (exit_requested) return;
     }
 }
 
