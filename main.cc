@@ -174,10 +174,10 @@ struct light_field {
 #ifndef _WIN32
 void
 gl_debug_callback(GLenum source __unused,
--                 GLenum type __unused,
--                 GLenum id __unused,
--                 GLenum severity __unused,
--                 GLsizei length __unused,
+                  GLenum type __unused,
+                  GLenum id __unused,
+                  GLenum severity __unused,
+                  GLsizei length __unused,
                   GLchar const *message,
                   void const *userParam __unused)
 {
