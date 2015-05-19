@@ -1,6 +1,11 @@
 #include "chunk.h"
 
 
+chunk::chunk()
+{
+    memset(this->blocks.contents, block_empty, sizeof(this->blocks));
+}
+
 block *
 chunk::get_block(unsigned int x, unsigned int y, unsigned int z)
 {

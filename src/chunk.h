@@ -15,16 +15,19 @@ class btCollisionShape;
 class btRigidBody;
 
 struct render_chunk {
-    hw_mesh *mesh;
-    bool valid;
+    hw_mesh *mesh = NULL;
+    bool valid = false;
 
 
-    btTriangleMesh *phys_mesh;
-    btCollisionShape *phys_shape;
-    btRigidBody *phys_body;
+    btTriangleMesh *phys_mesh = NULL;
+    btCollisionShape *phys_shape = NULL;
+    btRigidBody *phys_body = NULL;
 };
 
 struct chunk {
+    /* create an empty chunk */
+    chunk();
+
     /* with a CHUNK_SIZE of 8
      * we have 8^3 blocks
      * this means a chunk represents
