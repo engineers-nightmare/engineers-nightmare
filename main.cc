@@ -171,17 +171,19 @@ struct light_field {
 };
 
 
+#ifndef _WIN32
 void
-gl_debug_callback(GLenum /*source __unused*/,
-                  GLenum /*type __unused*/,
-                  GLenum /*id __unused*/,
-                  GLenum /*severity __unused*/,
-                  GLsizei /*length __unused*/,
+gl_debug_callback(GLenum source __unused,
+-                 GLenum type __unused,
+-                 GLenum id __unused,
+-                 GLenum severity __unused,
+-                 GLsizei length __unused,
                   GLchar const *message,
-                  void const * /*userParam __unused*/)
+                  void const *userParam __unused)
 {
     printf("GL: %s\n", message);
 }
+#endif // _WIN32
 
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
@@ -420,8 +422,10 @@ init()
     if (!epoxy_has_gl_extension("GL_KHR_debug"))
         errx(1, "No support for GL debugging, life isn't worth it.\n");
 
-    //glEnable(GL_DEBUG_OUTPUT);
-    //glDebugMessageCallback(gl_debug_callback, NULL);
+#ifndef _WIN32
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(gl_debug_callback, NULL);
+#endif
 
     /* Check for ARB_texture_storage */
     if (!epoxy_has_gl_extension("GL_ARB_texture_storage"))
@@ -1258,6 +1262,7 @@ enum key_action {
 };
 
 
+// super fragile assignation for windows support
 static unsigned bindings[num_actions] = {
     /*[action_left]    =*/ SDL_SCANCODE_A,
     /*[action_right]   =*/ SDL_SCANCODE_D,
