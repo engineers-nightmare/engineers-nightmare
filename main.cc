@@ -518,12 +518,8 @@ init()
     player.angle = 0;
     player.elev = 0;
     player.pos = glm::vec3(3,2,2);
-    player.last_jump = player.jump = false;
     player.selected_slot = 1;
-    player.last_use = player.use = false;
-    player.last_reset = player.reset = false;
     player.last_left_button = player.left_button = false;
-    player.last_crouch = player.crouch = false;
     player.ui_dirty = true;
     player.disable_gravity = false;
 
@@ -1164,7 +1160,7 @@ update()
         player.ui_dirty = true;
     }
 
-    if (player.use && !player.last_use && hit_ent) {
+    if (player.use && hit_ent) {
         hit_ent->use();
     }
 
@@ -1267,6 +1263,8 @@ enum input_action {
     action_reset,
     action_crouch,
     action_gravity,
+    action_tool_next,
+    action_tool_prev,
     action_slot1,
     action_slot2,
     action_slot3,
@@ -1276,8 +1274,6 @@ enum input_action {
     action_slot7,
     action_slot8,
     action_slot9,
-    action_tool_next,
-    action_tool_prev,
 
     num_actions,
 };
@@ -1453,32 +1449,11 @@ struct action {
     }
 };
 
-static unsigned bindings[num_actions];
 static std::hash_map<input_action, action> em_actions;
 
 void
 configureBindings()
 {
-    bindings[action_left]    = INPUT_A;
-    bindings[action_right]   = INPUT_D;
-    bindings[action_forward] = INPUT_W;
-    bindings[action_back]    = INPUT_S;
-    bindings[action_jump]    = INPUT_SPACE;
-    bindings[action_use]     = INPUT_E;
-    bindings[action_menu]    = INPUT_ESCAPE;
-    bindings[action_reset]   = INPUT_R;
-    bindings[action_crouch]  = INPUT_LCTRL;
-    bindings[action_gravity] = INPUT_G;
-    bindings[action_slot1]   = INPUT_1;
-    bindings[action_slot2]   = INPUT_2;
-    bindings[action_slot3]   = INPUT_3;
-    bindings[action_slot4]   = INPUT_4;
-    bindings[action_slot5]   = INPUT_5;
-    bindings[action_slot6]   = INPUT_6;
-    bindings[action_slot7]   = INPUT_7;
-    bindings[action_slot8]   = INPUT_8;
-    bindings[action_slot9]   = INPUT_9;
-
     em_actions[action_left]    = action(action_right,   binding(INPUT_A));
     em_actions[action_right]   = action(action_right,   binding(INPUT_D));
     em_actions[action_forward] = action(action_forward, binding(INPUT_W));
@@ -1557,6 +1532,8 @@ set_inputs() {
             }
             /* still not pressed */
             else {
+                action->active = false;
+                action->just_inactive = false;
             }
         }
     }
@@ -1564,47 +1541,60 @@ set_inputs() {
 
 void
 handle_input()
-{   
+{
     set_inputs();
 
     if (em_actions[action_menu].active) player.menu_requested = true;
 
-    auto moveX = em_actions[action_right].active - em_actions[action_left].active;
-    auto moveY = em_actions[action_forward].active - em_actions[action_back].active;
-    auto crouch = em_actions[action_crouch].active;
+    /* movement */
+    auto moveX      = em_actions[action_right].active - em_actions[action_left].active;
+    auto moveY      = em_actions[action_forward].active - em_actions[action_back].active;
+
+    /* crouch */
+    auto crouch     = em_actions[action_crouch].active;
+    auto crouch_end = em_actions[action_crouch].just_inactive;
+
+    /* momentary */
+    auto jump       = em_actions[action_jump].just_active;
+    auto reset      = em_actions[action_reset].just_active;
+    auto use        = em_actions[action_use].just_active;
+    auto slot1      = em_actions[action_slot1].just_active;
+    auto slot2      = em_actions[action_slot2].just_active;
+    auto slot3      = em_actions[action_slot3].just_active;
+    auto slot4      = em_actions[action_slot4].just_active;
+    auto slot5      = em_actions[action_slot5].just_active;
+    auto slot6      = em_actions[action_slot6].just_active;
+    auto slot7      = em_actions[action_slot7].just_active;
+    auto slot8      = em_actions[action_slot8].just_active;
+    auto slot9      = em_actions[action_slot9].just_active;
+    auto gravity    = em_actions[action_gravity].just_active;
+
+    /* persistent */
 
     player.move.x = moveX;
     player.move.y = moveY;
+
+    player.jump       = jump;
+    player.crouch     = crouch;
+    player.reset      = reset;
+    player.crouch_end = crouch_end;
+    player.use        = use;
+    player.gravity    = gravity;
+
+    if (slot1) set_slot(1);
+    if (slot2) set_slot(2);
+    if (slot3) set_slot(3);
+    if (slot4) set_slot(4);
+    if (slot5) set_slot(5);
+    if (slot6) set_slot(6);
+    if (slot7) set_slot(7);
+    if (slot8) set_slot(8);
+    if (slot9) set_slot(9);
 
     /* limit to unit vector */
     float len = glm::length(player.move);
     if (len > 0.0f)
         player.move = player.move / len;
-
-    player.last_jump = player.jump;
-    player.jump = keys[bindings[action_jump]];
-
-    player.last_use = player.use;
-    player.use = keys[bindings[action_use]];
-
-    player.last_reset = player.reset;
-    player.reset = keys[bindings[action_reset]];
-
-    player.last_crouch = player.crouch;
-    player.crouch = crouch;
-
-    player.last_gravity = player.gravity;
-    player.gravity = keys[bindings[action_gravity]];
-
-    if (keys[bindings[action_slot1]]) set_slot(1);
-    if (keys[bindings[action_slot2]]) set_slot(2);
-    if (keys[bindings[action_slot3]]) set_slot(3);
-    if (keys[bindings[action_slot4]]) set_slot(4);
-    if (keys[bindings[action_slot5]]) set_slot(5);
-    if (keys[bindings[action_slot6]]) set_slot(6);
-    if (keys[bindings[action_slot7]]) set_slot(7);
-    if (keys[bindings[action_slot8]]) set_slot(8);
-    if (keys[bindings[action_slot9]]) set_slot(9);
 
     /* Current state of the mouse buttons. */
     unsigned int mouse_buttons = SDL_GetRelativeMouseState(NULL, NULL);

@@ -103,7 +103,7 @@ physics::tick()
     btVector3 fwd(c, s, 0);
     btVector3 right(s, -c, 0);
 
-    if (!pl->last_gravity && pl->gravity) {
+    if (pl->gravity) {
         pl->disable_gravity ^= true;
 
         if( this->pl->disable_gravity ){
@@ -129,19 +129,18 @@ physics::tick()
 
     this->controller->setWalkDirection(fwd + right);
 
-    if (!pl->last_jump && pl->jump && this->controller->onGround())
+    if (pl->jump && this->controller->onGround())
         this->controller->jump();
 
-    if (!pl->last_reset && pl->reset) {
+    if (pl->reset) {
         /* reset position (for debug) */
         this->controller->warp(btVector3(PLAYER_START_X, PLAYER_START_Y, PLAYER_START_Z));
     }
 
-    if (!pl->last_crouch && pl->crouch) {
+    if (pl->crouch) {
         this->controller->crouch(this->dynamicsWorld);
     }
-
-    if (pl->last_crouch && !pl->crouch) {
+    else if (pl->crouch_end) {
         this->controller->crouchEnd();
     }
 
