@@ -45,6 +45,8 @@ void configureBindings();
 
 bool exit_requested = false;
 
+auto hfov = DEG2RAD(90.f);
+
 struct wnd {
     SDL_Window *ptr;
     SDL_GLContext gl_ctx;
@@ -1128,7 +1130,9 @@ update()
 
     player.eye = player.pos + glm::vec3(0, 0, EYE_OFFSET_Z);
 
-    glm::mat4 proj = glm::perspective(45.0f, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
+    auto vfov = hfov * (float)wnd.height / wnd.width;
+
+    glm::mat4 proj = glm::perspective(vfov, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
     glm::mat4 view = glm::lookAt(player.eye, player.eye + player.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
