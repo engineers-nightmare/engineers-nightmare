@@ -41,6 +41,9 @@
 // 1 for ordinary use, -1 to invert mouse. TODO: settings...
 #define MOUSE_INVERT_LOOK 1
 
+/* rebase button */
+#define EN_BUTTON(x) (x - INPUT_EOK)
+
 void configureBindings();
 
 bool exit_requested = false;
@@ -205,6 +208,7 @@ ship_space *ship;
 player player;
 physics *phy;
 unsigned char const *keys;
+unsigned int mouse_buttons;
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 text_renderer *text;
@@ -519,7 +523,6 @@ init()
     player.elev = 0;
     player.pos = glm::vec3(3,2,2);
     player.selected_slot = 1;
-    player.last_left_button = player.left_button = false;
     player.ui_dirty = true;
     player.disable_gravity = false;
 
@@ -1146,7 +1149,7 @@ update()
     ship->raycast(player.eye.x, player.eye.y, player.eye.z, player.dir.x, player.dir.y, player.dir.z, &rc);
 
     /* tool use */
-    if (player.left_button && !player.last_left_button && rc.hit && t) {
+    if (player.use_tool && rc.hit && t) {
         t->use(&rc);
     }
 
@@ -1265,6 +1268,7 @@ enum input_action {
     action_gravity,
     action_tool_next,
     action_tool_prev,
+    action_use_tool,
     action_slot1,
     action_slot2,
     action_slot3,
@@ -1464,7 +1468,7 @@ configureBindings()
     en_actions[action_reset]    = action(action_reset,    binding(INPUT_R));
     en_actions[action_crouch]   = action(action_crouch,   binding(INPUT_LCTRL));
     en_actions[action_gravity]  = action(action_gravity,  binding(INPUT_G));
-    en_actions[action_use_tool] = action(action_use_tool, binding(INPUT_MOUSE_LEFT));
+    en_actions[action_use_tool] = action(action_use_tool, binding(INPUT_EOK, INPUT_MOUSE_LEFT));
     en_actions[action_slot1]    = action(action_slot1,    binding(INPUT_1));
     en_actions[action_slot2]    = action(action_slot2,    binding(INPUT_2));
     en_actions[action_slot3]    = action(action_slot3,    binding(INPUT_3));
@@ -1492,6 +1496,12 @@ set_inputs() {
         for (auto &key : binds->keyboard_inputs) {
             if (keys[key]) {
                 pressed = true;
+            }
+        }
+
+        for (auto &mouse : binds->mouse_inputs) {
+            if (mouse_buttons & SDL_BUTTON(EN_BUTTON(mouse))) {
+                pressed |= true;
             }
         }
 
@@ -1538,6 +1548,8 @@ set_inputs() {
 void
 handle_input()
 {
+    mouse_buttons = SDL_GetRelativeMouseState(NULL, NULL);
+
     set_inputs();
 
     if (en_actions[action_menu].active) player.menu_requested = true;
@@ -1564,6 +1576,7 @@ handle_input()
     auto slot8      = en_actions[action_slot8].just_active;
     auto slot9      = en_actions[action_slot9].just_active;
     auto gravity    = en_actions[action_gravity].just_active;
+    auto use_tool   = en_actions[action_use_tool].just_active;
 
     /* persistent */
 
@@ -1576,6 +1589,7 @@ handle_input()
     player.crouch_end = crouch_end;
     player.use        = use;
     player.gravity    = gravity;
+    player.use_tool   = use_tool;
 
     if (slot1) set_slot(1);
     if (slot2) set_slot(2);
@@ -1591,11 +1605,6 @@ handle_input()
     float len = glm::length(player.move);
     if (len > 0.0f)
         player.move = player.move / len;
-
-    /* Current state of the mouse buttons. */
-    unsigned int mouse_buttons = SDL_GetRelativeMouseState(NULL, NULL);
-    player.last_left_button = player.left_button;
-    player.left_button = mouse_buttons & SDL_BUTTON(1);
 }
 
 

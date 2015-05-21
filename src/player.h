@@ -20,13 +20,12 @@ struct player {
 
     bool reset;
 
-    bool last_left_button;
-    bool left_button;
-
     bool crouch;
     bool crouch_end;
 
     bool gravity;
+
+    bool use_tool;
 
     bool menu_requested = false;
 
