@@ -11,7 +11,7 @@
 #include <epoxy/gl.h>
 #include <algorithm>
 
-#include <hash_map>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -1480,7 +1480,7 @@ struct action {
     }
 };
 
-static std::hash_map<input_action, action> en_actions;
+static std::unordered_map<input_action, action> en_actions;
 
 void
 configureBindings()
