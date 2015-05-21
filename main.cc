@@ -1503,8 +1503,6 @@ set_inputs() {
                 /* ensure state integrity */
                 action->just_active = false;
                 action->just_inactive = false;
-
-                printf("input %d still pressed: %d\n", action->input, action->current_active);
             }
             /* just released */
             else {
@@ -1514,7 +1512,6 @@ set_inputs() {
 
                 action->just_active = false;
                 action->just_inactive = true;
-                printf("input %d just released\n", action->input);
             }
         }
         /* not currently pressed */
@@ -1527,8 +1524,6 @@ set_inputs() {
                 action->just_inactive = false;
                 action->last_active = now;
                 action->current_active = 0;
-
-                printf("input %d just pressed\n", action->input);
             }
             /* still not pressed */
             else {
