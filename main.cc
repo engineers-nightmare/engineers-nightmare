@@ -1280,7 +1280,7 @@ enum input_action {
 
 /* fairly ugly. non-keyboard inputs go at bottom
    keyboard entries trimmed down from SDL list */
-enum em_input {
+enum en_input {
     INPUT_A                  = SDL_SCANCODE_A,
     INPUT_B                  = SDL_SCANCODE_B,
     INPUT_C                  = SDL_SCANCODE_C,
@@ -1405,15 +1405,15 @@ enum em_input {
 };
 
 struct binding {
-    std::vector<em_input> keyboard_inputs;
-    std::vector<em_input> mouse_inputs;
+    std::vector<en_input> keyboard_inputs;
+    std::vector<en_input> mouse_inputs;
 
-    binding(em_input keyboard = INPUT_EOK, em_input mouse = INPUT_EOM)
+    binding(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
     {
         bind(keyboard, mouse);
     }
 
-    void bind(em_input keyboard = INPUT_EOK, em_input mouse = INPUT_EOM)
+    void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
     {
         if (keyboard != INPUT_EOK) {
             keyboard_inputs.push_back(keyboard);
@@ -1443,39 +1443,40 @@ struct action {
     {
     }
     
-    void bind(em_input keyboard = INPUT_EOK, em_input mouse = INPUT_EOM)
+    void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
     {
         binds.bind(keyboard, mouse);
     }
 };
 
-static std::hash_map<input_action, action> em_actions;
+static std::hash_map<input_action, action> en_actions;
 
 void
 configureBindings()
 {
-    em_actions[action_left]    = action(action_right,   binding(INPUT_A));
-    em_actions[action_right]   = action(action_right,   binding(INPUT_D));
-    em_actions[action_forward] = action(action_forward, binding(INPUT_W));
-    em_actions[action_back]    = action(action_back,    binding(INPUT_S));
-    em_actions[action_jump]    = action(action_jump,    binding(INPUT_SPACE));
-    em_actions[action_use]     = action(action_use,     binding(INPUT_E));
-    em_actions[action_menu]    = action(action_menu,    binding(INPUT_ESCAPE));
-    em_actions[action_reset]   = action(action_reset,   binding(INPUT_R));
-    em_actions[action_crouch]  = action(action_crouch,  binding(INPUT_LCTRL));
-    em_actions[action_gravity] = action(action_gravity, binding(INPUT_G));
-    em_actions[action_slot1]   = action(action_slot1,   binding(INPUT_1));
-    em_actions[action_slot2]   = action(action_slot2,   binding(INPUT_2));
-    em_actions[action_slot3]   = action(action_slot3,   binding(INPUT_3));
-    em_actions[action_slot4]   = action(action_slot4,   binding(INPUT_4));
-    em_actions[action_slot5]   = action(action_slot5,   binding(INPUT_5));
-    em_actions[action_slot6]   = action(action_slot6,   binding(INPUT_6));
-    em_actions[action_slot7]   = action(action_slot7,   binding(INPUT_7));
-    em_actions[action_slot8]   = action(action_slot8,   binding(INPUT_8));
-    em_actions[action_slot9]   = action(action_slot9,   binding(INPUT_9));
+    en_actions[action_left]     = action(action_right,    binding(INPUT_A));
+    en_actions[action_right]    = action(action_right,    binding(INPUT_D));
+    en_actions[action_forward]  = action(action_forward,  binding(INPUT_W));
+    en_actions[action_back]     = action(action_back,     binding(INPUT_S));
+    en_actions[action_jump]     = action(action_jump,     binding(INPUT_SPACE));
+    en_actions[action_use]      = action(action_use,      binding(INPUT_E));
+    en_actions[action_menu]     = action(action_menu,     binding(INPUT_ESCAPE));
+    en_actions[action_reset]    = action(action_reset,    binding(INPUT_R));
+    en_actions[action_crouch]   = action(action_crouch,   binding(INPUT_LCTRL));
+    en_actions[action_gravity]  = action(action_gravity,  binding(INPUT_G));
+    en_actions[action_use_tool] = action(action_use_tool, binding(INPUT_MOUSE_LEFT));
+    en_actions[action_slot1]    = action(action_slot1,    binding(INPUT_1));
+    en_actions[action_slot2]    = action(action_slot2,    binding(INPUT_2));
+    en_actions[action_slot3]    = action(action_slot3,    binding(INPUT_3));
+    en_actions[action_slot4]    = action(action_slot4,    binding(INPUT_4));
+    en_actions[action_slot5]    = action(action_slot5,    binding(INPUT_5));
+    en_actions[action_slot6]    = action(action_slot6,    binding(INPUT_6));
+    en_actions[action_slot7]    = action(action_slot7,    binding(INPUT_7));
+    en_actions[action_slot8]    = action(action_slot8,    binding(INPUT_8));
+    en_actions[action_slot9]    = action(action_slot9,    binding(INPUT_9));
 
     /* extra assign */
-    em_actions[action_crouch].bind(INPUT_C);
+    en_actions[action_crouch].bind(INPUT_C);
 }
 
 
@@ -1483,7 +1484,7 @@ void
 set_inputs() {
     auto now = SDL_GetTicks();
 
-    for (auto &actionPair : em_actions) {
+    for (auto &actionPair : en_actions) {
         bool pressed = false;
         auto action = &actionPair.second;
         auto binds = &action->binds;
@@ -1539,30 +1540,30 @@ handle_input()
 {
     set_inputs();
 
-    if (em_actions[action_menu].active) player.menu_requested = true;
+    if (en_actions[action_menu].active) player.menu_requested = true;
 
     /* movement */
-    auto moveX      = em_actions[action_right].active - em_actions[action_left].active;
-    auto moveY      = em_actions[action_forward].active - em_actions[action_back].active;
+    auto moveX      = en_actions[action_right].active - en_actions[action_left].active;
+    auto moveY      = en_actions[action_forward].active - en_actions[action_back].active;
 
     /* crouch */
-    auto crouch     = em_actions[action_crouch].active;
-    auto crouch_end = em_actions[action_crouch].just_inactive;
+    auto crouch     = en_actions[action_crouch].active;
+    auto crouch_end = en_actions[action_crouch].just_inactive;
 
     /* momentary */
-    auto jump       = em_actions[action_jump].just_active;
-    auto reset      = em_actions[action_reset].just_active;
-    auto use        = em_actions[action_use].just_active;
-    auto slot1      = em_actions[action_slot1].just_active;
-    auto slot2      = em_actions[action_slot2].just_active;
-    auto slot3      = em_actions[action_slot3].just_active;
-    auto slot4      = em_actions[action_slot4].just_active;
-    auto slot5      = em_actions[action_slot5].just_active;
-    auto slot6      = em_actions[action_slot6].just_active;
-    auto slot7      = em_actions[action_slot7].just_active;
-    auto slot8      = em_actions[action_slot8].just_active;
-    auto slot9      = em_actions[action_slot9].just_active;
-    auto gravity    = em_actions[action_gravity].just_active;
+    auto jump       = en_actions[action_jump].just_active;
+    auto reset      = en_actions[action_reset].just_active;
+    auto use        = en_actions[action_use].just_active;
+    auto slot1      = en_actions[action_slot1].just_active;
+    auto slot2      = en_actions[action_slot2].just_active;
+    auto slot3      = en_actions[action_slot3].just_active;
+    auto slot4      = en_actions[action_slot4].just_active;
+    auto slot5      = en_actions[action_slot5].just_active;
+    auto slot6      = en_actions[action_slot6].just_active;
+    auto slot7      = en_actions[action_slot7].just_active;
+    auto slot8      = en_actions[action_slot8].just_active;
+    auto slot9      = en_actions[action_slot9].just_active;
+    auto gravity    = en_actions[action_gravity].just_active;
 
     /* persistent */
 
