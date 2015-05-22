@@ -1480,7 +1480,7 @@ struct action {
     }
 };
 
-static std::unordered_map<input_action, action> en_actions;
+static std::unordered_map<input_action, action, std::hash<int>> en_actions;
 
 void
 configureBindings()
