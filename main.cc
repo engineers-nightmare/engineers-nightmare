@@ -11,6 +11,8 @@
 #include <epoxy/gl.h>
 #include <algorithm>
 
+#include <unordered_map>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -39,6 +41,15 @@
 // 1 for ordinary use, -1 to invert mouse. TODO: settings...
 #define MOUSE_INVERT_LOOK 1
 
+/* rebase button */
+#define EN_BUTTON(x) (x - INPUT_EOK)
+
+void configureBindings();
+
+bool exit_requested = false;
+
+auto hfov = DEG2RAD(90.f);
+
 struct wnd {
     SDL_Window *ptr;
     SDL_GLContext gl_ctx;
@@ -46,6 +57,164 @@ struct wnd {
     int height;
 } wnd;
 
+
+enum input_action {
+    action_left,
+    action_right,
+    action_forward,
+    action_back,
+    action_jump,
+    action_use,
+    action_menu,
+    action_reset,
+    action_crouch,
+    action_gravity,
+    action_tool_next,
+    action_tool_prev,
+    action_use_tool,
+    action_slot1,
+    action_slot2,
+    action_slot3,
+    action_slot4,
+    action_slot5,
+    action_slot6,
+    action_slot7,
+    action_slot8,
+    action_slot9,
+
+    num_actions,
+};
+
+/* fairly ugly. non-keyboard inputs go at bottom
+keyboard entries trimmed down from SDL list */
+enum en_input {
+    INPUT_A              = SDL_SCANCODE_A,
+    INPUT_B              = SDL_SCANCODE_B,
+    INPUT_C              = SDL_SCANCODE_C,
+    INPUT_D              = SDL_SCANCODE_D,
+    INPUT_E              = SDL_SCANCODE_E,
+    INPUT_F              = SDL_SCANCODE_F,
+    INPUT_G              = SDL_SCANCODE_G,
+    INPUT_H              = SDL_SCANCODE_H,
+    INPUT_I              = SDL_SCANCODE_I,
+    INPUT_J              = SDL_SCANCODE_J,
+    INPUT_K              = SDL_SCANCODE_K,
+    INPUT_L              = SDL_SCANCODE_L,
+    INPUT_M              = SDL_SCANCODE_M,
+    INPUT_N              = SDL_SCANCODE_N,
+    INPUT_O              = SDL_SCANCODE_O,
+    INPUT_P              = SDL_SCANCODE_P,
+    INPUT_Q              = SDL_SCANCODE_Q,
+    INPUT_R              = SDL_SCANCODE_R,
+    INPUT_S              = SDL_SCANCODE_S,
+    INPUT_T              = SDL_SCANCODE_T,
+    INPUT_U              = SDL_SCANCODE_U,
+    INPUT_V              = SDL_SCANCODE_V,
+    INPUT_W              = SDL_SCANCODE_W,
+    INPUT_X              = SDL_SCANCODE_X,
+    INPUT_Y              = SDL_SCANCODE_Y,
+    INPUT_Z              = SDL_SCANCODE_Z,
+    INPUT_1              = SDL_SCANCODE_1,
+    INPUT_2              = SDL_SCANCODE_2,
+    INPUT_3              = SDL_SCANCODE_3,
+    INPUT_4              = SDL_SCANCODE_4,
+    INPUT_5              = SDL_SCANCODE_5,
+    INPUT_6              = SDL_SCANCODE_6,
+    INPUT_7              = SDL_SCANCODE_7,
+    INPUT_8              = SDL_SCANCODE_8,
+    INPUT_9              = SDL_SCANCODE_9,
+    INPUT_0              = SDL_SCANCODE_0,
+    INPUT_RETURN         = SDL_SCANCODE_RETURN,
+    INPUT_ESCAPE         = SDL_SCANCODE_ESCAPE,
+    INPUT_BACKSPACE      = SDL_SCANCODE_BACKSPACE,
+    INPUT_TAB            = SDL_SCANCODE_TAB,
+    INPUT_SPACE          = SDL_SCANCODE_SPACE,
+    INPUT_MINUS          = SDL_SCANCODE_MINUS,
+    INPUT_EQUALS         = SDL_SCANCODE_EQUALS,
+    INPUT_LEFTBRACKET    = SDL_SCANCODE_LEFTBRACKET,
+    INPUT_RIGHTBRACKET   = SDL_SCANCODE_RIGHTBRACKET,
+    INPUT_BACKSLASH      = SDL_SCANCODE_BACKSLASH,
+    INPUT_NONUSHASH      = SDL_SCANCODE_NONUSHASH,
+    INPUT_SEMICOLON      = SDL_SCANCODE_SEMICOLON,
+    INPUT_APOSTROPHE     = SDL_SCANCODE_APOSTROPHE,
+    INPUT_GRAVE          = SDL_SCANCODE_GRAVE,
+    INPUT_COMMA          = SDL_SCANCODE_COMMA,
+    INPUT_PERIOD         = SDL_SCANCODE_PERIOD,
+    INPUT_SLASH          = SDL_SCANCODE_SLASH,
+    INPUT_CAPSLOCK       = SDL_SCANCODE_CAPSLOCK,
+    INPUT_F1             = SDL_SCANCODE_F1,
+    INPUT_F2             = SDL_SCANCODE_F2,
+    INPUT_F3             = SDL_SCANCODE_F3,
+    INPUT_F4             = SDL_SCANCODE_F4,
+    INPUT_F5             = SDL_SCANCODE_F5,
+    INPUT_F6             = SDL_SCANCODE_F6,
+    INPUT_F7             = SDL_SCANCODE_F7,
+    INPUT_F8             = SDL_SCANCODE_F8,
+    INPUT_F9             = SDL_SCANCODE_F9,
+    INPUT_F10            = SDL_SCANCODE_F10,
+    INPUT_F11            = SDL_SCANCODE_F11,
+    INPUT_F12            = SDL_SCANCODE_F12,
+    INPUT_PRINTSCREEN    = SDL_SCANCODE_PRINTSCREEN,
+    INPUT_SCROLLLOCK     = SDL_SCANCODE_SCROLLLOCK,
+    INPUT_PAUSE          = SDL_SCANCODE_PAUSE,
+    INPUT_INSERT         = SDL_SCANCODE_INSERT,
+    INPUT_HOME           = SDL_SCANCODE_HOME,
+    INPUT_PAGEUP         = SDL_SCANCODE_PAGEUP,
+    INPUT_DELETE         = SDL_SCANCODE_DELETE,
+    INPUT_END            = SDL_SCANCODE_END,
+    INPUT_PAGEDOWN       = SDL_SCANCODE_PAGEDOWN,
+    INPUT_RIGHT          = SDL_SCANCODE_RIGHT,
+    INPUT_LEFT           = SDL_SCANCODE_LEFT,
+    INPUT_DOWN           = SDL_SCANCODE_DOWN,
+    INPUT_UP             = SDL_SCANCODE_UP,
+    INPUT_NUMLOCKCLEAR   = SDL_SCANCODE_NUMLOCKCLEAR,
+    INPUT_KP_DIVIDE      = SDL_SCANCODE_KP_DIVIDE,
+    INPUT_KP_MULTIPLY    = SDL_SCANCODE_KP_MULTIPLY,
+    INPUT_KP_MINUS       = SDL_SCANCODE_KP_MINUS,
+    INPUT_KP_PLUS        = SDL_SCANCODE_KP_PLUS,
+    INPUT_KP_ENTER       = SDL_SCANCODE_KP_ENTER,
+    INPUT_KP_1           = SDL_SCANCODE_KP_1,
+    INPUT_KP_2           = SDL_SCANCODE_KP_2,
+    INPUT_KP_3           = SDL_SCANCODE_KP_3,
+    INPUT_KP_4           = SDL_SCANCODE_KP_4,
+    INPUT_KP_5           = SDL_SCANCODE_KP_5,
+    INPUT_KP_6           = SDL_SCANCODE_KP_6,
+    INPUT_KP_7           = SDL_SCANCODE_KP_7,
+    INPUT_KP_8           = SDL_SCANCODE_KP_8,
+    INPUT_KP_9           = SDL_SCANCODE_KP_9,
+    INPUT_KP_0           = SDL_SCANCODE_KP_0,
+    INPUT_KP_PERIOD      = SDL_SCANCODE_KP_PERIOD,
+    INPUT_NONUSBACKSLASH = SDL_SCANCODE_NONUSBACKSLASH,
+    INPUT_LCTRL          = SDL_SCANCODE_LCTRL,
+    INPUT_LSHIFT         = SDL_SCANCODE_LSHIFT,
+    INPUT_LALT           = SDL_SCANCODE_LALT,
+    INPUT_LGUI           = SDL_SCANCODE_LGUI,
+    INPUT_RCTRL          = SDL_SCANCODE_RCTRL,
+    INPUT_RSHIFT         = SDL_SCANCODE_RSHIFT,
+    INPUT_RALT           = SDL_SCANCODE_RALT,
+    INPUT_RGUI           = SDL_SCANCODE_RGUI,
+
+    /* end of keyboard */
+    INPUT_EOK            = SDL_NUM_SCANCODES,
+
+    INPUT_MOUSE_LEFT     = INPUT_EOK + SDL_BUTTON_LEFT,
+    INPUT_MOUSE_MIDDLE   = INPUT_EOK + SDL_BUTTON_MIDDLE,
+    INPUT_MOUSE_RIGHT    = INPUT_EOK + SDL_BUTTON_RIGHT,
+    INPUT_MOUSE_THUMB1   = INPUT_EOK + SDL_BUTTON_X1,
+    INPUT_MOUSE_THUMB2   = INPUT_EOK + SDL_BUTTON_X2,
+    INPUT_MOUSE_WHEELDOWN,
+    INPUT_MOUSE_WHEELUP,
+
+    /* end of mouse */
+    INPUT_EOM,
+
+    INPUT_NUM_INPUTS,
+};
+
+enum slot_cycle_direction {
+    cycle_next,
+    cycle_prev,
+};
 
 /* where T is std140-conforming, and agrees with the shader. */
 template<typename T>
@@ -197,6 +366,8 @@ ship_space *ship;
 player player;
 physics *phy;
 unsigned char const *keys;
+/* one larger than it needs to be due to SDL starting numbering at 1 */
+unsigned int mouse_buttons[INPUT_EOM - INPUT_EOK];
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 text_renderer *text;
@@ -505,15 +676,12 @@ init()
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
 
+    configureBindings();
+
     player.angle = 0;
     player.elev = 0;
     player.pos = glm::vec3(3,2,2);
-    player.last_jump = player.jump = false;
     player.selected_slot = 1;
-    player.last_use = player.use = false;
-    player.last_reset = player.reset = false;
-    player.last_left_button = player.left_button = false;
-    player.last_crouch = player.crouch = false;
     player.ui_dirty = true;
     player.disable_gravity = false;
 
@@ -1120,19 +1288,27 @@ update()
 
     player.eye = player.pos + glm::vec3(0, 0, EYE_OFFSET_Z);
 
-    glm::mat4 proj = glm::perspective(45.0f, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
+    auto vfov = hfov * (float)wnd.height / wnd.width;
+
+    glm::mat4 proj = glm::perspective(vfov, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
     glm::mat4 view = glm::lookAt(player.eye, player.eye + player.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
 
     tool *t = tools[player.selected_slot];
 
+    /* no menu. exit for now */
+    if (player.menu_requested) {
+        exit_requested = true;
+        player.menu_requested = false;
+    }
+
     /* both tool use and overlays need the raycast itself */
     raycast_info rc;
     ship->raycast(player.eye.x, player.eye.y, player.eye.z, player.dir.x, player.dir.y, player.dir.z, &rc);
 
     /* tool use */
-    if (player.left_button && !player.last_left_button && rc.hit && t) {
+    if (player.use_tool && rc.hit && t) {
         t->use(&rc);
     }
 
@@ -1146,7 +1322,7 @@ update()
         player.ui_dirty = true;
     }
 
-    if (player.use && !player.last_use && hit_ent) {
+    if (player.use && hit_ent) {
         hit_ent->use();
     }
 
@@ -1237,94 +1413,235 @@ set_slot(int slot)
     player.ui_dirty = true;
 }
 
+void
+cycle_slot(slot_cycle_direction direction)
+{
+    auto num_tools = sizeof(tools) / sizeof(tools[0]);
+    auto cur_slot = player.selected_slot;
+    if (direction == cycle_next) {
+        cur_slot++;
+        if (cur_slot >= num_tools) {
+            cur_slot = 0;
+        }
+    }
+    else if (direction == cycle_prev) {
+        cur_slot--;
+        if (cur_slot < 0) {
+            cur_slot = num_tools - 1;
+        }
+    }
 
-enum key_action {
-    action_left,
-    action_right,
-    action_forward,
-    action_back,
-    action_jump,
-    action_use,
-    action_reset,
-    action_crouch,
-    action_gravity,
-    action_slot1,
-    action_slot2,
-    action_slot3,
-    action_slot4,
-    action_slot5,
-    action_slot6,
-    action_slot7,
-    action_slot8,
-    action_slot9,
+    player.selected_slot = cur_slot;
+    player.ui_dirty = true;
+}
 
-    num_actions,
+struct binding {
+    std::vector<en_input> keyboard_inputs;
+    std::vector<en_input> mouse_inputs;
+
+    binding(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
+    {
+        bind(keyboard, mouse);
+    }
+
+    void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
+    {
+        if (keyboard != INPUT_EOK) {
+            keyboard_inputs.push_back(keyboard);
+        }
+        if (mouse != INPUT_EOM) {
+            mouse_inputs.push_back(mouse);
+        }
+    }
 };
 
+struct action {
+    input_action input;
+    binding binds;
 
-// super fragile assignation for windows support
-static unsigned bindings[num_actions] = {
-    /*[action_left]    =*/ SDL_SCANCODE_A,
-    /*[action_right]   =*/ SDL_SCANCODE_D,
-    /*[action_forward] =*/ SDL_SCANCODE_W,
-    /*[action_back]    =*/ SDL_SCANCODE_S,
-    /*[action_jump]    =*/ SDL_SCANCODE_SPACE,
-    /*[action_use]     =*/ SDL_SCANCODE_E,
-    /*[action_reset]   =*/ SDL_SCANCODE_R,
-    /*[action_crouch]  =*/ SDL_SCANCODE_LCTRL,
-    /*[action_gravity] =*/ SDL_SCANCODE_G,
-    /*[action_slot1]   =*/ SDL_SCANCODE_1,
-    /*[action_slot2]   =*/ SDL_SCANCODE_2,
-    /*[action_slot3]   =*/ SDL_SCANCODE_3,
-    /*[action_slot4]   =*/ SDL_SCANCODE_4,
-    /*[action_slot5]   =*/ SDL_SCANCODE_5,
-    /*[action_slot6]   =*/ SDL_SCANCODE_6,
-    /*[action_slot7]   =*/ SDL_SCANCODE_7,
-    /*[action_slot8]   =*/ SDL_SCANCODE_8,
-    /*[action_slot9]   =*/ SDL_SCANCODE_9,
+    bool active = false;        /* is action currently active */
+    bool just_active = false;   /* did action go active this frame */
+    bool just_inactive = false; /* did action go inactive this frame */
+    Uint32 last_active = 0;     /* time of last activation */
+    Uint32 current_active = 0;  /* duration of current activation */
+
+    action()
+    {
+    }
+
+    action(input_action a, binding b) :
+        input(a), binds(b)
+    {
+    }
+    
+    void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
+    {
+        binds.bind(keyboard, mouse);
+    }
 };
 
+static std::unordered_map<input_action, action, std::hash<int>> en_actions;
+
+void
+configureBindings()
+{
+    en_actions[action_left]      = action(action_right,     binding(INPUT_A));
+    en_actions[action_right]     = action(action_right,     binding(INPUT_D));
+    en_actions[action_forward]   = action(action_forward,   binding(INPUT_W));
+    en_actions[action_back]      = action(action_back,      binding(INPUT_S));
+    en_actions[action_jump]      = action(action_jump,      binding(INPUT_SPACE));
+    en_actions[action_use]       = action(action_use,       binding(INPUT_E));
+    en_actions[action_menu]      = action(action_menu,      binding(INPUT_ESCAPE));
+    en_actions[action_reset]     = action(action_reset,     binding(INPUT_R));
+    en_actions[action_crouch]    = action(action_crouch,    binding(INPUT_LCTRL));
+    en_actions[action_gravity]   = action(action_gravity,   binding(INPUT_G));
+    en_actions[action_use_tool]  = action(action_use_tool,  binding(INPUT_EOK, INPUT_MOUSE_LEFT));
+    en_actions[action_tool_next] = action(action_tool_next, binding(INPUT_EOK, INPUT_MOUSE_WHEELUP));
+    en_actions[action_tool_prev] = action(action_tool_prev, binding(INPUT_EOK, INPUT_MOUSE_WHEELDOWN));
+    en_actions[action_slot1]     = action(action_slot1,     binding(INPUT_1));
+    en_actions[action_slot2]     = action(action_slot2,     binding(INPUT_2));
+    en_actions[action_slot3]     = action(action_slot3,     binding(INPUT_3));
+    en_actions[action_slot4]     = action(action_slot4,     binding(INPUT_4));
+    en_actions[action_slot5]     = action(action_slot5,     binding(INPUT_5));
+    en_actions[action_slot6]     = action(action_slot6,     binding(INPUT_6));
+    en_actions[action_slot7]     = action(action_slot7,     binding(INPUT_7));
+    en_actions[action_slot8]     = action(action_slot8,     binding(INPUT_8));
+    en_actions[action_slot9]     = action(action_slot9,     binding(INPUT_9));
+
+    /* extra assign */
+    en_actions[action_crouch].bind(INPUT_C);
+}
+
+
+void
+set_inputs() {
+    auto now = SDL_GetTicks();
+
+    for (auto &actionPair : en_actions) {
+        bool pressed = false;
+        auto action = &actionPair.second;
+        auto binds = &action->binds;
+
+        for (auto &key : binds->keyboard_inputs) {
+            if (keys[key]) {
+                pressed = true;
+            }
+        }
+
+        for (auto &mouse : binds->mouse_inputs) {
+            if (mouse_buttons[EN_BUTTON(mouse)]) {
+                pressed |= true;
+            }
+        }
+
+        if (action->active) {
+            /* still pressed */
+            if (pressed) {
+                /* increase duration */
+                action->current_active = now - action->last_active;
+
+                /* ensure state integrity */
+                action->just_active = false;
+                action->just_inactive = false;
+            }
+            /* just released */
+            else {
+                action->active = false;
+
+                action->current_active = 0;
+
+                action->just_active = false;
+                action->just_inactive = true;
+            }
+        }
+        /* not currently pressed */
+        else {
+            /* just pressed */
+            if (pressed) {
+                action->active = true;
+
+                action->just_active = true;
+                action->just_inactive = false;
+                action->last_active = now;
+                action->current_active = 0;
+            }
+            /* still not pressed */
+            else {
+                action->active = false;
+                action->just_inactive = false;
+            }
+        }
+    }
+}
 
 void
 handle_input()
 {
-    player.move.x = keys[bindings[action_right]] - keys[bindings[action_left]];
-    player.move.y = keys[bindings[action_forward]] - keys[bindings[action_back]];
+    set_inputs();
+
+    if (en_actions[action_menu].active) player.menu_requested = true;
+
+    /* movement */
+    auto moveX      = en_actions[action_right].active - en_actions[action_left].active;
+    auto moveY      = en_actions[action_forward].active - en_actions[action_back].active;
+
+    /* crouch */
+    auto crouch     = en_actions[action_crouch].active;
+    auto crouch_end = en_actions[action_crouch].just_inactive;
+
+    /* momentary */
+    auto jump       = en_actions[action_jump].just_active;
+    auto reset      = en_actions[action_reset].just_active;
+    auto use        = en_actions[action_use].just_active;
+    auto slot1      = en_actions[action_slot1].just_active;
+    auto slot2      = en_actions[action_slot2].just_active;
+    auto slot3      = en_actions[action_slot3].just_active;
+    auto slot4      = en_actions[action_slot4].just_active;
+    auto slot5      = en_actions[action_slot5].just_active;
+    auto slot6      = en_actions[action_slot6].just_active;
+    auto slot7      = en_actions[action_slot7].just_active;
+    auto slot8      = en_actions[action_slot8].just_active;
+    auto slot9      = en_actions[action_slot9].just_active;
+    auto gravity    = en_actions[action_gravity].just_active;
+    auto use_tool   = en_actions[action_use_tool].just_active;
+    auto next_tool  = en_actions[action_tool_next].just_active;
+    auto prev_tool  = en_actions[action_tool_prev].just_active;
+
+    /* persistent */
+
+
+    player.move.x = moveX;
+    player.move.y = moveY;
+
+    player.jump       = jump;
+    player.crouch     = crouch;
+    player.reset      = reset;
+    player.crouch_end = crouch_end;
+    player.use        = use;
+    player.gravity    = gravity;
+    player.use_tool   = use_tool;
+
+    if (next_tool) {
+        cycle_slot(cycle_next);
+    }
+    if (prev_tool) {
+        cycle_slot(cycle_prev);
+    }
+    
+    if (slot1) set_slot(1);
+    if (slot2) set_slot(2);
+    if (slot3) set_slot(3);
+    if (slot4) set_slot(4);
+    if (slot5) set_slot(5);
+    if (slot6) set_slot(6);
+    if (slot7) set_slot(7);
+    if (slot8) set_slot(8);
+    if (slot9) set_slot(9);
 
     /* limit to unit vector */
     float len = glm::length(player.move);
     if (len > 0.0f)
         player.move = player.move / len;
-
-    player.last_jump = player.jump;
-    player.jump = keys[bindings[action_jump]];
-
-    player.last_use = player.use;
-    player.use = keys[bindings[action_use]];
-
-    player.last_reset = player.reset;
-    player.reset = keys[bindings[action_reset]];
-
-    player.last_crouch = player.crouch;
-    player.crouch = keys[bindings[action_crouch]];
-
-    player.last_gravity = player.gravity;
-    player.gravity = keys[bindings[action_gravity]];
-
-    if (keys[bindings[action_slot1]]) set_slot(1);
-    if (keys[bindings[action_slot2]]) set_slot(2);
-    if (keys[bindings[action_slot3]]) set_slot(3);
-    if (keys[bindings[action_slot4]]) set_slot(4);
-    if (keys[bindings[action_slot5]]) set_slot(5);
-    if (keys[bindings[action_slot6]]) set_slot(6);
-    if (keys[bindings[action_slot7]]) set_slot(7);
-    if (keys[bindings[action_slot8]]) set_slot(8);
-    if (keys[bindings[action_slot9]]) set_slot(9);
-
-    /* Current state of the mouse buttons. */
-    unsigned int mouse_buttons = SDL_GetRelativeMouseState(NULL, NULL);
-    player.last_left_button = player.left_button;
-    player.left_button = mouse_buttons & SDL_BUTTON(1);
 }
 
 
@@ -1332,6 +1649,15 @@ void
 run()
 {
     for (;;) {
+        auto sdl_buttons = SDL_GetRelativeMouseState(NULL, NULL);
+        mouse_buttons[EN_BUTTON(INPUT_MOUSE_LEFT)]      = sdl_buttons & SDL_BUTTON(EN_BUTTON(INPUT_MOUSE_LEFT));
+        mouse_buttons[EN_BUTTON(INPUT_MOUSE_MIDDLE)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(INPUT_MOUSE_MIDDLE));
+        mouse_buttons[EN_BUTTON(INPUT_MOUSE_RIGHT)]     = sdl_buttons & SDL_BUTTON(EN_BUTTON(INPUT_MOUSE_RIGHT));
+        mouse_buttons[EN_BUTTON(INPUT_MOUSE_THUMB1)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(INPUT_MOUSE_THUMB1));
+        mouse_buttons[EN_BUTTON(INPUT_MOUSE_THUMB2)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(INPUT_MOUSE_THUMB2));
+        mouse_buttons[EN_BUTTON(INPUT_MOUSE_WHEELDOWN)] = false;
+        mouse_buttons[EN_BUTTON(INPUT_MOUSE_WHEELUP)]   = false;
+
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
@@ -1357,6 +1683,14 @@ run()
                 if (player.elev > MOUSE_Y_LIMIT)
                     player.elev = MOUSE_Y_LIMIT;
                 break;
+
+            case SDL_MOUSEWHEEL:
+                if (e.wheel.y != 0) {
+                    e.wheel.y > 0
+                        ? mouse_buttons[EN_BUTTON(INPUT_MOUSE_WHEELUP)] = true
+                        : mouse_buttons[EN_BUTTON(INPUT_MOUSE_WHEELDOWN)] = true;
+                }
+                break;
             }
         }
 
@@ -1369,6 +1703,8 @@ run()
         update();
 
         SDL_GL_SwapWindow(wnd.ptr);
+
+        if (exit_requested) return;
     }
 }
 
