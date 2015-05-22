@@ -340,10 +340,7 @@ struct light_field {
 };
 
 
-void
-#ifdef _WIN32
-GLAPIENTRY
-#endif // _WIN32
+void GLAPIENTRY
 gl_debug_callback(GLenum source __unused,
                   GLenum type __unused,
                   GLenum id __unused,
@@ -595,11 +592,7 @@ init()
         errx(1, "No support for GL debugging, life isn't worth it.\n");
 
     glEnable(GL_DEBUG_OUTPUT);
-#ifndef _WIN32
-    glDebugMessageCallback(gl_debug_callback, NULL);
-#else
     glDebugMessageCallback(reinterpret_cast<GLDEBUGPROC>(&gl_debug_callback), NULL);
-#endif // _WIN32
 
     /* Check for ARB_texture_storage */
     if (!epoxy_has_gl_extension("GL_ARB_texture_storage"))
