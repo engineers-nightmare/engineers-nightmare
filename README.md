@@ -70,18 +70,3 @@ Create directories `assimp`, `bullet`, `freetype6`, `glm`, `libepoxy`, `mman-win
   * Open `mman.vcproj` and build `Release` and `Debug` modes on `mman` project
 * Into `sdl2` extract from `Development Libraries -> Windows -> *-VC.zip` at https://www.libsdl.org/download-2.0.php
 * Into `sdl2_image` extract from `Development Libraries -> Windows -> *-VC.zip` at https://www.libsdl.org/projects/SDL_image/
-
-### Runtime Setup
-
-Copy runtime dlls around
-
-* Build `Release` mode `bullet` with shared libs turned on
-  * Shared libs turned on requires .libs to be present first.
-  * Run `cmake -DBUILD_SHARED_LIBS:BOOL="1" -DBUILD_UNIT_TESTS:BOOL="0" -DBUILD_BULLET2_DEMOS:BOOL="0" -DBUILD_EXTRAS:BOOL="0" -DUSE_MSVC_RUNTIME_LIBRARY_DLL:BOOL="1" -DBUILD_CPU_DEMOS:BOOL="0" -DBUILD_OPENGL3_DEMOS:BOOL="0" .` in `bullet` directory
-  * Run `start BULLET_PHYSICS.sln`
-  * Build `Release` mode on `ALL_BUILD` project.
-  * Copy `bullet/lib/Release/*.dll` to your cloned `en` directory
-* Copy `assimp/bin/Release/*.dll` to your cloned `en` directory
-* Copy `sdl2/lib/x86/*.dll` to your cloned `en` directory
-* Copy `sdl2_image/lib/x86/*.dll` to your cloned `en` directory
-* Copy `freetype6/bin/*.dll` to your cloned `en` directory
