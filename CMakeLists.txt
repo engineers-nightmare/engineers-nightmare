@@ -36,6 +36,7 @@ target_link_libraries(nightmare
                       ${SDL2_IMAGE_LIBRARIES}
                       ${BULLET_LIBRARIES}
                       ${FREETYPE_LIBRARIES}
+                      ${LIBCONFIG_LIBRARIES}
                       NIGHTMARE)
 
 # the following is based on
