@@ -1659,7 +1659,16 @@ configureBindings()
     binds = config_lookup(&cfg, "binds");
 
     if (binds != NULL) {
-        auto count = config_setting_length(binds);
+        /* http://www.hyperrealm.com/libconfig/libconfig_manual.html
+         * states
+         *  > int config_setting_length (const config_setting_t * setting)
+         *  > This function returns the number of settings in a group,
+         *  > or the number of elements in a list or array.
+         *  > For other types of settings, it returns 0.
+         *
+         * so this can only ever be positive, despite the return type being int
+         */
+        unsigned int count = config_setting_length(binds);
 
         for (unsigned int i = 0; i < count; ++i) {
             config_setting_t *bind, *inputs;
@@ -1670,7 +1679,10 @@ configureBindings()
             config_setting_lookup_string(bind, "action", &action_name);
 
             inputs = config_setting_lookup(bind, "inputs");
-            auto inputs_count = config_setting_length(inputs);
+            /* config_setting_length will only ever be 0 or positive according
+             * to the docs
+             * */
+            unsigned int  inputs_count = config_setting_length(inputs);
             const char **input_names = (const char**)malloc(sizeof(char*) * inputs_count);
 
             for (unsigned int input_index = 0; input_index < inputs_count; ++input_index) {
