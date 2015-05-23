@@ -12,7 +12,7 @@ struct player {
     glm::vec3 eye;  /* computed */
     glm::vec2 move;
 
-    int selected_slot;
+    unsigned int selected_slot;
 
     bool jump;
 
