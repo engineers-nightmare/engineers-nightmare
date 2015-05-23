@@ -1631,7 +1631,7 @@ struct action {
         input(a), binds(b)
     {
     }
-    
+
     void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
     {
         binds.bind(keyboard, mouse);
@@ -1657,7 +1657,7 @@ configureBindings()
     }
 
     binds = config_lookup(&cfg, "binds");
-    
+
     if (binds != NULL) {
         auto count = config_setting_length(binds);
 
@@ -1682,7 +1682,7 @@ configureBindings()
             input_action i_action = lookup_input_action(action_name);
             en_input input = lookup_input(input_names[input_index]);
             en_actions[i_action] = action(i_action, binding(input));
-            
+
             for (input_index = 1; input_index < inputs_count; ++input_index) {
                 input = lookup_input(input_names[input_index]);
                 en_actions[i_action].bind(input);
@@ -1835,7 +1835,7 @@ handle_input()
     if (prev_tool) {
         cycle_slot(cycle_prev);
     }
-    
+
     if (slot1) set_slot(1);
     if (slot2) set_slot(2);
     if (slot3) set_slot(3);
