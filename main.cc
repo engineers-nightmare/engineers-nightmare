@@ -850,7 +850,7 @@ init()
 
     text = new text_renderer("fonts/pixelmix.ttf", 16);
 
-    printf("World vertex size: %u bytes\n", sizeof(vertex));
+    printf("World vertex size: %zu bytes\n", sizeof(vertex));
 
     light = new light_field();
     light->bind(1);
