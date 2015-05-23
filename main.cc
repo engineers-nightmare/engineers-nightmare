@@ -1665,7 +1665,7 @@ configureBindings()
             config_setting_t *bind, *inputs;
             bind = config_setting_get_elem(binds, i);
 
-            const char *action_name, *input_name;
+            const char *action_name;
 
             config_setting_lookup_string(bind, "action", &action_name);
 
