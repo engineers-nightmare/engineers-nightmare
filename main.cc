@@ -1690,7 +1690,7 @@ configureBindings()
                 input_names[input_index] = config_setting_get_string(input);
             }
 
-            int input_index = 0;
+            unsigned int input_index = 0;
             input_action i_action = lookup_input_action(action_name);
             en_input input = lookup_input(input_names[input_index]);
             en_actions[i_action] = action(i_action, binding(input));
