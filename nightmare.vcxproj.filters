@@ -48,6 +48,9 @@
     <ClCompile Include="src\input.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\config.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
