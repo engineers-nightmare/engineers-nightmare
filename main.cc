@@ -404,16 +404,13 @@ struct binding {
     std::vector<en_input> keyboard_inputs;
     std::vector<en_input> mouse_inputs;
 
-    binding(en_input keyboard = input_eok, en_input mouse = input_eom)
-    {
-        bind(keyboard, mouse);
+    void bind_key(en_input key) {
+        if (key != input_eok) {
+            keyboard_inputs.push_back(key);
+        }
     }
 
-    void bind(en_input keyboard = input_eok, en_input mouse = input_eom)
-    {
-        if (keyboard != input_eok) {
-            keyboard_inputs.push_back(keyboard);
-        }
+    void bind_mouse(en_input mouse) {
         if (mouse != input_eom) {
             mouse_inputs.push_back(mouse);
         }
@@ -434,14 +431,22 @@ struct action {
     {
     }
 
+    action(en_action a) :
+        input(a)
+    {
+    }
+
     action(en_action a, binding b) :
         input(a), binds(b)
     {
     }
 
-    void bind(en_input keyboard = input_eok, en_input mouse = input_eom)
-    {
-        binds.bind(keyboard, mouse);
+    void bind_key(en_input key) {
+        binds.bind_key(key);
+    }
+
+    void bind_mouse(en_input mouse) {
+        binds.bind_mouse(mouse);
     }
 };
 
@@ -1701,65 +1706,66 @@ configureBindings()
         unsigned int count = config_setting_length(binds);
 
         for (unsigned int i = 0; i < count; ++i) {
-            config_setting_t *bind, *inputs;
+            config_setting_t *bind, *inputs_keyboard, *inputs_mouse;
             bind = config_setting_get_elem(binds, i);
-
-            const char *action_name;
+            
+            const char **inputs_keyboard_names = NULL;
+            const char **inputs_mouse_names = NULL;
+            const char *action_name = NULL;
+            unsigned int inputs_keyboard_count = 0;
+            unsigned int inputs_mouse_count = 0;
 
             config_setting_lookup_string(bind, "action", &action_name);
+            if (!action_name) {
+                continue;
+            }
 
-            inputs = config_setting_lookup(bind, "inputs");
+            inputs_keyboard = config_setting_lookup(bind, "inputs_keyboard");
+            inputs_mouse    = config_setting_lookup(bind, "inputs_mouse");
+
             /* config_setting_length will only ever be 0 or positive according
              * to the docs
              * */
-            unsigned int  inputs_count = config_setting_length(inputs);
-            const char **input_names = (const char**)malloc(sizeof(char*) * inputs_count);
+            if (inputs_keyboard) {
+                inputs_keyboard_count = config_setting_length(inputs_keyboard);
+                inputs_keyboard_names = (const char**)malloc(sizeof(char*) * inputs_keyboard_count);
 
-            for (unsigned int input_index = 0; input_index < inputs_count; ++input_index) {
-                config_setting_t *input = config_setting_get_elem(inputs, input_index);
-                input_names[input_index] = config_setting_get_string(input);
+                for (unsigned int input_index = 0; input_index < inputs_keyboard_count; ++input_index) {
+                    config_setting_t *input = config_setting_get_elem(inputs_keyboard, input_index);
+                    inputs_keyboard_names[input_index] = config_setting_get_string(input);
+                }
+            }
+            if (inputs_mouse) {
+                inputs_mouse_count = config_setting_length(inputs_mouse);
+                inputs_mouse_names = (const char**)malloc(sizeof(char*) * inputs_mouse_count);
+
+                for (unsigned int input_index = 0; input_index < inputs_mouse_count; ++input_index) {
+                    config_setting_t *input = config_setting_get_elem(inputs_mouse, input_index);
+                    inputs_mouse_names[input_index] = config_setting_get_string(input);
+                }
             }
 
             unsigned int input_index = 0;
             en_action i_action = lookup_action(action_name);
-            en_input input = lookup_input(input_names[input_index]);
-            en_actions[i_action] = action(i_action, binding(input));
+            en_actions[i_action] = action(i_action);
 
-            for (input_index = 1; input_index < inputs_count; ++input_index) {
-                input = lookup_input(input_names[input_index]);
-                en_actions[i_action].bind(input);
+            for (input_index = 0; input_index < inputs_keyboard_count; ++input_index) {
+                en_input input = lookup_input(inputs_keyboard_names[input_index]);
+                en_actions[i_action].bind_key(input);
             }
 
-            free(input_names);
+            for (input_index = 0; input_index < inputs_mouse_count; ++input_index) {
+                en_input input = lookup_input(inputs_mouse_names[input_index]);
+                en_actions[i_action].bind_mouse(input);
+            }
+
+            if (inputs_keyboard_names)
+                free(inputs_keyboard_names);
+
+            if (inputs_mouse_names)
+                free(inputs_mouse_names);
         }
     }
-
-
-    //en_actions[action_left]      = action(action_right,     binding(INPUT_A));
-    //en_actions[action_right]     = action(action_right,     binding(INPUT_D));
-    // en_actions[action_forward]   = action(action_forward,   binding(INPUT_W));
-    // en_actions[action_back]      = action(action_back,      binding(INPUT_S));
-    // en_actions[action_jump]      = action(action_jump,      binding(INPUT_SPACE));
-    // en_actions[action_use]       = action(action_use,       binding(INPUT_E));
-    // en_actions[action_menu]      = action(action_menu,      binding(INPUT_ESCAPE));
-    // en_actions[action_reset]     = action(action_reset,     binding(INPUT_R));
-    // en_actions[action_crouch]    = action(action_crouch,    binding(INPUT_LCTRL));
-    // en_actions[action_gravity]   = action(action_gravity,   binding(INPUT_G));
-    en_actions[action_use_tool]  = action(action_use_tool,  binding(input_eok, input_mouse_left));
-    en_actions[action_tool_next] = action(action_tool_next, binding(input_eok, input_mouse_wheelup));
-    en_actions[action_tool_prev] = action(action_tool_prev, binding(input_eok, input_mouse_wheeldown));
-    // en_actions[action_slot1]     = action(action_slot1,     binding(INPUT_1));
-    // en_actions[action_slot2]     = action(action_slot2,     binding(INPUT_2));
-    // en_actions[action_slot3]     = action(action_slot3,     binding(INPUT_3));
-    // en_actions[action_slot4]     = action(action_slot4,     binding(INPUT_4));
-    // en_actions[action_slot5]     = action(action_slot5,     binding(INPUT_5));
-    // en_actions[action_slot6]     = action(action_slot6,     binding(INPUT_6));
-    // en_actions[action_slot7]     = action(action_slot7,     binding(INPUT_7));
-    // en_actions[action_slot8]     = action(action_slot8,     binding(INPUT_8));
-    // en_actions[action_slot9]     = action(action_slot9,     binding(INPUT_9));
-
-    /* extra assign */
-    // en_actions[action_crouch].bind(INPUT_C);
 }
 
 
