@@ -23,12 +23,17 @@ PKG_SEARCH_MODULE(FREETYPE REQUIRED freetype2)
 
 find_package(Bullet REQUIRED)
 
+find_path(LIBCONFIG_INCLUDE_DIRS libconfig.h)
+find_library(LIBCONFIG_LIBRARIES config)
+
 include_directories(${SDL2_INCLUDE_DIRS}
                     ${EPOXY_INCLUDE_DIRS}
                     ${ASSIMP_INCLUDE_DIRS}
                     ${SDL2_IMAGE_INCLUDE_DIRS}
                     ${BULLET_INCLUDE_DIRS}
-                    ${FREETYPE_INCLUDE_DIRS})
+                    ${FREETYPE_INCLUDE_DIRS}
+                    ${LIBCONFIG_INCLUDE_DIRS})
+
 target_link_libraries(nightmare
                       ${SDL2_LIBRARIES}
                       ${EPOXY_LIBRARIES}
