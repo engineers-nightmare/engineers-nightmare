@@ -89,7 +89,11 @@ enum en_action {
     num_actions,
 };
 
-typedef struct action_lookup_t { const char* name; en_action action; } action_lookup_t;
+struct action_lookup_t {
+    const char* name;
+    en_action action;
+};
+
 static const action_lookup_t action_lookup_table[] = {
     { "action_left",      action_left },
     { "action_right",     action_right },
@@ -242,7 +246,10 @@ enum en_input {
     input_num_inputs,
 };
 
-typedef struct input_lookup_t { const char* name; en_input action; } input_lookup_t;
+struct input_lookup_t {
+    const char* name; en_input action;
+};
+
 static const input_lookup_t input_lookup_table[] = {
     { "input_a",               input_a },
     { "input_b",               input_b },
