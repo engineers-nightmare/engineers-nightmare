@@ -1576,7 +1576,7 @@ void
 cycle_slot(slot_cycle_direction direction)
 {
     auto num_tools = sizeof(tools) / sizeof(tools[0]);
-    auto cur_slot = player.selected_slot;
+    unsigned int cur_slot = player.selected_slot;
     if (direction == cycle_next) {
         cur_slot++;
         if (cur_slot >= num_tools) {
@@ -1585,7 +1585,10 @@ cycle_slot(slot_cycle_direction direction)
     }
     else if (direction == cycle_prev) {
         cur_slot--;
-        if (cur_slot < 0) {
+        /* since cur_slot is unsigned wrap around
+         * behavior is defined
+         */
+        if (cur_slot >= num_tools ) {
             cur_slot = num_tools - 1;
         }
     }
