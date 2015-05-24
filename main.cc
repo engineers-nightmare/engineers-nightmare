@@ -61,7 +61,7 @@ struct wnd {
 } wnd;
 
 
-enum input_action {
+enum en_action {
     action_invalid = -1,
     action_left,
     action_right,
@@ -89,8 +89,8 @@ enum input_action {
     num_actions,
 };
 
-typedef struct input_action_lookup_t { const char* name; input_action action; } input_action_lookup_t;
-static const input_action_lookup_t action_lookup_table[] = {
+typedef struct action_lookup_t { const char* name; en_action action; } action_lookup_t;
+static const action_lookup_t action_lookup_table[] = {
     { "action_left",      action_left },
     { "action_right",     action_right },
     { "action_forward",   action_forward },
@@ -362,8 +362,8 @@ static const input_lookup_t input_lookup_table[] = {
  * through the lookup tables. This is probably fine as the tables shouldn't
  * get _too_ large, nor are these likely to be called very frequently.
 */
-input_action lookup_input_action(const char *lookup) {
-    for (const input_action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
+en_action lookup_action(const char *lookup) {
+    for (const action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
         if (strcmp(input->name, lookup) == 0) {
             return input->action;
         }
@@ -372,8 +372,8 @@ input_action lookup_input_action(const char *lookup) {
 }
 
 /* This is probably only useful for populating config files */
-const char*  lookup_input_action(input_action lookup) {
-    for (const input_action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
+const char*  lookup_input_action(en_action lookup) {
+    for (const action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
         if (input->action == lookup) {
             return input->name;
         }
@@ -421,7 +421,7 @@ struct binding {
 };
 
 struct action {
-    input_action input;
+    en_action input;
     binding binds;
 
     bool active = false;        /* is action currently active */
@@ -434,7 +434,7 @@ struct action {
     {
     }
 
-    action(input_action a, binding b) :
+    action(en_action a, binding b) :
         input(a), binds(b)
     {
     }
@@ -445,7 +445,7 @@ struct action {
     }
 };
 
-static std::unordered_map<input_action, action, std::hash<int>> en_actions;
+static std::unordered_map<en_action, action, std::hash<int>> en_actions;
 
 enum slot_cycle_direction {
     cycle_next,
@@ -1721,7 +1721,7 @@ configureBindings()
             }
 
             unsigned int input_index = 0;
-            input_action i_action = lookup_input_action(action_name);
+            en_action i_action = lookup_action(action_name);
             en_input input = lookup_input(input_names[input_index]);
             en_actions[i_action] = action(i_action, binding(input));
 
