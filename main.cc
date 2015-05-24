@@ -12,6 +12,7 @@
 #include <algorithm>
 
 #include <libconfig.h>
+#include "src/libconfig_shim.h"
 
 #include <unordered_map>
 
