@@ -62,6 +62,7 @@ struct wnd {
 
 
 enum input_action {
+    action_invalid = -1,
     action_left,
     action_right,
     action_forward,
@@ -114,18 +115,10 @@ static const input_action_lookup_t action_lookup_table[] = {
     { "action_slot9",     action_slot9 },
 };
 
-input_action lookup_input_action(const char *name) {
-    for (const input_action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
-        if (strcmp(input->name, name) == 0) {
-            return input->action;
-        }
-    }
-    return (input_action)-1;
-}
-
 /* fairly ugly. non-keyboard inputs go at bottom
 keyboard entries trimmed down from SDL list */
 enum en_input {
+    INPUT_INVALID        = -1,
     INPUT_A              = SDL_SCANCODE_A,
     INPUT_B              = SDL_SCANCODE_B,
     INPUT_C              = SDL_SCANCODE_C,
@@ -365,14 +358,94 @@ static const input_lookup_t input_lookup_table[] = {
     { "INPUT_MOUSE_WHEELUP",   INPUT_MOUSE_WHEELUP },
 };
 
-en_input lookup_input(const char *name) {
-    for (const input_lookup_t *input = input_lookup_table; input->name != NULL; ++input) {
-        if (strcmp(input->name, name) == 0) {
+/* The lookup_* functions aren't optimized. They just do a linear walk
+ * through the lookup tables. This is probably fine as the tables shouldn't
+ * get _too_ large, nor are these likely to be called very frequently.
+*/
+input_action lookup_input_action(const char *lookup) {
+    for (const input_action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
+        if (strcmp(input->name, lookup) == 0) {
             return input->action;
         }
     }
-    return (en_input)-1;
+    return action_invalid;
 }
+
+/* This is probably only useful for populating config files */
+const char*  lookup_input_action(input_action lookup) {
+    for (const input_action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
+        if (input->action == lookup) {
+            return input->name;
+        }
+    }
+    return NULL;
+}
+
+en_input lookup_input(const char *lookup) {
+    for (const input_lookup_t *input = input_lookup_table; input->name != NULL; ++input) {
+        if (strcmp(input->name, lookup) == 0) {
+            return input->action;
+        }
+    }
+    return INPUT_INVALID;
+}
+
+/* This is probably only useful for populating config files */
+const char* lookup_input(en_input lookup) {
+    for (const input_lookup_t *input = input_lookup_table; input->name != NULL; ++input) {
+        if (input->action == lookup) {
+            return input->name;
+        }
+    }
+    return NULL;
+}
+
+struct binding {
+    std::vector<en_input> keyboard_inputs;
+    std::vector<en_input> mouse_inputs;
+
+    binding(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
+    {
+        bind(keyboard, mouse);
+    }
+
+    void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
+    {
+        if (keyboard != INPUT_EOK) {
+            keyboard_inputs.push_back(keyboard);
+        }
+        if (mouse != INPUT_EOM) {
+            mouse_inputs.push_back(mouse);
+        }
+    }
+};
+
+struct action {
+    input_action input;
+    binding binds;
+
+    bool active = false;        /* is action currently active */
+    bool just_active = false;   /* did action go active this frame */
+    bool just_inactive = false; /* did action go inactive this frame */
+    Uint32 last_active = 0;     /* time of last activation */
+    Uint32 current_active = 0;  /* duration of current activation */
+
+    action()
+    {
+    }
+
+    action(input_action a, binding b) :
+        input(a), binds(b)
+    {
+    }
+
+    void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
+    {
+        binds.bind(keyboard, mouse);
+    }
+};
+
+static std::unordered_map<input_action, action, std::hash<int>> en_actions;
 
 enum slot_cycle_direction {
     cycle_next,
@@ -1596,53 +1669,6 @@ cycle_slot(slot_cycle_direction direction)
     player.selected_slot = cur_slot;
     player.ui_dirty = true;
 }
-
-struct binding {
-    std::vector<en_input> keyboard_inputs;
-    std::vector<en_input> mouse_inputs;
-
-    binding(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
-    {
-        bind(keyboard, mouse);
-    }
-
-    void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
-    {
-        if (keyboard != INPUT_EOK) {
-            keyboard_inputs.push_back(keyboard);
-        }
-        if (mouse != INPUT_EOM) {
-            mouse_inputs.push_back(mouse);
-        }
-    }
-};
-
-struct action {
-    input_action input;
-    binding binds;
-
-    bool active = false;        /* is action currently active */
-    bool just_active = false;   /* did action go active this frame */
-    bool just_inactive = false; /* did action go inactive this frame */
-    Uint32 last_active = 0;     /* time of last activation */
-    Uint32 current_active = 0;  /* duration of current activation */
-
-    action()
-    {
-    }
-
-    action(input_action a, binding b) :
-        input(a), binds(b)
-    {
-    }
-
-    void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
-    {
-        binds.bind(keyboard, mouse);
-    }
-};
-
-static std::unordered_map<input_action, action, std::hash<int>> en_actions;
 
 void
 configureBindings()
