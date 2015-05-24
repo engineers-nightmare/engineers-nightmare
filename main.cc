@@ -45,7 +45,7 @@
 #define MOUSE_INVERT_LOOK 1
 
 /* rebase button */
-#define EN_BUTTON(x) (x - INPUT_EOK)
+#define EN_BUTTON(x) (x - input_eok)
 
 void configureBindings();
 
@@ -118,244 +118,244 @@ static const action_lookup_t action_lookup_table[] = {
 /* fairly ugly. non-keyboard inputs go at bottom
 keyboard entries trimmed down from SDL list */
 enum en_input {
-    INPUT_INVALID        = -1,
-    INPUT_A              = SDL_SCANCODE_A,
-    INPUT_B              = SDL_SCANCODE_B,
-    INPUT_C              = SDL_SCANCODE_C,
-    INPUT_D              = SDL_SCANCODE_D,
-    INPUT_E              = SDL_SCANCODE_E,
-    INPUT_F              = SDL_SCANCODE_F,
-    INPUT_G              = SDL_SCANCODE_G,
-    INPUT_H              = SDL_SCANCODE_H,
-    INPUT_I              = SDL_SCANCODE_I,
-    INPUT_J              = SDL_SCANCODE_J,
-    INPUT_K              = SDL_SCANCODE_K,
-    INPUT_L              = SDL_SCANCODE_L,
-    INPUT_M              = SDL_SCANCODE_M,
-    INPUT_N              = SDL_SCANCODE_N,
-    INPUT_O              = SDL_SCANCODE_O,
-    INPUT_P              = SDL_SCANCODE_P,
-    INPUT_Q              = SDL_SCANCODE_Q,
-    INPUT_R              = SDL_SCANCODE_R,
-    INPUT_S              = SDL_SCANCODE_S,
-    INPUT_T              = SDL_SCANCODE_T,
-    INPUT_U              = SDL_SCANCODE_U,
-    INPUT_V              = SDL_SCANCODE_V,
-    INPUT_W              = SDL_SCANCODE_W,
-    INPUT_X              = SDL_SCANCODE_X,
-    INPUT_Y              = SDL_SCANCODE_Y,
-    INPUT_Z              = SDL_SCANCODE_Z,
-    INPUT_1              = SDL_SCANCODE_1,
-    INPUT_2              = SDL_SCANCODE_2,
-    INPUT_3              = SDL_SCANCODE_3,
-    INPUT_4              = SDL_SCANCODE_4,
-    INPUT_5              = SDL_SCANCODE_5,
-    INPUT_6              = SDL_SCANCODE_6,
-    INPUT_7              = SDL_SCANCODE_7,
-    INPUT_8              = SDL_SCANCODE_8,
-    INPUT_9              = SDL_SCANCODE_9,
-    INPUT_0              = SDL_SCANCODE_0,
-    INPUT_RETURN         = SDL_SCANCODE_RETURN,
-    INPUT_ESCAPE         = SDL_SCANCODE_ESCAPE,
-    INPUT_BACKSPACE      = SDL_SCANCODE_BACKSPACE,
-    INPUT_TAB            = SDL_SCANCODE_TAB,
-    INPUT_SPACE          = SDL_SCANCODE_SPACE,
-    INPUT_MINUS          = SDL_SCANCODE_MINUS,
-    INPUT_EQUALS         = SDL_SCANCODE_EQUALS,
-    INPUT_LEFTBRACKET    = SDL_SCANCODE_LEFTBRACKET,
-    INPUT_RIGHTBRACKET   = SDL_SCANCODE_RIGHTBRACKET,
-    INPUT_BACKSLASH      = SDL_SCANCODE_BACKSLASH,
-    INPUT_NONUSHASH      = SDL_SCANCODE_NONUSHASH,
-    INPUT_SEMICOLON      = SDL_SCANCODE_SEMICOLON,
-    INPUT_APOSTROPHE     = SDL_SCANCODE_APOSTROPHE,
-    INPUT_GRAVE          = SDL_SCANCODE_GRAVE,
-    INPUT_COMMA          = SDL_SCANCODE_COMMA,
-    INPUT_PERIOD         = SDL_SCANCODE_PERIOD,
-    INPUT_SLASH          = SDL_SCANCODE_SLASH,
-    INPUT_CAPSLOCK       = SDL_SCANCODE_CAPSLOCK,
-    INPUT_F1             = SDL_SCANCODE_F1,
-    INPUT_F2             = SDL_SCANCODE_F2,
-    INPUT_F3             = SDL_SCANCODE_F3,
-    INPUT_F4             = SDL_SCANCODE_F4,
-    INPUT_F5             = SDL_SCANCODE_F5,
-    INPUT_F6             = SDL_SCANCODE_F6,
-    INPUT_F7             = SDL_SCANCODE_F7,
-    INPUT_F8             = SDL_SCANCODE_F8,
-    INPUT_F9             = SDL_SCANCODE_F9,
-    INPUT_F10            = SDL_SCANCODE_F10,
-    INPUT_F11            = SDL_SCANCODE_F11,
-    INPUT_F12            = SDL_SCANCODE_F12,
-    INPUT_PRINTSCREEN    = SDL_SCANCODE_PRINTSCREEN,
-    INPUT_SCROLLLOCK     = SDL_SCANCODE_SCROLLLOCK,
-    INPUT_PAUSE          = SDL_SCANCODE_PAUSE,
-    INPUT_INSERT         = SDL_SCANCODE_INSERT,
-    INPUT_HOME           = SDL_SCANCODE_HOME,
-    INPUT_PAGEUP         = SDL_SCANCODE_PAGEUP,
-    INPUT_DELETE         = SDL_SCANCODE_DELETE,
-    INPUT_END            = SDL_SCANCODE_END,
-    INPUT_PAGEDOWN       = SDL_SCANCODE_PAGEDOWN,
-    INPUT_RIGHT          = SDL_SCANCODE_RIGHT,
-    INPUT_LEFT           = SDL_SCANCODE_LEFT,
-    INPUT_DOWN           = SDL_SCANCODE_DOWN,
-    INPUT_UP             = SDL_SCANCODE_UP,
-    INPUT_NUMLOCKCLEAR   = SDL_SCANCODE_NUMLOCKCLEAR,
-    INPUT_KP_DIVIDE      = SDL_SCANCODE_KP_DIVIDE,
-    INPUT_KP_MULTIPLY    = SDL_SCANCODE_KP_MULTIPLY,
-    INPUT_KP_MINUS       = SDL_SCANCODE_KP_MINUS,
-    INPUT_KP_PLUS        = SDL_SCANCODE_KP_PLUS,
-    INPUT_KP_ENTER       = SDL_SCANCODE_KP_ENTER,
-    INPUT_KP_1           = SDL_SCANCODE_KP_1,
-    INPUT_KP_2           = SDL_SCANCODE_KP_2,
-    INPUT_KP_3           = SDL_SCANCODE_KP_3,
-    INPUT_KP_4           = SDL_SCANCODE_KP_4,
-    INPUT_KP_5           = SDL_SCANCODE_KP_5,
-    INPUT_KP_6           = SDL_SCANCODE_KP_6,
-    INPUT_KP_7           = SDL_SCANCODE_KP_7,
-    INPUT_KP_8           = SDL_SCANCODE_KP_8,
-    INPUT_KP_9           = SDL_SCANCODE_KP_9,
-    INPUT_KP_0           = SDL_SCANCODE_KP_0,
-    INPUT_KP_PERIOD      = SDL_SCANCODE_KP_PERIOD,
-    INPUT_NONUSBACKSLASH = SDL_SCANCODE_NONUSBACKSLASH,
-    INPUT_LCTRL          = SDL_SCANCODE_LCTRL,
-    INPUT_LSHIFT         = SDL_SCANCODE_LSHIFT,
-    INPUT_LALT           = SDL_SCANCODE_LALT,
-    INPUT_LGUI           = SDL_SCANCODE_LGUI,
-    INPUT_RCTRL          = SDL_SCANCODE_RCTRL,
-    INPUT_RSHIFT         = SDL_SCANCODE_RSHIFT,
-    INPUT_RALT           = SDL_SCANCODE_RALT,
-    INPUT_RGUI           = SDL_SCANCODE_RGUI,
+    input_invalid        = -1,
+    input_a              = SDL_SCANCODE_A,
+    input_b              = SDL_SCANCODE_B,
+    input_c              = SDL_SCANCODE_C,
+    input_d              = SDL_SCANCODE_D,
+    input_e              = SDL_SCANCODE_E,
+    input_f              = SDL_SCANCODE_F,
+    input_g              = SDL_SCANCODE_G,
+    input_h              = SDL_SCANCODE_H,
+    input_i              = SDL_SCANCODE_I,
+    input_j              = SDL_SCANCODE_J,
+    input_k              = SDL_SCANCODE_K,
+    input_l              = SDL_SCANCODE_L,
+    input_m              = SDL_SCANCODE_M,
+    input_n              = SDL_SCANCODE_N,
+    input_o              = SDL_SCANCODE_O,
+    input_p              = SDL_SCANCODE_P,
+    input_q              = SDL_SCANCODE_Q,
+    input_r              = SDL_SCANCODE_R,
+    input_s              = SDL_SCANCODE_S,
+    input_t              = SDL_SCANCODE_T,
+    input_u              = SDL_SCANCODE_U,
+    input_v              = SDL_SCANCODE_V,
+    input_w              = SDL_SCANCODE_W,
+    input_x              = SDL_SCANCODE_X,
+    input_y              = SDL_SCANCODE_Y,
+    input_z              = SDL_SCANCODE_Z,
+    input_1              = SDL_SCANCODE_1,
+    input_2              = SDL_SCANCODE_2,
+    input_3              = SDL_SCANCODE_3,
+    input_4              = SDL_SCANCODE_4,
+    input_5              = SDL_SCANCODE_5,
+    input_6              = SDL_SCANCODE_6,
+    input_7              = SDL_SCANCODE_7,
+    input_8              = SDL_SCANCODE_8,
+    input_9              = SDL_SCANCODE_9,
+    input_0              = SDL_SCANCODE_0,
+    input_return         = SDL_SCANCODE_RETURN,
+    input_escape         = SDL_SCANCODE_ESCAPE,
+    input_backspace      = SDL_SCANCODE_BACKSPACE,
+    input_tab            = SDL_SCANCODE_TAB,
+    input_space          = SDL_SCANCODE_SPACE,
+    input_minus          = SDL_SCANCODE_MINUS,
+    input_equals         = SDL_SCANCODE_EQUALS,
+    input_leftbracket    = SDL_SCANCODE_LEFTBRACKET,
+    input_rightbracket   = SDL_SCANCODE_RIGHTBRACKET,
+    input_backslash      = SDL_SCANCODE_BACKSLASH,
+    input_nonushash      = SDL_SCANCODE_NONUSHASH,
+    input_semicolon      = SDL_SCANCODE_SEMICOLON,
+    input_apostrophe     = SDL_SCANCODE_APOSTROPHE,
+    input_grave          = SDL_SCANCODE_GRAVE,
+    input_comma          = SDL_SCANCODE_COMMA,
+    input_period         = SDL_SCANCODE_PERIOD,
+    input_slash          = SDL_SCANCODE_SLASH,
+    input_capslock       = SDL_SCANCODE_CAPSLOCK,
+    input_f1             = SDL_SCANCODE_F1,
+    input_f2             = SDL_SCANCODE_F2,
+    input_f3             = SDL_SCANCODE_F3,
+    input_f4             = SDL_SCANCODE_F4,
+    input_f5             = SDL_SCANCODE_F5,
+    input_f6             = SDL_SCANCODE_F6,
+    input_f7             = SDL_SCANCODE_F7,
+    input_f8             = SDL_SCANCODE_F8,
+    input_f9             = SDL_SCANCODE_F9,
+    input_f10            = SDL_SCANCODE_F10,
+    input_f11            = SDL_SCANCODE_F11,
+    input_f12            = SDL_SCANCODE_F12,
+    input_printscreen    = SDL_SCANCODE_PRINTSCREEN,
+    input_scrolllock     = SDL_SCANCODE_SCROLLLOCK,
+    input_pause          = SDL_SCANCODE_PAUSE,
+    input_insert         = SDL_SCANCODE_INSERT,
+    input_home           = SDL_SCANCODE_HOME,
+    input_pageup         = SDL_SCANCODE_PAGEUP,
+    input_delete         = SDL_SCANCODE_DELETE,
+    input_end            = SDL_SCANCODE_END,
+    input_pagedown       = SDL_SCANCODE_PAGEDOWN,
+    input_right          = SDL_SCANCODE_RIGHT,
+    input_left           = SDL_SCANCODE_LEFT,
+    input_down           = SDL_SCANCODE_DOWN,
+    input_up             = SDL_SCANCODE_UP,
+    input_numlockclear   = SDL_SCANCODE_NUMLOCKCLEAR,
+    input_kp_divide      = SDL_SCANCODE_KP_DIVIDE,
+    input_kp_multiply    = SDL_SCANCODE_KP_MULTIPLY,
+    input_kp_minus       = SDL_SCANCODE_KP_MINUS,
+    input_kp_plus        = SDL_SCANCODE_KP_PLUS,
+    input_kp_enter       = SDL_SCANCODE_KP_ENTER,
+    input_kp_1           = SDL_SCANCODE_KP_1,
+    input_kp_2           = SDL_SCANCODE_KP_2,
+    input_kp_3           = SDL_SCANCODE_KP_3,
+    input_kp_4           = SDL_SCANCODE_KP_4,
+    input_kp_5           = SDL_SCANCODE_KP_5,
+    input_kp_6           = SDL_SCANCODE_KP_6,
+    input_kp_7           = SDL_SCANCODE_KP_7,
+    input_kp_8           = SDL_SCANCODE_KP_8,
+    input_kp_9           = SDL_SCANCODE_KP_9,
+    input_kp_0           = SDL_SCANCODE_KP_0,
+    input_kp_period      = SDL_SCANCODE_KP_PERIOD,
+    input_nonusbackslash = SDL_SCANCODE_NONUSBACKSLASH,
+    input_lctrl          = SDL_SCANCODE_LCTRL,
+    input_lshift         = SDL_SCANCODE_LSHIFT,
+    input_lalt           = SDL_SCANCODE_LALT,
+    input_lgui           = SDL_SCANCODE_LGUI,
+    input_rctrl          = SDL_SCANCODE_RCTRL,
+    input_rshift         = SDL_SCANCODE_RSHIFT,
+    input_ralt           = SDL_SCANCODE_RALT,
+    input_rgui           = SDL_SCANCODE_RGUI,
 
     /* end of keyboard */
-    INPUT_EOK            = SDL_NUM_SCANCODES,
+    input_eok            = SDL_NUM_SCANCODES,
 
-    INPUT_MOUSE_LEFT     = INPUT_EOK + SDL_BUTTON_LEFT,
-    INPUT_MOUSE_MIDDLE   = INPUT_EOK + SDL_BUTTON_MIDDLE,
-    INPUT_MOUSE_RIGHT    = INPUT_EOK + SDL_BUTTON_RIGHT,
-    INPUT_MOUSE_THUMB1   = INPUT_EOK + SDL_BUTTON_X1,
-    INPUT_MOUSE_THUMB2   = INPUT_EOK + SDL_BUTTON_X2,
-    INPUT_MOUSE_WHEELDOWN,
-    INPUT_MOUSE_WHEELUP,
+    input_mouse_left     = input_eok + SDL_BUTTON_LEFT,
+    input_mouse_middle   = input_eok + SDL_BUTTON_MIDDLE,
+    input_mouse_right    = input_eok + SDL_BUTTON_RIGHT,
+    input_mouse_thumb1   = input_eok + SDL_BUTTON_X1,
+    input_mouse_thumb2   = input_eok + SDL_BUTTON_X2,
+    input_mouse_wheeldown,
+    input_mouse_wheelup,
 
     /* end of mouse */
-    INPUT_EOM,
+    input_eom,
 
-    INPUT_NUM_INPUTS,
+    input_num_inputs,
 };
 
 typedef struct input_lookup_t { const char* name; en_input action; } input_lookup_t;
 static const input_lookup_t input_lookup_table[] = {
-    { "INPUT_A",               INPUT_A },
-    { "INPUT_B",               INPUT_B },
-    { "INPUT_C",               INPUT_C },
-    { "INPUT_D",               INPUT_D },
-    { "INPUT_E",               INPUT_E },
-    { "INPUT_F",               INPUT_F },
-    { "INPUT_G",               INPUT_G },
-    { "INPUT_H",               INPUT_H },
-    { "INPUT_I",               INPUT_I },
-    { "INPUT_J",               INPUT_J },
-    { "INPUT_K",               INPUT_K },
-    { "INPUT_L",               INPUT_L },
-    { "INPUT_M",               INPUT_M },
-    { "INPUT_N",               INPUT_N },
-    { "INPUT_O",               INPUT_O },
-    { "INPUT_P",               INPUT_P },
-    { "INPUT_Q",               INPUT_Q },
-    { "INPUT_R",               INPUT_R },
-    { "INPUT_S",               INPUT_S },
-    { "INPUT_T",               INPUT_T },
-    { "INPUT_U",               INPUT_U },
-    { "INPUT_V",               INPUT_V },
-    { "INPUT_W",               INPUT_W },
-    { "INPUT_X",               INPUT_X },
-    { "INPUT_Y",               INPUT_Y },
-    { "INPUT_Z",               INPUT_Z },
-    { "INPUT_1",               INPUT_1 },
-    { "INPUT_2",               INPUT_2 },
-    { "INPUT_3",               INPUT_3 },
-    { "INPUT_4",               INPUT_4 },
-    { "INPUT_5",               INPUT_5 },
-    { "INPUT_6",               INPUT_6 },
-    { "INPUT_7",               INPUT_7 },
-    { "INPUT_8",               INPUT_8 },
-    { "INPUT_9",               INPUT_9 },
-    { "INPUT_0",               INPUT_0 },
-    { "INPUT_RETURN",          INPUT_RETURN },
-    { "INPUT_ESCAPE",          INPUT_ESCAPE },
-    { "INPUT_BACKSPACE",       INPUT_BACKSPACE },
-    { "INPUT_TAB",             INPUT_TAB },
-    { "INPUT_SPACE",           INPUT_SPACE },
-    { "INPUT_MINUS",           INPUT_MINUS },
-    { "INPUT_EQUALS",          INPUT_EQUALS },
-    { "INPUT_LEFTBRACKET",     INPUT_LEFTBRACKET },
-    { "INPUT_RIGHTBRACKET",    INPUT_RIGHTBRACKET },
-    { "INPUT_BACKSLASH",       INPUT_BACKSLASH },
-    { "INPUT_NONUSHASH",       INPUT_NONUSHASH },
-    { "INPUT_SEMICOLON",       INPUT_SEMICOLON },
-    { "INPUT_APOSTROPHE",      INPUT_APOSTROPHE },
-    { "INPUT_GRAVE",           INPUT_GRAVE },
-    { "INPUT_COMMA",           INPUT_COMMA },
-    { "INPUT_PERIOD",          INPUT_PERIOD },
-    { "INPUT_SLASH",           INPUT_SLASH },
-    { "INPUT_CAPSLOCK",        INPUT_CAPSLOCK },
-    { "INPUT_F1",              INPUT_F1 },
-    { "INPUT_F2",              INPUT_F2 },
-    { "INPUT_F3",              INPUT_F3 },
-    { "INPUT_F4",              INPUT_F4 },
-    { "INPUT_F5",              INPUT_F5 },
-    { "INPUT_F6",              INPUT_F6 },
-    { "INPUT_F7",              INPUT_F7 },
-    { "INPUT_F8",              INPUT_F8 },
-    { "INPUT_F9",              INPUT_F9 },
-    { "INPUT_F10",             INPUT_F10 },
-    { "INPUT_F11",             INPUT_F11 },
-    { "INPUT_F12",             INPUT_F12 },
-    { "INPUT_PRINTSCREEN",     INPUT_PRINTSCREEN },
-    { "INPUT_SCROLLLOCK",      INPUT_SCROLLLOCK },
-    { "INPUT_PAUSE",           INPUT_PAUSE },
-    { "INPUT_INSERT",          INPUT_INSERT },
-    { "INPUT_HOME",            INPUT_HOME },
-    { "INPUT_PAGEUP",          INPUT_PAGEUP },
-    { "INPUT_DELETE",          INPUT_DELETE },
-    { "INPUT_END",             INPUT_END },
-    { "INPUT_PAGEDOWN",        INPUT_PAGEDOWN },
-    { "INPUT_RIGHT",           INPUT_RIGHT },
-    { "INPUT_LEFT",            INPUT_LEFT },
-    { "INPUT_DOWN",            INPUT_DOWN },
-    { "INPUT_UP",              INPUT_UP },
-    { "INPUT_NUMLOCKCLEAR",    INPUT_NUMLOCKCLEAR },
-    { "INPUT_KP_DIVIDE",       INPUT_KP_DIVIDE },
-    { "INPUT_KP_MULTIPLY",     INPUT_KP_MULTIPLY },
-    { "INPUT_KP_MINUS",        INPUT_KP_MINUS },
-    { "INPUT_KP_PLUS",         INPUT_KP_PLUS },
-    { "INPUT_KP_ENTER",        INPUT_KP_ENTER },
-    { "INPUT_KP_1",            INPUT_KP_1 },
-    { "INPUT_KP_2",            INPUT_KP_2 },
-    { "INPUT_KP_3",            INPUT_KP_3 },
-    { "INPUT_KP_4",            INPUT_KP_4 },
-    { "INPUT_KP_5",            INPUT_KP_5 },
-    { "INPUT_KP_6",            INPUT_KP_6 },
-    { "INPUT_KP_7",            INPUT_KP_7 },
-    { "INPUT_KP_8",            INPUT_KP_8 },
-    { "INPUT_KP_9",            INPUT_KP_9 },
-    { "INPUT_KP_0",            INPUT_KP_0 },
-    { "INPUT_KP_PERIOD",       INPUT_KP_PERIOD },
-    { "INPUT_NONUSBACKSLASH",  INPUT_NONUSBACKSLASH },
-    { "INPUT_LCTRL",           INPUT_LCTRL },
-    { "INPUT_LSHIFT",          INPUT_LSHIFT },
-    { "INPUT_LALT",            INPUT_LALT },
-    { "INPUT_LGUI",            INPUT_LGUI },
-    { "INPUT_RCTRL",           INPUT_RCTRL },
-    { "INPUT_RSHIFT",          INPUT_RSHIFT },
-    { "INPUT_RALT",            INPUT_RALT },
-    { "INPUT_RGUI",            INPUT_RGUI },
-    { "INPUT_MOUSE_LEFT",      INPUT_MOUSE_LEFT },
-    { "INPUT_MOUSE_MIDDLE",    INPUT_MOUSE_MIDDLE },
-    { "INPUT_MOUSE_RIGHT",     INPUT_MOUSE_RIGHT },
-    { "INPUT_MOUSE_THUMB1",    INPUT_MOUSE_THUMB1 },
-    { "INPUT_MOUSE_THUMB2",    INPUT_MOUSE_THUMB2 },
-    { "INPUT_MOUSE_WHEELDOWN", INPUT_MOUSE_WHEELDOWN },
-    { "INPUT_MOUSE_WHEELUP",   INPUT_MOUSE_WHEELUP },
+    { "input_a",               input_a },
+    { "input_b",               input_b },
+    { "input_c",               input_c },
+    { "input_d",               input_d },
+    { "input_e",               input_e },
+    { "input_f",               input_f },
+    { "input_g",               input_g },
+    { "input_h",               input_h },
+    { "input_i",               input_i },
+    { "input_j",               input_j },
+    { "input_k",               input_k },
+    { "input_l",               input_l },
+    { "input_m",               input_m },
+    { "input_n",               input_n },
+    { "input_o",               input_o },
+    { "input_p",               input_p },
+    { "input_q",               input_q },
+    { "input_r",               input_r },
+    { "input_s",               input_s },
+    { "input_t",               input_t },
+    { "input_u",               input_u },
+    { "input_v",               input_v },
+    { "input_w",               input_w },
+    { "input_x",               input_x },
+    { "input_y",               input_y },
+    { "input_z",               input_z },
+    { "input_1",               input_1 },
+    { "input_2",               input_2 },
+    { "input_3",               input_3 },
+    { "input_4",               input_4 },
+    { "input_5",               input_5 },
+    { "input_6",               input_6 },
+    { "input_7",               input_7 },
+    { "input_8",               input_8 },
+    { "input_9",               input_9 },
+    { "input_0",               input_0 },
+    { "input_return",          input_return },
+    { "input_escape",          input_escape },
+    { "input_backspace",       input_backspace },
+    { "input_tab",             input_tab },
+    { "input_space",           input_space },
+    { "input_minus",           input_minus },
+    { "input_equals",          input_equals },
+    { "input_leftbracket",     input_leftbracket },
+    { "input_rightbracket",    input_rightbracket },
+    { "input_backslash",       input_backslash },
+    { "input_nonushash",       input_nonushash },
+    { "input_semicolon",       input_semicolon },
+    { "input_apostrophe",      input_apostrophe },
+    { "input_grave",           input_grave },
+    { "input_comma",           input_comma },
+    { "input_period",          input_period },
+    { "input_slash",           input_slash },
+    { "input_capslock",        input_capslock },
+    { "input_f1",              input_f1 },
+    { "input_f2",              input_f2 },
+    { "input_f3",              input_f3 },
+    { "input_f4",              input_f4 },
+    { "input_f5",              input_f5 },
+    { "input_f6",              input_f6 },
+    { "input_f7",              input_f7 },
+    { "input_f8",              input_f8 },
+    { "input_f9",              input_f9 },
+    { "input_f10",             input_f10 },
+    { "input_f11",             input_f11 },
+    { "input_f12",             input_f12 },
+    { "input_printscreen",     input_printscreen },
+    { "input_scrolllock",      input_scrolllock },
+    { "input_pause",           input_pause },
+    { "input_insert",          input_insert },
+    { "input_home",            input_home },
+    { "input_pageup",          input_pageup },
+    { "input_delete",          input_delete },
+    { "input_end",             input_end },
+    { "input_pagedown",        input_pagedown },
+    { "input_right",           input_right },
+    { "input_left",            input_left },
+    { "input_down",            input_down },
+    { "input_up",              input_up },
+    { "input_numlockclear",    input_numlockclear },
+    { "input_kp_divide",       input_kp_divide },
+    { "input_kp_multiply",     input_kp_multiply },
+    { "input_kp_minus",        input_kp_minus },
+    { "input_kp_plus",         input_kp_plus },
+    { "input_kp_enter",        input_kp_enter },
+    { "input_kp_1",            input_kp_1 },
+    { "input_kp_2",            input_kp_2 },
+    { "input_kp_3",            input_kp_3 },
+    { "input_kp_4",            input_kp_4 },
+    { "input_kp_5",            input_kp_5 },
+    { "input_kp_6",            input_kp_6 },
+    { "input_kp_7",            input_kp_7 },
+    { "input_kp_8",            input_kp_8 },
+    { "input_kp_9",            input_kp_9 },
+    { "input_kp_0",            input_kp_0 },
+    { "input_kp_period",       input_kp_period },
+    { "input_nonusbackslash",  input_nonusbackslash },
+    { "input_lctrl",           input_lctrl },
+    { "input_lshift",          input_lshift },
+    { "input_lalt",            input_lalt },
+    { "input_lgui",            input_lgui },
+    { "input_rctrl",           input_rctrl },
+    { "input_rshift",          input_rshift },
+    { "input_ralt",            input_ralt },
+    { "input_rgui",            input_rgui },
+    { "input_mouse_left",      input_mouse_left },
+    { "input_mouse_middle",    input_mouse_middle },
+    { "input_mouse_right",     input_mouse_right },
+    { "input_mouse_thumb1",    input_mouse_thumb1 },
+    { "input_mouse_thumb2",    input_mouse_thumb2 },
+    { "input_mouse_wheeldown", input_mouse_wheeldown },
+    { "input_mouse_wheelup",   input_mouse_wheelup },
 };
 
 /* The lookup_* functions aren't optimized. They just do a linear walk
@@ -387,7 +387,7 @@ en_input lookup_input(const char *lookup) {
             return input->action;
         }
     }
-    return INPUT_INVALID;
+    return input_invalid;
 }
 
 /* This is probably only useful for populating config files */
@@ -404,17 +404,17 @@ struct binding {
     std::vector<en_input> keyboard_inputs;
     std::vector<en_input> mouse_inputs;
 
-    binding(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
+    binding(en_input keyboard = input_eok, en_input mouse = input_eom)
     {
         bind(keyboard, mouse);
     }
 
-    void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
+    void bind(en_input keyboard = input_eok, en_input mouse = input_eom)
     {
-        if (keyboard != INPUT_EOK) {
+        if (keyboard != input_eok) {
             keyboard_inputs.push_back(keyboard);
         }
-        if (mouse != INPUT_EOM) {
+        if (mouse != input_eom) {
             mouse_inputs.push_back(mouse);
         }
     }
@@ -439,7 +439,7 @@ struct action {
     {
     }
 
-    void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
+    void bind(en_input keyboard = input_eok, en_input mouse = input_eom)
     {
         binds.bind(keyboard, mouse);
     }
@@ -601,7 +601,7 @@ player player;
 physics *phy;
 unsigned char const *keys;
 /* one larger than it needs to be due to SDL starting numbering at 1 */
-unsigned int mouse_buttons[INPUT_EOM - INPUT_EOK];
+unsigned int mouse_buttons[input_eom - input_eok];
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 text_renderer *text;
@@ -1745,9 +1745,9 @@ configureBindings()
     // en_actions[action_reset]     = action(action_reset,     binding(INPUT_R));
     // en_actions[action_crouch]    = action(action_crouch,    binding(INPUT_LCTRL));
     // en_actions[action_gravity]   = action(action_gravity,   binding(INPUT_G));
-    en_actions[action_use_tool]  = action(action_use_tool,  binding(INPUT_EOK, INPUT_MOUSE_LEFT));
-    en_actions[action_tool_next] = action(action_tool_next, binding(INPUT_EOK, INPUT_MOUSE_WHEELUP));
-    en_actions[action_tool_prev] = action(action_tool_prev, binding(INPUT_EOK, INPUT_MOUSE_WHEELDOWN));
+    en_actions[action_use_tool]  = action(action_use_tool,  binding(input_eok, input_mouse_left));
+    en_actions[action_tool_next] = action(action_tool_next, binding(input_eok, input_mouse_wheelup));
+    en_actions[action_tool_prev] = action(action_tool_prev, binding(input_eok, input_mouse_wheeldown));
     // en_actions[action_slot1]     = action(action_slot1,     binding(INPUT_1));
     // en_actions[action_slot2]     = action(action_slot2,     binding(INPUT_2));
     // en_actions[action_slot3]     = action(action_slot3,     binding(INPUT_3));
@@ -1900,13 +1900,13 @@ run()
 {
     for (;;) {
         auto sdl_buttons = SDL_GetRelativeMouseState(NULL, NULL);
-        mouse_buttons[EN_BUTTON(INPUT_MOUSE_LEFT)]      = sdl_buttons & SDL_BUTTON(EN_BUTTON(INPUT_MOUSE_LEFT));
-        mouse_buttons[EN_BUTTON(INPUT_MOUSE_MIDDLE)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(INPUT_MOUSE_MIDDLE));
-        mouse_buttons[EN_BUTTON(INPUT_MOUSE_RIGHT)]     = sdl_buttons & SDL_BUTTON(EN_BUTTON(INPUT_MOUSE_RIGHT));
-        mouse_buttons[EN_BUTTON(INPUT_MOUSE_THUMB1)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(INPUT_MOUSE_THUMB1));
-        mouse_buttons[EN_BUTTON(INPUT_MOUSE_THUMB2)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(INPUT_MOUSE_THUMB2));
-        mouse_buttons[EN_BUTTON(INPUT_MOUSE_WHEELDOWN)] = false;
-        mouse_buttons[EN_BUTTON(INPUT_MOUSE_WHEELUP)]   = false;
+        mouse_buttons[EN_BUTTON(input_mouse_left)]      = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_left));
+        mouse_buttons[EN_BUTTON(input_mouse_middle)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_middle));
+        mouse_buttons[EN_BUTTON(input_mouse_right)]     = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_right));
+        mouse_buttons[EN_BUTTON(input_mouse_thumb1)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_thumb1));
+        mouse_buttons[EN_BUTTON(input_mouse_thumb2)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_thumb2));
+        mouse_buttons[EN_BUTTON(input_mouse_wheeldown)] = false;
+        mouse_buttons[EN_BUTTON(input_mouse_wheelup)]   = false;
 
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
@@ -1937,8 +1937,8 @@ run()
             case SDL_MOUSEWHEEL:
                 if (e.wheel.y != 0) {
                     e.wheel.y > 0
-                        ? mouse_buttons[EN_BUTTON(INPUT_MOUSE_WHEELUP)] = true
-                        : mouse_buttons[EN_BUTTON(INPUT_MOUSE_WHEELDOWN)] = true;
+                        ? mouse_buttons[EN_BUTTON(input_mouse_wheelup)] = true
+                        : mouse_buttons[EN_BUTTON(input_mouse_wheeldown)] = true;
                 }
                 break;
             }
