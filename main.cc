@@ -11,6 +11,9 @@
 #include <epoxy/gl.h>
 #include <algorithm>
 
+#include <libconfig.h>
+#include "src/libconfig_shim.h"
+
 #include <unordered_map>
 
 #include <glm/glm.hpp>
@@ -84,6 +87,41 @@ enum input_action {
 
     num_actions,
 };
+
+typedef struct input_action_lookup_t { const char* name; input_action action; } input_action_lookup_t;
+static const input_action_lookup_t action_lookup_table[] = {
+    { "action_left",      action_left },
+    { "action_right",     action_right },
+    { "action_forward",   action_forward },
+    { "action_back",      action_back },
+    { "action_jump",      action_jump },
+    { "action_use",       action_use },
+    { "action_menu",      action_menu },
+    { "action_reset",     action_reset },
+    { "action_crouch",    action_crouch },
+    { "action_gravity",   action_gravity },
+    { "action_tool_next", action_tool_next },
+    { "action_tool_prev", action_tool_prev },
+    { "action_use_tool",  action_use_tool },
+    { "action_slot1",     action_slot1 },
+    { "action_slot2",     action_slot2 },
+    { "action_slot3",     action_slot3 },
+    { "action_slot4",     action_slot4 },
+    { "action_slot5",     action_slot5 },
+    { "action_slot6",     action_slot6 },
+    { "action_slot7",     action_slot7 },
+    { "action_slot8",     action_slot8 },
+    { "action_slot9",     action_slot9 },
+};
+
+input_action lookup_input_action(const char *name) {
+    for (const input_action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
+        if (strcmp(input->name, name) == 0) {
+            return input->action;
+        }
+    }
+    return (input_action)-1;
+}
 
 /* fairly ugly. non-keyboard inputs go at bottom
 keyboard entries trimmed down from SDL list */
@@ -210,6 +248,131 @@ enum en_input {
 
     INPUT_NUM_INPUTS,
 };
+
+typedef struct input_lookup_t { const char* name; en_input action; } input_lookup_t;
+static const input_lookup_t input_lookup_table[] = {
+    { "INPUT_A",               INPUT_A },
+    { "INPUT_B",               INPUT_B },
+    { "INPUT_C",               INPUT_C },
+    { "INPUT_D",               INPUT_D },
+    { "INPUT_E",               INPUT_E },
+    { "INPUT_F",               INPUT_F },
+    { "INPUT_G",               INPUT_G },
+    { "INPUT_H",               INPUT_H },
+    { "INPUT_I",               INPUT_I },
+    { "INPUT_J",               INPUT_J },
+    { "INPUT_K",               INPUT_K },
+    { "INPUT_L",               INPUT_L },
+    { "INPUT_M",               INPUT_M },
+    { "INPUT_N",               INPUT_N },
+    { "INPUT_O",               INPUT_O },
+    { "INPUT_P",               INPUT_P },
+    { "INPUT_Q",               INPUT_Q },
+    { "INPUT_R",               INPUT_R },
+    { "INPUT_S",               INPUT_S },
+    { "INPUT_T",               INPUT_T },
+    { "INPUT_U",               INPUT_U },
+    { "INPUT_V",               INPUT_V },
+    { "INPUT_W",               INPUT_W },
+    { "INPUT_X",               INPUT_X },
+    { "INPUT_Y",               INPUT_Y },
+    { "INPUT_Z",               INPUT_Z },
+    { "INPUT_1",               INPUT_1 },
+    { "INPUT_2",               INPUT_2 },
+    { "INPUT_3",               INPUT_3 },
+    { "INPUT_4",               INPUT_4 },
+    { "INPUT_5",               INPUT_5 },
+    { "INPUT_6",               INPUT_6 },
+    { "INPUT_7",               INPUT_7 },
+    { "INPUT_8",               INPUT_8 },
+    { "INPUT_9",               INPUT_9 },
+    { "INPUT_0",               INPUT_0 },
+    { "INPUT_RETURN",          INPUT_RETURN },
+    { "INPUT_ESCAPE",          INPUT_ESCAPE },
+    { "INPUT_BACKSPACE",       INPUT_BACKSPACE },
+    { "INPUT_TAB",             INPUT_TAB },
+    { "INPUT_SPACE",           INPUT_SPACE },
+    { "INPUT_MINUS",           INPUT_MINUS },
+    { "INPUT_EQUALS",          INPUT_EQUALS },
+    { "INPUT_LEFTBRACKET",     INPUT_LEFTBRACKET },
+    { "INPUT_RIGHTBRACKET",    INPUT_RIGHTBRACKET },
+    { "INPUT_BACKSLASH",       INPUT_BACKSLASH },
+    { "INPUT_NONUSHASH",       INPUT_NONUSHASH },
+    { "INPUT_SEMICOLON",       INPUT_SEMICOLON },
+    { "INPUT_APOSTROPHE",      INPUT_APOSTROPHE },
+    { "INPUT_GRAVE",           INPUT_GRAVE },
+    { "INPUT_COMMA",           INPUT_COMMA },
+    { "INPUT_PERIOD",          INPUT_PERIOD },
+    { "INPUT_SLASH",           INPUT_SLASH },
+    { "INPUT_CAPSLOCK",        INPUT_CAPSLOCK },
+    { "INPUT_F1",              INPUT_F1 },
+    { "INPUT_F2",              INPUT_F2 },
+    { "INPUT_F3",              INPUT_F3 },
+    { "INPUT_F4",              INPUT_F4 },
+    { "INPUT_F5",              INPUT_F5 },
+    { "INPUT_F6",              INPUT_F6 },
+    { "INPUT_F7",              INPUT_F7 },
+    { "INPUT_F8",              INPUT_F8 },
+    { "INPUT_F9",              INPUT_F9 },
+    { "INPUT_F10",             INPUT_F10 },
+    { "INPUT_F11",             INPUT_F11 },
+    { "INPUT_F12",             INPUT_F12 },
+    { "INPUT_PRINTSCREEN",     INPUT_PRINTSCREEN },
+    { "INPUT_SCROLLLOCK",      INPUT_SCROLLLOCK },
+    { "INPUT_PAUSE",           INPUT_PAUSE },
+    { "INPUT_INSERT",          INPUT_INSERT },
+    { "INPUT_HOME",            INPUT_HOME },
+    { "INPUT_PAGEUP",          INPUT_PAGEUP },
+    { "INPUT_DELETE",          INPUT_DELETE },
+    { "INPUT_END",             INPUT_END },
+    { "INPUT_PAGEDOWN",        INPUT_PAGEDOWN },
+    { "INPUT_RIGHT",           INPUT_RIGHT },
+    { "INPUT_LEFT",            INPUT_LEFT },
+    { "INPUT_DOWN",            INPUT_DOWN },
+    { "INPUT_UP",              INPUT_UP },
+    { "INPUT_NUMLOCKCLEAR",    INPUT_NUMLOCKCLEAR },
+    { "INPUT_KP_DIVIDE",       INPUT_KP_DIVIDE },
+    { "INPUT_KP_MULTIPLY",     INPUT_KP_MULTIPLY },
+    { "INPUT_KP_MINUS",        INPUT_KP_MINUS },
+    { "INPUT_KP_PLUS",         INPUT_KP_PLUS },
+    { "INPUT_KP_ENTER",        INPUT_KP_ENTER },
+    { "INPUT_KP_1",            INPUT_KP_1 },
+    { "INPUT_KP_2",            INPUT_KP_2 },
+    { "INPUT_KP_3",            INPUT_KP_3 },
+    { "INPUT_KP_4",            INPUT_KP_4 },
+    { "INPUT_KP_5",            INPUT_KP_5 },
+    { "INPUT_KP_6",            INPUT_KP_6 },
+    { "INPUT_KP_7",            INPUT_KP_7 },
+    { "INPUT_KP_8",            INPUT_KP_8 },
+    { "INPUT_KP_9",            INPUT_KP_9 },
+    { "INPUT_KP_0",            INPUT_KP_0 },
+    { "INPUT_KP_PERIOD",       INPUT_KP_PERIOD },
+    { "INPUT_NONUSBACKSLASH",  INPUT_NONUSBACKSLASH },
+    { "INPUT_LCTRL",           INPUT_LCTRL },
+    { "INPUT_LSHIFT",          INPUT_LSHIFT },
+    { "INPUT_LALT",            INPUT_LALT },
+    { "INPUT_LGUI",            INPUT_LGUI },
+    { "INPUT_RCTRL",           INPUT_RCTRL },
+    { "INPUT_RSHIFT",          INPUT_RSHIFT },
+    { "INPUT_RALT",            INPUT_RALT },
+    { "INPUT_RGUI",            INPUT_RGUI },
+    { "INPUT_MOUSE_LEFT",      INPUT_MOUSE_LEFT },
+    { "INPUT_MOUSE_MIDDLE",    INPUT_MOUSE_MIDDLE },
+    { "INPUT_MOUSE_RIGHT",     INPUT_MOUSE_RIGHT },
+    { "INPUT_MOUSE_THUMB1",    INPUT_MOUSE_THUMB1 },
+    { "INPUT_MOUSE_THUMB2",    INPUT_MOUSE_THUMB2 },
+    { "INPUT_MOUSE_WHEELDOWN", INPUT_MOUSE_WHEELDOWN },
+    { "INPUT_MOUSE_WHEELUP",   INPUT_MOUSE_WHEELUP },
+};
+
+en_input lookup_input(const char *name) {
+    for (const input_lookup_t *input = input_lookup_table; input->name != NULL; ++input) {
+        if (strcmp(input->name, name) == 0) {
+            return input->action;
+        }
+    }
+    return (en_input)-1;
+}
 
 enum slot_cycle_direction {
     cycle_next,
@@ -688,7 +851,7 @@ init()
 
     text = new text_renderer("fonts/pixelmix.ttf", 16);
 
-    printf("World vertex size: %u bytes\n", sizeof(vertex));
+    printf("World vertex size: %zu bytes\n", sizeof(vertex));
 
     light = new light_field();
     light->bind(1);
@@ -1469,7 +1632,7 @@ struct action {
         input(a), binds(b)
     {
     }
-    
+
     void bind(en_input keyboard = INPUT_EOK, en_input mouse = INPUT_EOM)
     {
         binds.bind(keyboard, mouse);
@@ -1481,31 +1644,93 @@ static std::unordered_map<input_action, action, std::hash<int>> en_actions;
 void
 configureBindings()
 {
-    en_actions[action_left]      = action(action_right,     binding(INPUT_A));
-    en_actions[action_right]     = action(action_right,     binding(INPUT_D));
-    en_actions[action_forward]   = action(action_forward,   binding(INPUT_W));
-    en_actions[action_back]      = action(action_back,      binding(INPUT_S));
-    en_actions[action_jump]      = action(action_jump,      binding(INPUT_SPACE));
-    en_actions[action_use]       = action(action_use,       binding(INPUT_E));
-    en_actions[action_menu]      = action(action_menu,      binding(INPUT_ESCAPE));
-    en_actions[action_reset]     = action(action_reset,     binding(INPUT_R));
-    en_actions[action_crouch]    = action(action_crouch,    binding(INPUT_LCTRL));
-    en_actions[action_gravity]   = action(action_gravity,   binding(INPUT_G));
+    const char *keysPath = "configs/keys.cfg";
+    config_t cfg;
+    config_setting_t *binds;
+
+    config_init(&cfg);
+
+    if (!config_read_file(&cfg, keysPath))
+    {
+        printf("%s:%d - %s reading %s\n", config_error_file(&cfg),
+            config_error_line(&cfg), config_error_text(&cfg), keysPath);
+        config_destroy(&cfg);
+    }
+
+    binds = config_lookup(&cfg, "binds");
+
+    if (binds != NULL) {
+        /* http://www.hyperrealm.com/libconfig/libconfig_manual.html
+         * states
+         *  > int config_setting_length (const config_setting_t * setting)
+         *  > This function returns the number of settings in a group,
+         *  > or the number of elements in a list or array.
+         *  > For other types of settings, it returns 0.
+         *
+         * so this can only ever be positive, despite the return type being int
+         */
+        unsigned int count = config_setting_length(binds);
+
+        for (unsigned int i = 0; i < count; ++i) {
+            config_setting_t *bind, *inputs;
+            bind = config_setting_get_elem(binds, i);
+
+            const char *action_name;
+
+            config_setting_lookup_string(bind, "action", &action_name);
+
+            inputs = config_setting_lookup(bind, "inputs");
+            /* config_setting_length will only ever be 0 or positive according
+             * to the docs
+             * */
+            unsigned int  inputs_count = config_setting_length(inputs);
+            const char **input_names = (const char**)malloc(sizeof(char*) * inputs_count);
+
+            for (unsigned int input_index = 0; input_index < inputs_count; ++input_index) {
+                config_setting_t *input = config_setting_get_elem(inputs, input_index);
+                input_names[input_index] = config_setting_get_string(input);
+            }
+
+            unsigned int input_index = 0;
+            input_action i_action = lookup_input_action(action_name);
+            en_input input = lookup_input(input_names[input_index]);
+            en_actions[i_action] = action(i_action, binding(input));
+
+            for (input_index = 1; input_index < inputs_count; ++input_index) {
+                input = lookup_input(input_names[input_index]);
+                en_actions[i_action].bind(input);
+            }
+
+            free(input_names);
+        }
+    }
+
+
+    //en_actions[action_left]      = action(action_right,     binding(INPUT_A));
+    //en_actions[action_right]     = action(action_right,     binding(INPUT_D));
+    // en_actions[action_forward]   = action(action_forward,   binding(INPUT_W));
+    // en_actions[action_back]      = action(action_back,      binding(INPUT_S));
+    // en_actions[action_jump]      = action(action_jump,      binding(INPUT_SPACE));
+    // en_actions[action_use]       = action(action_use,       binding(INPUT_E));
+    // en_actions[action_menu]      = action(action_menu,      binding(INPUT_ESCAPE));
+    // en_actions[action_reset]     = action(action_reset,     binding(INPUT_R));
+    // en_actions[action_crouch]    = action(action_crouch,    binding(INPUT_LCTRL));
+    // en_actions[action_gravity]   = action(action_gravity,   binding(INPUT_G));
     en_actions[action_use_tool]  = action(action_use_tool,  binding(INPUT_EOK, INPUT_MOUSE_LEFT));
     en_actions[action_tool_next] = action(action_tool_next, binding(INPUT_EOK, INPUT_MOUSE_WHEELUP));
     en_actions[action_tool_prev] = action(action_tool_prev, binding(INPUT_EOK, INPUT_MOUSE_WHEELDOWN));
-    en_actions[action_slot1]     = action(action_slot1,     binding(INPUT_1));
-    en_actions[action_slot2]     = action(action_slot2,     binding(INPUT_2));
-    en_actions[action_slot3]     = action(action_slot3,     binding(INPUT_3));
-    en_actions[action_slot4]     = action(action_slot4,     binding(INPUT_4));
-    en_actions[action_slot5]     = action(action_slot5,     binding(INPUT_5));
-    en_actions[action_slot6]     = action(action_slot6,     binding(INPUT_6));
-    en_actions[action_slot7]     = action(action_slot7,     binding(INPUT_7));
-    en_actions[action_slot8]     = action(action_slot8,     binding(INPUT_8));
-    en_actions[action_slot9]     = action(action_slot9,     binding(INPUT_9));
+    // en_actions[action_slot1]     = action(action_slot1,     binding(INPUT_1));
+    // en_actions[action_slot2]     = action(action_slot2,     binding(INPUT_2));
+    // en_actions[action_slot3]     = action(action_slot3,     binding(INPUT_3));
+    // en_actions[action_slot4]     = action(action_slot4,     binding(INPUT_4));
+    // en_actions[action_slot5]     = action(action_slot5,     binding(INPUT_5));
+    // en_actions[action_slot6]     = action(action_slot6,     binding(INPUT_6));
+    // en_actions[action_slot7]     = action(action_slot7,     binding(INPUT_7));
+    // en_actions[action_slot8]     = action(action_slot8,     binding(INPUT_8));
+    // en_actions[action_slot9]     = action(action_slot9,     binding(INPUT_9));
 
     /* extra assign */
-    en_actions[action_crouch].bind(INPUT_C);
+    // en_actions[action_crouch].bind(INPUT_C);
 }
 
 
@@ -1623,7 +1848,7 @@ handle_input()
     if (prev_tool) {
         cycle_slot(cycle_prev);
     }
-    
+
     if (slot1) set_slot(1);
     if (slot2) set_slot(2);
     if (slot3) set_slot(3);

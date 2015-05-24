@@ -20,6 +20,7 @@ types; Lightfield propagated from certain entities.
  * bullet
  * freetype6
  * glm
+ * libconfig
  * libepoxy
  * mman-win32 (For Windows build)
  * SDL2
