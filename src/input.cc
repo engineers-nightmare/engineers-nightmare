@@ -41,3 +41,72 @@ const char* lookup_input(en_input lookup) {
     }
     return NULL;
 }
+
+void
+set_inputs(unsigned char const * keys,
+const unsigned int mouse_buttons[],
+std::unordered_map<en_action, action, std::hash<int>> &actions) {
+    auto now = SDL_GetTicks();
+
+    for (auto &actionPair : actions) {
+        bool pressed = false;
+        auto action = &actionPair.second;
+        auto binds = &action->binds;
+
+        for (auto &key : binds->keyboard_inputs) {
+            if (keys[key]) {
+                pressed = true;
+            }
+        }
+
+        for (auto &mouse : binds->mouse_inputs) {
+            if (mouse_buttons[EN_BUTTON(mouse)]) {
+                pressed |= true;
+            }
+        }
+
+        /* currently pressed */
+        if (action->active) {
+            /* still pressed */
+            if (pressed) {
+                /* set everything to ensure full state maintained */
+                action->value = 1.f;
+                action->active = true;
+                action->just_active = false;
+                action->just_inactive = false;
+                action->last_active = action->last_active;
+                action->current_active = now - action->last_active;
+            }
+            /* just released */
+            else {
+                action->value = 0.f;
+                action->active = false;
+                action->just_active = false;
+                action->just_inactive = true;
+                action->last_active = action->last_active;
+                action->current_active = 0;
+            }
+        }
+        /* not currently pressed */
+        else {
+            /* just pressed */
+            if (pressed) {
+                action->value = 1.f;
+                action->active = true;
+                action->just_active = true;
+                action->just_inactive = false;
+                action->last_active = now;
+                action->current_active = 0;
+            }
+            /* still not pressed */
+            else {
+                action->value = 0.f;
+                action->active = false;
+                action->just_active = false;
+                action->just_inactive = false;
+                action->last_active = action->last_active;
+                action->current_active = 0;
+            }
+        }
+    }
+}

@@ -43,9 +43,6 @@
 // 1 for ordinary use, -1 to invert mouse. TODO: settings...
 #define MOUSE_INVERT_LOOK 1
 
-/* rebase button */
-#define EN_BUTTON(x) (x - input_eok)
-
 bool exit_requested = false;
 
 auto hfov = DEG2RAD(90.f);
@@ -1233,73 +1230,14 @@ cycle_slot(slot_cycle_direction direction)
     player.ui_dirty = true;
 }
 
-void
-set_inputs() {
-    auto now = SDL_GetTicks();
-
-    for (auto &actionPair : en_actions) {
-        bool pressed = false;
-        auto action = &actionPair.second;
-        auto binds = &action->binds;
-
-        for (auto &key : binds->keyboard_inputs) {
-            if (keys[key]) {
-                pressed = true;
-            }
-        }
-
-        for (auto &mouse : binds->mouse_inputs) {
-            if (mouse_buttons[EN_BUTTON(mouse)]) {
-                pressed |= true;
-            }
-        }
-
-        if (action->active) {
-            /* still pressed */
-            if (pressed) {
-                /* increase duration */
-                action->current_active = now - action->last_active;
-
-                /* ensure state integrity */
-                action->just_active = false;
-                action->just_inactive = false;
-            }
-            /* just released */
-            else {
-                action->active = false;
-
-                action->current_active = 0;
-
-                action->just_active = false;
-                action->just_inactive = true;
-            }
-        }
-        /* not currently pressed */
-        else {
-            /* just pressed */
-            if (pressed) {
-                action->active = true;
-
-                action->just_active = true;
-                action->just_inactive = false;
-                action->last_active = now;
-                action->current_active = 0;
-            }
-            /* still not pressed */
-            else {
-                action->active = false;
-                action->just_inactive = false;
-            }
-        }
-    }
-}
 
 void
 handle_input()
 {
-    set_inputs();
+    set_inputs(keys, mouse_buttons, en_actions);
 
-    if (en_actions[action_menu].active) player.menu_requested = true;
+    if (en_actions[action_menu].active)
+        player.menu_requested = true;
 
     /* movement */
     auto moveX      = en_actions[action_right].active - en_actions[action_left].active;

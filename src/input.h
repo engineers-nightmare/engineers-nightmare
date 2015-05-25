@@ -2,8 +2,33 @@
 
 #include <SDL.h>
 
+#include <unordered_map>
 #include <vector>
 
+/* rebase button */
+#define EN_BUTTON(x) (x - input_eok)
+
+struct action;
+enum en_action;
+enum en_input;
+
+void set_inputs(unsigned char const * keys,
+    const unsigned int mouse_buttons[],
+    std::unordered_map<en_action, action, std::hash<int>> &actions);
+
+/* The lookup_* functions aren't optimized. They just do a linear walk
+* through the lookup tables. This is probably fine as the tables shouldn't
+* get _too_ large, nor are these likely to be called very frequently.
+*/
+en_action lookup_action(const char *lookup);
+
+/* This is probably only useful for populating config files */
+const char* lookup_input_action(en_action lookup);
+
+en_input lookup_input(const char *lookup);
+
+/* This is probably only useful for populating config files */
+const char* lookup_input(en_input lookup);
 
 enum en_action {
     action_invalid = -1,
@@ -309,20 +334,6 @@ static const input_lookup_t input_lookup_table[] = {
     { "input_mouse_wheelup",   input_mouse_wheelup },
 };
 
-/* The lookup_* functions aren't optimized. They just do a linear walk
-* through the lookup tables. This is probably fine as the tables shouldn't
-* get _too_ large, nor are these likely to be called very frequently.
-*/
-en_action lookup_action(const char *lookup);
-
-/* This is probably only useful for populating config files */
-const char*  lookup_input_action(en_action lookup);
-
-en_input lookup_input(const char *lookup);
-
-/* This is probably only useful for populating config files */
-const char* lookup_input(en_input lookup);
-
 struct binding {
     std::vector<en_input> keyboard_inputs;
     std::vector<en_input> mouse_inputs;
@@ -344,6 +355,7 @@ struct action {
     en_action input;
     binding binds;
 
+    float value = 0.f;          /* value of this input. useful for axes */
     bool active = false;        /* is action currently active */
     bool just_active = false;   /* did action go active this frame */
     bool just_inactive = false; /* did action go inactive this frame */
