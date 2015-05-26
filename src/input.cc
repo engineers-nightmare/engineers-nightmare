@@ -1,10 +1,36 @@
 #include "input.h"
 
+enum input_type {
+    input_type_invalid,
+    input_type_keyboard,
+    input_type_mouse_button,
+    input_type_mouse_axis,
+};
+
+/* dependent on proper grouping in en_input */
+input_type
+get_input_type(en_input input) {
+    input_type type = input_type_invalid;
+
+    if (input_keyboard_keys_start <= input && input <= input_keyboard_keys_end) {
+        type = input_type_keyboard;
+    }
+    else if (input_mouse_buttons_start <= input && input <= input_mouse_buttons_end) {
+        type = input_type_mouse_button;
+    }
+    else if (input_mouse_axes_start <= input && input <= input_mouse_axes_end) {
+        type = input_type_mouse_axis;
+    }
+
+    return type;
+}
+
 /* The lookup_* functions aren't optimized. They just do a linear walk
 * through the lookup tables. This is probably fine as the tables shouldn't
 * get _too_ large, nor are these likely to be called very frequently.
 */
-en_action lookup_action(const char *lookup) {
+en_action
+lookup_action(const char *lookup) {
     for (const action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
         if (strcmp(input->name, lookup) == 0) {
             return input->action;
@@ -14,7 +40,8 @@ en_action lookup_action(const char *lookup) {
 }
 
 /* This is probably only useful for populating config files */
-const char*  lookup_input_action(en_action lookup) {
+const char*
+lookup_input_action(en_action lookup) {
     for (const action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
         if (input->action == lookup) {
             return input->name;
@@ -23,7 +50,8 @@ const char*  lookup_input_action(en_action lookup) {
     return NULL;
 }
 
-en_input lookup_input(const char *lookup) {
+en_input
+lookup_input(const char *lookup) {
     for (const input_lookup_t *input = input_lookup_table; input->name != NULL; ++input) {
         if (strcmp(input->name, lookup) == 0) {
             return input->action;
@@ -33,7 +61,8 @@ en_input lookup_input(const char *lookup) {
 }
 
 /* This is probably only useful for populating config files */
-const char* lookup_input(en_input lookup) {
+const char*
+lookup_input(en_input lookup) {
     for (const input_lookup_t *input = input_lookup_table; input->name != NULL; ++input) {
         if (input->action == lookup) {
             return input->name;
@@ -45,23 +74,42 @@ const char* lookup_input(en_input lookup) {
 void
 set_inputs(unsigned char const * keys,
 const unsigned int mouse_buttons[],
+const int mouse_axes[],
 std::unordered_map<en_action, action, std::hash<int>> &actions) {
     auto now = SDL_GetTicks();
 
     for (auto &actionPair : actions) {
         bool active = false;
+        float axis_value = 0.f;
         auto action = &actionPair.second;
         auto binds = &action->binds;
 
-        for (auto &key : binds->keyboard_inputs) {
-            if (keys[key]) {
-                active = true;
-            }
-        }
+        for (auto &input : binds->inputs) {
+            input_type type = input_type_invalid;
 
-        for (auto &mouse : binds->mouse_inputs) {
-            if (mouse_buttons[EN_BUTTON(mouse)]) {
-                active |= true;
+            switch (get_input_type(input))
+            {
+            default:
+            case input_type_invalid:
+                break;
+            case input_type_keyboard:
+                if (keys[input]) {
+                    active = true;
+                    axis_value = 1.f;
+                }
+                break;
+            case input_type_mouse_button:
+                if (mouse_buttons[EN_MOUSE_BUTTON(input)]) {
+                    active |= true;
+                    axis_value = 1.f;
+                }
+                break;
+            case input_type_mouse_axis:
+                if (mouse_axes[EN_MOUSE_AXIS(input)]) {
+                    active |= true;
+                    axis_value = (float)mouse_axes[EN_MOUSE_AXIS(input)];
+                }
+                break;
             }
         }
 
@@ -70,7 +118,7 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
             /* still active */
             if (active) {
                 /* set everything to ensure full state maintained */
-                action->value = 1.f;
+                action->value = axis_value;
                 action->active = true;
                 action->just_active = false;
                 action->just_inactive = false;
@@ -91,7 +139,7 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
         else {
             /* just active */
             if (active) {
-                action->value = 1.f;
+                action->value = axis_value;
                 action->active = true;
                 action->just_active = true;
                 action->just_inactive = false;

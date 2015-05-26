@@ -160,8 +160,8 @@ ship_space *ship;
 player pl;
 physics *phy;
 unsigned char const *keys;
-/* one larger than it needs to be due to SDL starting numbering at 1 */
-unsigned int mouse_buttons[input_eom - input_eok];
+unsigned int mouse_buttons[input_mouse_buttons_count];
+int mouse_axes[input_mouse_axes_count];
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 text_renderer *text;
@@ -1234,10 +1234,14 @@ cycle_slot(slot_cycle_direction direction)
 void
 handle_input()
 {
-    set_inputs(keys, mouse_buttons, en_actions);
+    set_inputs(keys, mouse_buttons, mouse_axes, en_actions);
 
     if (en_actions[action_menu].active)
         pl.menu_requested = true;
+
+    /* look */
+    auto look_x     = en_actions[action_look_x].value;
+    auto look_y     = en_actions[action_look_y].value;
 
     /* movement */
     auto moveX      = en_actions[action_right].active - en_actions[action_left].active;
@@ -1267,6 +1271,16 @@ handle_input()
 
     /* persistent */
 
+
+
+
+    pl.angle += MOUSE_X_SENSITIVITY * look_x;
+    pl.elev += MOUSE_Y_SENSITIVITY * MOUSE_INVERT_LOOK * look_y;
+
+    if (pl.elev < -MOUSE_Y_LIMIT)
+        pl.elev = -MOUSE_Y_LIMIT;
+    if (pl.elev > MOUSE_Y_LIMIT)
+        pl.elev = MOUSE_Y_LIMIT;
 
     pl.move.x = moveX;
     pl.move.y = moveY;
@@ -1308,13 +1322,16 @@ run()
 {
     for (;;) {
         auto sdl_buttons = SDL_GetRelativeMouseState(NULL, NULL);
-        mouse_buttons[EN_BUTTON(input_mouse_left)]      = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_left));
-        mouse_buttons[EN_BUTTON(input_mouse_middle)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_middle));
-        mouse_buttons[EN_BUTTON(input_mouse_right)]     = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_right));
-        mouse_buttons[EN_BUTTON(input_mouse_thumb1)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_thumb1));
-        mouse_buttons[EN_BUTTON(input_mouse_thumb2)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_thumb2));
-        mouse_buttons[EN_BUTTON(input_mouse_wheeldown)] = false;
-        mouse_buttons[EN_BUTTON(input_mouse_wheelup)]   = false;
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_left)]      = sdl_buttons & EN_SDL_BUTTON(input_mouse_left);
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_middle)]    = sdl_buttons & EN_SDL_BUTTON(input_mouse_middle);
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_right)]     = sdl_buttons & EN_SDL_BUTTON(input_mouse_right);
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_thumb1)]    = sdl_buttons & EN_SDL_BUTTON(input_mouse_thumb1);
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_thumb2)]    = sdl_buttons & EN_SDL_BUTTON(input_mouse_thumb2);
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheeldown)] = false;
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheelup)]   = false;
+
+        mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] = 0.f;
+        mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] = 0.f;
 
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
@@ -1333,20 +1350,15 @@ run()
                 break;
 
             case SDL_MOUSEMOTION:
-                pl.angle += MOUSE_X_SENSITIVITY * e.motion.xrel;
-                pl.elev += MOUSE_Y_SENSITIVITY * MOUSE_INVERT_LOOK * e.motion.yrel;
-
-                if (pl.elev < -MOUSE_Y_LIMIT)
-                    pl.elev = -MOUSE_Y_LIMIT;
-                if (pl.elev > MOUSE_Y_LIMIT)
-                    pl.elev = MOUSE_Y_LIMIT;
+                mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] += e.motion.xrel;
+                mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] += e.motion.yrel;
                 break;
 
             case SDL_MOUSEWHEEL:
                 if (e.wheel.y != 0) {
                     e.wheel.y > 0
-                        ? mouse_buttons[EN_BUTTON(input_mouse_wheelup)] = true
-                        : mouse_buttons[EN_BUTTON(input_mouse_wheeldown)] = true;
+                        ? mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheelup)] = true
+                        : mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheeldown)] = true;
                 }
                 break;
             }
