@@ -49,26 +49,26 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
     auto now = SDL_GetTicks();
 
     for (auto &actionPair : actions) {
-        bool pressed = false;
+        bool active = false;
         auto action = &actionPair.second;
         auto binds = &action->binds;
 
         for (auto &key : binds->keyboard_inputs) {
             if (keys[key]) {
-                pressed = true;
+                active = true;
             }
         }
 
         for (auto &mouse : binds->mouse_inputs) {
             if (mouse_buttons[EN_BUTTON(mouse)]) {
-                pressed |= true;
+                active |= true;
             }
         }
 
-        /* currently pressed */
+        /* currently active */
         if (action->active) {
-            /* still pressed */
-            if (pressed) {
+            /* still active */
+            if (active) {
                 /* set everything to ensure full state maintained */
                 action->value = 1.f;
                 action->active = true;
@@ -77,7 +77,7 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
                 action->last_active = action->last_active;
                 action->current_active = now - action->last_active;
             }
-            /* just released */
+            /* just deactivated */
             else {
                 action->value = 0.f;
                 action->active = false;
@@ -87,10 +87,10 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
                 action->current_active = 0;
             }
         }
-        /* not currently pressed */
+        /* not currently active */
         else {
-            /* just pressed */
-            if (pressed) {
+            /* just active */
+            if (active) {
                 action->value = 1.f;
                 action->active = true;
                 action->just_active = true;
@@ -98,7 +98,7 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
                 action->last_active = now;
                 action->current_active = 0;
             }
-            /* still not pressed */
+            /* still not active */
             else {
                 action->value = 0.f;
                 action->active = false;
