@@ -43,9 +43,6 @@
 // 1 for ordinary use, -1 to invert mouse. TODO: settings...
 #define MOUSE_INVERT_LOOK 1
 
-/* rebase button */
-#define EN_BUTTON(x) (x - input_eok)
-
 bool exit_requested = false;
 
 auto hfov = DEG2RAD(90.f);
@@ -160,11 +157,11 @@ shader_params<per_object_params> *per_object;
 texture_set *world_textures;
 texture_set *skybox;
 ship_space *ship;
-player player;
+player pl;
 physics *phy;
 unsigned char const *keys;
-/* one larger than it needs to be due to SDL starting numbering at 1 */
-unsigned int mouse_buttons[input_eom - input_eok];
+unsigned int mouse_buttons[input_mouse_buttons_count];
+int mouse_axes[input_mouse_axes_count];
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 text_renderer *text;
@@ -473,14 +470,14 @@ init()
 
     configureBindings(en_actions);
 
-    player.angle = 0;
-    player.elev = 0;
-    player.pos = glm::vec3(3,2,2);
-    player.selected_slot = 1;
-    player.ui_dirty = true;
-    player.disable_gravity = false;
+    pl.angle = 0;
+    pl.elev = 0;
+    pl.pos = glm::vec3(3,2,2);
+    pl.selected_slot = 1;
+    pl.ui_dirty = true;
+    pl.disable_gravity = false;
 
-    phy = new physics(&player);
+    phy = new physics(&pl);
 
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CW);
@@ -1035,7 +1032,7 @@ rebuild_ui()
     char buf2[512];
 
     /* Tool name down the bottom */
-    tool *t = tools[player.selected_slot];
+    tool *t = tools[pl.selected_slot];
 
     if (t) {
         t->get_description(buf);
@@ -1052,7 +1049,7 @@ rebuild_ui()
 
     /* Gravity state (temp) */
     w = 0; h = 0;
-    sprintf(buf, "Gravity: %s (G to toggle)", player.disable_gravity ? "OFF" : "ON");
+    sprintf(buf, "Gravity: %s (G to toggle)", pl.disable_gravity ? "OFF" : "ON");
     text->measure(buf, &w, &h);
     add_text_with_outline(buf, -w/2, -430);
 
@@ -1075,49 +1072,49 @@ update()
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    player.dir = glm::vec3(
-            cosf(player.angle) * cosf(player.elev),
-            sinf(player.angle) * cosf(player.elev),
-            sinf(player.elev)
+    pl.dir = glm::vec3(
+            cosf(pl.angle) * cosf(pl.elev),
+            sinf(pl.angle) * cosf(pl.elev),
+            sinf(pl.elev)
             );
 
-    player.eye = player.pos + glm::vec3(0, 0, EYE_OFFSET_Z);
+    pl.eye = pl.pos + glm::vec3(0, 0, EYE_OFFSET_Z);
 
     auto vfov = hfov * (float)wnd.height / wnd.width;
 
     glm::mat4 proj = glm::perspective(vfov, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
-    glm::mat4 view = glm::lookAt(player.eye, player.eye + player.dir, glm::vec3(0, 0, 1));
+    glm::mat4 view = glm::lookAt(pl.eye, pl.eye + pl.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
 
-    tool *t = tools[player.selected_slot];
+    tool *t = tools[pl.selected_slot];
 
     /* no menu. exit for now */
-    if (player.menu_requested) {
+    if (pl.menu_requested) {
         exit_requested = true;
-        player.menu_requested = false;
+        pl.menu_requested = false;
     }
 
     /* both tool use and overlays need the raycast itself */
     raycast_info rc;
-    ship->raycast(player.eye.x, player.eye.y, player.eye.z, player.dir.x, player.dir.y, player.dir.z, &rc);
+    ship->raycast(pl.eye.x, pl.eye.y, pl.eye.z, pl.dir.x, pl.dir.y, pl.dir.z, &rc);
 
     /* tool use */
-    if (player.use_tool && rc.hit && t) {
+    if (pl.use_tool && rc.hit && t) {
         t->use(&rc);
     }
 
     /* interact with ents */
-    entity *hit_ent = phys_raycast(player.eye.x, player.eye.y, player.eye.z,
-                                   player.dir.x, player.dir.y, player.dir.z,
+    entity *hit_ent = phys_raycast(pl.eye.x, pl.eye.y, pl.eye.z,
+                                   pl.dir.x, pl.dir.y, pl.dir.z,
                                    2 /* dist */, phy->ghostObj, phy->dynamicsWorld);
 
     if (hit_ent != use_entity) {
         use_entity = hit_ent;
-        player.ui_dirty = true;
+        pl.ui_dirty = true;
     }
 
-    if (player.use && hit_ent) {
+    if (pl.use && hit_ent) {
         hit_ent->use();
     }
 
@@ -1183,9 +1180,9 @@ update()
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
 
-    if (player.ui_dirty) {
+    if (pl.ui_dirty) {
         rebuild_ui();
-        player.ui_dirty = false;
+        pl.ui_dirty = false;
     }
 
 
@@ -1204,15 +1201,15 @@ update()
 void
 set_slot(int slot)
 {
-    player.selected_slot = slot;
-    player.ui_dirty = true;
+    pl.selected_slot = slot;
+    pl.ui_dirty = true;
 }
 
 void
 cycle_slot(slot_cycle_direction direction)
 {
     auto num_tools = sizeof(tools) / sizeof(tools[0]);
-    unsigned int cur_slot = player.selected_slot;
+    unsigned int cur_slot = pl.selected_slot;
     if (direction == cycle_next) {
         cur_slot++;
         if (cur_slot >= num_tools) {
@@ -1229,77 +1226,22 @@ cycle_slot(slot_cycle_direction direction)
         }
     }
 
-    player.selected_slot = cur_slot;
-    player.ui_dirty = true;
+    pl.selected_slot = cur_slot;
+    pl.ui_dirty = true;
 }
 
-void
-set_inputs() {
-    auto now = SDL_GetTicks();
-
-    for (auto &actionPair : en_actions) {
-        bool pressed = false;
-        auto action = &actionPair.second;
-        auto binds = &action->binds;
-
-        for (auto &key : binds->keyboard_inputs) {
-            if (keys[key]) {
-                pressed = true;
-            }
-        }
-
-        for (auto &mouse : binds->mouse_inputs) {
-            if (mouse_buttons[EN_BUTTON(mouse)]) {
-                pressed |= true;
-            }
-        }
-
-        if (action->active) {
-            /* still pressed */
-            if (pressed) {
-                /* increase duration */
-                action->current_active = now - action->last_active;
-
-                /* ensure state integrity */
-                action->just_active = false;
-                action->just_inactive = false;
-            }
-            /* just released */
-            else {
-                action->active = false;
-
-                action->current_active = 0;
-
-                action->just_active = false;
-                action->just_inactive = true;
-            }
-        }
-        /* not currently pressed */
-        else {
-            /* just pressed */
-            if (pressed) {
-                action->active = true;
-
-                action->just_active = true;
-                action->just_inactive = false;
-                action->last_active = now;
-                action->current_active = 0;
-            }
-            /* still not pressed */
-            else {
-                action->active = false;
-                action->just_inactive = false;
-            }
-        }
-    }
-}
 
 void
 handle_input()
 {
-    set_inputs();
+    set_inputs(keys, mouse_buttons, mouse_axes, en_actions);
 
-    if (en_actions[action_menu].active) player.menu_requested = true;
+    if (en_actions[action_menu].active)
+        pl.menu_requested = true;
+
+    /* look */
+    auto look_x     = en_actions[action_look_x].value;
+    auto look_y     = en_actions[action_look_y].value;
 
     /* movement */
     auto moveX      = en_actions[action_right].active - en_actions[action_left].active;
@@ -1330,16 +1272,26 @@ handle_input()
     /* persistent */
 
 
-    player.move.x = moveX;
-    player.move.y = moveY;
 
-    player.jump       = jump;
-    player.crouch     = crouch;
-    player.reset      = reset;
-    player.crouch_end = crouch_end;
-    player.use        = use;
-    player.gravity    = gravity;
-    player.use_tool   = use_tool;
+
+    pl.angle += MOUSE_X_SENSITIVITY * look_x;
+    pl.elev += MOUSE_Y_SENSITIVITY * MOUSE_INVERT_LOOK * look_y;
+
+    if (pl.elev < -MOUSE_Y_LIMIT)
+        pl.elev = -MOUSE_Y_LIMIT;
+    if (pl.elev > MOUSE_Y_LIMIT)
+        pl.elev = MOUSE_Y_LIMIT;
+
+    pl.move.x = moveX;
+    pl.move.y = moveY;
+
+    pl.jump       = jump;
+    pl.crouch     = crouch;
+    pl.reset      = reset;
+    pl.crouch_end = crouch_end;
+    pl.use        = use;
+    pl.gravity    = gravity;
+    pl.use_tool   = use_tool;
 
     if (next_tool) {
         cycle_slot(cycle_next);
@@ -1359,9 +1311,9 @@ handle_input()
     if (slot9) set_slot(9);
 
     /* limit to unit vector */
-    float len = glm::length(player.move);
+    float len = glm::length(pl.move);
     if (len > 0.0f)
-        player.move = player.move / len;
+        pl.move = pl.move / len;
 }
 
 
@@ -1370,13 +1322,16 @@ run()
 {
     for (;;) {
         auto sdl_buttons = SDL_GetRelativeMouseState(NULL, NULL);
-        mouse_buttons[EN_BUTTON(input_mouse_left)]      = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_left));
-        mouse_buttons[EN_BUTTON(input_mouse_middle)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_middle));
-        mouse_buttons[EN_BUTTON(input_mouse_right)]     = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_right));
-        mouse_buttons[EN_BUTTON(input_mouse_thumb1)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_thumb1));
-        mouse_buttons[EN_BUTTON(input_mouse_thumb2)]    = sdl_buttons & SDL_BUTTON(EN_BUTTON(input_mouse_thumb2));
-        mouse_buttons[EN_BUTTON(input_mouse_wheeldown)] = false;
-        mouse_buttons[EN_BUTTON(input_mouse_wheelup)]   = false;
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_left)]      = sdl_buttons & EN_SDL_BUTTON(input_mouse_left);
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_middle)]    = sdl_buttons & EN_SDL_BUTTON(input_mouse_middle);
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_right)]     = sdl_buttons & EN_SDL_BUTTON(input_mouse_right);
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_thumb1)]    = sdl_buttons & EN_SDL_BUTTON(input_mouse_thumb1);
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_thumb2)]    = sdl_buttons & EN_SDL_BUTTON(input_mouse_thumb2);
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheeldown)] = false;
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheelup)]   = false;
+
+        mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] = 0.f;
+        mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] = 0.f;
 
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
@@ -1395,20 +1350,15 @@ run()
                 break;
 
             case SDL_MOUSEMOTION:
-                player.angle += MOUSE_X_SENSITIVITY * e.motion.xrel;
-                player.elev += MOUSE_Y_SENSITIVITY * MOUSE_INVERT_LOOK * e.motion.yrel;
-
-                if (player.elev < -MOUSE_Y_LIMIT)
-                    player.elev = -MOUSE_Y_LIMIT;
-                if (player.elev > MOUSE_Y_LIMIT)
-                    player.elev = MOUSE_Y_LIMIT;
+                mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] += e.motion.xrel;
+                mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] += e.motion.yrel;
                 break;
 
             case SDL_MOUSEWHEEL:
                 if (e.wheel.y != 0) {
                     e.wheel.y > 0
-                        ? mouse_buttons[EN_BUTTON(input_mouse_wheelup)] = true
-                        : mouse_buttons[EN_BUTTON(input_mouse_wheeldown)] = true;
+                        ? mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheelup)] = true
+                        : mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheeldown)] = true;
                 }
                 break;
             }

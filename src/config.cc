@@ -34,42 +34,30 @@ configureBindings(std::unordered_map<en_action, action, std::hash<int>> &en_acti
         unsigned int count = config_setting_length(binds);
 
         for (unsigned int i = 0; i < count; ++i) {
-            config_setting_t *bind, *inputs_keyboard, *inputs_mouse;
+            config_setting_t *bind, *inputs;
             bind = config_setting_get_elem(binds, i);
 
-            const char **inputs_keyboard_names = NULL;
-            const char **inputs_mouse_names = NULL;
+            const char **inputs_names = NULL;
             const char *action_name = NULL;
-            unsigned int inputs_keyboard_count = 0;
-            unsigned int inputs_mouse_count = 0;
+            unsigned int inputs_count = 0;
 
             config_setting_lookup_string(bind, "action", &action_name);
             if (!action_name) {
                 continue;
             }
 
-            inputs_keyboard = config_setting_lookup(bind, "inputs_keyboard");
-            inputs_mouse = config_setting_lookup(bind, "inputs_mouse");
+            inputs = config_setting_lookup(bind, "inputs");
 
             /* config_setting_length will only ever be 0 or positive according
             * to the docs
             * */
-            if (inputs_keyboard) {
-                inputs_keyboard_count = config_setting_length(inputs_keyboard);
-                inputs_keyboard_names = (const char**)malloc(sizeof(char*) * inputs_keyboard_count);
+            if (inputs) {
+                inputs_count = config_setting_length(inputs);
+                inputs_names = (const char**)malloc(sizeof(char*) * inputs_count);
 
-                for (unsigned int input_index = 0; input_index < inputs_keyboard_count; ++input_index) {
-                    config_setting_t *input = config_setting_get_elem(inputs_keyboard, input_index);
-                    inputs_keyboard_names[input_index] = config_setting_get_string(input);
-                }
-            }
-            if (inputs_mouse) {
-                inputs_mouse_count = config_setting_length(inputs_mouse);
-                inputs_mouse_names = (const char**)malloc(sizeof(char*) * inputs_mouse_count);
-
-                for (unsigned int input_index = 0; input_index < inputs_mouse_count; ++input_index) {
-                    config_setting_t *input = config_setting_get_elem(inputs_mouse, input_index);
-                    inputs_mouse_names[input_index] = config_setting_get_string(input);
+                for (unsigned int input_index = 0; input_index < inputs_count; ++input_index) {
+                    config_setting_t *input = config_setting_get_elem(inputs, input_index);
+                    inputs_names[input_index] = config_setting_get_string(input);
                 }
             }
 
@@ -77,21 +65,13 @@ configureBindings(std::unordered_map<en_action, action, std::hash<int>> &en_acti
             en_action i_action = lookup_action(action_name);
             en_actions[i_action] = action(i_action);
 
-            for (input_index = 0; input_index < inputs_keyboard_count; ++input_index) {
-                en_input input = lookup_input(inputs_keyboard_names[input_index]);
-                en_actions[i_action].bind_key(input);
+            for (input_index = 0; input_index < inputs_count; ++input_index) {
+                en_input input = lookup_input(inputs_names[input_index]);
+                en_actions[i_action].bind(input);
             }
 
-            for (input_index = 0; input_index < inputs_mouse_count; ++input_index) {
-                en_input input = lookup_input(inputs_mouse_names[input_index]);
-                en_actions[i_action].bind_mouse(input);
-            }
-
-            if (inputs_keyboard_names)
-                free(inputs_keyboard_names);
-
-            if (inputs_mouse_names)
-                free(inputs_mouse_names);
+            if (inputs)
+                free(inputs);
         }
     }
 }
