@@ -36,7 +36,7 @@ en_input lookup_input(const char *lookup);
 const char* lookup_input(en_input lookup);
 
 /* keep in sync with its lookup table[s] */
-enum en_action {
+enum en_action : int {
     action_invalid = -1,
     action_look_y,
     action_look_x,
@@ -109,7 +109,7 @@ static const action_lookup_t action_lookup_table[] = {
  * (See input_mouse_axes_start as example)
  */
 /* keep in sync with its lookup table[s] */
-enum en_input {
+enum en_input : int {
     input_invalid               = -1,
 
     input_keyboard_keys_start   = SDL_SCANCODE_A,
