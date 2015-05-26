@@ -13,8 +13,8 @@
 #define EN_SDL_BUTTON(x) (SDL_BUTTON(EN_MOUSE_BUTTON(x) + 1))
 
 struct action;
-enum en_action;
-enum en_input;
+enum en_action : int;
+enum en_input : int;
 
 void set_inputs(unsigned char const *,
     const unsigned int[],
