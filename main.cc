@@ -1039,19 +1039,8 @@ struct remove_surface_entity_tool : public tool
 {
     virtual void use(raycast_info *rc)
     {
-        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
         int index = normal_to_surface_index(rc);
-        chunk *ch = ship->get_chunk_containing(rc->px, rc->py, rc->pz);
-        assert(ch);
-        for(auto it = ch->entities.begin(); it != ch->entities.end(); it++) {
-            entity *e = *it;
-            if(e->x == rc->px && e->y == rc->py && e->z == rc->pz) {
-                delete e;
-                ch->entities.erase(it);
-                other_side->surf_space[index ^ 1] = 0;
-                break;
-            }
-        }
+        remove_ents_from_surface(rc->px, rc->py, rc->pz, index^1);
         mark_lightfield_update(rc->px, rc->py, rc->pz);
     }
 
