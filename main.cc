@@ -157,7 +157,7 @@ shader_params<per_object_params> *per_object;
 texture_set *world_textures;
 texture_set *skybox;
 ship_space *ship;
-player player;
+player pl;
 physics *phy;
 unsigned char const *keys;
 /* one larger than it needs to be due to SDL starting numbering at 1 */
@@ -470,14 +470,14 @@ init()
 
     configureBindings(en_actions);
 
-    player.angle = 0;
-    player.elev = 0;
-    player.pos = glm::vec3(3,2,2);
-    player.selected_slot = 1;
-    player.ui_dirty = true;
-    player.disable_gravity = false;
+    pl.angle = 0;
+    pl.elev = 0;
+    pl.pos = glm::vec3(3,2,2);
+    pl.selected_slot = 1;
+    pl.ui_dirty = true;
+    pl.disable_gravity = false;
 
-    phy = new physics(&player);
+    phy = new physics(&pl);
 
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CW);
@@ -1032,7 +1032,7 @@ rebuild_ui()
     char buf2[512];
 
     /* Tool name down the bottom */
-    tool *t = tools[player.selected_slot];
+    tool *t = tools[pl.selected_slot];
 
     if (t) {
         t->get_description(buf);
@@ -1049,7 +1049,7 @@ rebuild_ui()
 
     /* Gravity state (temp) */
     w = 0; h = 0;
-    sprintf(buf, "Gravity: %s (G to toggle)", player.disable_gravity ? "OFF" : "ON");
+    sprintf(buf, "Gravity: %s (G to toggle)", pl.disable_gravity ? "OFF" : "ON");
     text->measure(buf, &w, &h);
     add_text_with_outline(buf, -w/2, -430);
 
@@ -1072,49 +1072,49 @@ update()
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    player.dir = glm::vec3(
-            cosf(player.angle) * cosf(player.elev),
-            sinf(player.angle) * cosf(player.elev),
-            sinf(player.elev)
+    pl.dir = glm::vec3(
+            cosf(pl.angle) * cosf(pl.elev),
+            sinf(pl.angle) * cosf(pl.elev),
+            sinf(pl.elev)
             );
 
-    player.eye = player.pos + glm::vec3(0, 0, EYE_OFFSET_Z);
+    pl.eye = pl.pos + glm::vec3(0, 0, EYE_OFFSET_Z);
 
     auto vfov = hfov * (float)wnd.height / wnd.width;
 
     glm::mat4 proj = glm::perspective(vfov, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
-    glm::mat4 view = glm::lookAt(player.eye, player.eye + player.dir, glm::vec3(0, 0, 1));
+    glm::mat4 view = glm::lookAt(pl.eye, pl.eye + pl.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
 
-    tool *t = tools[player.selected_slot];
+    tool *t = tools[pl.selected_slot];
 
     /* no menu. exit for now */
-    if (player.menu_requested) {
+    if (pl.menu_requested) {
         exit_requested = true;
-        player.menu_requested = false;
+        pl.menu_requested = false;
     }
 
     /* both tool use and overlays need the raycast itself */
     raycast_info rc;
-    ship->raycast(player.eye.x, player.eye.y, player.eye.z, player.dir.x, player.dir.y, player.dir.z, &rc);
+    ship->raycast(pl.eye.x, pl.eye.y, pl.eye.z, pl.dir.x, pl.dir.y, pl.dir.z, &rc);
 
     /* tool use */
-    if (player.use_tool && rc.hit && t) {
+    if (pl.use_tool && rc.hit && t) {
         t->use(&rc);
     }
 
     /* interact with ents */
-    entity *hit_ent = phys_raycast(player.eye.x, player.eye.y, player.eye.z,
-                                   player.dir.x, player.dir.y, player.dir.z,
+    entity *hit_ent = phys_raycast(pl.eye.x, pl.eye.y, pl.eye.z,
+                                   pl.dir.x, pl.dir.y, pl.dir.z,
                                    2 /* dist */, phy->ghostObj, phy->dynamicsWorld);
 
     if (hit_ent != use_entity) {
         use_entity = hit_ent;
-        player.ui_dirty = true;
+        pl.ui_dirty = true;
     }
 
-    if (player.use && hit_ent) {
+    if (pl.use && hit_ent) {
         hit_ent->use();
     }
 
@@ -1180,9 +1180,9 @@ update()
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
 
-    if (player.ui_dirty) {
+    if (pl.ui_dirty) {
         rebuild_ui();
-        player.ui_dirty = false;
+        pl.ui_dirty = false;
     }
 
 
@@ -1201,15 +1201,15 @@ update()
 void
 set_slot(int slot)
 {
-    player.selected_slot = slot;
-    player.ui_dirty = true;
+    pl.selected_slot = slot;
+    pl.ui_dirty = true;
 }
 
 void
 cycle_slot(slot_cycle_direction direction)
 {
     auto num_tools = sizeof(tools) / sizeof(tools[0]);
-    unsigned int cur_slot = player.selected_slot;
+    unsigned int cur_slot = pl.selected_slot;
     if (direction == cycle_next) {
         cur_slot++;
         if (cur_slot >= num_tools) {
@@ -1226,8 +1226,8 @@ cycle_slot(slot_cycle_direction direction)
         }
     }
 
-    player.selected_slot = cur_slot;
-    player.ui_dirty = true;
+    pl.selected_slot = cur_slot;
+    pl.ui_dirty = true;
 }
 
 
@@ -1237,7 +1237,7 @@ handle_input()
     set_inputs(keys, mouse_buttons, en_actions);
 
     if (en_actions[action_menu].active)
-        player.menu_requested = true;
+        pl.menu_requested = true;
 
     /* movement */
     auto moveX      = en_actions[action_right].active - en_actions[action_left].active;
@@ -1268,16 +1268,16 @@ handle_input()
     /* persistent */
 
 
-    player.move.x = moveX;
-    player.move.y = moveY;
+    pl.move.x = moveX;
+    pl.move.y = moveY;
 
-    player.jump       = jump;
-    player.crouch     = crouch;
-    player.reset      = reset;
-    player.crouch_end = crouch_end;
-    player.use        = use;
-    player.gravity    = gravity;
-    player.use_tool   = use_tool;
+    pl.jump       = jump;
+    pl.crouch     = crouch;
+    pl.reset      = reset;
+    pl.crouch_end = crouch_end;
+    pl.use        = use;
+    pl.gravity    = gravity;
+    pl.use_tool   = use_tool;
 
     if (next_tool) {
         cycle_slot(cycle_next);
@@ -1297,9 +1297,9 @@ handle_input()
     if (slot9) set_slot(9);
 
     /* limit to unit vector */
-    float len = glm::length(player.move);
+    float len = glm::length(pl.move);
     if (len > 0.0f)
-        player.move = player.move / len;
+        pl.move = pl.move / len;
 }
 
 
@@ -1333,13 +1333,13 @@ run()
                 break;
 
             case SDL_MOUSEMOTION:
-                player.angle += MOUSE_X_SENSITIVITY * e.motion.xrel;
-                player.elev += MOUSE_Y_SENSITIVITY * MOUSE_INVERT_LOOK * e.motion.yrel;
+                pl.angle += MOUSE_X_SENSITIVITY * e.motion.xrel;
+                pl.elev += MOUSE_Y_SENSITIVITY * MOUSE_INVERT_LOOK * e.motion.yrel;
 
-                if (player.elev < -MOUSE_Y_LIMIT)
-                    player.elev = -MOUSE_Y_LIMIT;
-                if (player.elev > MOUSE_Y_LIMIT)
-                    player.elev = MOUSE_Y_LIMIT;
+                if (pl.elev < -MOUSE_Y_LIMIT)
+                    pl.elev = -MOUSE_Y_LIMIT;
+                if (pl.elev > MOUSE_Y_LIMIT)
+                    pl.elev = MOUSE_Y_LIMIT;
                 break;
 
             case SDL_MOUSEWHEEL:
