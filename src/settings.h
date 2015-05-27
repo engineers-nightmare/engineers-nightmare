@@ -1,5 +1,9 @@
 #pragma once
 
+#include <unordered_map>
+
+#include "input.h"
+
 struct video_settings {
     /* render xres */           /* render framebuffer to this size (usually window size) */
     /* render yres */           /* render framebuffer to this size (usually window size) */
@@ -20,4 +24,5 @@ struct input_settings {
 struct settings {
     video_settings video;
     input_settings input;
+    std::unordered_map<en_action, action, std::hash<int>> bindings;
 };

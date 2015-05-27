@@ -8,6 +8,13 @@
 #define INPUT_CONFIG_PATH "configs/input.cfg"
 
 void
+configure_settings(settings &settings) {
+    configure_video_settings(settings.video);
+    configure_input_settings(settings.input);
+    configure_bindings(settings.bindings);
+}
+
+void
 configure_bindings(std::unordered_map<en_action, action, std::hash<int>> &en_actions) {
     config_t cfg;
     config_setting_t *binds_config_setting;
@@ -78,12 +85,6 @@ configure_bindings(std::unordered_map<en_action, action, std::hash<int>> &en_act
                 free(inputs);
         }
     }
-}
-
-void
-configure_settings(settings &settings) {
-    configure_video_settings(settings.video);
-    configure_input_settings(settings.input);
 }
 
 void
