@@ -37,15 +37,12 @@
 #define MAX_WORLD_TEXTURES          64
 
 #define MOUSE_Y_LIMIT   1.54
-#define MOUSE_X_SENSITIVITY -0.001
-#define MOUSE_Y_SENSITIVITY -0.001
-
-// 1 for ordinary use, -1 to invert mouse. TODO: settings...
-#define MOUSE_INVERT_LOOK 1
 
 bool exit_requested = false;
 
 auto hfov = DEG2RAD(90.f);
+
+settings en_settings;
 
 struct wnd {
     SDL_Window *ptr;
@@ -468,7 +465,8 @@ init()
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
 
-    configureBindings(en_actions);
+    configure_settings(en_settings);
+    configure_bindings(en_actions);
 
     pl.angle = 0;
     pl.elev = 0;
@@ -1271,11 +1269,11 @@ handle_input()
 
     /* persistent */
 
+    float mouse_invert = en_settings.input.mouse_invert ? -1.f : 1.f;
 
 
-
-    pl.angle += MOUSE_X_SENSITIVITY * look_x;
-    pl.elev += MOUSE_Y_SENSITIVITY * MOUSE_INVERT_LOOK * look_y;
+    pl.angle += en_settings.input.mouse_x_sensitivity * look_x;
+    pl.elev += en_settings.input.mouse_y_sensitivity * mouse_invert * look_y;
 
     if (pl.elev < -MOUSE_Y_LIMIT)
         pl.elev = -MOUSE_Y_LIMIT;

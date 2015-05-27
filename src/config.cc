@@ -3,25 +3,29 @@
 #include <libconfig.h>
 #include "libconfig_shim.h"
 
+#define KEYS_CONFIG_PATH "configs/keys.cfg"
+#define VIDEO_CONFIG_PATH "configs/video.cfg"
+#define INPUT_CONFIG_PATH "configs/input.cfg"
 
 void
-configureBindings(std::unordered_map<en_action, action, std::hash<int>> &en_actions) {
-    const char *keysPath = "configs/keys.cfg";
+configure_bindings(std::unordered_map<en_action, action, std::hash<int>> &en_actions) {
     config_t cfg;
-    config_setting_t *binds;
+    config_setting_t *binds_config_setting;
 
     config_init(&cfg);
 
-    if (!config_read_file(&cfg, keysPath))
+    if (!config_read_file(&cfg, KEYS_CONFIG_PATH))
     {
         printf("%s:%d - %s reading %s\n", config_error_file(&cfg),
-            config_error_line(&cfg), config_error_text(&cfg), keysPath);
+            config_error_line(&cfg), config_error_text(&cfg), KEYS_CONFIG_PATH);
         config_destroy(&cfg);
+
+        return;
     }
 
-    binds = config_lookup(&cfg, "binds");
+    binds_config_setting = config_lookup(&cfg, "binds");
 
-    if (binds != NULL) {
+    if (binds_config_setting != NULL) {
         /* http://www.hyperrealm.com/libconfig/libconfig_manual.html
         * states
         *  > int config_setting_length (const config_setting_t * setting)
@@ -31,11 +35,11 @@ configureBindings(std::unordered_map<en_action, action, std::hash<int>> &en_acti
         *
         * so this can only ever be positive, despite the return type being int
         */
-        unsigned int count = config_setting_length(binds);
+        unsigned int count = config_setting_length(binds_config_setting);
 
         for (unsigned int i = 0; i < count; ++i) {
             config_setting_t *bind, *inputs;
-            bind = config_setting_get_elem(binds, i);
+            bind = config_setting_get_elem(binds_config_setting, i);
 
             const char **inputs_names = NULL;
             const char *action_name = NULL;
@@ -72,6 +76,66 @@ configureBindings(std::unordered_map<en_action, action, std::hash<int>> &en_acti
 
             if (inputs)
                 free(inputs);
+        }
+    }
+}
+
+void
+configure_settings(settings &settings) {
+    configure_video_settings(settings.video);
+    configure_input_settings(settings.input);
+}
+
+void
+configure_video_settings(video_settings &video_settings) {
+    /* nothing configured yet */
+}
+
+void
+configure_input_settings(input_settings &input_settings) {
+    config_t cfg;
+    config_setting_t *input_config_setting;
+
+    config_init(&cfg);
+
+    if (!config_read_file(&cfg, INPUT_CONFIG_PATH))
+    {
+        printf("%s:%d - %s reading %s\n", config_error_file(&cfg),
+            config_error_line(&cfg), config_error_text(&cfg), INPUT_CONFIG_PATH);
+        config_destroy(&cfg);
+
+        return;
+    }
+
+    input_config_setting = config_lookup(&cfg, "input");
+
+    if (input_config_setting != NULL) {
+        int mouse_invert = NULL;
+        double mouse_x_sensitivity = NULL;
+        double mouse_y_sensitivity = NULL;
+
+        /* mouse_invert */
+        int success = config_setting_lookup_bool(
+            input_config_setting, "mouse_invert", &mouse_invert);
+
+        if (success == CONFIG_TRUE) {
+            input_settings.mouse_invert = (mouse_invert != 0);
+        }
+
+        /* mouse_x_sensitivity */
+        success = config_setting_lookup_float(
+            input_config_setting, "mouse_x_sensitivity", &mouse_x_sensitivity);
+
+        if (success == CONFIG_TRUE) {
+            input_settings.mouse_x_sensitivity = (float)mouse_x_sensitivity;
+        }
+
+        /* mouse_y_sensitivity */
+        success = config_setting_lookup_float(
+            input_config_setting, "mouse_y_sensitivity", &mouse_y_sensitivity);
+
+        if (success == CONFIG_TRUE) {
+            input_settings.mouse_y_sensitivity = (float)mouse_x_sensitivity;
         }
     }
 }
