@@ -995,6 +995,41 @@ struct empty_hands_tool : public tool
     }
 };
 
+struct remove_surface_entity_tool : public tool
+{
+    virtual void use(raycast_info *rc)
+    {
+        int index = normal_to_surface_index(rc);
+        remove_ents_from_surface(rc->px, rc->py, rc->pz, index^1);
+        mark_lightfield_update(rc->px, rc->py, rc->pz);
+    }
+
+    virtual void preview(raycast_info *rc)
+    {
+        int index = normal_to_surface_index(rc);
+        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
+
+        if (!other_side->surf_space[index ^ 1]) {
+            return;
+        }
+
+        per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
+        per_object->upload();
+
+        glUseProgram(remove_overlay_shader);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(-0.1, -0.1);
+        draw_mesh(surfs_hw[index]);
+        glPolygonOffset(0, 0);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glUseProgram(simple_shader);
+    }
+
+    virtual void get_description(char *str)
+    {
+        strcpy(str, "Remove surface entity");
+    }
+};
 
 tool *tools[] = {
     NULL,   /* tool 0 isnt a tool (currently) */
@@ -1007,6 +1042,7 @@ tool *tools[] = {
     new add_block_entity_tool(&entity_types[0]),
     new add_surface_entity_tool(&entity_types[1]),
     new add_surface_entity_tool(&entity_types[2]),
+    new remove_surface_entity_tool(),
 };
 
 
