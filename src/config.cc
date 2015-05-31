@@ -111,9 +111,9 @@ configure_input_settings(input_settings &input_settings) {
     input_config_setting = config_lookup(&cfg, "input");
 
     if (input_config_setting != NULL) {
-        int mouse_invert = NULL;
-        double mouse_x_sensitivity = NULL;
-        double mouse_y_sensitivity = NULL;
+        int mouse_invert = 0;
+        double mouse_x_sensitivity = 0.0;
+        double mouse_y_sensitivity = 0.0;
 
         /* mouse_invert */
         int success = config_setting_lookup_bool(
