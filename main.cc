@@ -37,15 +37,12 @@
 #define MAX_WORLD_TEXTURES          64
 
 #define MOUSE_Y_LIMIT   1.54
-#define MOUSE_X_SENSITIVITY -0.001
-#define MOUSE_Y_SENSITIVITY -0.001
-
-// 1 for ordinary use, -1 to invert mouse. TODO: settings...
-#define MOUSE_INVERT_LOOK 1
 
 bool exit_requested = false;
 
 auto hfov = DEG2RAD(90.f);
+
+settings en_settings;
 
 struct wnd {
     SDL_Window *ptr;
@@ -53,8 +50,6 @@ struct wnd {
     int width;
     int height;
 } wnd;
-
-static std::unordered_map<en_action, action, std::hash<int>> en_actions;
 
 enum slot_cycle_direction {
     cycle_next,
@@ -468,7 +463,7 @@ init()
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
 
-    configureBindings(en_actions);
+    configure_settings(en_settings);
 
     pl.angle = 0;
     pl.elev = 0;
@@ -1270,48 +1265,48 @@ cycle_slot(slot_cycle_direction direction)
 void
 handle_input()
 {
-    set_inputs(keys, mouse_buttons, mouse_axes, en_actions);
+    set_inputs(keys, mouse_buttons, mouse_axes, en_settings.bindings);
 
-    if (en_actions[action_menu].active)
+    if (en_settings.bindings[action_menu].active)
         pl.menu_requested = true;
 
     /* look */
-    auto look_x     = en_actions[action_look_x].value;
-    auto look_y     = en_actions[action_look_y].value;
+    auto look_x     = en_settings.bindings[action_look_x].value;
+    auto look_y     = en_settings.bindings[action_look_y].value;
 
     /* movement */
-    auto moveX      = en_actions[action_right].active - en_actions[action_left].active;
-    auto moveY      = en_actions[action_forward].active - en_actions[action_back].active;
+    auto moveX      = en_settings.bindings[action_right].active - en_settings.bindings[action_left].active;
+    auto moveY      = en_settings.bindings[action_forward].active - en_settings.bindings[action_back].active;
 
     /* crouch */
-    auto crouch     = en_actions[action_crouch].active;
-    auto crouch_end = en_actions[action_crouch].just_inactive;
+    auto crouch     = en_settings.bindings[action_crouch].active;
+    auto crouch_end = en_settings.bindings[action_crouch].just_inactive;
 
     /* momentary */
-    auto jump       = en_actions[action_jump].just_active;
-    auto reset      = en_actions[action_reset].just_active;
-    auto use        = en_actions[action_use].just_active;
-    auto slot1      = en_actions[action_slot1].just_active;
-    auto slot2      = en_actions[action_slot2].just_active;
-    auto slot3      = en_actions[action_slot3].just_active;
-    auto slot4      = en_actions[action_slot4].just_active;
-    auto slot5      = en_actions[action_slot5].just_active;
-    auto slot6      = en_actions[action_slot6].just_active;
-    auto slot7      = en_actions[action_slot7].just_active;
-    auto slot8      = en_actions[action_slot8].just_active;
-    auto slot9      = en_actions[action_slot9].just_active;
-    auto gravity    = en_actions[action_gravity].just_active;
-    auto use_tool   = en_actions[action_use_tool].just_active;
-    auto next_tool  = en_actions[action_tool_next].just_active;
-    auto prev_tool  = en_actions[action_tool_prev].just_active;
+    auto jump       = en_settings.bindings[action_jump].just_active;
+    auto reset      = en_settings.bindings[action_reset].just_active;
+    auto use        = en_settings.bindings[action_use].just_active;
+    auto slot1      = en_settings.bindings[action_slot1].just_active;
+    auto slot2      = en_settings.bindings[action_slot2].just_active;
+    auto slot3      = en_settings.bindings[action_slot3].just_active;
+    auto slot4      = en_settings.bindings[action_slot4].just_active;
+    auto slot5      = en_settings.bindings[action_slot5].just_active;
+    auto slot6      = en_settings.bindings[action_slot6].just_active;
+    auto slot7      = en_settings.bindings[action_slot7].just_active;
+    auto slot8      = en_settings.bindings[action_slot8].just_active;
+    auto slot9      = en_settings.bindings[action_slot9].just_active;
+    auto gravity    = en_settings.bindings[action_gravity].just_active;
+    auto use_tool   = en_settings.bindings[action_use_tool].just_active;
+    auto next_tool  = en_settings.bindings[action_tool_next].just_active;
+    auto prev_tool  = en_settings.bindings[action_tool_prev].just_active;
 
     /* persistent */
 
+    float mouse_invert = en_settings.input.mouse_invert ? -1.f : 1.f;
 
 
-
-    pl.angle += MOUSE_X_SENSITIVITY * look_x;
-    pl.elev += MOUSE_Y_SENSITIVITY * MOUSE_INVERT_LOOK * look_y;
+    pl.angle += en_settings.input.mouse_x_sensitivity * look_x;
+    pl.elev += en_settings.input.mouse_y_sensitivity * mouse_invert * look_y;
 
     if (pl.elev < -MOUSE_Y_LIMIT)
         pl.elev = -MOUSE_Y_LIMIT;
