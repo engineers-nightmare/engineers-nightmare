@@ -1,5 +1,7 @@
 #include "settings.h"
 
+#include <algorithm>
+
 void input_settings::merge_with(input_settings other) {
     // bool mouse_invert
     // float mouse_x_sensitivity
