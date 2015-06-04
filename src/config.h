@@ -5,10 +5,17 @@
 #include "input.h"
 #include "settings.h"
 
-void configure_bindings(std::unordered_map<en_action, action, std::hash<int>> &);
+enum en_config_type {
+    en_config_base,
+    en_config_user,
+};
 
-void configure_settings(settings &);
+settings load_settings(en_config_type);
 
-void configure_input_settings(input_settings &);
+input_settings load_input_settings(en_config_type);
 
-void configure_video_settings(video_settings &);
+binding_settings load_binding_settings(en_config_type);
+
+video_settings load_video_settings(en_config_type);
+
+settings merge_settings(settings, settings);

@@ -3,31 +3,85 @@
 #include <libconfig.h>
 #include "libconfig_shim.h"
 
-#define KEYS_CONFIG_PATH "configs/keys.cfg"
-#define VIDEO_CONFIG_PATH "configs/video.cfg"
-#define INPUT_CONFIG_PATH "configs/input.cfg"
+#define BASE_CONFIG_PATH "configs/base/"
+#define USER_CONFIG_PATH "configs/user/"
+#define KEYS_CONFIG  "keys.cfg"
+#define VIDEO_CONFIG "video.cfg"
+#define INPUT_CONFIG "input.cfg"
 
-void
-configure_settings(settings &settings) {
-    configure_video_settings(settings.video);
-    configure_input_settings(settings.input);
-    configure_bindings(settings.bindings);
+#define BASE_KEYS_CONFIG_PATH  BASE_CONFIG_PATH KEYS_CONFIG 
+#define BASE_VIDEO_CONFIG_PATH BASE_CONFIG_PATH VIDEO_CONFIG
+#define BASE_INPUT_CONFIG_PATH BASE_CONFIG_PATH INPUT_CONFIG
+
+#define USER_KEYS_CONFIG_PATH  USER_CONFIG_PATH KEYS_CONFIG 
+#define USER_VIDEO_CONFIG_PATH USER_CONFIG_PATH VIDEO_CONFIG
+#define USER_INPUT_CONFIG_PATH USER_CONFIG_PATH INPUT_CONFIG
+
+const char* get_video_config_path(en_config_type config_type) {
+    switch (config_type) {
+    case en_config_base:
+    default:
+        return BASE_VIDEO_CONFIG_PATH;
+    case en_config_user:
+        return USER_VIDEO_CONFIG_PATH;
+    }
+}
+
+const char* get_input_config_path(en_config_type config_type) {
+    switch (config_type) {
+    case en_config_base:
+    default:
+        return BASE_INPUT_CONFIG_PATH;
+    case en_config_user:
+        return USER_INPUT_CONFIG_PATH;
+    }
+}
+
+const char* get_keys_config_path(en_config_type config_type) {
+    switch (config_type) {
+    case en_config_base:
+    default:
+        return BASE_KEYS_CONFIG_PATH;
+    case en_config_user:
+        return USER_KEYS_CONFIG_PATH;
+    }
 }
 
 void
-configure_bindings(std::unordered_map<en_action, action, std::hash<int>> &en_actions) {
+settings::merge_with(settings other) {
+    this->input.merge_with(other.input);
+    this->video.merge_with(other.video);
+    this->bindings.merge_with(other.bindings);
+}
+
+settings
+load_settings(en_config_type config_type) {
+    settings loaded_settings;
+
+    loaded_settings.input    = load_input_settings(config_type);
+    loaded_settings.bindings = load_binding_settings(config_type);
+    loaded_settings.video    = load_video_settings(config_type);
+
+    return loaded_settings;
+}
+
+binding_settings
+load_binding_settings(en_config_type config_type) {
+    binding_settings loaded_bindings;
     config_t cfg;
-    config_setting_t *binds_config_setting;
+    config_setting_t *binds_config_setting = nullptr;
+
+    const char* config_path = get_keys_config_path(config_type);
 
     config_init(&cfg);
 
-    if (!config_read_file(&cfg, KEYS_CONFIG_PATH))
+    if (!config_read_file(&cfg, config_path))
     {
         printf("%s:%d - %s reading %s\n", config_error_file(&cfg),
-            config_error_line(&cfg), config_error_text(&cfg), KEYS_CONFIG_PATH);
+            config_error_line(&cfg), config_error_text(&cfg), config_path);
         config_destroy(&cfg);
 
-        return;
+        return loaded_bindings;
     }
 
     binds_config_setting = config_lookup(&cfg, "binds");
@@ -74,53 +128,61 @@ configure_bindings(std::unordered_map<en_action, action, std::hash<int>> &en_act
 
             unsigned int input_index = 0;
             en_action i_action = lookup_action(action_name);
-            en_actions[i_action] = action(i_action);
+            loaded_bindings.bindings[i_action] = action(i_action);
 
             for (input_index = 0; input_index < inputs_count; ++input_index) {
                 en_input input = lookup_input(inputs_names[input_index]);
-                en_actions[i_action].bind(input);
+                loaded_bindings.bindings[i_action].bind(input);
             }
 
             if (inputs)
                 free(inputs);
         }
     }
+
+    return loaded_bindings;
 }
 
-void
-configure_video_settings(video_settings &video_settings) {
+video_settings
+load_video_settings(en_config_type config_type) {
+    video_settings loaded_video;
     /* nothing configured yet */
+
+    return loaded_video;
 }
 
-void
-configure_input_settings(input_settings &input_settings) {
+input_settings
+load_input_settings(en_config_type config_type) {
+    input_settings loaded_inputs;
     config_t cfg;
-    config_setting_t *input_config_setting;
+    config_setting_t *input_config_setting = nullptr;
+
+    const char* config_path = get_input_config_path(config_type);
 
     config_init(&cfg);
 
-    if (!config_read_file(&cfg, INPUT_CONFIG_PATH))
+    if (!config_read_file(&cfg, config_path))
     {
         printf("%s:%d - %s reading %s\n", config_error_file(&cfg),
-            config_error_line(&cfg), config_error_text(&cfg), INPUT_CONFIG_PATH);
+            config_error_line(&cfg), config_error_text(&cfg), config_path);
         config_destroy(&cfg);
 
-        return;
+        return loaded_inputs;
     }
 
     input_config_setting = config_lookup(&cfg, "input");
 
     if (input_config_setting != NULL) {
-        int mouse_invert = 0;
+        double mouse_invert        = 0.0;
         double mouse_x_sensitivity = 0.0;
         double mouse_y_sensitivity = 0.0;
 
         /* mouse_invert */
-        int success = config_setting_lookup_bool(
+        int success = config_setting_lookup_float(
             input_config_setting, "mouse_invert", &mouse_invert);
 
         if (success == CONFIG_TRUE) {
-            input_settings.mouse_invert = (mouse_invert != 0);
+            loaded_inputs.mouse_invert = (float)mouse_invert;
         }
 
         /* mouse_x_sensitivity */
@@ -128,7 +190,7 @@ configure_input_settings(input_settings &input_settings) {
             input_config_setting, "mouse_x_sensitivity", &mouse_x_sensitivity);
 
         if (success == CONFIG_TRUE) {
-            input_settings.mouse_x_sensitivity = (float)mouse_x_sensitivity;
+            loaded_inputs.mouse_x_sensitivity = (float)mouse_x_sensitivity;
         }
 
         /* mouse_y_sensitivity */
@@ -136,7 +198,9 @@ configure_input_settings(input_settings &input_settings) {
             input_config_setting, "mouse_y_sensitivity", &mouse_y_sensitivity);
 
         if (success == CONFIG_TRUE) {
-            input_settings.mouse_y_sensitivity = (float)mouse_x_sensitivity;
+            loaded_inputs.mouse_y_sensitivity = (float)mouse_x_sensitivity;
         }
     }
+    
+    return loaded_inputs;
 }

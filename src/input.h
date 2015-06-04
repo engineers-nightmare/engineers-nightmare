@@ -110,7 +110,8 @@ static const action_lookup_t action_lookup_table[] = {
  */
 /* keep in sync with its lookup table[s] */
 enum en_input : int {
-    input_invalid               = -1,
+    input_invalid               = -2,
+    input_unbound               = -1,
 
     input_keyboard_keys_start   = SDL_SCANCODE_A,
 
@@ -257,6 +258,7 @@ struct input_lookup_t {
 };
 
 static const input_lookup_t input_lookup_table[] = {
+    { "input_unbound",         input_unbound },
     { "input_a",               input_a },
     { "input_b",               input_b },
     { "input_c",               input_c },
