@@ -129,11 +129,11 @@ ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
  * tx, ty, and tz are out params
  */
 static void
-find_neighbour(int fx, int fy, int fz, enum surface_index si, int *tx, int *ty, int *tz){
+find_neighbor(int fx, int fy, int fz, enum surface_index si, int *tx, int *ty, int *tz){
     if( ! tx ||
         ! ty ||
         ! tz ){
-        errx(1, "ship_space.c: find_neighbour tx, ty or tz null");
+        errx(1, "ship_space.c: find_neighbor tx, ty or tz null");
         return;
     }
 
@@ -167,11 +167,11 @@ find_neighbour(int fx, int fy, int fz, enum surface_index si, int *tx, int *ty, 
             break;
 
         case face_count:
-            errx(1, "ship_space.c: find_neighbour supplied surface_index of type 'face_count'");
+            errx(1, "ship_space.c: find_neighbor supplied surface_index of type 'face_count'");
             break;
 
         default:
-            errx(1, "ship_space.c: find_neighbour supplied surface_index of unknown type");
+            errx(1, "ship_space.c: find_neighbor supplied surface_index of unknown type");
             break;
     }
 }
@@ -196,16 +196,16 @@ ship_space::ensure_and_get_block(int block_x, int block_y, int block_z){
     return b;
 }
 
-/* returns the neighbour of a block along a given suface's normal
+/* returns the neighbor of a block along a given suface's normal
  * finds the block at the position (x,y,z) within
  * the whole ship_space
  * will move across chunks
  * will call ensure_block if needed
  */
 block *
-ship_space::get_block_neighbour(int block_x, int block_y, int block_z, enum surface_index si){
+ship_space::get_block_neighbor(int block_x, int block_y, int block_z, enum surface_index si){
     int tx, ty, tz;
-    find_neighbour(block_x, block_y, block_z, si, &tx, &ty, &tz);
+    find_neighbor(block_x, block_y, block_z, si, &tx, &ty, &tz);
     return this->ensure_and_get_block(tx, ty, tz);
 }
 
@@ -214,10 +214,10 @@ ship_space::get_block_neighbour(int block_x, int block_y, int block_z, enum surf
  *
  * Set Neighbour for block N
  */
-#define sn1(si, type) (ss->get_block_neighbour(x,   y,   z, si)->surfs[si ^ 1] = type)
-#define sn2(si, type) (ss->get_block_neighbour(x,   y+8, z, si)->surfs[si ^ 1] = type)
-#define sn3(si, type) (ss->get_block_neighbour(x+8, y,   z, si)->surfs[si ^ 1] = type)
-#define sn4(si, type) (ss->get_block_neighbour(x+8, y+8, z, si)->surfs[si ^ 1] = type)
+#define sn1(si, type) (ss->get_block_neighbor(x,   y,   z, si)->surfs[si ^ 1] = type)
+#define sn2(si, type) (ss->get_block_neighbor(x,   y+8, z, si)->surfs[si ^ 1] = type)
+#define sn3(si, type) (ss->get_block_neighbor(x+8, y,   z, si)->surfs[si ^ 1] = type)
+#define sn4(si, type) (ss->get_block_neighbor(x+8, y+8, z, si)->surfs[si ^ 1] = type)
 
 /* returns a pointer to a new ship space
  * this ship space will have 2 x 2 rooms and will be 1 room tall
