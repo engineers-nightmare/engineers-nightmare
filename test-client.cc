@@ -53,6 +53,7 @@ void handle_server_message(ENetEvent *event, uint8_t *data)
             break;
         case SLOT_GRANTED:
             printf("slot was granted!\n");
+            request_whole_ship(event->peer);
             break;
         case SERVER_FULL:
             printf("no free slots!\n");
@@ -61,6 +62,18 @@ void handle_server_message(ENetEvent *event, uint8_t *data)
         case REGISTER_REQUIRED:
             printf("attempted to join before registering!\n");
             disconnect_peer(event->peer);
+            break;
+        case NOT_IN_SLOT:
+            printf("was not in a slot when requesting game information\n");
+            break;
+    }
+}
+
+void handle_ship_message(ENetEvent *event, uint8_t *data)
+{
+    switch(*data) {
+        case ALL_SHIP_REPLY:
+            printf("got ship info!\n");
             break;
     }
 }
@@ -73,8 +86,12 @@ void handle_message(ENetEvent *event)
     data = event->packet->data;
     switch(*data) {
         case SERVER_MSG:
-            printf("server message(0x%02x): ", *(data + 1));
+            printf("server message(0x%02X): ", *(data + 1));
             handle_server_message(event, data + 1);
+            break;
+        case SHIP_MSG:
+            printf("ship message(0x%02X): ", *(data + 1));
+            handle_ship_message(event, data + 1);
             break;
         default:
             printf("unknown message(0x%02x)\n", *data);

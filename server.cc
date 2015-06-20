@@ -87,6 +87,25 @@ void handle_server_message(ENetEvent *event, uint8_t *data)
             }
 
             break;
+        default:
+            printf("unknown message(0x%02X)\n", *data);
+    }
+}
+
+/* handle the submessage of a SHIP_MSG */
+void handle_ship_message(ENetEvent *event, uint8_t *data)
+{
+    switch(*data) {
+        case ALL_SHIP_REQUEST:
+            printf("ship space requested!\n");
+            if(!event->peer->data) {
+                send_not_in_slot(event->peer);
+                return;
+            }
+            reply_whole_ship(event->peer, ship);
+            break;
+        default:
+            printf("unknown messages(0x%02X)\n", *data);
     }
 }
 
@@ -101,6 +120,10 @@ void handle_message(ENetEvent *event)
         case SERVER_MSG:
             printf("server message(0x%02x): ", *(data + 1));
             handle_server_message(event, data + 1);
+            break;
+        case SHIP_MSG:
+            printf("ship message(0x%02x): ", *(data + 1));
+            handle_ship_message(event, data + 1);
             break;
         default:
             printf("unknown message(0x%02x)\n", *data);
@@ -151,8 +174,6 @@ int server_loop()
                     break;
             }
         }
-        if(server_ret == 0)
-            printf("timed out!\n");
     } while(server_ret >= 0);
 
     if(server_ret < 0)

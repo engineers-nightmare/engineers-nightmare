@@ -77,3 +77,34 @@ bool send_slot_granted(ENetPeer *peer)
 {
     return basic_sever_message(peer, SLOT_GRANTED);
 }
+
+bool send_not_in_slot(ENetPeer *peer)
+{
+    return basic_sever_message(peer, NOT_IN_SLOT);
+}
+
+bool basic_ship_message(ENetPeer *peer, uint8_t subtype)
+{
+    ENetPacket *packet;
+
+    assert(peer);
+
+    uint8_t data[2] = {SHIP_MSG, subtype};
+    packet = enet_packet_create(data, 2, ENET_PACKET_FLAG_RELIABLE);
+    return send_packet(peer, packet);
+}
+
+bool request_whole_ship(ENetPeer *peer) {
+    return basic_ship_message(peer, ALL_SHIP_REQUEST);
+}
+
+/* TODO: actually send the whole ship */
+bool reply_whole_ship(ENetPeer *peer, ship_space *space) {
+    ENetPacket *packet;
+
+    assert(peer && space);
+
+    uint8_t data[2] = {SHIP_MSG, ALL_SHIP_REPLY};
+    packet = enet_packet_create(data, 2, ENET_PACKET_FLAG_RELIABLE);
+    return send_packet(peer, packet);
+}
