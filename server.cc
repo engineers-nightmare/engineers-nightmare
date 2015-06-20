@@ -35,7 +35,8 @@ enum msg_ret_type {
 
 static ENetHost *server;
 
-int init(void)
+int
+init(void)
 {
     ship = ship_space::mock_ship_space();
     if(!ship) {
@@ -47,7 +48,8 @@ int init(void)
 }
 
 /* handle the submessage of a SERVER_MSG */
-void handle_server_message(ENetEvent *event, uint8_t *data)
+void
+handle_server_message(ENetEvent *event, uint8_t *data)
 {
     struct peer_info *pi;
     int i;
@@ -93,7 +95,8 @@ void handle_server_message(ENetEvent *event, uint8_t *data)
 }
 
 /* handle the submessage of a SHIP_MSG */
-void handle_ship_message(ENetEvent *event, uint8_t *data)
+void
+handle_ship_message(ENetEvent *event, uint8_t *data)
 {
     switch(*data) {
         case ALL_SHIP_REQUEST:
@@ -110,7 +113,8 @@ void handle_ship_message(ENetEvent *event, uint8_t *data)
 }
 
 /*  handle any incoming messages */
-void handle_message(ENetEvent *event)
+void
+handle_message(ENetEvent *event)
 {
     uint8_t *data;
 
@@ -131,7 +135,8 @@ void handle_message(ENetEvent *event)
 }
 
 /* handle a remote disconnect. remove all references to the cliet */
-void handle_disconnect(ENetEvent *event)
+void
+handle_disconnect(ENetEvent *event)
 {
     int i;
 
@@ -149,7 +154,8 @@ void handle_disconnect(ENetEvent *event)
 }
 
 /* listen/dispatch loop */
-int server_loop()
+int
+server_loop()
 {
     ENetEvent event;
     int server_ret;
@@ -181,7 +187,8 @@ int server_loop()
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     int ret;
     ENetAddress addr;
