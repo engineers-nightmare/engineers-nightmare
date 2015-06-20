@@ -116,11 +116,63 @@ test_block_serialization(void)
     free(b4);
 }
 
+
+chunk *
+testing_chunk(void)
+{
+    chunk *c = 0;
+
+    c = (chunk*) calloc(1, sizeof(chunk));
+
+    /* FIXME do something interesting */
+
+    return c;
+}
+
+/* returns 1 if equal
+ * 0 if not
+ */
+unsigned int
+chunk_equal(chunk *c1, chunk *c2){
+    return 0 == memcmp(c1, c2, sizeof(chunk));
+}
+
+void
+test_chunk_serialization(void)
+{
+    chunk *c1 = 0;
+    chunk *c2 = 0;
+
+    uint8_t *buffer = 0;
+    unsigned int index = 0;
+
+    buffer = (uint8_t*) calloc(SERIALIZE_CHUNK_SIZE, sizeof(uint8_t));
+    assert(buffer);
+
+    c1 = testing_chunk();
+    assert(c1);
+
+    assert( 0 == serialize_chunk(c1, buffer, &index) );
+    assert( index == SERIALIZE_CHUNK_SIZE );
+
+    index = 0;
+    c2 = deserialize_chunk(buffer, &index);
+    assert(c2);
+    assert( index == SERIALIZE_CHUNK_SIZE );
+
+    assert( chunk_equal(c1, c2) );
+
+    free(c1);
+    free(c2);
+}
+
+
 /* some light manual testing of block and grid
  */
 int
 main(void)
 {
     test_block_serialization();
+    test_chunk_serialization();
 }
 

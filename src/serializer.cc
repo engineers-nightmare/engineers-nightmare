@@ -135,10 +135,34 @@ deserialize_to_block(block *b, uint8_t *buffer, unsigned int *index)
  * on error will call errx(1)
  */
 unsigned int
-serialize_chunk(chunk *b, uint8_t *buffer, unsigned int *index)
+serialize_chunk(chunk *c, uint8_t *buffer, unsigned int *index)
 {
-    errx(1, "serialize_chunk: unimplemented");
-    return 1;
+    unsigned int i = 0;
+    unsigned int j = 0;
+    unsigned int k = 0;
+
+    if( ! c      ||
+        ! buffer ||
+        ! index  ){
+        errx(1, "serialize_chunk: null args");
+        return 1;
+    }
+
+    /* serialize blocks */
+    for( k=0; k < CHUNK_SIZE; ++k ){
+        for( j=0; j < CHUNK_SIZE; ++j ){
+            for( i=0; i < CHUNK_SIZE; ++i ){
+                if( serialize_block(c->get_block(i, j, k), buffer, index) ){
+                    errx(1, "serialize_chunk: call to serialize_block failed");
+                    return 1;
+                }
+            }
+        }
+    }
+
+    /* FIXME entities */
+
+    return 0;
 }
 
 /* take a buffer with a serialised chunk in it and return a
@@ -154,8 +178,38 @@ serialize_chunk(chunk *b, uint8_t *buffer, unsigned int *index)
 chunk *
 deserialize_chunk(uint8_t *buffer, unsigned int *index)
 {
-    errx(1, "deserialize_chunk: unimplemented");
-    return 0;
+    chunk *c = 0;
+    unsigned int i = 0;
+    unsigned int j = 0;
+    unsigned int k = 0;
+
+    if( ! buffer ||
+        ! index  ){
+        errx(1, "deserialize_chunk: null args");
+        return 0;
+    }
+
+    c = (chunk*) calloc(1, sizeof(chunk));
+    if( ! c ){
+        errx(1, "deserialize_chunk: call to calloc failed");
+        return 0;
+    }
+
+    /* deserialize blocks */
+    for( k=0; k < CHUNK_SIZE; ++k ){
+        for( j=0; j < CHUNK_SIZE; ++j ){
+            for( i=0; i < CHUNK_SIZE; ++i ){
+                if( deserialize_to_block(c->get_block(i, j, k), buffer, index) ){
+                    errx(1, "deserialize_chunk: call to deserialize_block failed");
+                    return 0;
+                }
+            }
+        }
+    }
+
+    /* FIXME entities */
+
+    return c;
 }
 
 
