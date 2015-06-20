@@ -12,12 +12,15 @@
 #include <SDL.h>
 #include <unordered_map>
 
+#include <enet/enet.h>
+
 #include "src/common.h"
 #include "src/component/component_system_manager.h"
 #include "src/config.h"
 #include "src/input.h"
 #include "src/light_field.h"
 #include "src/mesh.h"
+#include "src/network.h"
 #include "src/physics.h"
 #include "src/player.h"
 #include "src/projectile/projectile.h"
@@ -32,6 +35,9 @@
 #include "src/wiring/wiring.h"
 #include "src/wiring/wiring_data.h"
 
+#define VSN_MAJOR 0
+#define VSN_MINOR 1
+#define VSN_PATCH 0
 
 #define APP_NAME        "Engineer's Nightmare"
 #define DEFAULT_WIDTH   1024
@@ -151,6 +157,10 @@ sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
 projectile_linear_manager proj_man;
 particle_manager *particle_man;
+
+ENetHost *client;
+ENetPeer *peer;
+bool disconnected = false;
 
 glm::mat4
 mat_block_face(glm::ivec3 p, int face)
@@ -2608,9 +2618,172 @@ run()
     }
 }
 
-int
-main(int, char **)
+void
+disconnect_peer(ENetPeer *peer)
 {
+    ENetEvent event;
+    enet_host_flush(client);
+
+    enet_peer_disconnect(peer, 0);
+    while(enet_host_service(client, &event, 3000) > 0) {
+        switch(event.type) {
+            case ENET_EVENT_TYPE_RECEIVE:
+                enet_packet_destroy(event.packet);
+                break;
+            case ENET_EVENT_TYPE_DISCONNECT:
+                disconnected = true;
+                break;
+            case ENET_EVENT_TYPE_CONNECT:
+            case ENET_EVENT_TYPE_NONE:
+                break;
+        }
+    }
+
+    /* failed to disconnect in 3 seconds */
+    if(!disconnected) {
+        enet_peer_reset(peer);
+        disconnected = true;
+    }
+}
+
+bool
+connect_server(char *host, int port)
+{
+    ENetAddress addr;
+    ENetEvent event;
+
+    if(enet_initialize()) {
+        fprintf(stderr, "failed to initialize enet!\n");
+        return false;
+    }
+
+    client = enet_host_create(NULL, /* create a client host */
+            1,          /* only allow 1 outgoing connection */
+            2,          /* allow up 2 channels to be used, 0 and 1 */
+            57600/8,    /* 56K modem with 56 Kbps downstream bandwidth */
+            14400/8);   /* 56k modem with 14 Kbps upstream bandwidth */
+    if(!client) {
+        fprintf(stderr, "failed to create enet client!\n");
+        return false;
+    }
+
+    enet_address_set_host(&addr, host);
+    addr.port = port;
+    /* connect to the remote host */
+    peer =enet_host_connect(client, &addr, 2, 0);
+    if(!peer)
+        return false;
+
+    if(enet_host_service(client, &event, 5000) > 0
+            && event.type == ENET_EVENT_TYPE_CONNECT) {
+        printf("connected to %s:%d\n", host, port);
+        return true;
+    }
+
+    enet_peer_reset(peer);
+    return 0;
+}
+
+bool
+handle_server_message(ENetEvent *event, uint8_t *data)
+{
+    switch(*data) {
+        case SERVER_VSN_MSG:
+            printf("server version: %d.%d.%d\n", *(data + 1),
+                    *(data + 2), *(data + 3));
+            request_slot(event->peer);
+            break;
+        case INCOMPAT_VSN_MSG:
+            fprintf(stderr, "You must upgrade your client to at "
+                    "least v%d.%d.%d\n", *(data + 1), *(data + 2),
+                    *(data + 3));
+            disconnect_peer(event->peer);
+            break;
+        case SLOT_GRANTED:
+            request_whole_ship(event->peer);
+            break;
+        case SERVER_FULL:
+            fprintf(stderr, "server is full!\n");
+            break;
+        case REGISTER_REQUIRED:
+            fprintf(stderr, "failed to join before sending version "
+                    "information!\n");
+            disconnect_peer(event->peer);
+            break;
+        case NOT_IN_SLOT:
+            fprintf(stderr, "had not joined the server before "
+                    "requesting game information\n");
+            break;
+    }
+
+    return false;
+}
+
+bool
+handle_ship_message(ENetEvent *event, uint8_t *data)
+{
+    switch(*data) {
+        case ALL_SHIP_REPLY:
+            return  true;
+    }
+
+    return false;
+}
+
+bool
+handle_message(ENetEvent *event) {
+    uint8_t *data;
+
+    data = event->packet->data;
+    switch(*data) {
+        case SERVER_MSG:
+            return handle_server_message(event, data + 1);
+        case SHIP_MSG:
+            return handle_ship_message(event, data + 1);
+    }
+
+    return false;
+}
+
+bool
+negotiate_ship(void)
+{
+    bool ret;
+    ENetEvent event;
+
+    send_client_version(peer, VSN_MAJOR, VSN_MINOR, VSN_PATCH);
+    while(enet_host_service(client, &event, 1000) >= 0 && !disconnected) {
+        switch(event.type) {
+            case ENET_EVENT_TYPE_RECEIVE:
+                ret = handle_message(&event);
+                enet_packet_destroy(event.packet);
+                if(ret)
+                    return true;
+                break;
+            case ENET_EVENT_TYPE_DISCONNECT:
+                printf("disconnected\n!");
+                disconnected = true;
+                break;
+            case ENET_EVENT_TYPE_CONNECT:
+            case ENET_EVENT_TYPE_NONE:
+                break;
+            default:
+                fprintf(stderr, "server timed out\n");
+                return false;
+        }
+    }
+
+    return false;
+}
+
+int
+main(int argc, char **argv)
+{
+    if(argc != 3) {
+        fprintf(stderr, "Requires hostname and port!\n");
+        return 1;
+    }
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
         errx(1, "Error initializing SDL: %s\n", SDL_GetError());
 
@@ -2634,6 +2807,14 @@ main(int, char **)
     keys = SDL_GetKeyboardState(nullptr);
 
     resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+    if(!connect_server(argv[1], atoi(argv[2]))) {
+        fprintf(stderr, "failed to connect to server!\n");
+        return 1;
+    }
+
+    if(!negotiate_ship())
+        return 0;
 
     init();
 
