@@ -22,7 +22,7 @@
  * which is SERIALIZE_BLOCK_SIZE uint8_t(s)
  *
  * returns 0 on success
- * returns 1 on error
+ * on error will call errx(1)
  */
 unsigned int serialize_block(block *b, uint8_t *buffer, unsigned int *index);
 
@@ -34,7 +34,7 @@ unsigned int serialize_block(block *b, uint8_t *buffer, unsigned int *index);
  * deserialize_block will increment index past the end of the block
  *
  * returns *block on success
- * returns 0 on error
+ * on error will call errx(1)
  */
 block * deserialize_block(uint8_t *buffer, unsigned int *index);
 
@@ -46,7 +46,7 @@ block * deserialize_block(uint8_t *buffer, unsigned int *index);
  * deseriaize_to_block will increment index past the end of the block
  *
  * returns 0 on success
- * returns 1 on error
+ * on error will call errx(1)
  */
 unsigned int deserialize_to_block(block *b, uint8_t *buffer, unsigned int *index);
 
@@ -59,7 +59,7 @@ unsigned int deserialize_to_block(block *b, uint8_t *buffer, unsigned int *index
  * which is SERIALIZE_CHUNK_SIZE uint8_t(s)
  *
  * returns 0 on success
- * returns 1 on error
+ * on error will call errx(1)
  */
 unsigned int serialize_chunk(chunk *b, uint8_t *buffer, unsigned int *index);
 
@@ -71,7 +71,7 @@ unsigned int serialize_chunk(chunk *b, uint8_t *buffer, unsigned int *index);
  * deseriaize_block will increment index past the end of the chunk
  *
  * returns *block on success
- * returns 0 on error
+ * on error will call errx(1)
  */
 chunk * deserialize_chunk(uint8_t *buffer, unsigned int *index);
 
