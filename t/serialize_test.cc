@@ -194,7 +194,7 @@ test_chunk_serialization(void)
 }
 
 
-/* some light manual testing of block and grid
+/* some light manual testing of serialization
  */
 int
 main(void)
