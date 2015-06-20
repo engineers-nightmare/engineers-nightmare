@@ -121,10 +121,37 @@ chunk *
 testing_chunk(void)
 {
     chunk *c = 0;
+    unsigned int i = 0;
+    unsigned int j = 0;
+    unsigned int k = 0;
+    block *b = 0;
 
     c = (chunk*) calloc(1, sizeof(chunk));
 
-    /* FIXME do something interesting */
+    /* make something mildly interesting */
+    for( k=0; k < CHUNK_SIZE; ++k ){
+        for( j=0; j < CHUNK_SIZE; ++j ){
+            for( i=0; i < CHUNK_SIZE; ++i ){
+                b = c->get_block(i, j, k);
+                if( ! b ){
+                    errx(1, "deserialize_chunk: call to get_block failed");
+                }
+
+                if( i == j ){
+                    b->type = block_support;
+
+                    b->surfs[surface_xp] = surface_wall;
+                    b->surfs[surface_xm] = surface_none;
+                    b->surfs[surface_yp] = surface_none;
+                    b->surfs[surface_ym] = surface_wall;
+                    b->surfs[surface_zp] = surface_grate;
+                    b->surfs[surface_zm] = surface_text;
+                } else {
+                    b->type = block_empty;
+                }
+            }
+        }
+    }
 
     return c;
 }
