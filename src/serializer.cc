@@ -75,6 +75,34 @@ deserialize_block(uint8_t *buffer, unsigned int *index)
         return 0;
     }
 
+    if( deserialize_to_block(b, buffer, index) ){
+        errx(1, "deserialize_block: call to deserialize_to_block failed");
+        return 0;
+    }
+
+    return b;
+}
+
+/* take a buffer containing a serialized block and a pointer to a block
+ * set block based on contents in serialized buffer
+ *
+ * index must point to start of block
+ *
+ * deseriaize_to_block will increment index past the end of the block
+ *
+ * returns 0 on success
+ * returns 1 on error
+ */
+unsigned int
+deserialize_to_block(block *b, uint8_t *buffer, unsigned int *index)
+{
+    if( ! b      ||
+        ! buffer ||
+        ! index  ){
+        errx(1, "deserialize_to_block: given null args");
+        return 1;
+    }
+
     b->type = (block_type) buffer[(*index)++];
 
     b->surfs[surface_xp] = (surface_type) buffer[(*index)++];
@@ -91,7 +119,7 @@ deserialize_block(uint8_t *buffer, unsigned int *index)
     b->surf_space[surface_zp] = (unsigned short) buffer[(*index)++];
     b->surf_space[surface_zm] = (unsigned short) buffer[(*index)++];
 
-    return b;
+    return 0;
 }
 
 
