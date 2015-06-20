@@ -6,7 +6,8 @@
 /* return an initialised block
  * returns 0 on error
  */
-block * testing_block1(void)
+block *
+testing_block1(void)
 {
     block * b = 0;
 
@@ -35,7 +36,8 @@ block * testing_block1(void)
 /* return an initialised block
  * returns 0 on error
  */
-block * testing_block2(void)
+block *
+testing_block2(void)
 {
     block * b = 0;
 
@@ -64,12 +66,14 @@ block * testing_block2(void)
 /* returns 1 if equal
  * returns 0 if not
  */
-unsigned int block_equal(block *b1, block*b2)
+unsigned int
+block_equal(block *b1, block*b2)
 {
     return 0 == memcmp(b1, b2, sizeof(block));
 }
 
-void test_block_serialization(void)
+void
+test_block_serialization(void)
 {
     uint8_t *buffer = 0;
     unsigned int index = 0;

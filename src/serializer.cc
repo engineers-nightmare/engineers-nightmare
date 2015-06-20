@@ -11,7 +11,8 @@
  * returns 0 on success
  * returns 1 on error
  */
-unsigned int serialize_block(block *b, uint8_t *buffer, unsigned int *index)
+unsigned int
+serialize_block(block *b, uint8_t *buffer, unsigned int *index)
 {
     if( ! b      ||
         ! buffer ||
@@ -56,7 +57,8 @@ unsigned int serialize_block(block *b, uint8_t *buffer, unsigned int *index)
  * returns *block on success
  * returns 0 on error
  */
-block * deserialize_block(uint8_t *buffer, unsigned int *index)
+block *
+deserialize_block(uint8_t *buffer, unsigned int *index)
 {
     block *b = 0;
 
@@ -104,7 +106,8 @@ block * deserialize_block(uint8_t *buffer, unsigned int *index)
  * returns 0 on success
  * returns 1 on error
  */
-unsigned int serialize_chunk(chunk *b, uint8_t *buffer, unsigned int *index)
+unsigned int
+serialize_chunk(chunk *b, uint8_t *buffer, unsigned int *index)
 {
     errx(1, "serialize_chunk: unimplemented");
     return 1;
@@ -120,7 +123,8 @@ unsigned int serialize_chunk(chunk *b, uint8_t *buffer, unsigned int *index)
  * returns *block on success
  * returns 0 on error
  */
-chunk * deserialize_chunk(uint8_t *buffer, unsigned int *index)
+chunk *
+deserialize_chunk(uint8_t *buffer, unsigned int *index)
 {
     errx(1, "deserialize_chunk: unimplemented");
     return 0;
