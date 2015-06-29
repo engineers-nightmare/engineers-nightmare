@@ -775,7 +775,7 @@ struct remove_surface_tool : public tool
 
         int index = normal_to_surface_index(rc);
 
-        if (bl->surfs[index] != surface_none) {
+        if (bl && bl->surfs[index] != surface_none) {
 
             bl->surfs[index] = surface_none;
             ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
