@@ -684,7 +684,7 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
             continue;
         }
 
-        if (bl->type != (block_empty ^ rc->inside)) {
+        if (rc->inside ^ (bl && bl->type != block_empty)) {
             rc->hit = true;
             rc->x = x;
             rc->y = y;
