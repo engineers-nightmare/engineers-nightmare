@@ -675,7 +675,7 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
         }
 
         bl = this->get_block(x, y, z);
-        if (!bl){
+        if (!bl && !rc->inside){
             /* if there is no block then we are outside the grid
              * we still want to keep stepping until we either
              * hit a block within the grid or exceed our maximum
