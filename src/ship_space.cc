@@ -594,6 +594,12 @@ max_along_axis(float o, float d)
     }
 }
 
+/* max reach, counted in edge-crossings. for spherical reach, the results need to be
+ * further pruned -- this allows ~2 blocks in the worst case diagonals, and 6 in the
+ * best cases, where only one axis is traversed.
+ */
+#define MAX_PLAYER_REACH 6
+
 
 void
 ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, raycast_info *rc)
@@ -634,10 +640,7 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
     float tMaxY = max_along_axis(oy, dy);
     float tMaxZ = max_along_axis(oz, dz);
 
-    /* this counting here ensures our reach distance
-     * FIXME this will need to be tweaked
-     */
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < MAX_PLAYER_REACH; ++i) {
         if (tMaxX < tMaxY) {
             if (tMaxX < tMaxZ) {
                 x += stepX;
