@@ -594,6 +594,12 @@ max_along_axis(float o, float d)
     }
 }
 
+/* max reach, counted in edge-crossings. for spherical reach, the results need to be
+ * further pruned -- this allows ~2 blocks in the worst case diagonals, and 6 in the
+ * best cases, where only one axis is traversed.
+ */
+#define MAX_PLAYER_REACH 6
+
 
 void
 ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, raycast_info *rc)
@@ -634,10 +640,7 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
     float tMaxY = max_along_axis(oy, dy);
     float tMaxZ = max_along_axis(oz, dz);
 
-    /* this counting here ensures our reach distance
-     * FIXME this will need to be tweaked
-     */
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < MAX_PLAYER_REACH; ++i) {
         if (tMaxX < tMaxY) {
             if (tMaxX < tMaxZ) {
                 x += stepX;
@@ -672,7 +675,7 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
         }
 
         bl = this->get_block(x, y, z);
-        if (!bl){
+        if (!bl && !rc->inside){
             /* if there is no block then we are outside the grid
              * we still want to keep stepping until we either
              * hit a block within the grid or exceed our maximum
@@ -681,7 +684,7 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
             continue;
         }
 
-        if (bl->type != (block_empty ^ rc->inside)) {
+        if (rc->inside ^ (bl && bl->type != block_empty)) {
             rc->hit = true;
             rc->x = x;
             rc->y = y;

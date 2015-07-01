@@ -705,9 +705,8 @@ struct add_surface_tool : public tool
 
     bool can_use(block *bl, block *other, int index)
     {
-        if (!bl) return false;
-        if (bl->surfs[index] != surface_none) return false; /* already a surface here */
-        return bl->type == block_support || (other && other->type == block_support);
+        if (bl && bl->surfs[index] != surface_none) return false; /* already a surface here */
+        return (bl && bl->type == block_support) || (other && other->type == block_support);
     }
 
     virtual void use(raycast_info *rc)
@@ -718,6 +717,11 @@ struct add_surface_tool : public tool
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
         if (can_use(bl, other_side, index)) {
+
+            if (!bl) {
+                ship->ensure_block(rc->x, rc->y, rc->z);
+                bl = ship->get_block(rc->x, rc->y, rc->z);
+            }
 
             if (!other_side) {
                 ship->ensure_block(rc->px, rc->py, rc->pz);
@@ -771,7 +775,7 @@ struct remove_surface_tool : public tool
 
         int index = normal_to_surface_index(rc);
 
-        if (bl->surfs[index] != surface_none) {
+        if (bl && bl->surfs[index] != surface_none) {
 
             bl->surfs[index] = surface_none;
             ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
