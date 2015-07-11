@@ -1370,10 +1370,22 @@ struct play_state : game_state {
 game_state *game_state::create_play_state() { return new play_state; }
 
 
+#define NUM_MENU_ITEMS 2
+
 struct menu_state : game_state
 {
+    int selected = 1;
+
     void update()
     {
+    }
+
+    void put_item_text(char *dest, char const *src, int index)
+    {
+        if (index == selected)
+            sprintf(dest, "> %s <", src);
+        else
+            strcpy(dest, src);
     }
 
     void rebuild_ui()
@@ -1389,14 +1401,14 @@ struct menu_state : game_state
         w = 0;
         h = 0;
 
-        sprintf(buf, "Resume Game");
+        put_item_text(buf, "Resume Game", 0);
         text->measure(buf, &w, &h);
         add_text_with_outline(buf, -w/2, 50);
 
         w = 0;
         h = 0;
 
-        sprintf(buf, "> Exit Game <");
+        put_item_text(buf, "Exit Game", 1);
         text->measure(buf, &w, &h);
         add_text_with_outline(buf, -w/2, -50);
     }
@@ -1406,6 +1418,16 @@ struct menu_state : game_state
         /* TODO: act on menu selection; for now, the only item is to quit */
         if (en_settings.bindings.bindings[action_menu_confirm].just_active) {
             exit_requested = true;
+        }
+
+        if (en_settings.bindings.bindings[action_menu_down].just_active) {
+            selected = (selected + 1) % NUM_MENU_ITEMS;
+            pl.ui_dirty = true;
+        }
+
+        if (en_settings.bindings.bindings[action_menu_up].just_active) {
+            selected = (selected + NUM_MENU_ITEMS - 1) % NUM_MENU_ITEMS;
+            pl.ui_dirty = true;
         }
 
         if (en_settings.bindings.bindings[action_menu].just_active) {
