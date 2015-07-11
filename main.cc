@@ -368,6 +368,31 @@ update_lightfield()
 }
 
 
+struct game_state {
+    virtual ~game_state() {}
+
+    virtual void handle_input() = 0;
+    virtual void update() = 0;
+    virtual void rebuild_ui() = 0;
+
+    static game_state *create_play_state();
+    static game_state *create_menu_state();
+};
+
+
+game_state *state = game_state::create_play_state();
+
+void
+set_game_state(game_state *s)
+{
+    if (state)
+        delete state;
+
+    state = s;
+    pl.ui_dirty = true; /* state change always requires a ui rebuild. */
+}
+
+
 void
 init()
 {
@@ -1059,50 +1084,6 @@ add_text_with_outline(char const *s, float x, float y)
 
 
 void
-rebuild_ui()
-{
-    text->reset();
-
-    float w = 0;
-    float h = 0;
-    char buf[256];
-    char buf2[512];
-
-    /* Tool name down the bottom */
-    tool *t = tools[pl.selected_slot];
-
-    if (t) {
-        t->get_description(buf);
-    }
-    else {
-        strcpy(buf, "(no tool)");
-    }
-
-    add_text_with_outline(".", 0, 0);
-
-    sprintf(buf2, "Left mouse button: %s", buf);
-    text->measure(buf2, &w, &h);
-    add_text_with_outline(buf2, -w/2, -400);
-
-    /* Gravity state (temp) */
-    w = 0; h = 0;
-    sprintf(buf, "Gravity: %s (G to toggle)", pl.disable_gravity ? "OFF" : "ON");
-    text->measure(buf, &w, &h);
-    add_text_with_outline(buf, -w/2, -430);
-
-    /* Use key affordance */
-    if (use_entity) {
-        sprintf(buf2, "(E) Use the %s", use_entity->type->name);
-        w = 0; h = 0;
-        text->measure(buf2, &w, &h);
-        add_text_with_outline(buf2, -w/2, -200);
-    }
-
-    text->upload();
-}
-
-
-void
 update()
 {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -1123,37 +1104,6 @@ update()
     glm::mat4 view = glm::lookAt(pl.eye, pl.eye + pl.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->upload();
-
-    tool *t = tools[pl.selected_slot];
-
-    /* no menu. exit for now */
-    if (pl.menu_requested) {
-        exit_requested = true;
-        pl.menu_requested = false;
-    }
-
-    /* both tool use and overlays need the raycast itself */
-    raycast_info rc;
-    ship->raycast(pl.eye.x, pl.eye.y, pl.eye.z, pl.dir.x, pl.dir.y, pl.dir.z, &rc);
-
-    /* tool use */
-    if (pl.use_tool && rc.hit && t) {
-        t->use(&rc);
-    }
-
-    /* interact with ents */
-    entity *hit_ent = phys_raycast(pl.eye.x, pl.eye.y, pl.eye.z,
-                                   pl.dir.x, pl.dir.y, pl.dir.z,
-                                   2 /* dist */, phy->ghostObj, phy->dynamicsWorld);
-
-    if (hit_ent != use_entity) {
-        use_entity = hit_ent;
-        pl.ui_dirty = true;
-    }
-
-    if (pl.use && hit_ent) {
-        hit_ent->use();
-    }
 
     /* rebuild lighting if needed */
     update_lightfield();
@@ -1205,11 +1155,7 @@ update()
         }
     }
 
-    /* tool preview */
-    if (rc.hit && t) {
-        t->preview(&rc);
-    }
-
+    state->update();
 
     /* draw the sky */
     glUseProgram(sky_shader);
@@ -1218,7 +1164,9 @@ update()
 
 
     if (pl.ui_dirty) {
-        rebuild_ui();
+        text->reset();
+        state->rebuild_ui();
+        text->upload();
         pl.ui_dirty = false;
     }
 
@@ -1268,89 +1216,195 @@ cycle_slot(slot_cycle_direction direction)
 }
 
 
+struct play_state : game_state {
+
+    void rebuild_ui() {
+        float w = 0;
+        float h = 0;
+        char buf[256];
+        char buf2[512];
+
+        /* Tool name down the bottom */
+        tool *t = tools[pl.selected_slot];
+
+        if (t) {
+            t->get_description(buf);
+        }
+        else {
+            strcpy(buf, "(no tool)");
+        }
+
+        add_text_with_outline(".", 0, 0);
+
+        sprintf(buf2, "Left mouse button: %s", buf);
+        text->measure(buf2, &w, &h);
+        add_text_with_outline(buf2, -w/2, -400);
+
+        /* Gravity state (temp) */
+        w = 0; h = 0;
+        sprintf(buf, "Gravity: %s (G to toggle)", pl.disable_gravity ? "OFF" : "ON");
+        text->measure(buf, &w, &h);
+        add_text_with_outline(buf, -w/2, -430);
+
+        /* Use key affordance */
+        if (use_entity) {
+            sprintf(buf2, "(E) Use the %s", use_entity->type->name);
+            w = 0; h = 0;
+            text->measure(buf2, &w, &h);
+            add_text_with_outline(buf2, -w/2, -200);
+        }
+    }
+
+    void update() {
+        tool *t = tools[pl.selected_slot];
+
+        /* both tool use and overlays need the raycast itself */
+        raycast_info rc;
+        ship->raycast(pl.eye.x, pl.eye.y, pl.eye.z, pl.dir.x, pl.dir.y, pl.dir.z, &rc);
+
+        /* tool use */
+        if (pl.use_tool && rc.hit && t) {
+            t->use(&rc);
+        }
+
+        /* interact with ents */
+        entity *hit_ent = phys_raycast(pl.eye.x, pl.eye.y, pl.eye.z,
+                                       pl.dir.x, pl.dir.y, pl.dir.z,
+                                       2 /* dist */, phy->ghostObj, phy->dynamicsWorld);
+
+        if (hit_ent != use_entity) {
+            use_entity = hit_ent;
+            pl.ui_dirty = true;
+        }
+
+        if (pl.use && hit_ent) {
+            hit_ent->use();
+        }
+
+        /* tool preview */
+        if (rc.hit && t) {
+            t->preview(&rc);
+        }
+    }
+
+    void handle_input() {
+        /* look */
+        auto look_x     = en_settings.bindings.bindings[action_look_x].value;
+        auto look_y     = en_settings.bindings.bindings[action_look_y].value;
+
+        /* movement */
+        auto moveX      = en_settings.bindings.bindings[action_right].active - en_settings.bindings.bindings[action_left].active;
+        auto moveY      = en_settings.bindings.bindings[action_forward].active - en_settings.bindings.bindings[action_back].active;
+
+        /* crouch */
+        auto crouch     = en_settings.bindings.bindings[action_crouch].active;
+        auto crouch_end = en_settings.bindings.bindings[action_crouch].just_inactive;
+
+        /* momentary */
+        auto jump       = en_settings.bindings.bindings[action_jump].just_active;
+        auto reset      = en_settings.bindings.bindings[action_reset].just_active;
+        auto use        = en_settings.bindings.bindings[action_use].just_active;
+        auto slot1      = en_settings.bindings.bindings[action_slot1].just_active;
+        auto slot2      = en_settings.bindings.bindings[action_slot2].just_active;
+        auto slot3      = en_settings.bindings.bindings[action_slot3].just_active;
+        auto slot4      = en_settings.bindings.bindings[action_slot4].just_active;
+        auto slot5      = en_settings.bindings.bindings[action_slot5].just_active;
+        auto slot6      = en_settings.bindings.bindings[action_slot6].just_active;
+        auto slot7      = en_settings.bindings.bindings[action_slot7].just_active;
+        auto slot8      = en_settings.bindings.bindings[action_slot8].just_active;
+        auto slot9      = en_settings.bindings.bindings[action_slot9].just_active;
+        auto gravity    = en_settings.bindings.bindings[action_gravity].just_active;
+        auto use_tool   = en_settings.bindings.bindings[action_use_tool].just_active;
+        auto next_tool  = en_settings.bindings.bindings[action_tool_next].just_active;
+        auto prev_tool  = en_settings.bindings.bindings[action_tool_prev].just_active;
+
+        /* persistent */
+
+        float mouse_invert = en_settings.input.mouse_invert;
+
+        pl.angle += en_settings.input.mouse_x_sensitivity * look_x;
+        pl.elev += en_settings.input.mouse_y_sensitivity * mouse_invert * look_y;
+
+        if (pl.elev < -MOUSE_Y_LIMIT)
+            pl.elev = -MOUSE_Y_LIMIT;
+        if (pl.elev > MOUSE_Y_LIMIT)
+            pl.elev = MOUSE_Y_LIMIT;
+
+        pl.move.x = moveX;
+        pl.move.y = moveY;
+
+        pl.jump       = jump;
+        pl.crouch     = crouch;
+        pl.reset      = reset;
+        pl.crouch_end = crouch_end;
+        pl.use        = use;
+        pl.gravity    = gravity;
+        pl.use_tool   = use_tool;
+
+        if (next_tool) {
+            cycle_slot(cycle_next);
+        }
+        if (prev_tool) {
+            cycle_slot(cycle_prev);
+        }
+
+        if (slot1) set_slot(1);
+        if (slot2) set_slot(2);
+        if (slot3) set_slot(3);
+        if (slot4) set_slot(4);
+        if (slot5) set_slot(5);
+        if (slot6) set_slot(6);
+        if (slot7) set_slot(7);
+        if (slot8) set_slot(8);
+        if (slot9) set_slot(9);
+
+        /* limit to unit vector */
+        float len = glm::length(pl.move);
+        if (len > 0.0f)
+            pl.move = pl.move / len;
+
+        if (en_settings.bindings.bindings[action_menu].just_active) {
+            set_game_state(game_state::create_menu_state());
+        }
+    }
+};
+
+
+game_state *game_state::create_play_state() { return new play_state; }
+
+
+struct menu_state : game_state
+{
+    void update()
+    {
+    }
+
+    void rebuild_ui()
+    {
+    }
+
+    void handle_input()
+    {
+        /* TODO: act on menu selection; for now, the only item is to quit */
+        if (en_settings.bindings.bindings[action_menu_confirm].just_active) {
+            exit_requested = true;
+        }
+
+        if (en_settings.bindings.bindings[action_menu].just_active) {
+            set_game_state(game_state::create_play_state());
+        }
+    }
+};
+
+
+game_state *game_state::create_menu_state() { return new menu_state; }
+
+
 void
 handle_input()
 {
     set_inputs(keys, mouse_buttons, mouse_axes, en_settings.bindings.bindings);
-
-    if (en_settings.bindings.bindings[action_menu].active)
-        pl.menu_requested = true;
-
-    /* look */
-    auto look_x     = en_settings.bindings.bindings[action_look_x].value;
-    auto look_y     = en_settings.bindings.bindings[action_look_y].value;
-
-    /* movement */
-    auto moveX      = en_settings.bindings.bindings[action_right].active - en_settings.bindings.bindings[action_left].active;
-    auto moveY      = en_settings.bindings.bindings[action_forward].active - en_settings.bindings.bindings[action_back].active;
-
-    /* crouch */
-    auto crouch     = en_settings.bindings.bindings[action_crouch].active;
-    auto crouch_end = en_settings.bindings.bindings[action_crouch].just_inactive;
-
-    /* momentary */
-    auto jump       = en_settings.bindings.bindings[action_jump].just_active;
-    auto reset      = en_settings.bindings.bindings[action_reset].just_active;
-    auto use        = en_settings.bindings.bindings[action_use].just_active;
-    auto slot1      = en_settings.bindings.bindings[action_slot1].just_active;
-    auto slot2      = en_settings.bindings.bindings[action_slot2].just_active;
-    auto slot3      = en_settings.bindings.bindings[action_slot3].just_active;
-    auto slot4      = en_settings.bindings.bindings[action_slot4].just_active;
-    auto slot5      = en_settings.bindings.bindings[action_slot5].just_active;
-    auto slot6      = en_settings.bindings.bindings[action_slot6].just_active;
-    auto slot7      = en_settings.bindings.bindings[action_slot7].just_active;
-    auto slot8      = en_settings.bindings.bindings[action_slot8].just_active;
-    auto slot9      = en_settings.bindings.bindings[action_slot9].just_active;
-    auto gravity    = en_settings.bindings.bindings[action_gravity].just_active;
-    auto use_tool   = en_settings.bindings.bindings[action_use_tool].just_active;
-    auto next_tool  = en_settings.bindings.bindings[action_tool_next].just_active;
-    auto prev_tool  = en_settings.bindings.bindings[action_tool_prev].just_active;
-
-    /* persistent */
-
-    float mouse_invert = en_settings.input.mouse_invert;
-
-
-    pl.angle += en_settings.input.mouse_x_sensitivity * look_x;
-    pl.elev += en_settings.input.mouse_y_sensitivity * mouse_invert * look_y;
-
-    if (pl.elev < -MOUSE_Y_LIMIT)
-        pl.elev = -MOUSE_Y_LIMIT;
-    if (pl.elev > MOUSE_Y_LIMIT)
-        pl.elev = MOUSE_Y_LIMIT;
-
-    pl.move.x = moveX;
-    pl.move.y = moveY;
-
-    pl.jump       = jump;
-    pl.crouch     = crouch;
-    pl.reset      = reset;
-    pl.crouch_end = crouch_end;
-    pl.use        = use;
-    pl.gravity    = gravity;
-    pl.use_tool   = use_tool;
-
-    if (next_tool) {
-        cycle_slot(cycle_next);
-    }
-    if (prev_tool) {
-        cycle_slot(cycle_prev);
-    }
-
-    if (slot1) set_slot(1);
-    if (slot2) set_slot(2);
-    if (slot3) set_slot(3);
-    if (slot4) set_slot(4);
-    if (slot5) set_slot(5);
-    if (slot6) set_slot(6);
-    if (slot7) set_slot(7);
-    if (slot8) set_slot(8);
-    if (slot9) set_slot(9);
-
-    /* limit to unit vector */
-    float len = glm::length(pl.move);
-    if (len > 0.0f)
-        pl.move = pl.move / len;
+    state->handle_input();
 }
 
 

@@ -27,8 +27,6 @@ struct player {
 
     bool use_tool;
 
-    bool menu_requested = false;
-
     bool ui_dirty;
 
     /* used within physics to toggle gravity */
