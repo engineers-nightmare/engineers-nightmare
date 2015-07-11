@@ -1183,39 +1183,6 @@ update()
 }
 
 
-void
-set_slot(int slot)
-{
-    pl.selected_slot = slot;
-    pl.ui_dirty = true;
-}
-
-void
-cycle_slot(slot_cycle_direction direction)
-{
-    auto num_tools = sizeof(tools) / sizeof(tools[0]);
-    unsigned int cur_slot = pl.selected_slot;
-    if (direction == cycle_next) {
-        cur_slot++;
-        if (cur_slot >= num_tools) {
-            cur_slot = 0;
-        }
-    }
-    else if (direction == cycle_prev) {
-        cur_slot--;
-        /* since cur_slot is unsigned wrap around
-         * behavior is defined
-         */
-        if (cur_slot >= num_tools ) {
-            cur_slot = num_tools - 1;
-        }
-    }
-
-    pl.selected_slot = cur_slot;
-    pl.ui_dirty = true;
-}
-
-
 struct play_state : game_state {
 
     void rebuild_ui() {
@@ -1285,6 +1252,36 @@ struct play_state : game_state {
         if (rc.hit && t) {
             t->preview(&rc);
         }
+    }
+
+    void set_slot(int slot)
+    {
+        pl.selected_slot = slot;
+        pl.ui_dirty = true;
+    }
+
+    void cycle_slot(slot_cycle_direction direction)
+    {
+        auto num_tools = sizeof(tools) / sizeof(tools[0]);
+        unsigned int cur_slot = pl.selected_slot;
+        if (direction == cycle_next) {
+            cur_slot++;
+            if (cur_slot >= num_tools) {
+                cur_slot = 0;
+            }
+        }
+        else if (direction == cycle_prev) {
+            cur_slot--;
+            /* since cur_slot is unsigned wrap around
+             * behavior is defined
+             */
+            if (cur_slot >= num_tools ) {
+                cur_slot = num_tools - 1;
+            }
+        }
+
+        pl.selected_slot = cur_slot;
+        pl.ui_dirty = true;
     }
 
     void handle_input() {
