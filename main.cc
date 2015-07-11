@@ -858,62 +858,58 @@ struct add_block_entity_tool : public tool
 
     add_block_entity_tool(entity_type *type) : type(type) {}
 
-    virtual void use(raycast_info *rc)
-    {
-        if (rc->inside) return; /* n/a */
+    bool can_use(raycast_info *rc) {
+        if (rc->inside)
+            return false; /* n/a */
 
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         if (bl) {
+            /* check for surface ents that would conflict */
             for (int face = 0; face < face_count; face++)
                 if (bl->surf_space[face])
-                    return;
+                    return false;
         }
 
-        /* can only build on the side of an existing scaffold */
-        if (bl && rc->block->type == block_support) {
-            bl->type = block_entity;
-            /* dirty the chunk -- TODO: do we really have to do this when changing a cell from
-             * empty -> entity? */
-            ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
-        }
+        /* block ents can only be placed in empty space, on a scaffold */
+        return bl && rc->block->type == block_support;
+    }
 
-        /* TODO: flesh this out a bit */
-        ship->get_chunk_containing(rc->px, rc->py, rc->pz)->entities.push_back(
+    virtual void use(raycast_info *rc)
+    {
+        if (!can_use(rc))
+            return;
+
+        /* dirty the chunk -- TODO: do we really have to do this when changing a cell from
+         * empty -> entity? */
+        chunk *ch = ship->get_chunk_containing(rc->px, rc->py, rc->pz);
+        ch->render_chunk.valid = false;
+        ch->entities.push_back(
             new entity(rc->px, rc->py, rc->pz, type, surface_zm)
             );
 
-        if (bl) {
-            /* consume ALL the space on the surfaces */
-            for (int face = 0; face < face_count; face++)
-                bl->surf_space[face] = ~0;
-        }
+        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
+        bl->type = block_entity;
+
+        /* consume ALL the space on the surfaces */
+        for (int face = 0; face < face_count; face++)
+            bl->surf_space[face] = ~0;
     }
 
     virtual void preview(raycast_info *rc)
     {
-        if (rc->inside) return; /* n/a */
+        if (!can_use(rc))
+            return;
 
-        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
+        per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
+        per_object->upload();
 
-        if (bl) {
-            for (int face = 0; face < face_count; face++)
-                if (bl->surf_space[face])
-                    return;
-        }
+        draw_mesh(type->hw);
 
-        /* frobnicator can only be placed in empty space, on a scaffold */
-        if (bl && rc->block->type == block_support) {
-            per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
-            per_object->upload();
-
-            draw_mesh(type->hw);
-
-            /* draw a block overlay as well around the frobnicator */
-            glUseProgram(add_overlay_shader);
-            draw_mesh(scaffold_hw);
-            glUseProgram(simple_shader);
-        }
+        /* draw a block overlay as well around the frobnicator */
+        glUseProgram(add_overlay_shader);
+        draw_mesh(scaffold_hw);
+        glUseProgram(simple_shader);
     }
 
     virtual void get_description(char *str)
