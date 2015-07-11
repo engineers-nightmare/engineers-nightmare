@@ -1381,6 +1381,27 @@ struct menu_state : game_state
 
     void rebuild_ui()
     {
+        float w = 0;
+        float h = 0;
+        char buf[256];
+
+        sprintf(buf, "Engineer's Nightmare");
+        text->measure(buf, &w, &h);
+        add_text_with_outline(buf, -w/2, 300);
+
+        w = 0;
+        h = 0;
+
+        sprintf(buf, "Resume Game");
+        text->measure(buf, &w, &h);
+        add_text_with_outline(buf, -w/2, 50);
+
+        w = 0;
+        h = 0;
+
+        sprintf(buf, "> Exit Game <");
+        text->measure(buf, &w, &h);
+        add_text_with_outline(buf, -w/2, -50);
     }
 
     void handle_input()
