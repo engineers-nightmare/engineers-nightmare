@@ -1160,7 +1160,9 @@ update()
     /* draw the sky */
     glUseProgram(sky_shader);
     skybox->bind(0);
+    glDepthMask(GL_FALSE);
     glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDepthMask(GL_TRUE);
 
 
     if (pl.ui_dirty) {
