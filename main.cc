@@ -1170,9 +1170,6 @@ update()
         pl.ui_dirty = false;
     }
 
-
-    text->upload();
-
     glDisable(GL_DEPTH_TEST);
 
     glUseProgram(ui_shader);
