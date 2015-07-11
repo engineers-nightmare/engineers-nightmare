@@ -1374,7 +1374,7 @@ game_state *game_state::create_play_state() { return new play_state; }
 
 struct menu_state : game_state
 {
-    int selected = 1;
+    int selected = 0;
 
     void update()
     {
@@ -1415,9 +1415,15 @@ struct menu_state : game_state
 
     void handle_input()
     {
-        /* TODO: act on menu selection; for now, the only item is to quit */
         if (en_settings.bindings.bindings[action_menu_confirm].just_active) {
-            exit_requested = true;
+            switch (selected) {
+            case 0:
+                set_game_state(game_state::create_play_state());
+                break;
+            case 1:
+                exit_requested = true;
+                break;
+            }
         }
 
         if (en_settings.bindings.bindings[action_menu_down].just_active) {
