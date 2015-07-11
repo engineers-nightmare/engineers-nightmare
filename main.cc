@@ -1369,11 +1369,17 @@ struct play_state : game_state {
 game_state *game_state::create_play_state() { return new play_state; }
 
 
-#define NUM_MENU_ITEMS 2
-
 struct menu_state : game_state
 {
+    typedef void item_handler(void);
+    typedef std::pair<char const *, item_handler *> menu_item;
+    std::vector<menu_item> items;
     int selected = 0;
+
+    menu_state() : items() {
+        items.push_back(menu_item("Resume Game", []{ set_game_state(game_state::create_play_state()); }));
+        items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
+    }
 
     void update()
     {
@@ -1397,41 +1403,32 @@ struct menu_state : game_state
         text->measure(buf, &w, &h);
         add_text_with_outline(buf, -w/2, 300);
 
-        w = 0;
-        h = 0;
+        float y = 50;
+        float dy = -100;
 
-        put_item_text(buf, "Resume Game", 0);
-        text->measure(buf, &w, &h);
-        add_text_with_outline(buf, -w/2, 50);
-
-        w = 0;
-        h = 0;
-
-        put_item_text(buf, "Exit Game", 1);
-        text->measure(buf, &w, &h);
-        add_text_with_outline(buf, -w/2, -50);
+        for (auto it = items.begin(); it != items.end(); it++) {
+            w = 0;
+            h = 0;
+            put_item_text(buf, it->first, it - items.begin());
+            text->measure(buf, &w, &h);
+            add_text_with_outline(buf, -w/2, y);
+            y += dy;
+        }
     }
 
     void handle_input()
     {
         if (en_settings.bindings.bindings[action_menu_confirm].just_active) {
-            switch (selected) {
-            case 0:
-                set_game_state(game_state::create_play_state());
-                break;
-            case 1:
-                exit_requested = true;
-                break;
-            }
+            items[selected].second();
         }
 
         if (en_settings.bindings.bindings[action_menu_down].just_active) {
-            selected = (selected + 1) % NUM_MENU_ITEMS;
+            selected = (selected + 1) % items.size();
             pl.ui_dirty = true;
         }
 
         if (en_settings.bindings.bindings[action_menu_up].just_active) {
-            selected = (selected + NUM_MENU_ITEMS - 1) % NUM_MENU_ITEMS;
+            selected = (selected + items.size() - 1) % items.size();
             pl.ui_dirty = true;
         }
 
