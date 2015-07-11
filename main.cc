@@ -925,22 +925,35 @@ struct add_surface_entity_tool : public tool
 
     add_surface_entity_tool(entity_type *type) : type(type) {}
 
-    virtual void use(raycast_info *rc)
+    bool can_use(raycast_info *rc)
     {
         block *bl = rc->block;
 
         int index = normal_to_surface_index(rc);
 
         if (bl->surfs[index] == surface_none)
-            return;
+            return false;
 
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
         unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
 
         if (other_side->surf_space[index ^ 1] & required_space) {
             /* no room on the surface */
-            return;
+            return false;
         }
+
+        return true;
+    }
+
+    virtual void use(raycast_info *rc)
+    {
+        if (!can_use(rc))
+            return;
+
+        int index = normal_to_surface_index(rc);
+
+        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
+        unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
 
         chunk *ch = ship->get_chunk_containing(rc->px, rc->py, rc->pz);
         /* the chunk we're placing into is guaranteed to exist, because there's
@@ -959,21 +972,10 @@ struct add_surface_entity_tool : public tool
 
     virtual void preview(raycast_info *rc)
     {
-        block *bl = rc->block;
+        if (!can_use(rc))
+            return;
 
         int index = normal_to_surface_index(rc);
-
-        if (bl->surfs[index] == surface_none)
-            return;
-
-        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
-
-        unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
-
-        if (other_side->surf_space[index ^ 1] & required_space) {
-            /* no room on the surface */
-            return;
-        }
 
         per_object->val.world_matrix = mat_block_face(rc->px, rc->py, rc->pz, index ^ 1);
         per_object->upload();
