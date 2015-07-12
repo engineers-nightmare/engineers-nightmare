@@ -1,5 +1,6 @@
 #pragma once
 
+#include "block.h"
 
 struct raycast_info;
 
@@ -12,4 +13,5 @@ struct tool
 
     static tool *create_add_block_tool();
     static tool *create_remove_block_tool();
+    static tool *create_add_surface_tool(surface_type s);
 };
