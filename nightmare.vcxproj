@@ -170,6 +170,10 @@ copy /y $(SolutionDir)..\sdl2_image\lib\x86\*.dll $(OutputPath)</Command>
     <ClCompile Include="src\ship_space.cc" />
     <ClCompile Include="src\text.cc" />
     <ClCompile Include="src\textureset.cc" />
+    <ClCompile Include="src\tools\add_block.cc" />
+    <ClCompile Include="src\tools\add_surface.cc" />
+    <ClCompile Include="src\tools\remove_block.cc" />
+    <ClCompile Include="src\tools\remove_surface.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h" />
@@ -189,6 +193,7 @@ copy /y $(SolutionDir)..\sdl2_image\lib\x86\*.dll $(OutputPath)</Command>
     <ClInclude Include="src\ship_space.h" />
     <ClInclude Include="src\text.h" />
     <ClInclude Include="src\textureset.h" />
+    <ClInclude Include="src\tools.h" />
     <ClInclude Include="src\winunistd.h" />
     <ClInclude Include="winerr.h" />
   </ItemGroup>

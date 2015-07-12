@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\tools">
+      <UniqueIdentifier>{f13d420f-690b-4f89-976d-7d2348605b64}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\blob.cc">
@@ -56,6 +59,18 @@
     </ClCompile>
     <ClCompile Include="src\settings.cc">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tools\add_block.cc">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tools\add_surface.cc">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tools\remove_block.cc">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tools\remove_surface.cc">
+      <Filter>Source Files\tools</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -114,6 +129,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
