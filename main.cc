@@ -1180,6 +1180,11 @@ update()
 }
 
 
+action const* get_input(en_action a) {
+    return &en_settings.bindings.bindings[a];
+}
+
+
 struct play_state : game_state {
 
     void rebuild_ui() {
@@ -1269,34 +1274,34 @@ struct play_state : game_state {
 
     void handle_input() {
         /* look */
-        auto look_x     = en_settings.bindings.bindings[action_look_x].value;
-        auto look_y     = en_settings.bindings.bindings[action_look_y].value;
+        auto look_x     = get_input(action_look_x)->value;
+        auto look_y     = get_input(action_look_y)->value;
 
         /* movement */
-        auto moveX      = en_settings.bindings.bindings[action_right].active - en_settings.bindings.bindings[action_left].active;
-        auto moveY      = en_settings.bindings.bindings[action_forward].active - en_settings.bindings.bindings[action_back].active;
+        auto moveX      = get_input(action_right)->active - get_input(action_left)->active;
+        auto moveY      = get_input(action_forward)->active - get_input(action_back)->active;
 
         /* crouch */
-        auto crouch     = en_settings.bindings.bindings[action_crouch].active;
-        auto crouch_end = en_settings.bindings.bindings[action_crouch].just_inactive;
+        auto crouch     = get_input(action_crouch)->active;
+        auto crouch_end = get_input(action_crouch)->just_inactive;
 
         /* momentary */
-        auto jump       = en_settings.bindings.bindings[action_jump].just_active;
-        auto reset      = en_settings.bindings.bindings[action_reset].just_active;
-        auto use        = en_settings.bindings.bindings[action_use].just_active;
-        auto slot1      = en_settings.bindings.bindings[action_slot1].just_active;
-        auto slot2      = en_settings.bindings.bindings[action_slot2].just_active;
-        auto slot3      = en_settings.bindings.bindings[action_slot3].just_active;
-        auto slot4      = en_settings.bindings.bindings[action_slot4].just_active;
-        auto slot5      = en_settings.bindings.bindings[action_slot5].just_active;
-        auto slot6      = en_settings.bindings.bindings[action_slot6].just_active;
-        auto slot7      = en_settings.bindings.bindings[action_slot7].just_active;
-        auto slot8      = en_settings.bindings.bindings[action_slot8].just_active;
-        auto slot9      = en_settings.bindings.bindings[action_slot9].just_active;
-        auto gravity    = en_settings.bindings.bindings[action_gravity].just_active;
-        auto use_tool   = en_settings.bindings.bindings[action_use_tool].just_active;
-        auto next_tool  = en_settings.bindings.bindings[action_tool_next].just_active;
-        auto prev_tool  = en_settings.bindings.bindings[action_tool_prev].just_active;
+        auto jump       = get_input(action_jump)->just_active;
+        auto reset      = get_input(action_reset)->just_active;
+        auto use        = get_input(action_use)->just_active;
+        auto slot1      = get_input(action_slot1)->just_active;
+        auto slot2      = get_input(action_slot2)->just_active;
+        auto slot3      = get_input(action_slot3)->just_active;
+        auto slot4      = get_input(action_slot4)->just_active;
+        auto slot5      = get_input(action_slot5)->just_active;
+        auto slot6      = get_input(action_slot6)->just_active;
+        auto slot7      = get_input(action_slot7)->just_active;
+        auto slot8      = get_input(action_slot8)->just_active;
+        auto slot9      = get_input(action_slot9)->just_active;
+        auto gravity    = get_input(action_gravity)->just_active;
+        auto use_tool   = get_input(action_use_tool)->just_active;
+        auto next_tool  = get_input(action_tool_next)->just_active;
+        auto prev_tool  = get_input(action_tool_prev)->just_active;
 
         /* persistent */
 
@@ -1343,7 +1348,7 @@ struct play_state : game_state {
         if (len > 0.0f)
             pl.move = pl.move / len;
 
-        if (en_settings.bindings.bindings[action_menu].just_active) {
+        if (get_input(action_menu)->just_active) {
             set_game_state(game_state::create_menu_state());
         }
     }
@@ -1402,21 +1407,21 @@ struct menu_state : game_state
 
     void handle_input()
     {
-        if (en_settings.bindings.bindings[action_menu_confirm].just_active) {
+        if (get_input(action_menu_confirm)->just_active) {
             items[selected].second();
         }
 
-        if (en_settings.bindings.bindings[action_menu_down].just_active) {
+        if (get_input(action_menu_down)->just_active) {
             selected = (selected + 1) % items.size();
             pl.ui_dirty = true;
         }
 
-        if (en_settings.bindings.bindings[action_menu_up].just_active) {
+        if (get_input(action_menu_up)->just_active) {
             selected = (selected + items.size() - 1) % items.size();
             pl.ui_dirty = true;
         }
 
-        if (en_settings.bindings.bindings[action_menu].just_active) {
+        if (get_input(action_menu)->just_active) {
             set_game_state(game_state::create_play_state());
         }
     }
