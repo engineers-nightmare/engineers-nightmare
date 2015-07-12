@@ -25,9 +25,6 @@ struct render_chunk {
 };
 
 struct chunk {
-    /* create an empty chunk */
-    chunk();
-
     /* with a CHUNK_SIZE of 8
      * we have 8^3 blocks
      * this means a chunk represents
@@ -40,8 +37,6 @@ struct chunk {
 
     /* entities */
     std::vector<entity *> entities;
-
-    block * get_block(unsigned int x, unsigned int y, unsigned int z);
 
     void prepare_render(int _x, int _y, int _z);
 };

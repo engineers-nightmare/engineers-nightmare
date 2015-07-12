@@ -86,7 +86,7 @@ ship_space::get_block(int block_x, int block_y, int block_z)
         return 0;
     }
 
-    return c->get_block(wb_x, wb_y, wb_z);
+    return c->blocks.get(wb_x, wb_y, wb_z);
 }
 
 /* returns the chunk containing the block denotated by (x, y, z)
