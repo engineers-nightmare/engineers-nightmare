@@ -24,6 +24,12 @@ struct render_chunk {
     btRigidBody *phys_body = NULL;
 };
 
+struct topo_info {
+    topo_info *p;
+    int rank;
+    int size;   /* if p==this, then the number of blocks in this cc */
+};
+
 struct chunk {
     /* with a CHUNK_SIZE of 8
      * we have 8^3 blocks
@@ -31,6 +37,7 @@ struct chunk {
      * 8m^3
      */
     fixed_cube<block, CHUNK_SIZE> blocks;
+    fixed_cube<topo_info, CHUNK_SIZE> topo;
 
     /* rendering information */
     struct render_chunk render_chunk;

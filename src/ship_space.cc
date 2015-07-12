@@ -89,6 +89,31 @@ ship_space::get_block(int block_x, int block_y, int block_z)
     return c->blocks.get(wb_x, wb_y, wb_z);
 }
 
+/* returns a topo_info or null
+ * finds the topo_info at the position (x,y,z) within
+ * the whole ship_space
+ * will move across chunks
+ */
+topo_info *
+ship_space::get_topo_info(int block_x, int block_y, int block_z)
+{
+    /* Within Block coordinates */
+    int wb_x, wb_y, wb_z;
+    int chunk_x, chunk_y, chunk_z;
+
+    split_coord(block_x, &wb_x, &chunk_x);
+    split_coord(block_y, &wb_y, &chunk_y);
+    split_coord(block_z, &wb_z, &chunk_z);
+
+    chunk *c = this->get_chunk(chunk_x, chunk_y, chunk_z);
+
+    if (!c) {
+        return &this->outside_topo_info;
+    }
+
+    return c->topo.get(wb_x, wb_y, wb_z);
+}
+
 /* returns the chunk containing the block denotated by (x, y, z)
  * or null
  */
@@ -754,4 +779,103 @@ ship_space::_maintain_bounds(int x_seen, int y_seen, int z_seen)
     this->max_z = std::max(max_z, z_seen);
 }
 
+topo_info *
+topo_find(topo_info *p)
+{
+    /* compress path */
+    if (p->p != p) {
+        p->p = topo_find(p->p);
+    }
 
+    return p->p;
+}
+
+/* helper to unify subtrees */
+static void
+topo_unite(topo_info *from, topo_info *to)
+{
+    from = topo_find(from);
+    to = topo_find(to);
+
+    /* already in same subtee? */
+    if (from == to) return;
+
+    if (from->rank < to->rank) {
+        from->p = to;
+    } else if (from->rank > to->rank) {
+        to->p = from;
+    } else {
+        /* merging two rank-r subtrees produces a rank-r+1 subtree. */
+        to->p = from;
+        from->rank++;
+    }
+}
+
+static glm::ivec3 dirs[] = {
+    glm::ivec3(1, 0, 0),
+    glm::ivec3(-1, 0, 0),
+    glm::ivec3(0, 1, 0),
+    glm::ivec3(0, -1, 0),
+    glm::ivec3(0, 0, 1),
+    glm::ivec3(0, 0, -1),
+};
+
+/* rebuild the ship topology. this is generally not the optimal thing -
+ * we can dynamically rebuild parts of the topology cheaper based on
+ * knowing the change that was made.
+ */
+void
+ship_space::rebuild_topology()
+{
+    /* 1/ initially, every block is its own subtree */
+    for (auto it = chunks.begin(); it != chunks.end(); it++) {
+        for (int z = 0; z < CHUNK_SIZE; z++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                for (int x = 0; x < CHUNK_SIZE; x++) {
+                    topo_info *t = it->second->topo.get(x, y, z);
+                    t->p = t;
+                    t->rank = 0;
+                    t->size = 0;
+                }
+            }
+        }
+    }
+
+    this->outside_topo_info.p = &this->outside_topo_info;
+    this->outside_topo_info.rank = 0;
+    this->outside_topo_info.size = 0;
+
+    /* 2/ combine across air-permeable interfaces */
+    for (auto it = chunks.begin(); it != chunks.end(); it++) {
+        for (int z = 0; z < CHUNK_SIZE; z++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                for (int x = 0; x < CHUNK_SIZE; x++) {
+                    block *bl = it->second->blocks.get(x, y, z);
+
+                    /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                    for (int i = 0; i < 6; i++) {
+                        if (bl->surfs[i] != surface_wall) {
+                            glm::ivec3 offset = dirs[i];
+                            topo_unite(it->second->topo.get(x, y, z),
+                                  get_topo_info(CHUNK_SIZE * it->first.x + x + offset.x,
+                                                CHUNK_SIZE * it->first.y + y + offset.y,
+                                                CHUNK_SIZE * it->first.z + z + offset.z));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /* 3/ finalize, and accumulate sizes */
+    for (auto it = chunks.begin(); it != chunks.end(); it++) {
+        for (int z = 0; z < CHUNK_SIZE; z++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                for (int x = 0; x < CHUNK_SIZE; x++) {
+                    topo_info *t = topo_find(it->second->topo.get(x, y, z));
+                    t->size++;
+                }
+            }
+        }
+    }
+}
