@@ -1085,9 +1085,8 @@ add_text_with_outline(char const *s, float x, float y)
 void
 update()
 {
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClearDepth(1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    float depthClearValue = 1.0f;
+    glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
 
     pl.dir = glm::vec3(
             cosf(pl.angle) * cosf(pl.elev),
