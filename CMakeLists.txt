@@ -11,7 +11,7 @@ add_executable(nightmare main.cc)
 # here we compile all of src/*.cc into one library
 # this is used below to link both to our main executable
 # as well as to link to each of our tests
-file(GLOB SOURCE src/*.cc)
+file(GLOB SOURCE src/*.cc src/**/*.cc)
 add_library(NIGHTMARE ${SOURCE})
 
 include(FindPkgConfig)

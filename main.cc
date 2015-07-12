@@ -26,6 +26,9 @@
 #include "src/ship_space.h"
 #include "src/text.h"
 #include "src/textureset.h"
+#include "src/tools.h"
+#include "src/shader_params.h"
+#include "src/light_field.h"
 
 
 #define APP_NAME    "Engineer's Nightmare"
@@ -50,81 +53,6 @@ struct wnd {
     int width;
     int height;
 } wnd;
-
-/* where T is std140-conforming, and agrees with the shader. */
-template<typename T>
-struct shader_params
-{
-    T val;
-    GLuint bo;
-
-    shader_params() : bo(0)
-    {
-        glGenBuffers(1, &bo);
-        glBindBuffer(GL_UNIFORM_BUFFER, bo);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(T), NULL, GL_DYNAMIC_DRAW);
-    }
-
-    ~shader_params() {
-        glDeleteBuffers(1, &bo);
-    }
-
-    void upload() {
-        /* bind to nonindexed binding point */
-        glBindBuffer(GL_UNIFORM_BUFFER, bo);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(T), &val);
-    }
-
-    void bind(GLuint index) {
-        /* bind to proper index of indexed binding point, for use */
-        glBindBufferBase(GL_UNIFORM_BUFFER, index, bo);
-    }
-};
-
-
-struct per_camera_params {
-    glm::mat4 view_proj_matrix;
-    glm::mat4 inv_centered_view_proj_matrix;
-};
-
-struct per_object_params {
-    glm::mat4 world_matrix;
-};
-
-
-struct light_field {
-    GLuint texobj;
-    unsigned char data[128*128*128];
-
-    light_field() : texobj(0) {
-        glGenTextures(1, &texobj);
-        glBindTexture(GL_TEXTURE_3D, texobj);
-        glTexStorage3D(GL_TEXTURE_3D, 1, GL_R8, 128, 128, 128);
-    }
-
-    void bind(int texunit)
-    {
-        glActiveTexture(GL_TEXTURE0 + texunit);
-        glBindTexture(GL_TEXTURE_3D, texobj);
-    }
-
-    void upload()
-    {
-        /* TODO: toroidal addressing + partial updates, to make these uploads VERY small */
-        /* TODO: experiment with buffer texture rather than 3D, so we can have the light field
-         * persistently mapped in our address space */
-
-        /* DSA would be nice -- for now, we'll just disturb the tex0 binding */
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_3D, texobj);
-
-        glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0,
-                        128, 128, 128,
-                        GL_RED,
-                        GL_UNSIGNED_BYTE,
-                        data);
-    }
-};
 
 
 void GLAPIENTRY
@@ -552,58 +480,6 @@ surface_index_to_normal(int index, int *nx, int *ny, int *nz)
         case 5: *nz = -1; break;
     }
 }
-
-
-struct tool
-{
-    virtual void use(raycast_info *rc) = 0;
-    virtual void preview(raycast_info *rc) = 0;
-    virtual void get_description(char *str) = 0;
-};
-
-
-struct add_block_tool : public tool
-{
-    virtual void use(raycast_info *rc)
-    {
-        if (rc->inside) return; /* n/a */
-
-        /* ensure we can access this x,y,z */
-        ship->ensure_block(rc->px, rc->py, rc->pz);
-
-        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
-
-        /* can only build on the side of an existing scaffold */
-        if (bl && rc->block->type == block_support) {
-            bl->type = block_support;
-            /* dirty the chunk */
-            ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
-            mark_lightfield_update(rc->px, rc->py, rc->pz);
-        }
-    }
-
-    virtual void preview(raycast_info *rc)
-    {
-        if (rc->inside) return; /* n/a */
-
-        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
-
-        /* can only build on the side of an existing scaffold */
-        if ((!bl || bl->type == block_empty) && rc->block->type == block_support) {
-            per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
-            per_object->upload();
-
-            glUseProgram(add_overlay_shader);
-            draw_mesh(scaffold_hw);
-            glUseProgram(simple_shader);
-        }
-    }
-
-    virtual void get_description(char *str)
-    {
-        strcpy(str, "Place Scaffolding");
-    }
-};
 
 
 void
@@ -1058,7 +934,7 @@ struct remove_surface_entity_tool : public tool
 
 tool *tools[] = {
     NULL,   /* tool 0 isnt a tool (currently) */
-    new add_block_tool(),
+    tool::create_add_block_tool(),
     new remove_block_tool(),
     new add_surface_tool(surface_wall),
     new add_surface_tool(surface_grate),
