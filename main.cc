@@ -482,71 +482,6 @@ remove_ents_from_surface(int x, int y, int z, int face)
 }
 
 
-struct remove_surface_tool : public tool
-{
-    bool can_use(raycast_info *rc)
-    {
-        block *bl = rc->block;
-        int index = normal_to_surface_index(rc);
-        return bl && bl->surfs[index] != surface_none;
-    }
-
-    virtual void use(raycast_info *rc)
-    {
-        if (!can_use(rc))
-            return;
-
-        block *bl = rc->block;
-
-        int index = normal_to_surface_index(rc);
-
-        bl->surfs[index] = surface_none;
-        ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
-
-        /* cause the other side to exist */
-        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
-
-        if (!other_side) {
-            /* expand: note: we shouldn't ever actually have to do this... */
-        }
-        else {
-            other_side->surfs[index ^ 1] = surface_none;
-            ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
-        }
-
-        /* remove any ents using the surface */
-        remove_ents_from_surface(rc->px, rc->py, rc->pz, index ^ 1);
-        remove_ents_from_surface(rc->x, rc->y, rc->z, index);
-
-        mark_lightfield_update(rc->x, rc->y, rc->z);
-        mark_lightfield_update(rc->px, rc->py, rc->pz);
-    }
-
-    virtual void preview(raycast_info *rc)
-    {
-        if (!can_use(rc))
-            return;
-
-        int index = normal_to_surface_index(rc);
-        per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
-        per_object->upload();
-
-        glUseProgram(remove_overlay_shader);
-        glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-0.1, -0.1);
-        draw_mesh(surfs_hw[index]);
-        glPolygonOffset(0, 0);
-        glDisable(GL_POLYGON_OFFSET_FILL);
-        glUseProgram(simple_shader);
-    }
-
-    virtual void get_description(char *str)
-    {
-        strcpy(str, "Remove surface");
-    }
-};
-
-
 struct add_block_entity_tool : public tool
 {
     entity_type *type;
@@ -757,7 +692,7 @@ tool *tools[] = {
     tool::create_add_surface_tool(surface_wall),
     tool::create_add_surface_tool(surface_grate),
     tool::create_add_surface_tool(surface_text),
-    new remove_surface_tool(),
+    tool::create_remove_surface_tool(),
     new add_block_entity_tool(&entity_types[0]),
     new add_surface_entity_tool(&entity_types[1]),
     new add_surface_entity_tool(&entity_types[2]),
