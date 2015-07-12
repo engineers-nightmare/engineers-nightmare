@@ -84,7 +84,7 @@ struct shader_params
 
 struct per_camera_params {
     glm::mat4 view_proj_matrix;
-    glm::mat4 centered_view_proj_matrix;
+    glm::mat4 inv_centered_view_proj_matrix;
 };
 
 struct per_object_params {
@@ -1102,7 +1102,7 @@ update()
     glm::mat4 view = glm::lookAt(pl.eye, pl.eye + pl.dir, glm::vec3(0, 0, 1));
     glm::mat4 centered_view = glm::lookAt(glm::vec3(0), pl.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
-    per_camera->val.centered_view_proj_matrix = proj * centered_view;
+    per_camera->val.inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
     per_camera->upload();
 
     /* rebuild lighting if needed */
