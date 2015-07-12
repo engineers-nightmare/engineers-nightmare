@@ -41,5 +41,3 @@ struct block {
     surface_type surfs[face_count];
     unsigned short surf_space[face_count];
 };
-
-

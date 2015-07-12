@@ -23,8 +23,6 @@ extern hw_mesh *scaffold_hw;
 extern void
 remove_ents_from_surface(int x, int y, int z, int face);
 
-extern void
-surface_index_to_normal(int index, int *nx, int *ny, int *nz);
 
 struct remove_block_tool : public tool
 {

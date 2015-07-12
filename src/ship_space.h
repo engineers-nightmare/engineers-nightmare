@@ -111,3 +111,31 @@ struct ship_space {
 };
 
 
+static inline int
+normal_to_surface_index(raycast_info const *rc)
+{
+    if (rc->nx == 1) return 0;
+    if (rc->nx == -1) return 1;
+    if (rc->ny == 1) return 2;
+    if (rc->ny == -1) return 3;
+    if (rc->nz == 1) return 4;
+    if (rc->nz == -1) return 5;
+
+    return 0;   /* unreachable */
+}
+
+
+static inline void
+surface_index_to_normal(int index, int *nx, int *ny, int *nz)
+{
+    *nx = *ny = *nz = 0;
+
+    switch (index) {
+        case 0: *nx = 1; break;
+        case 1: *nx = -1; break;
+        case 2: *ny = 1; break;
+        case 3: *ny = -1; break;
+        case 4: *nz = 1; break;
+        case 5: *nz = -1; break;
+    }
+}

@@ -4,6 +4,7 @@
 #include "../ship_space.h"
 #include "../shader_params.h"
 #include "../mesh.h"
+#include "../block.h"
 
 
 extern GLuint add_overlay_shader;
@@ -22,12 +23,6 @@ extern hw_mesh *surfs_hw[6];
 
 extern void
 remove_ents_from_surface(int x, int y, int z, int face);
-
-extern void
-surface_index_to_normal(int index, int *nx, int *ny, int *nz);
-
-extern int
-normal_to_surface_index(raycast_info const *rc);
 
 
 struct add_surface_tool : public tool
