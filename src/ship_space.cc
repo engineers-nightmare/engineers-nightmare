@@ -308,7 +308,7 @@ ship_space::mock_ship_space(void)
                     b4->type = block_support;
 
                     /* add surfaces to outside */
-                    b1->surfs[surface_zp] = surface_wall
+                    b1->surfs[surface_zp] = surface_wall;
                     sn1(surface_zp, surface_wall);
                     b2->surfs[surface_zp] = surface_wall;
                     sn2(surface_zp, surface_wall);
@@ -406,6 +406,8 @@ ship_space::mock_ship_space(void)
      *  3 -> 4
      *
      *  FIXME we also want to add a light in each chunk
+     *
+     *  FIXME for each surface we remove below we must also remove the adjacent facing surface
      */
 
     {
