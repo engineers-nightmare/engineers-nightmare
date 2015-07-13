@@ -297,6 +297,31 @@ ship_space::mock_ship_space(void)
                     b4->surfs[surface_zm] = surface_wall;
                     sn4(surface_zm, surface_wall);
 
+                } else if( z == 7 ){
+                    /* the roof */
+                    b1->type = block_support;
+                    b2->type = block_support;
+                    b3->type = block_support;
+                    b4->type = block_support;
+
+                    b1->surfs[surface_zp] = surface_wall
+                    sn1(surface_zp, surface_wall);
+                    b2->surfs[surface_zp] = surface_wall;
+                    sn2(surface_zp, surface_wall);
+                    b3->surfs[surface_zp] = surface_wall;
+                    sn3(surface_zp, surface_wall);
+                    b4->surfs[surface_zp] = surface_wall;
+                    sn4(surface_zp, surface_wall);
+
+                    b1->surfs[surface_zm] = surface_wall;
+                    sn1(surface_zm, surface_wall);
+                    b2->surfs[surface_zm] = surface_wall;
+                    sn2(surface_zm, surface_wall);
+                    b3->surfs[surface_zm] = surface_wall;
+                    sn3(surface_zm, surface_wall);
+                    b4->surfs[surface_zm] = surface_wall;
+                    sn4(surface_zm, surface_wall);
+
                 } else if( y == 0 ){
                     /* we want a 2 height door at x == 3
                      * and a one height door a x == 5
