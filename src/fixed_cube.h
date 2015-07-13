@@ -8,6 +8,8 @@
 #include "winerr.h"
 #endif
 
+#include <assert.h>
+
 #include <stdlib.h> /* calloc, free, realloc */
 #include <stdio.h> /* printf */
 #include <string.h> /* memmove, memset */
@@ -21,6 +23,11 @@
  */
 template <class T, int N>
 struct fixed_cube {
+
+    fixed_cube()
+    {
+        memset(contents, 0, sizeof(contents));
+    }
     /* contents of grid
      * 3d array of T
      *
@@ -38,24 +45,16 @@ struct fixed_cube {
      *
      * will check bounds
      */
-    T * get(unsigned int x, unsigned int y, unsigned int z);
+    T * get(unsigned int x, unsigned int y, unsigned int z)
+    {
+        if( x >= N ||
+            y >= N ||
+            z >= N ){
+            assert(!"out of range");
+            return 0;
+        }
 
-};
-
-template <class T, int N>
-T *
-fixed_cube<T, N>::get(unsigned int x, unsigned int y, unsigned int z)
-{
-    if( x >= N ||
-        y >= N ||
-        z >= N ){
-#if DEBUG
-        printf("fixed_cube::get OUT OF RANGE: x: %u/%u, y: %u/%u, z: %u/%u\n", x, N, y, N, z, N);
-#endif
-        puts("cube get out of range");
-        return 0;
+        return &( contents[x][y][z] );
     }
 
-    return &( contents[x][y][z] );
-}
-
+};

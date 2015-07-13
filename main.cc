@@ -737,6 +737,9 @@ update()
     /* rebuild lighting if needed */
     update_lightfield();
 
+    /* TODO: only do this when needed */
+    ship->rebuild_topology();
+
     world_textures->bind(0);
 
     /* walk all the chunks -- TODO: only walk chunks that might contribute to the view */
@@ -794,7 +797,8 @@ update()
     glDepthMask(GL_TRUE);
 
 
-    if (pl.ui_dirty) {
+    /* HACK: dirty this every frame for now while debugging atmo */
+    if (1 || pl.ui_dirty) {
         text->reset();
         state->rebuild_ui();
         text->upload();
@@ -824,14 +828,16 @@ struct play_state : game_state {
         char buf[256];
         char buf2[512];
 
-        /* Tool name down the bottom */
-        tool *t = tools[pl.selected_slot];
+        {
+            /* Tool name down the bottom */
+            tool *t = tools[pl.selected_slot];
 
-        if (t) {
-            t->get_description(buf);
-        }
-        else {
-            strcpy(buf, "(no tool)");
+            if (t) {
+                t->get_description(buf);
+            }
+            else {
+                strcpy(buf, "(no tool)");
+            }
         }
 
         add_text_with_outline(".", 0, 0);
@@ -852,6 +858,26 @@ struct play_state : game_state {
             w = 0; h = 0;
             text->measure(buf2, &w, &h);
             add_text_with_outline(buf2, -w/2, -200);
+        }
+
+        {
+            /* Atmo status */
+            int plx = pl.eye.x; if (pl.eye.x < 0) plx--;
+            int ply = pl.eye.y; if (pl.eye.y < 0) ply--;
+            int plz = pl.eye.z; if (pl.eye.z < 0) plz--;
+
+            topo_info *t = topo_find(ship->get_topo_info(plx, ply, plz));
+            topo_info *outside = topo_find(&ship->outside_topo_info);
+            if (t != outside) {
+                sprintf(buf2, "[INSIDE %p %d]", t, t->size);
+            }
+            else {
+                sprintf(buf2, "[OUTSIDE %p %d]", t, t->size);
+            }
+
+            w = 0; h = 0;
+            text->measure(buf2, &w, &h);
+            add_text_with_outline(buf2, -w/2, -100);
         }
     }
 

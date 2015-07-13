@@ -53,6 +53,8 @@ struct ship_space {
      */
     block * get_block(int block_x, int block_y, int block_z);
 
+    topo_info * get_topo_info(int block_x, int block_y, int block_z);
+
     /* returns a block
      * finds the block at the position (x,y,z) within
      * the whole ship_space
@@ -108,7 +110,14 @@ struct ship_space {
      */
     void ensure_chunk(int chunk_x, int chunk_y, int chunk_z);
 
+    /* topo info for open vacuum, so we know what pressure to force to zero */
+    topo_info outside_topo_info;
+    void rebuild_topology();
 };
+
+/* helper */
+topo_info *
+topo_find(topo_info *p);
 
 
 static inline int
