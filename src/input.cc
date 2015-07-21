@@ -85,8 +85,6 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
         auto binds = &action->binds;
 
         for (auto &input : binds->inputs) {
-            input_type type = input_type_invalid;
-
             switch (get_input_type(input))
             {
             default:

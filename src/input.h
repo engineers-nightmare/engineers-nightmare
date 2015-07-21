@@ -398,7 +398,7 @@ struct action {
     bool just_active = false;   /* did action go active this frame */
     bool just_inactive = false; /* did action go inactive this frame */
     Uint32 last_active = 0;     /* time of last activation */
-    Uint32 current_active = 0;  /* duration of current activation */
+    Uint32 current_active = 0;  /* duration of current activation (milliseconds) */
 
     action()
     {
