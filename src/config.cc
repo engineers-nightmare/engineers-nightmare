@@ -54,6 +54,109 @@ en_settings::merge_with(en_settings other) {
     bindings.merge_with(other.bindings);
 }
 
+en_settings en_settings::get_delta(en_settings other) {
+    en_settings delta;
+    delta.input    = input.get_delta(other.input);
+    delta.video    = video.get_delta(other.video);
+    delta.bindings = bindings.get_delta(other.bindings);
+
+    return delta;
+}
+
+
+// todo: consolidate save_n_settings into overloads?
+void
+save_settings(en_settings to_save) {
+    en_settings base = load_settings(en_config_base);
+
+    en_settings delta = base.get_delta(to_save);
+
+    save_binding_settings(delta.bindings);
+    save_video_settings(delta.video);
+    save_input_settings(delta.input);
+}
+
+void
+save_binding_settings(binding_settings to_save) {
+    config_t bindings_config;
+    config_setting_t *binds;
+    config_setting_t *root;
+
+    config_init(&bindings_config);
+
+    root = config_root_setting(&bindings_config);
+
+    binds = config_setting_add(root, "binds", CONFIG_TYPE_LIST);
+
+    for (auto &actionPair : to_save.bindings) {
+        auto action = actionPair.first;
+        auto action_string = lookup_input_action(action);
+        auto action_input = actionPair.second;
+
+        if (action == action_invalid) {
+            continue;
+        }
+
+        auto action_entry = config_setting_add(binds, nullptr, CONFIG_TYPE_GROUP);
+
+        auto action_config = config_setting_add(action_entry, "action", CONFIG_TYPE_STRING);
+        config_setting_set_string(action_config, action_string);
+
+        auto inputs_config = config_setting_add(action_entry, "inputs", CONFIG_TYPE_ARRAY);
+        for (auto &bind : action_input.binds.inputs) {
+            auto input = lookup_input(bind);
+            if (bind != input_invalid) {
+                auto bind_entry = config_setting_add(inputs_config, nullptr, CONFIG_TYPE_STRING);
+                config_setting_set_string(bind_entry, input);
+            }
+        }
+    }
+
+    // of course it worked, what could go wrong?
+    config_write_file(&bindings_config, USER_KEYS_CONFIG_PATH);
+
+    config_destroy(&bindings_config);
+}
+
+void
+save_video_settings(video_settings to_save) {
+    //config_write_file(&to_save, USER_VIDEO_CONFIG_PATH);
+}
+
+void
+save_input_settings(input_settings to_save) {
+    config_t input_config;
+    config_setting_t *input;
+    config_setting_t *root;
+
+    config_init(&input_config);
+
+    root = config_root_setting(&input_config);
+
+    input = config_setting_add(root, "input", CONFIG_TYPE_GROUP);
+
+    if (to_save.mouse_invert != INVALID_SETTINGS_FLOAT) {
+        auto invert_config = config_setting_add(input, "mouse_invert", CONFIG_TYPE_FLOAT);
+        config_setting_set_float(invert_config, to_save.mouse_invert);
+    }
+
+    if (to_save.mouse_x_sensitivity != INVALID_SETTINGS_FLOAT) {
+        auto x_sens_config = config_setting_add(input, "mouse_x_sensitivity", CONFIG_TYPE_FLOAT);
+        config_setting_set_float(x_sens_config, to_save.mouse_x_sensitivity);
+    }
+
+    if (to_save.mouse_y_sensitivity != INVALID_SETTINGS_FLOAT) {
+        auto y_sens_config = config_setting_add(input, "mouse_y_sensitivity", CONFIG_TYPE_FLOAT);
+        config_setting_set_float(y_sens_config, to_save.mouse_y_sensitivity);
+    }
+
+    // of course it worked, what could go wrong?
+    config_write_file(&input_config, USER_INPUT_CONFIG_PATH);
+
+    config_destroy(&input_config);
+}
+
+// todo: consolidate load_n_settings into overloads and pass and fill references?
 en_settings
 load_settings(en_config_type config_type) {
     en_settings loaded_settings;

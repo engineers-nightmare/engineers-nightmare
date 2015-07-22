@@ -1102,6 +1102,10 @@ struct menu_settings_state : game_state
             // ^^ Not real keen on requiring these to be static
 
         items.push_back(
+            menu_item("Save Settings", "",
+            []{ save_settings(game_settings); }));
+
+        items.push_back(
             menu_item("Back", "",
             []{ set_game_state(create_menu_state()); }));
     }

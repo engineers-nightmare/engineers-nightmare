@@ -13,7 +13,15 @@
 #define INVALID_SETTINGS_INT INT_MAX
 #define INVALID_SETTINGS_FLOAT FLT_MAX
 
-struct video_settings {
+template <typename T>
+struct settings {
+    virtual ~settings() {}
+
+    virtual void merge_with(T) = 0;
+    virtual T get_delta(T) = 0;
+};
+
+struct video_settings : settings<video_settings> {
     /* render xres */           /* render framebuffer to this size (usually window size) */
     /* render yres */           /* render framebuffer to this size (usually window size) */
     /* framebuffer xres */      /* for super/sub sampling? */
@@ -23,27 +31,31 @@ struct video_settings {
     /* anisotropy */            /* less eye bleed */
     /* antialiasing */          /* SMAA, CSAAS, FXAA, ETCAA*/
 
-    void merge_with(video_settings);
+    void merge_with(video_settings) override;
+    video_settings get_delta(video_settings) override;
 };
 
-struct input_settings {
+struct input_settings : settings<input_settings> {
     float mouse_invert        = INVALID_SETTINGS_FLOAT;
     float mouse_x_sensitivity = INVALID_SETTINGS_FLOAT;
     float mouse_y_sensitivity = INVALID_SETTINGS_FLOAT;
 
-    void merge_with(input_settings);
+    void merge_with(input_settings) override;
+    input_settings get_delta(input_settings) override;
 };
 
-struct binding_settings {
+struct binding_settings : settings<binding_settings> {
     std::unordered_map<en_action, action, std::hash<int>> bindings;
 
-    void merge_with(binding_settings);
+    void merge_with(binding_settings) override;
+    binding_settings get_delta(binding_settings) override;
 };
 
-struct settings {
+struct en_settings : settings<en_settings> {
     video_settings video;
     input_settings input;
     binding_settings bindings;
 
-    void merge_with(settings);
+    void merge_with(en_settings) override;
+    en_settings get_delta(en_settings) override;
 };
