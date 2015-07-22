@@ -48,15 +48,15 @@ const char* get_keys_config_path(en_config_type config_type) {
 }
 
 void
-settings::merge_with(settings other) {
-    this->input.merge_with(other.input);
-    this->video.merge_with(other.video);
-    this->bindings.merge_with(other.bindings);
+en_settings::merge_with(en_settings other) {
+    input.merge_with(other.input);
+    video.merge_with(other.video);
+    bindings.merge_with(other.bindings);
 }
 
-settings
+en_settings
 load_settings(en_config_type config_type) {
-    settings loaded_settings;
+    en_settings loaded_settings;
 
     loaded_settings.input    = load_input_settings(config_type);
     loaded_settings.bindings = load_binding_settings(config_type);

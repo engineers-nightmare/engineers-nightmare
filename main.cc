@@ -45,7 +45,7 @@ bool exit_requested = false;
 
 auto hfov = DEG2RAD(90.f);
 
-settings en_settings;
+en_settings game_settings;
 
 struct wnd {
     SDL_Window *ptr;
@@ -413,9 +413,9 @@ init()
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
 
-    en_settings = load_settings(en_config_base);
-    settings user_settings = load_settings(en_config_user);
-    en_settings.merge_with(user_settings);
+    game_settings = load_settings(en_config_base);
+    en_settings user_settings = load_settings(en_config_user);
+    game_settings.merge_with(user_settings);
 
     pl.angle = 0;
     pl.elev = 0;
@@ -817,7 +817,7 @@ update()
 
 
 action const* get_input(en_action a) {
-    return &en_settings.bindings.bindings[a];
+    return &game_settings.bindings.bindings[a];
 }
 
 
@@ -963,10 +963,10 @@ struct play_state : game_state {
 
         /* persistent */
 
-        float mouse_invert = en_settings.input.mouse_invert;
+        float mouse_invert = game_settings.input.mouse_invert;
 
-        pl.angle += en_settings.input.mouse_x_sensitivity * look_x;
-        pl.elev += en_settings.input.mouse_y_sensitivity * mouse_invert * look_y;
+        pl.angle += game_settings.input.mouse_x_sensitivity * look_x;
+        pl.elev += game_settings.input.mouse_y_sensitivity * mouse_invert * look_y;
 
         if (pl.elev < -MOUSE_Y_LIMIT)
             pl.elev = -MOUSE_Y_LIMIT;
@@ -1108,7 +1108,7 @@ struct menu_settings_state : game_state
     
     static void toggle_mouse_invert() {
     // ^^ Not real keen on requiring these to be static
-        en_settings.input.mouse_invert *= -1;
+        game_settings.input.mouse_invert *= -1;
     }
     
     void update() override {
@@ -1123,7 +1123,7 @@ struct menu_settings_state : game_state
 
     void rebuild_ui() override {
         menu_item *invert_item = &items.at(mouse_invert_mi);
-        std::get<1>(*invert_item) = en_settings.input.mouse_invert > 0 ? off_text : on_text;
+        std::get<1>(*invert_item) = game_settings.input.mouse_invert > 0 ? off_text : on_text;
 
         float w = 0;
         float h = 0;
@@ -1180,7 +1180,7 @@ game_state *game_state::create_menu_settings_state() { return new menu_settings_
 void
 handle_input()
 {
-    set_inputs(keys, mouse_buttons, mouse_axes, en_settings.bindings.bindings);
+    set_inputs(keys, mouse_buttons, mouse_axes, game_settings.bindings.bindings);
     state->handle_input();
 }
 
