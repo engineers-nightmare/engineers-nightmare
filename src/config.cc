@@ -86,7 +86,7 @@ load_binding_settings(en_config_type config_type) {
 
     binds_config_setting = config_lookup(&cfg, "binds");
 
-    if (binds_config_setting != NULL) {
+    if (binds_config_setting != nullptr) {
         /* http://www.hyperrealm.com/libconfig/libconfig_manual.html
         * states
         *  > int config_setting_length (const config_setting_t * setting)
@@ -102,8 +102,8 @@ load_binding_settings(en_config_type config_type) {
             config_setting_t *bind, *inputs;
             bind = config_setting_get_elem(binds_config_setting, i);
 
-            const char **inputs_names = NULL;
-            const char *action_name = NULL;
+            const char **inputs_names = nullptr;
+            const char *action_name = nullptr;
             unsigned int inputs_count = 0;
 
             config_setting_lookup_string(bind, "action", &action_name);
@@ -172,7 +172,7 @@ load_input_settings(en_config_type config_type) {
 
     input_config_setting = config_lookup(&cfg, "input");
 
-    if (input_config_setting != NULL) {
+    if (input_config_setting != nullptr) {
         double mouse_invert        = 0.0;
         double mouse_x_sensitivity = 0.0;
         double mouse_y_sensitivity = 0.0;
