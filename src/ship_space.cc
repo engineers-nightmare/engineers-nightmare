@@ -707,9 +707,9 @@ ship_space::rebuild_topology()
 
     /* 2/ combine across air-permeable interfaces */
     for (auto it = chunks.begin(); it != chunks.end(); it++) {
-        for (int z = 0; z < CHUNK_SIZE; z++) {
-            for (int y = 0; y < CHUNK_SIZE; y++) {
-                for (int x = 0; x < CHUNK_SIZE; x++) {
+        for (int z = 1; z < CHUNK_SIZE - 1; z++) {
+            for (int y = 1; y < CHUNK_SIZE - 1; y++) {
+                for (int x = 1; x < CHUNK_SIZE - 1; x++) {
                     block *bl = it->second->blocks.get(x, y, z);
 
                     /* TODO: proper air-permeability query -- soon it will be not just walls! */
@@ -717,10 +717,90 @@ ship_space::rebuild_topology()
                         if (bl->surfs[i] != surface_wall) {
                             glm::ivec3 offset = dirs[i];
                             topo_unite(it->second->topo.get(x, y, z),
-                                  get_topo_info(CHUNK_SIZE * it->first.x + x + offset.x,
-                                                CHUNK_SIZE * it->first.y + y + offset.y,
-                                                CHUNK_SIZE * it->first.z + z + offset.z));
+                                       it->second->topo.get(x + offset.x, y + offset.y, z + offset.z));
                         }
+                    }
+                }
+            }
+        }
+
+        for (int z = 0; z < CHUNK_SIZE; z++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                block *bl = it->second->blocks.get(0, y, z);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(it->second->topo.get(0, y, z),
+                              get_topo_info(CHUNK_SIZE * it->first.x + 0 + offset.x,
+                                            CHUNK_SIZE * it->first.y + y + offset.y,
+                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                    }
+                }
+
+                bl = it->second->blocks.get(CHUNK_SIZE - 1, y, z);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(it->second->topo.get(CHUNK_SIZE - 1, y, z),
+                              get_topo_info(CHUNK_SIZE * it->first.x + CHUNK_SIZE - 1 + offset.x,
+                                            CHUNK_SIZE * it->first.y + y + offset.y,
+                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                    }
+                }
+
+                bl = it->second->blocks.get(y, 0, z);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(it->second->topo.get(y, 0, z),
+                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
+                                            CHUNK_SIZE * it->first.y + 0 + offset.y,
+                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                    }
+                }
+
+                bl = it->second->blocks.get(y, CHUNK_SIZE - 1, z);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(it->second->topo.get(y, CHUNK_SIZE - 1, z),
+                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
+                                            CHUNK_SIZE * it->first.y + CHUNK_SIZE - 1 + offset.y,
+                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                    }
+                }
+
+                bl = it->second->blocks.get(y, z, 0);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(it->second->topo.get(y, z, 0),
+                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
+                                            CHUNK_SIZE * it->first.y + z + offset.y,
+                                            CHUNK_SIZE * it->first.z + 0 + offset.z));
+                    }
+                }
+
+                bl = it->second->blocks.get(y, z, CHUNK_SIZE - 1);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(it->second->topo.get(y, z, CHUNK_SIZE - 1),
+                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
+                                            CHUNK_SIZE * it->first.y + z + offset.y,
+                                            CHUNK_SIZE * it->first.z + CHUNK_SIZE - 1 + offset.z));
                     }
                 }
             }
