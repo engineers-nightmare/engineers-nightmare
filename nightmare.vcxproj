@@ -125,7 +125,7 @@
     <ClCompile Include="src\mesher.cc" />
     <ClCompile Include="src\mock_ship_junk.cc" />
     <ClCompile Include="src\physics.cc" />
-    <ClCompile Include="src\projectiles.cc"/>
+    <ClCompile Include="src\projectiles.cc" />
     <ClCompile Include="src\settings.cc" />
     <ClCompile Include="src\shader.cc" />
     <ClCompile Include="src\ship_space.cc" />
@@ -151,11 +151,13 @@
     <ClInclude Include="src\physics.h" />
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\projectiles.h" />
+    <ClInclude Include="src\scopetimer.h" />
     <ClInclude Include="src\settings.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\ship_space.h" />
     <ClInclude Include="src\text.h" />
     <ClInclude Include="src\textureset.h" />
+    <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\tools.h" />
     <ClInclude Include="src\winunistd.h" />
     <ClInclude Include="winerr.h" />

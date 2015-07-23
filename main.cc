@@ -31,6 +31,8 @@
 #include "src/light_field.h"
 #include "src/projectiles.h"
 
+#include "src/scopetimer.h"
+
 
 #define APP_NAME    "Engineer's Nightmare"
 #define DEFAULT_WIDTH   1024
@@ -48,14 +50,42 @@ auto hfov = DEG2RAD(90.f);
 
 en_settings game_settings;
 
-struct wnd {
+struct {
     SDL_Window *ptr;
     SDL_GLContext gl_ctx;
     int width;
     int height;
 } wnd;
 
-Uint32 last_frame_time = 0;
+struct {
+    Timer timer;
+
+    const float fps_duration = 0.25f;
+
+    unsigned int frame = 0;
+
+    unsigned int fps_frame = 0;
+    float fps_time = 0.f;
+
+    float dt = 0.f;
+    float fps = 0.f;
+
+    void tick() {
+        auto t = timer.touch();
+
+        dt = t.delta;
+        frame++;
+
+        fps_frame++;
+        fps_time += dt;
+
+        if (fps_time >= fps_duration) {
+            fps = 1 / (fps_time / fps_frame);
+            fps_time = 0.f;
+            fps_frame = 0;
+        }
+    }
+} frame_info;
 
 void GLAPIENTRY
 gl_debug_callback(GLenum source __unused,
@@ -802,9 +832,8 @@ struct time_accumulator
             accum -= period;
             return true;
         }
-        else {
-            return false;
-        }
+
+        return false;
     }
 };
 
@@ -812,14 +841,11 @@ struct time_accumulator
 time_accumulator main_tick_accum(1/15.0f);  /* 15Hz tick for game logic */
 time_accumulator fast_tick_accum(1/60.0f);  /* 60Hz tick for motion */
 
-
 void
 update()
 {
-    Uint32 now = SDL_GetTicks();
-    // frame delta time in seconds
-    float dt = (now - last_frame_time) / 1000.f;
-    last_frame_time = now;
+    frame_info.tick();
+    auto dt = frame_info.dt;
 
     float depthClearValue = 1.0f;
     glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
@@ -874,6 +900,22 @@ update()
         if (1 || pl.ui_dirty) {
             text->reset();
             state->rebuild_ui();
+
+            char buf[3][256];
+            float w[3] = { 0, 0, 0 }, h = 0;
+
+            sprintf(buf[0], "%.2f", frame_info.dt * 1000);
+            sprintf(buf[1], "%.2f", 1.f / frame_info.dt);
+            sprintf(buf[2], "%.2f", frame_info.fps);
+
+            text->measure(buf[0], &w[0], &h);
+            text->measure(buf[1], &w[1], &h);
+            text->measure(buf[2], &w[2], &h);
+
+            add_text_with_outline(buf[0], -DEFAULT_WIDTH / 2 + (100 - w[0]), DEFAULT_HEIGHT / 2 + 100);
+            add_text_with_outline(buf[1], -DEFAULT_WIDTH / 2 + (100 - w[1]), DEFAULT_HEIGHT / 2 + 82);
+            add_text_with_outline(buf[2], -DEFAULT_WIDTH / 2 + (100 - w[2]), DEFAULT_HEIGHT / 2 + 64);
+
             text->upload();
             pl.ui_dirty = false;
         }
