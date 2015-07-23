@@ -10,7 +10,10 @@
 struct ivec3_hash {
   size_t operator()(const glm::ivec3 &v) const {
       std::hash<int> h;
-      return h(v.x) ^ h(v.y) ^ h(v.z);
+      size_t hh = h(v.x);
+      hh = hh>>6 ^ hh<<2 ^ h(v.y);
+      hh = hh>>6 ^ hh<<2 ^ h(v.z);
+      return hh;
   }
 };
 
