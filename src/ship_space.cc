@@ -5,7 +5,7 @@
 
 /* create a ship space of x * y * z instantiated chunks */
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
-    : min_x(0), min_y(0), min_z(0)
+    : min_x(0), min_y(0), min_z(0), topo_dirty(true)
 {
     unsigned int x = 0,
                  y = 0,
@@ -30,7 +30,7 @@ ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
 
 /* create an empty ship_space */
 ship_space::ship_space(void)
-    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0)
+    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0), topo_dirty(true)
 {
 }
 
@@ -687,6 +687,10 @@ static glm::ivec3 dirs[] = {
 void
 ship_space::rebuild_topology()
 {
+    if (!topo_dirty)
+        return;
+    topo_dirty = false;
+
     /* 1/ initially, every block is its own subtree */
     for (auto it = chunks.begin(); it != chunks.end(); it++) {
         for (int z = 0; z < CHUNK_SIZE; z++) {

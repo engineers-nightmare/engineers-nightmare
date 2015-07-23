@@ -113,6 +113,7 @@ struct ship_space {
     /* topo info for open vacuum, so we know what pressure to force to zero */
     topo_info outside_topo_info;
     void rebuild_topology();
+    bool topo_dirty;
 };
 
 /* helper */

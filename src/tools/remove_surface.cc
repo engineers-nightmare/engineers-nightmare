@@ -63,6 +63,8 @@ struct remove_surface_tool : public tool
 
         mark_lightfield_update(rc->x, rc->y, rc->z);
         mark_lightfield_update(rc->px, rc->py, rc->pz);
+
+        ship->topo_dirty = true;
     }
 
     virtual void preview(raycast_info *rc)

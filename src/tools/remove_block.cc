@@ -73,6 +73,8 @@ struct remove_block_tool : public tool
 
                     mark_lightfield_update(rx, ry, rz);
                 }
+
+                ship->topo_dirty = true;
             }
         }
 
