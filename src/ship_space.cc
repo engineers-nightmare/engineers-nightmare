@@ -137,8 +137,9 @@ ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
 {
     glm::ivec3 v(chunk_x, chunk_y, chunk_z);
 
-    if( this->chunks.count(v) ){
-        return this->chunks[v];
+    auto it = this->chunks.find(v);
+    if( it != this->chunks.end() ){
+        return it->second;
     }
 
     return NULL;
