@@ -5,7 +5,7 @@
 
 /* create a ship space of x * y * z instantiated chunks */
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
-    : min_x(0), min_y(0), min_z(0), topo_dirty(true)
+    : min_x(0), min_y(0), min_z(0), topo_dirty(true), num_full_rebuilds(0), num_fast_unifys(0)
 {
     unsigned int x = 0,
                  y = 0,
@@ -30,7 +30,8 @@ ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
 
 /* create an empty ship_space */
 ship_space::ship_space(void)
-    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0), topo_dirty(true)
+    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0), topo_dirty(true),
+      num_full_rebuilds(0), num_fast_unifys(0)
 {
 }
 
@@ -651,24 +652,51 @@ topo_find(topo_info *p)
 }
 
 /* helper to unify subtrees */
-static void
+static topo_info *
 topo_unite(topo_info *from, topo_info *to)
 {
     from = topo_find(from);
     to = topo_find(to);
 
     /* already in same subtee? */
-    if (from == to) return;
+    if (from == to) return from;
 
     if (from->rank < to->rank) {
         from->p = to;
+        return to;
     } else if (from->rank > to->rank) {
         to->p = from;
+        return from;
     } else {
         /* merging two rank-r subtrees produces a rank-r+1 subtree. */
         to->p = from;
         from->rank++;
+        return from;
     }
+}
+
+void
+ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz, int face)
+{
+    if (topo_dirty) {
+        /* if we already dirtied it, we cant assume anything. just take the rebuild */
+        rebuild_topology();
+        return;
+    }
+
+    topo_info *t = topo_find(get_topo_info(x, y, z));
+    topo_info *u = topo_find(get_topo_info(px, py, pz));
+
+    num_fast_unifys++;
+
+    if (t == u) {
+        /* we're not really unifying */
+        return;
+    }
+
+    topo_info *v = topo_unite(t, u);
+    /* track sizing */
+    v->size = t->size + u->size;
 }
 
 static glm::ivec3 dirs[] = {
@@ -690,6 +718,8 @@ ship_space::rebuild_topology()
     if (!topo_dirty)
         return;
     topo_dirty = false;
+
+    num_full_rebuilds++;
 
     /* 1/ initially, every block is its own subtree */
     for (auto it = chunks.begin(); it != chunks.end(); it++) {
