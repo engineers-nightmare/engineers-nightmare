@@ -1084,14 +1084,14 @@ struct menu_state : game_state
 struct menu_settings_state : game_state
 {
     typedef void item_handler(void);
-    typedef std::tuple<char *, char *, item_handler *> menu_item;
+    typedef std::tuple<char const *, char const *, item_handler *> menu_item;
     std::vector<menu_item> items;
     int selected = 0;
 
-    char *on_text = "On";
-    char *off_text = "Off";
+    char const *on_text = "On";
+    char const *off_text = "Off";
 
-    char *invert_mouse_text = "Invert Mouse: ";
+    char const *invert_mouse_text = "Invert Mouse: ";
 
     Uint32 mouse_invert_mi = 0;
 
@@ -1109,12 +1109,12 @@ struct menu_settings_state : game_state
             menu_item("Back", "",
             []{ set_game_state(create_menu_state()); }));
     }
-    
+
     static void toggle_mouse_invert() {
     // ^^ Not real keen on requiring these to be static
         game_settings.input.mouse_invert *= -1;
     }
-    
+
     void update() override {
     }
 
