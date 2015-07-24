@@ -45,7 +45,7 @@ bool exit_requested = false;
 
 auto hfov = DEG2RAD(90.f);
 
-settings en_settings;
+en_settings game_settings;
 
 struct wnd {
     SDL_Window *ptr;
@@ -301,6 +301,7 @@ struct game_state {
 
     static game_state *create_play_state();
     static game_state *create_menu_state();
+    static game_state *create_menu_settings_state();
 };
 
 
@@ -412,9 +413,9 @@ init()
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
 
-    en_settings = load_settings(en_config_base);
-    settings user_settings = load_settings(en_config_user);
-    en_settings.merge_with(user_settings);
+    game_settings = load_settings(en_config_base);
+    en_settings user_settings = load_settings(en_config_user);
+    game_settings.merge_with(user_settings);
 
     pl.angle = 0;
     pl.elev = 0;
@@ -701,13 +702,13 @@ tool *tools[] = {
 
 
 void
-add_text_with_outline(char const *s, float x, float y)
+add_text_with_outline(char const *s, float x, float y, float r = 1, float g = 1, float b = 1)
 {
     text->add(s, x - 2, y, 0, 0, 0);
     text->add(s, x + 2, y, 0, 0, 0);
     text->add(s, x, y - 2, 0, 0, 0);
     text->add(s, x, y + 2, 0, 0, 0);
-    text->add(s, x, y, 1, 1, 1);
+    text->add(s, x, y, r, g, b);
 }
 
 
@@ -816,13 +817,13 @@ update()
 
 
 action const* get_input(en_action a) {
-    return &en_settings.bindings.bindings[a];
+    return &game_settings.bindings.bindings[a];
 }
 
 
 struct play_state : game_state {
 
-    void rebuild_ui() {
+    void rebuild_ui() override {
         float w = 0;
         float h = 0;
         char buf[256];
@@ -881,7 +882,7 @@ struct play_state : game_state {
         }
     }
 
-    void update() {
+    void update() override {
         tool *t = tools[pl.selected_slot];
 
         /* both tool use and overlays need the raycast itself */
@@ -929,7 +930,7 @@ struct play_state : game_state {
         pl.ui_dirty = true;
     }
 
-    void handle_input() {
+    void handle_input() override {
         /* look */
         auto look_x     = get_input(action_look_x)->value;
         auto look_y     = get_input(action_look_y)->value;
@@ -962,10 +963,10 @@ struct play_state : game_state {
 
         /* persistent */
 
-        float mouse_invert = en_settings.input.mouse_invert;
+        float mouse_invert = game_settings.input.mouse_invert;
 
-        pl.angle += en_settings.input.mouse_x_sensitivity * look_x;
-        pl.elev += en_settings.input.mouse_y_sensitivity * mouse_invert * look_y;
+        pl.angle += game_settings.input.mouse_x_sensitivity * look_x;
+        pl.elev += game_settings.input.mouse_y_sensitivity * mouse_invert * look_y;
 
         if (pl.elev < -MOUSE_Y_LIMIT)
             pl.elev = -MOUSE_Y_LIMIT;
@@ -1006,13 +1007,10 @@ struct play_state : game_state {
             pl.move = pl.move / len;
 
         if (get_input(action_menu)->just_active) {
-            set_game_state(game_state::create_menu_state());
+            set_game_state(create_menu_state());
         }
     }
 };
-
-
-game_state *game_state::create_play_state() { return new play_state; }
 
 
 struct menu_state : game_state
@@ -1023,12 +1021,12 @@ struct menu_state : game_state
     int selected = 0;
 
     menu_state() : items() {
-        items.push_back(menu_item("Resume Game", []{ set_game_state(game_state::create_play_state()); }));
+        items.push_back(menu_item("Resume Game", []{ set_game_state(create_play_state()); }));
+        items.push_back(menu_item("Settings", []{ set_game_state(create_menu_settings_state()); }));
         items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
     }
 
-    void update()
-    {
+    void update() override {
     }
 
     void put_item_text(char *dest, char const *src, int index)
@@ -1039,8 +1037,7 @@ struct menu_state : game_state
             strcpy(dest, src);
     }
 
-    void rebuild_ui()
-    {
+    void rebuild_ui() override {
         float w = 0;
         float h = 0;
         char buf[256];
@@ -1062,8 +1059,7 @@ struct menu_state : game_state
         }
     }
 
-    void handle_input()
-    {
+    void handle_input() override {
         if (get_input(action_menu_confirm)->just_active) {
             items[selected].second();
         }
@@ -1079,19 +1075,116 @@ struct menu_state : game_state
         }
 
         if (get_input(action_menu)->just_active) {
-            set_game_state(game_state::create_play_state());
+            set_game_state(create_play_state());
         }
     }
 };
 
 
+struct menu_settings_state : game_state
+{
+    typedef void item_handler(void);
+    typedef std::tuple<char *, char *, item_handler *> menu_item;
+    std::vector<menu_item> items;
+    int selected = 0;
+
+    char *on_text = "On";
+    char *off_text = "Off";
+
+    char *invert_mouse_text = "Invert Mouse: ";
+
+    Uint32 mouse_invert_mi = 0;
+
+    menu_settings_state() {
+        mouse_invert_mi = items.size();
+        items.push_back(menu_item(invert_mouse_text, "",
+            []{ toggle_mouse_invert(); }));
+            // ^^ Not real keen on requiring these to be static
+
+        items.push_back(
+            menu_item("Save Settings", "",
+            []{ save_settings(game_settings); }));
+
+        items.push_back(
+            menu_item("Back", "",
+            []{ set_game_state(create_menu_state()); }));
+    }
+    
+    static void toggle_mouse_invert() {
+    // ^^ Not real keen on requiring these to be static
+        game_settings.input.mouse_invert *= -1;
+    }
+    
+    void update() override {
+    }
+
+    void put_item_text(char *dest, char const *src, int index) {
+        if (index == selected)
+            sprintf(dest, "> %s <", src);
+        else
+            strcpy(dest, src);
+    }
+
+    void rebuild_ui() override {
+        menu_item *invert_item = &items.at(mouse_invert_mi);
+        std::get<1>(*invert_item) = game_settings.input.mouse_invert > 0 ? off_text : on_text;
+
+        float w = 0;
+        float h = 0;
+        char buf[256];
+        char buf2[256];
+
+        sprintf(buf, "Engineer's Nightmare");
+        text->measure(buf, &w, &h);
+        add_text_with_outline(buf, -w / 2, 300);
+
+        float y = 50;
+        float dy = -100;
+
+        for (auto it = items.begin(); it != items.end(); ++it) {
+            w = 0;
+            h = 0;
+            sprintf(buf2, "%s%s", std::get<0>(*it), std::get<1>(*it));
+            put_item_text(buf, buf2, it - items.begin());
+            text->measure(buf, &w, &h);
+            add_text_with_outline(buf, -w / 2, y);
+            y += dy;
+        }
+    }
+
+
+    void handle_input() override {
+        if (get_input(action_menu_confirm)->just_active) {
+            std::get<2>(items[selected])();
+            pl.ui_dirty = true;
+        }
+
+        if (get_input(action_menu_down)->just_active) {
+            selected = (selected + 1) % items.size();
+            pl.ui_dirty = true;
+        }
+
+        if (get_input(action_menu_up)->just_active) {
+            selected = (selected + items.size() - 1) % items.size();
+            pl.ui_dirty = true;
+        }
+
+        if (get_input(action_menu)->just_active) {
+            set_game_state(create_play_state());
+        }
+    }
+};
+
+
+game_state *game_state::create_play_state() { return new play_state; }
 game_state *game_state::create_menu_state() { return new menu_state; }
+game_state *game_state::create_menu_settings_state() { return new menu_settings_state; }
 
 
 void
 handle_input()
 {
-    set_inputs(keys, mouse_buttons, mouse_axes, en_settings.bindings.bindings);
+    set_inputs(keys, mouse_buttons, mouse_axes, game_settings.bindings.bindings);
     state->handle_input();
 }
 
@@ -1100,7 +1193,7 @@ void
 run()
 {
     for (;;) {
-        auto sdl_buttons = SDL_GetRelativeMouseState(NULL, NULL);
+        auto sdl_buttons = SDL_GetRelativeMouseState(nullptr, nullptr);
         mouse_buttons[EN_MOUSE_BUTTON(input_mouse_left)]      = sdl_buttons & EN_SDL_BUTTON(input_mouse_left);
         mouse_buttons[EN_MOUSE_BUTTON(input_mouse_middle)]    = sdl_buttons & EN_SDL_BUTTON(input_mouse_middle);
         mouse_buttons[EN_MOUSE_BUTTON(input_mouse_right)]     = sdl_buttons & EN_SDL_BUTTON(input_mouse_right);

@@ -31,7 +31,7 @@ get_input_type(en_input input) {
 */
 en_action
 lookup_action(const char *lookup) {
-    for (const action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
+    for (const action_lookup_t *input = action_lookup_table; input->name != nullptr; ++input) {
         if (strcmp(input->name, lookup) == 0) {
             return input->action;
         }
@@ -42,17 +42,17 @@ lookup_action(const char *lookup) {
 /* This is probably only useful for populating config files */
 const char*
 lookup_input_action(en_action lookup) {
-    for (const action_lookup_t *input = action_lookup_table; input->name != NULL; ++input) {
+    for (const action_lookup_t *input = action_lookup_table; input->name != nullptr; ++input) {
         if (input->action == lookup) {
             return input->name;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 en_input
 lookup_input(const char *lookup) {
-    for (const input_lookup_t *input = input_lookup_table; input->name != NULL; ++input) {
+    for (const input_lookup_t *input = input_lookup_table; input->name != nullptr; ++input) {
         if (strcmp(input->name, lookup) == 0) {
             return input->action;
         }
@@ -63,12 +63,12 @@ lookup_input(const char *lookup) {
 /* This is probably only useful for populating config files */
 const char*
 lookup_input(en_input lookup) {
-    for (const input_lookup_t *input = input_lookup_table; input->name != NULL; ++input) {
+    for (const input_lookup_t *input = input_lookup_table; input->name != nullptr; ++input) {
         if (input->action == lookup) {
             return input->name;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void
@@ -85,8 +85,6 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
         auto binds = &action->binds;
 
         for (auto &input : binds->inputs) {
-            input_type type = input_type_invalid;
-
             switch (get_input_type(input))
             {
             default:

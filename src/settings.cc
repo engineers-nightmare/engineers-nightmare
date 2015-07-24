@@ -28,7 +28,7 @@ void binding_settings::merge_with(binding_settings other) {
         for (auto &bind : binds->inputs) {
             binding* thisBinds = &this->bindings[input].binds;
             auto contained =
-                std::find(thisBinds->inputs.begin(), thisBinds->inputs.end(), bind)
+                find(thisBinds->inputs.begin(), thisBinds->inputs.end(), bind)
                 != thisBinds->inputs.end();
 
             /* clear all bindings on this as we have some from other */
@@ -54,4 +54,85 @@ void binding_settings::merge_with(binding_settings other) {
 
 void video_settings::merge_with(video_settings other) {
     /* nothing yet */
+}
+
+input_settings input_settings::get_delta(input_settings other) {
+    // relies on fields being initialized to INVALID_SETTINGS_{type}
+    input_settings delta;
+
+    if (other.mouse_invert != mouse_invert) {
+        delta.mouse_invert = other.mouse_invert;
+    }
+
+    if (other.mouse_x_sensitivity != mouse_x_sensitivity) {
+        delta.mouse_x_sensitivity = other.mouse_x_sensitivity;
+    }
+
+    if (other.mouse_y_sensitivity != mouse_y_sensitivity) {
+        delta.mouse_y_sensitivity = other.mouse_y_sensitivity;
+    }
+
+    return delta;
+}
+
+binding_settings binding_settings::get_delta(binding_settings other) {
+    // relies on fields being initialized to INVALID_SETTINGS_{type}
+    binding_settings delta;
+
+    // 1. if bind for action exists in base, and exists in other, set delta to other
+    //    when any of other is different from base
+    //    should cover for unbound as well. That is, removing a bind from base, but
+    //    not reassigning (special case of input_unbound)
+    // 2. if bind for action exists in base, and does not exist in other, don't set in delta
+    //    This might actually be really weird. other ?should? never not contain something 
+    //    that exists in base
+    // 3. if bind for action does not exist in base, but does exist in other, set delta to
+    //    other
+
+    // first go through all of this bindings for above cases 1, 2
+    for (auto thisBind : bindings) {
+        auto inputAction = thisBind.first;
+
+        // case 2
+        auto findOther = other.bindings.find(inputAction);
+        if (findOther == other.bindings.end()) {
+            continue;
+        }
+
+        auto thisAction  = thisBind.second;
+        auto thisInputs  = thisAction.binds.inputs;
+        auto otherAction = findOther->second;
+        auto otherInputs = otherAction.binds.inputs;
+
+        // case 1
+        for (auto otherInput : otherInputs) {
+            auto thisInput = find(thisInputs.begin(), thisInputs.end(), otherInput);
+            if (thisInput == thisInputs.end()) {
+                delta.bindings.insert(*findOther);
+                break;
+            }
+        }
+    }
+
+    for (auto otherBind : other.bindings) {
+        auto input = otherBind.first;
+
+        auto findThis = bindings.find(input);
+        if (findThis != bindings.end()) {
+            // exists in this, already handled
+            continue;
+        }
+
+        // case 3
+        delta.bindings.insert(otherBind);
+    }
+
+    return delta;
+}
+
+video_settings video_settings::get_delta(video_settings other) {
+    // relies on fields being initialized to INVALID_SETTINGS_{type}
+
+    // no video settings yet. return default
+    return video_settings();
 }
