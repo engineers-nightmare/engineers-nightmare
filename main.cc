@@ -880,8 +880,10 @@ struct play_state : game_state {
             add_text_with_outline(buf2, -w/2, -100);
 
             w = 0; h = 0;
-            sprintf(buf2, "full: %d fast-unify: %d", ship->num_full_rebuilds,
-                    ship->num_fast_unifys);
+            sprintf(buf2, "full: %d fast-unify: %d fast-nosplit: %d",
+                    ship->num_full_rebuilds,
+                    ship->num_fast_unifys,
+                    ship->num_fast_nosplits);
             text->measure(buf2, &w, &h);
             add_text_with_outline(buf2, -w/2, -150);
         }

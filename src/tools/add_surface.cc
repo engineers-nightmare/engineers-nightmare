@@ -64,7 +64,7 @@ struct add_surface_tool : public tool
             mark_lightfield_update(rc->x, rc->y, rc->z);
             mark_lightfield_update(rc->px, rc->py, rc->pz);
 
-            ship->topo_dirty = true;
+            ship->update_topology_for_add_surface(rc->x, rc->y, rc->z, rc->px, rc->py, rc->pz, index);
 
         }
     }

@@ -5,7 +5,7 @@
 
 /* create a ship space of x * y * z instantiated chunks */
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
-    : min_x(0), min_y(0), min_z(0), topo_dirty(true), num_full_rebuilds(0), num_fast_unifys(0)
+    : min_x(0), min_y(0), min_z(0), topo_dirty(true), num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
 {
     unsigned int x = 0,
                  y = 0,
@@ -31,7 +31,7 @@ ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
 /* create an empty ship_space */
 ship_space::ship_space(void)
     : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0), topo_dirty(true),
-      num_full_rebuilds(0), num_fast_unifys(0)
+      num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
 {
 }
 
@@ -680,7 +680,6 @@ ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int 
 {
     if (topo_dirty) {
         /* if we already dirtied it, we cant assume anything. just take the rebuild */
-        rebuild_topology();
         return;
     }
 
@@ -697,6 +696,77 @@ ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int 
     topo_info *v = topo_unite(t, u);
     /* track sizing */
     v->size = t->size + u->size;
+}
+
+static bool
+exists_alt_path(int x, int y, int z, block *a, block *b, ship_space *ship, int face)
+{
+    block *c;
+
+    if (face != surface_xp) {
+        c = ship->get_block(x+1, y, z);
+        if (a->surfs[surface_xp] != surface_wall && b->surfs[surface_xp] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+        c = ship->get_block(x-1, y, z);
+        if (a->surfs[surface_xm] != surface_wall && b->surfs[surface_xm] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+    }
+
+    if (face != surface_yp) {
+        c = ship->get_block(x, y+1, z);
+        if (a->surfs[surface_yp] != surface_wall && b->surfs[surface_yp] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+        c = ship->get_block(x, y-1, z);
+        if (a->surfs[surface_ym] != surface_wall && b->surfs[surface_ym] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+    }
+
+    if (face != surface_zp) {
+        c = ship->get_block(x, y, z+1);
+        if (a->surfs[surface_zp] != surface_wall && b->surfs[surface_zp] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+        c = ship->get_block(x, y, z-1);
+        if (a->surfs[surface_zm] != surface_wall && b->surfs[surface_zm] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+    }
+
+    return false;
+}
+
+void
+ship_space::update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face)
+{
+    if (topo_dirty) {
+        /* if we already dirtied it, we cant assume anything. just take the rebuild */
+        return;
+    }
+
+    /* can this surface even split (does it block atmo?) */
+    if (get_block(x, y, z)->surfs[face] != surface_wall)
+        return;
+
+    /* collapse an obvious symmetry */
+    if (face & 1) {
+        /* symmetry */
+        std::swap(x, px);
+        std::swap(y, py);
+        std::swap(z, pz);
+        face ^= 1;
+    }
+
+    /* try to quickly prove that we don't divide space */
+    if (exists_alt_path(x, y, z, get_block(x, y, z), get_block(px, py, pz), this, face)) {
+        num_fast_nosplits++;
+    }
+    else {
+        topo_dirty = true;
+    }
 }
 
 static glm::ivec3 dirs[] = {
