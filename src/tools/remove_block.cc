@@ -26,7 +26,7 @@ remove_ents_from_surface(int x, int y, int z, int face);
 
 struct remove_block_tool : public tool
 {
-    virtual void use(raycast_info *rc)
+    void use(raycast_info *rc) override
     {
         if (rc->inside) return; /* n/a */
 
@@ -83,7 +83,7 @@ struct remove_block_tool : public tool
         mark_lightfield_update(rc->x, rc->y, rc->z);
     }
 
-    virtual void preview(raycast_info *rc)
+    void preview(raycast_info *rc) override
     {
         if (rc->inside) return; /* n/a */
 
@@ -102,7 +102,7 @@ struct remove_block_tool : public tool
         }
     }
 
-    virtual void get_description(char *str)
+    void get_description(char *str) override
     {
         strcpy(str, "Remove Scaffolding");
     }

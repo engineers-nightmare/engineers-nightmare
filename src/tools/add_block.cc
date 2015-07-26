@@ -20,9 +20,9 @@ mat_position(float x, float y, float z);
 extern hw_mesh *scaffold_hw;
 
 
-struct add_block_tool : public tool
+struct add_block_tool : tool
 {
-    virtual void use(raycast_info *rc)
+    void use(raycast_info *rc) override
     {
         if (rc->inside) return; /* n/a */
 
@@ -40,7 +40,7 @@ struct add_block_tool : public tool
         }
     }
 
-    virtual void preview(raycast_info *rc)
+    void preview(raycast_info *rc) override
     {
         if (rc->inside) return; /* n/a */
 
@@ -57,7 +57,7 @@ struct add_block_tool : public tool
         }
     }
 
-    virtual void get_description(char *str)
+    void get_description(char *str) override
     {
         strcpy(str, "Place Scaffolding");
     }
