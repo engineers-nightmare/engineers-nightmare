@@ -72,6 +72,8 @@ struct remove_block_tool : public tool
                     remove_ents_from_surface(rx, ry, rz, index ^ 1);
 
                     mark_lightfield_update(rx, ry, rz);
+
+                    ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rx, ry, rz, index);
                 }
             }
         }

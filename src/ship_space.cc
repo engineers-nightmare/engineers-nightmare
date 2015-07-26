@@ -5,7 +5,7 @@
 
 /* create a ship space of x * y * z instantiated chunks */
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
-    : min_x(0), min_y(0), min_z(0)
+    : min_x(0), min_y(0), min_z(0), topo_dirty(true), num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
 {
     unsigned int x = 0,
                  y = 0,
@@ -30,7 +30,8 @@ ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
 
 /* create an empty ship_space */
 ship_space::ship_space(void)
-    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0)
+    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0), topo_dirty(true),
+      num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
 {
 }
 
@@ -137,8 +138,9 @@ ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
 {
     glm::ivec3 v(chunk_x, chunk_y, chunk_z);
 
-    if( this->chunks.count(v) ){
-        return this->chunks[v];
+    auto it = this->chunks.find(v);
+    if( it != this->chunks.end() ){
+        return it->second;
     }
 
     return NULL;
@@ -263,6 +265,7 @@ ship_space::mock_ship_space(void)
 
     /* LET THIS SERVE AS MOTIVATION FOR NEEDING MAP LOAD AND SAVE */
 
+    /* first pass build complete outer shell for each chunk */
     for( z=0; z < 8; ++z ){
         for( y=0; y < 8; ++y ){
             for( x=0; x < 8; ++x ){
@@ -279,6 +282,7 @@ ship_space::mock_ship_space(void)
                     b3->type = block_support;
                     b4->type = block_support;
 
+                    /* add surfaces to inside */
                     b1->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
                     sn1(surface_zp, ((x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall));
                     b2->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
@@ -288,6 +292,7 @@ ship_space::mock_ship_space(void)
                     b4->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
                     sn4(surface_zp, ((x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall));
 
+                    /* add surfaces to outside */
                     b1->surfs[surface_zm] = surface_wall;
                     sn1(surface_zm, surface_wall);
                     b2->surfs[surface_zm] = surface_wall;
@@ -297,298 +302,87 @@ ship_space::mock_ship_space(void)
                     b4->surfs[surface_zm] = surface_wall;
                     sn4(surface_zm, surface_wall);
 
-                } else if( y == 0 ){
-                    /* we want a 2 height door at x == 3
-                     * and a one height door a x == 5
-                     */
-                    if( (x == 3     && z == 1) ||
-                        (x == 3     && z == 2) ||
-                        (x == 5     && z == 1) ){
-                        /* a door */
-                        b1->type = block_empty;
-                        b2->type = block_empty;
-                        b3->type = block_empty;
-                        b4->type = block_empty;
-                    } else {
-                        /* a wall */
-                        b1->type = block_support;
-                        b2->type = block_support;
-                        b3->type = block_support;
-                        b4->type = block_support;
+                } else if( z == 7 ){
+                    /* the roof */
+                    b1->type = block_support;
+                    b2->type = block_support;
+                    b3->type = block_support;
+                    b4->type = block_support;
 
-                        if( x != 0 &&
-                            x != 7 ){
-                            /* add surfaces to inside of walls */
-                            b1->surfs[surface_yp] = surface_wall;
-                            sn1(surface_yp, surface_wall);
-                            b2->surfs[surface_yp] = surface_wall;
-                            sn2(surface_yp, surface_wall);
-                            b3->surfs[surface_yp] = surface_wall;
-                            sn3(surface_yp, surface_wall);
-                            b4->surfs[surface_yp] = surface_wall;
-                            sn4(surface_yp, surface_wall);
-                        }
+                    /* add surfaces to outside */
+                    b1->surfs[surface_zp] = surface_wall;
+                    sn1(surface_zp, surface_wall);
+                    b2->surfs[surface_zp] = surface_wall;
+                    sn2(surface_zp, surface_wall);
+                    b3->surfs[surface_zp] = surface_wall;
+                    sn3(surface_zp, surface_wall);
+                    b4->surfs[surface_zp] = surface_wall;
+                    sn4(surface_zp, surface_wall);
 
-                        /* add surfaces to inside of doorways */
-                        if( (x == 3 && z == 3) ||
-                            (x == 5 && z == 2) ){
-                            /* tops */
-                            b1->surfs[surface_zm] = surface_wall;
-                            sn1(surface_zm, surface_wall);
-                            b2->surfs[surface_zm] = surface_wall;
-                            sn2(surface_zm, surface_wall);
-                            b3->surfs[surface_zm] = surface_wall;
-                            sn3(surface_zm, surface_wall);
-                            b4->surfs[surface_zm] = surface_wall;
-                            sn4(surface_zm, surface_wall);
-                        }
-                        if( (x == 2 && z == 1) ||
-                            (x == 2 && z == 2) ||
-                            (x == 4 && z == 1) ){
-                            /* minus */
-                            b1->surfs[surface_xp] = surface_wall;
-                            sn1(surface_xp, surface_wall);
-                            b2->surfs[surface_xp] = surface_wall;
-                            sn2(surface_xp, surface_wall);
-                            b3->surfs[surface_xp] = surface_wall;
-                            sn3(surface_xp, surface_wall);
-                            b4->surfs[surface_xp] = surface_wall;
-                            sn4(surface_xp, surface_wall);
-                        }
-                        if( (x == 4 && z == 2) ||
-                            (x == 4 && z == 1) ||
-                            (x == 6 && z == 1) ){
-                            /* plus */
-                            b1->surfs[surface_xm] = surface_wall;
-                            sn1(surface_xm, surface_wall);
-                            b2->surfs[surface_xm] = surface_wall;
-                            sn2(surface_xm, surface_wall);
-                            b3->surfs[surface_xm] = surface_wall;
-                            sn3(surface_xm, surface_wall);
-                            b4->surfs[surface_xm] = surface_wall;
-                            sn4(surface_xm, surface_wall);
-                        }
+                    /* add surfaces to inside */
+                    b1->surfs[surface_zm] = surface_wall;
+                    sn1(surface_zm, surface_wall);
+                    b2->surfs[surface_zm] = surface_wall;
+                    sn2(surface_zm, surface_wall);
+                    b3->surfs[surface_zm] = surface_wall;
+                    sn3(surface_zm, surface_wall);
+                    b4->surfs[surface_zm] = surface_wall;
+                    sn4(surface_zm, surface_wall);
 
-                    }
-                } else if( x == 0 ){
-                    /* we want a 2 height door at y == 3
-                     * and a one height door a y == 5
-                     */
-                    if( (y == 3     && z == 1) ||
-                        (y == 3     && z == 2) ||
-                        (y == 5     && z == 1) ){
-                        /* a door */
-                        b1->type = block_empty;
-                        b2->type = block_empty;
-                        b3->type = block_empty;
-                        b4->type = block_empty;
-                    } else {
-                        /* a wall */
-                        b1->type = block_support;
-                        b2->type = block_support;
-                        b3->type = block_support;
-                        b4->type = block_support;
+                } else if( y == 0 || y == 7 ){
+                    /* a wall */
+                    b1->type = block_support;
+                    b2->type = block_support;
+                    b3->type = block_support;
+                    b4->type = block_support;
 
-                        if( y != 0 &&
-                            y != 7 ){
-                            /* add surfaces to inside of walls */
-                            b1->surfs[surface_xp] = surface_wall;
-                            sn1(surface_xp, surface_wall);
-                            b2->surfs[surface_xp] = surface_wall;
-                            sn2(surface_xp, surface_wall);
-                            b3->surfs[surface_xp] = surface_wall;
-                            sn3(surface_xp, surface_wall);
-                            b4->surfs[surface_xp] = surface_wall;
-                            sn4(surface_xp, surface_wall);
-                        }
+                    /* add surfaces to one side */
+                    b1->surfs[surface_yp] = surface_wall;
+                    sn1(surface_yp, surface_wall);
+                    b2->surfs[surface_yp] = surface_wall;
+                    sn2(surface_yp, surface_wall);
+                    b3->surfs[surface_yp] = surface_wall;
+                    sn3(surface_yp, surface_wall);
+                    b4->surfs[surface_yp] = surface_wall;
+                    sn4(surface_yp, surface_wall);
 
-                        /* add surfaces to inside of doorways */
-                        if( (y == 3 && z == 3) ||
-                            (y == 5 && z == 2) ){
-                            /* tops */
-                            b1->surfs[surface_zm] = surface_wall;
-                            sn1(surface_zm, surface_wall);
-                            b2->surfs[surface_zm] = surface_wall;
-                            sn2(surface_zm, surface_wall);
-                            b3->surfs[surface_zm] = surface_wall;
-                            sn3(surface_zm, surface_wall);
-                            b4->surfs[surface_zm] = surface_wall;
-                            sn4(surface_zm, surface_wall);
-                        }
-                        if( (y == 2 && z == 1) ||
-                            (y == 2 && z == 2) ||
-                            (y == 4 && z == 1) ){
-                            /* minus */
-                            b1->surfs[surface_yp] = surface_wall;
-                            sn1(surface_yp, surface_wall);
-                            b2->surfs[surface_yp] = surface_wall;
-                            sn2(surface_yp, surface_wall);
-                            b3->surfs[surface_yp] = surface_wall;
-                            sn3(surface_yp, surface_wall);
-                            b4->surfs[surface_yp] = surface_wall;
-                            sn4(surface_yp, surface_wall);
-                        }
-                        if( (y == 4 && z == 2) ||
-                            (y == 4 && z == 1) ||
-                            (y == 6 && z == 1) ){
-                            /* plus */
-                            b1->surfs[surface_ym] = surface_wall;
-                            sn1(surface_ym, surface_wall);
-                            b2->surfs[surface_ym] = surface_wall;
-                            sn2(surface_ym, surface_wall);
-                            b3->surfs[surface_ym] = surface_wall;
-                            sn3(surface_ym, surface_wall);
-                            b4->surfs[surface_ym] = surface_wall;
-                            sn4(surface_ym, surface_wall);
-                        }
+                    /* add surfaces to other side */
+                    b1->surfs[surface_ym] = surface_wall;
+                    sn1(surface_ym, surface_wall);
+                    b2->surfs[surface_ym] = surface_wall;
+                    sn2(surface_ym, surface_wall);
+                    b3->surfs[surface_ym] = surface_wall;
+                    sn3(surface_ym, surface_wall);
+                    b4->surfs[surface_ym] = surface_wall;
+                    sn4(surface_ym, surface_wall);
 
-                    }
-                } else if( x == 7 ){
-                    /* we want a 2 height door at x == 3
-                     * and a one height door a x == 5
-                     */
-                    if( (y == 3     && z == 1) ||
-                        (y == 3     && z == 2) ||
-                        (y == 5     && z == 1) ){
-                        /* a door */
-                        b1->type = block_empty;
-                        b2->type = block_empty;
-                        b3->type = block_empty;
-                        b4->type = block_empty;
-                    } else {
-                        /* a wall */
-                        b1->type = block_support;
-                        b2->type = block_support;
-                        b3->type = block_support;
-                        b4->type = block_support;
+                } else if( x == 0 || x == 7 ){
+                    /* a wall */
+                    b1->type = block_support;
+                    b2->type = block_support;
+                    b3->type = block_support;
+                    b4->type = block_support;
 
-                        if( y != 0 &&
-                            y != 7 ){
-                            /* add surfaces to inside of walls */
-                            b1->surfs[surface_xm] = surface_wall;
-                            sn1(surface_xm, surface_wall);
-                            b2->surfs[surface_xm] = surface_wall;
-                            sn2(surface_xm, surface_wall);
-                            b3->surfs[surface_xm] = surface_wall;
-                            sn3(surface_xm, surface_wall);
-                            b4->surfs[surface_xm] = surface_wall;
-                            sn4(surface_xm, surface_wall);
-                        }
+                    /* add surfaces to one side */
+                    b1->surfs[surface_xp] = surface_wall;
+                    sn1(surface_xp, surface_wall);
+                    b2->surfs[surface_xp] = surface_wall;
+                    sn2(surface_xp, surface_wall);
+                    b3->surfs[surface_xp] = surface_wall;
+                    sn3(surface_xp, surface_wall);
+                    b4->surfs[surface_xp] = surface_wall;
+                    sn4(surface_xp, surface_wall);
 
-                        /* add surfaces to inside of doorways */
-                        if( (y == 3 && z == 3) ||
-                            (y == 5 && z == 2) ){
-                            /* tops */
-                            b1->surfs[surface_zm] = surface_wall;
-                            sn1(surface_zm, surface_wall);
-                            b2->surfs[surface_zm] = surface_wall;
-                            sn2(surface_zm, surface_wall);
-                            b3->surfs[surface_zm] = surface_wall;
-                            sn3(surface_zm, surface_wall);
-                            b4->surfs[surface_zm] = surface_wall;
-                            sn4(surface_zm, surface_wall);
-                        }
-                        if( (y == 2 && z == 1) ||
-                            (y == 2 && z == 2) ||
-                            (y == 4 && z == 1) ){
-                            /* minus */
-                            b1->surfs[surface_yp] = surface_wall;
-                            sn1(surface_yp, surface_wall);
-                            b2->surfs[surface_yp] = surface_wall;
-                            sn2(surface_yp, surface_wall);
-                            b3->surfs[surface_yp] = surface_wall;
-                            sn3(surface_yp, surface_wall);
-                            b4->surfs[surface_yp] = surface_wall;
-                            sn4(surface_yp, surface_wall);
-                        }
-                        if( (y == 4 && z == 2) ||
-                            (y == 4 && z == 1) ||
-                            (y == 6 && z == 1) ){
-                            /* plus */
-                            b1->surfs[surface_ym] = surface_wall;
-                            sn1(surface_ym, surface_wall);
-                            b2->surfs[surface_ym] = surface_wall;
-                            sn2(surface_ym, surface_wall);
-                            b3->surfs[surface_ym] = surface_wall;
-                            sn3(surface_ym, surface_wall);
-                            b4->surfs[surface_ym] = surface_wall;
-                            sn4(surface_ym, surface_wall);
-                        }
+                    /* add surfaces to other side */
+                    b1->surfs[surface_xm] = surface_wall;
+                    sn1(surface_xm, surface_wall);
+                    b2->surfs[surface_xm] = surface_wall;
+                    sn2(surface_xm, surface_wall);
+                    b3->surfs[surface_xm] = surface_wall;
+                    sn3(surface_xm, surface_wall);
+                    b4->surfs[surface_xm] = surface_wall;
+                    sn4(surface_xm, surface_wall);
 
-                    }
-                } else if( y == 7 ){
-                    /* we want a 2 height door at y == 3
-                     * and a one height door a y == 5
-                     */
-                    if( (x == 3     && z == 1) ||
-                        (x == 3     && z == 2) ||
-                        (x == 5     && z == 1) ){
-                        /* a door */
-                        b1->type = block_empty;
-                        b2->type = block_empty;
-                        b3->type = block_empty;
-                        b4->type = block_empty;
-                    } else {
-                        /* a wall */
-                        b1->type = block_support;
-                        b2->type = block_support;
-                        b3->type = block_support;
-                        b4->type = block_support;
-
-                        if( x != 0 &&
-                            x != 7 ){
-                            /* add surfaces to inside of walls */
-                            b1->surfs[surface_ym] = surface_wall;
-                            sn1(surface_ym, surface_wall);
-                            b2->surfs[surface_ym] = surface_wall;
-                            sn2(surface_ym, surface_wall);
-                            b3->surfs[surface_ym] = surface_wall;
-                            sn3(surface_ym, surface_wall);
-                            b4->surfs[surface_ym] = surface_wall;
-                            sn4(surface_ym, surface_wall);
-                        }
-
-                        /* add surfaces to inside of doorways */
-                        if( (x == 3 && z == 3) ||
-                            (x == 5 && z == 2) ){
-                            /* tops */
-                            b1->surfs[surface_zm] = surface_wall;
-                            sn1(surface_zm, surface_wall);
-                            b2->surfs[surface_zm] = surface_wall;
-                            sn2(surface_zm, surface_wall);
-                            b3->surfs[surface_zm] = surface_wall;
-                            sn3(surface_zm, surface_wall);
-                            b4->surfs[surface_zm] = surface_wall;
-                            sn4(surface_zm, surface_wall);
-                        }
-                        if( (x == 2 && z == 1) ||
-                            (x == 2 && z == 2) ||
-                            (x == 4 && z == 1) ){
-                            /* minus */
-                            b1->surfs[surface_xp] = surface_wall;
-                            sn1(surface_xp, surface_wall);
-                            b2->surfs[surface_xp] = surface_wall;
-                            sn2(surface_xp, surface_wall);
-                            b3->surfs[surface_xp] = surface_wall;
-                            sn3(surface_xp, surface_wall);
-                            b4->surfs[surface_xp] = surface_wall;
-                            sn4(surface_xp, surface_wall);
-                        }
-                        if( (x == 4 && z == 2) ||
-                            (x == 4 && z == 1) ||
-                            (x == 6 && z == 1) ){
-                            /* plus */
-                            b1->surfs[surface_xm] = surface_wall;
-                            sn1(surface_xm, surface_wall);
-                            b2->surfs[surface_xm] = surface_wall;
-                            sn2(surface_xm, surface_wall);
-                            b3->surfs[surface_xm] = surface_wall;
-                            sn3(surface_xm, surface_wall);
-                            b4->surfs[surface_xm] = surface_wall;
-                            sn4(surface_xm, surface_wall);
-                        }
-
-                    }
                 } else {
                     b1->type = block_empty;
                     b2->type = block_empty;
@@ -599,10 +393,77 @@ ship_space::mock_ship_space(void)
             }
         }
     }
+    /* *******
+     * chunks:
+     * y
+     * ^
+     * |3 4
+     * |1 2
+     * \---> x
+     *
+     * we want a doorway between chunks:
+     *  1 -> 2
+     *  1 -> 3
+     *  2 -> 4
+     *  3 -> 4
+     *
+     *  FIXME we also want to add a light in each chunk
+     *
+     *  FIXME for each surface we remove below we must also remove the adjacent facing surface
+     */
+
+    {
+        chunk * c1 = ss->get_chunk(0, 0, 0);
+
+        b1 = c1->blocks.get(4, 7, 0);
+        b1->surfs[surface_yp] = surface_none;
+        b1->surfs[surface_ym] = surface_none;
+
+        b2 = c1->blocks.get(7, 4, 0);
+        b1->surfs[surface_xp] = surface_none;
+        b1->surfs[surface_xm] = surface_none;
+    }
+
+    {
+        chunk * c2 = ss->get_chunk(1, 0, 0);
+
+        b1 = c2->blocks.get(4, 7, 0);
+        b1->surfs[surface_yp] = surface_none;
+        b1->surfs[surface_ym] = surface_none;
+
+        b2 = c2->blocks.get(0, 4, 0);
+        b1->surfs[surface_xp] = surface_none;
+        b1->surfs[surface_xm] = surface_none;
+    }
+
+    {
+        chunk * c3 = ss->get_chunk(0, 1, 0);
+
+        b1 = c3->blocks.get(7, 4, 0);
+        b1->surfs[surface_xp] = surface_none;
+        b1->surfs[surface_xm] = surface_none;
+
+        b2 = c3->blocks.get(4, 0, 0);
+        b1->surfs[surface_yp] = surface_none;
+        b1->surfs[surface_ym] = surface_none;
+    }
+
+    {
+        chunk * c4 = ss->get_chunk(1, 1, 0);
+
+        b1 = c4->blocks.get(0, 4, 0);
+        b1->surfs[surface_yp] = surface_none;
+        b1->surfs[surface_ym] = surface_none;
+
+        b2 = c4->blocks.get(4, 0, 0);
+        b1->surfs[surface_xp] = surface_none;
+        b1->surfs[surface_xm] = surface_none;
+    }
+
+    /* FIXME skin 'inside' of doorways */
 
     return ss;
 }
-
 
 static float
 max_along_axis(float o, float d)
@@ -791,23 +652,120 @@ topo_find(topo_info *p)
 }
 
 /* helper to unify subtrees */
-static void
+static topo_info *
 topo_unite(topo_info *from, topo_info *to)
 {
     from = topo_find(from);
     to = topo_find(to);
 
     /* already in same subtee? */
-    if (from == to) return;
+    if (from == to) return from;
 
     if (from->rank < to->rank) {
         from->p = to;
+        return to;
     } else if (from->rank > to->rank) {
         to->p = from;
+        return from;
     } else {
         /* merging two rank-r subtrees produces a rank-r+1 subtree. */
         to->p = from;
         from->rank++;
+        return from;
+    }
+}
+
+void
+ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz, int face)
+{
+    if (topo_dirty) {
+        /* if we already dirtied it, we cant assume anything. just take the rebuild */
+        return;
+    }
+
+    topo_info *t = topo_find(get_topo_info(x, y, z));
+    topo_info *u = topo_find(get_topo_info(px, py, pz));
+
+    num_fast_unifys++;
+
+    if (t == u) {
+        /* we're not really unifying */
+        return;
+    }
+
+    topo_info *v = topo_unite(t, u);
+    /* track sizing */
+    v->size = t->size + u->size;
+}
+
+static bool
+exists_alt_path(int x, int y, int z, block *a, block *b, ship_space *ship, int face)
+{
+    block *c;
+
+    if (face != surface_xp) {
+        c = ship->get_block(x+1, y, z);
+        if (a->surfs[surface_xp] != surface_wall && b->surfs[surface_xp] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+        c = ship->get_block(x-1, y, z);
+        if (a->surfs[surface_xm] != surface_wall && b->surfs[surface_xm] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+    }
+
+    if (face != surface_yp) {
+        c = ship->get_block(x, y+1, z);
+        if (a->surfs[surface_yp] != surface_wall && b->surfs[surface_yp] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+        c = ship->get_block(x, y-1, z);
+        if (a->surfs[surface_ym] != surface_wall && b->surfs[surface_ym] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+    }
+
+    if (face != surface_zp) {
+        c = ship->get_block(x, y, z+1);
+        if (a->surfs[surface_zp] != surface_wall && b->surfs[surface_zp] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+        c = ship->get_block(x, y, z-1);
+        if (a->surfs[surface_zm] != surface_wall && b->surfs[surface_zm] != surface_wall &&
+                (!c || c->surfs[face] != surface_wall))
+            return true;
+    }
+
+    return false;
+}
+
+void
+ship_space::update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face)
+{
+    if (topo_dirty) {
+        /* if we already dirtied it, we cant assume anything. just take the rebuild */
+        return;
+    }
+
+    /* can this surface even split (does it block atmo?) */
+    if (get_block(x, y, z)->surfs[face] != surface_wall)
+        return;
+
+    /* collapse an obvious symmetry */
+    if (face & 1) {
+        /* symmetry */
+        std::swap(x, px);
+        std::swap(y, py);
+        std::swap(z, pz);
+        face ^= 1;
+    }
+
+    /* try to quickly prove that we don't divide space */
+    if (exists_alt_path(x, y, z, get_block(x, y, z), get_block(px, py, pz), this, face)) {
+        num_fast_nosplits++;
+    }
+    else {
+        topo_dirty = true;
     }
 }
 
@@ -827,6 +785,12 @@ static glm::ivec3 dirs[] = {
 void
 ship_space::rebuild_topology()
 {
+    if (!topo_dirty)
+        return;
+    topo_dirty = false;
+
+    num_full_rebuilds++;
+
     /* 1/ initially, every block is its own subtree */
     for (auto it = chunks.begin(); it != chunks.end(); it++) {
         for (int z = 0; z < CHUNK_SIZE; z++) {
@@ -847,9 +811,9 @@ ship_space::rebuild_topology()
 
     /* 2/ combine across air-permeable interfaces */
     for (auto it = chunks.begin(); it != chunks.end(); it++) {
-        for (int z = 0; z < CHUNK_SIZE; z++) {
-            for (int y = 0; y < CHUNK_SIZE; y++) {
-                for (int x = 0; x < CHUNK_SIZE; x++) {
+        for (int z = 1; z < CHUNK_SIZE - 1; z++) {
+            for (int y = 1; y < CHUNK_SIZE - 1; y++) {
+                for (int x = 1; x < CHUNK_SIZE - 1; x++) {
                     block *bl = it->second->blocks.get(x, y, z);
 
                     /* TODO: proper air-permeability query -- soon it will be not just walls! */
@@ -857,10 +821,96 @@ ship_space::rebuild_topology()
                         if (bl->surfs[i] != surface_wall) {
                             glm::ivec3 offset = dirs[i];
                             topo_unite(it->second->topo.get(x, y, z),
-                                  get_topo_info(CHUNK_SIZE * it->first.x + x + offset.x,
-                                                CHUNK_SIZE * it->first.y + y + offset.y,
-                                                CHUNK_SIZE * it->first.z + z + offset.z));
+                                       it->second->topo.get(x + offset.x, y + offset.y, z + offset.z));
                         }
+                    }
+                }
+            }
+        }
+
+        for (int z = 0; z < CHUNK_SIZE; z++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                block *bl = it->second->blocks.get(0, y, z);
+                topo_info *to = it->second->topo.get(0, y, z);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(to,
+                              get_topo_info(CHUNK_SIZE * it->first.x + 0 + offset.x,
+                                            CHUNK_SIZE * it->first.y + y + offset.y,
+                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                    }
+                }
+
+                bl = it->second->blocks.get(CHUNK_SIZE - 1, y, z);
+                to = it->second->topo.get(CHUNK_SIZE - 1, y, z);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(to,
+                              get_topo_info(CHUNK_SIZE * it->first.x + CHUNK_SIZE - 1 + offset.x,
+                                            CHUNK_SIZE * it->first.y + y + offset.y,
+                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                    }
+                }
+
+                bl = it->second->blocks.get(y, 0, z);
+                to = it->second->topo.get(y, 0, z);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(to,
+                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
+                                            CHUNK_SIZE * it->first.y + 0 + offset.y,
+                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                    }
+                }
+
+                bl = it->second->blocks.get(y, CHUNK_SIZE - 1, z);
+                to = it->second->topo.get(y, CHUNK_SIZE - 1, z);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(to,
+                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
+                                            CHUNK_SIZE * it->first.y + CHUNK_SIZE - 1 + offset.y,
+                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                    }
+                }
+
+                bl = it->second->blocks.get(y, z, 0);
+                to = it->second->topo.get(y, z, 0);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(to,
+                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
+                                            CHUNK_SIZE * it->first.y + z + offset.y,
+                                            CHUNK_SIZE * it->first.z + 0 + offset.z));
+                    }
+                }
+
+                bl = it->second->blocks.get(y, z, CHUNK_SIZE - 1);
+                to = it->second->topo.get(y, z, CHUNK_SIZE - 1);
+
+                /* TODO: proper air-permeability query -- soon it will be not just walls! */
+                for (int i = 0; i < 6; i++) {
+                    if (bl->surfs[i] != surface_wall) {
+                        glm::ivec3 offset = dirs[i];
+                        topo_unite(to,
+                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
+                                            CHUNK_SIZE * it->first.y + z + offset.y,
+                                            CHUNK_SIZE * it->first.z + CHUNK_SIZE - 1 + offset.z));
                     }
                 }
             }
