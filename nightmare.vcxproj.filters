@@ -24,9 +24,6 @@
     <ClCompile Include="src\char.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\chunk.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mesh.cc">
       <Filter>Source Files</Filter>
     </ClCompile>

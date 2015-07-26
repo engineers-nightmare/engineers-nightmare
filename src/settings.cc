@@ -27,9 +27,6 @@ void binding_settings::merge_with(binding_settings other) {
 
         for (auto &bind : binds->inputs) {
             binding* thisBinds = &this->bindings[input].binds;
-            auto contained =
-                find(thisBinds->inputs.begin(), thisBinds->inputs.end(), bind)
-                != thisBinds->inputs.end();
 
             /* clear all bindings on this as we have some from other */
             if (cleared_this != true) {
