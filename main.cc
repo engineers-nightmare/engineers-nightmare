@@ -115,6 +115,19 @@ mat_block_face(int x, int y, int z, int face)
     }
 }
 
+struct projectile
+{
+    glm::vec3 pos;
+    glm::vec3 dir;
+    glm::vec3 move;
+
+    sw_mesh *sw;
+    hw_mesh *hw;
+    btTriangleMesh *phys_mesh;
+    btCollisionShape *phys_shape;
+
+
+};
 
 struct entity_type
 {
