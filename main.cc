@@ -14,7 +14,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "src/common.h"
 #include "src/config.h"
@@ -140,8 +139,7 @@ struct entity
     glm::mat4 mat;
 
     entity(int x, int y, int z, entity_type *type, int face)
-        : x(x), y(y), z(z), type(type), phys_body(0), face(face)
-    {
+        : x(x), y(y), z(z), type(type), phys_body(nullptr), face(face) {
         mat = mat_block_face(x, y, z, face);
 
         build_static_physics_rb_mat(&mat, type->phys_shape, &phys_body);
@@ -150,13 +148,11 @@ struct entity
         phys_body->setUserPointer(this);
     }
 
-    ~entity()
-    {
-        teardown_static_physics_setup(NULL, NULL, &phys_body);
+    ~entity() {
+        teardown_static_physics_setup(nullptr, nullptr, &phys_body);
     }
 
-    void use()
-    {
+    void use() {
         /* used by the player */
         printf("player using the %s at %d %d %d\n",
                type->name, x, y, z);
@@ -333,7 +329,7 @@ init()
         errx(1, "No support for GL debugging, life isn't worth it.\n");
 
     glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(reinterpret_cast<GLDEBUGPROC>(&gl_debug_callback), NULL);
+    glDebugMessageCallback(reinterpret_cast<GLDEBUGPROC>(&gl_debug_callback), nullptr);
 
     /* Check for ARB_texture_storage */
     if (!epoxy_has_gl_extension("GL_ARB_texture_storage"))
@@ -483,11 +479,11 @@ remove_ents_from_surface(int x, int y, int z, int face)
 }
 
 
-struct add_block_entity_tool : public tool
+struct add_block_entity_tool : tool
 {
     entity_type *type;
 
-    add_block_entity_tool(entity_type *type) : type(type) {}
+    explicit add_block_entity_tool(entity_type *type) : type(type) {}
 
     bool can_use(raycast_info *rc) {
         if (rc->inside)
@@ -506,8 +502,7 @@ struct add_block_entity_tool : public tool
         return bl && rc->block->type == block_support;
     }
 
-    virtual void use(raycast_info *rc)
-    {
+    void use(raycast_info *rc) override {
         if (!can_use(rc))
             return;
 
@@ -527,8 +522,7 @@ struct add_block_entity_tool : public tool
             bl->surf_space[face] = ~0;
     }
 
-    virtual void preview(raycast_info *rc)
-    {
+    void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
 
@@ -543,21 +537,19 @@ struct add_block_entity_tool : public tool
         glUseProgram(simple_shader);
     }
 
-    virtual void get_description(char *str)
-    {
+    void get_description(char *str) override {
         sprintf(str, "Place %s", type->name);
     }
 };
 
 
-struct add_surface_entity_tool : public tool
+struct add_surface_entity_tool : tool
 {
     entity_type *type;
 
     add_surface_entity_tool(entity_type *type) : type(type) {}
 
-    bool can_use(raycast_info *rc)
-    {
+    bool can_use(raycast_info *rc) {
         block *bl = rc->block;
 
         int index = normal_to_surface_index(rc);
@@ -576,8 +568,7 @@ struct add_surface_entity_tool : public tool
         return true;
     }
 
-    virtual void use(raycast_info *rc)
-    {
+    void use(raycast_info *rc) override {
         if (!can_use(rc))
             return;
 
@@ -601,8 +592,7 @@ struct add_surface_entity_tool : public tool
         mark_lightfield_update(rc->px, rc->py, rc->pz);
     }
 
-    virtual void preview(raycast_info *rc)
-    {
+    void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
 
@@ -627,40 +617,34 @@ struct add_surface_entity_tool : public tool
         glUseProgram(simple_shader);
     }
 
-    virtual void get_description(char *str)
-    {
+    void get_description(char *str) override {
         sprintf(str, "Place %s on surface", type->name);
     }
 };
 
 
-struct empty_hands_tool : public tool
+struct empty_hands_tool : tool
 {
-    virtual void use(raycast_info *rc)
-    {
+    void use(raycast_info *) override {
     }
 
-    virtual void preview(raycast_info *rc)
-    {
+    void preview(raycast_info *) override {
     }
 
-    virtual void get_description(char *str)
-    {
+    void get_description(char *str) override {
         strcpy(str, "(empty hands)");
     }
 };
 
-struct remove_surface_entity_tool : public tool
+struct remove_surface_entity_tool : tool
 {
-    virtual void use(raycast_info *rc)
-    {
+    void use(raycast_info *rc) override {
         int index = normal_to_surface_index(rc);
         remove_ents_from_surface(rc->px, rc->py, rc->pz, index^1);
         mark_lightfield_update(rc->px, rc->py, rc->pz);
     }
 
-    virtual void preview(raycast_info *rc)
-    {
+    void preview(raycast_info *rc) override {
         int index = normal_to_surface_index(rc);
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
@@ -680,8 +664,7 @@ struct remove_surface_entity_tool : public tool
         glUseProgram(simple_shader);
     }
 
-    virtual void get_description(char *str)
-    {
+    void get_description(char *str) override {
         strcpy(str, "Remove surface entity");
     }
 };
@@ -922,14 +905,12 @@ struct play_state : game_state {
         }
     }
 
-    void set_slot(int slot)
-    {
+    void set_slot(int slot) {
         pl.selected_slot = slot;
         pl.ui_dirty = true;
     }
 
-    void cycle_slot(int d)
-    {
+    void cycle_slot(int d) {
         auto num_tools = sizeof(tools) / sizeof(tools[0]);
         unsigned int cur_slot = pl.selected_slot;
         cur_slot = (cur_slot + num_tools + d) % num_tools;
@@ -1037,8 +1018,7 @@ struct menu_state : game_state
     void update() override {
     }
 
-    void put_item_text(char *dest, char const *src, int index)
-    {
+    void put_item_text(char *dest, char const *src, int index) {
         if (index == selected)
             sprintf(dest, "> %s <", src);
         else
@@ -1259,7 +1239,7 @@ run()
 }
 
 int
-main(int argc, char **argv)
+main(int, char **)
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
         errx(1, "Error initializing SDL: %s\n", SDL_GetError());
@@ -1281,7 +1261,7 @@ main(int argc, char **argv)
     wnd.gl_ctx = SDL_GL_CreateContext(wnd.ptr);
 
     SDL_SetRelativeMouseMode(SDL_TRUE);
-    keys = SDL_GetKeyboardState(NULL);
+    keys = SDL_GetKeyboardState(nullptr);
 
     resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 

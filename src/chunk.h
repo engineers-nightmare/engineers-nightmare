@@ -15,13 +15,13 @@ class btCollisionShape;
 class btRigidBody;
 
 struct render_chunk {
-    hw_mesh *mesh = NULL;
+    hw_mesh *mesh = nullptr;
     bool valid = false;
 
 
-    btTriangleMesh *phys_mesh = NULL;
-    btCollisionShape *phys_shape = NULL;
-    btRigidBody *phys_body = NULL;
+    btTriangleMesh *phys_mesh = nullptr;
+    btCollisionShape *phys_shape = nullptr;
+    btRigidBody *phys_body = nullptr;
 };
 
 struct topo_info {

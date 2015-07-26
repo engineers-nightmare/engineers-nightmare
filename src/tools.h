@@ -7,6 +7,8 @@ struct raycast_info;
 
 struct tool
 {
+    virtual ~tool() {}
+
     virtual void use(raycast_info *rc) = 0;
     virtual void preview(raycast_info *rc) = 0;
     virtual void get_description(char *str) = 0;
