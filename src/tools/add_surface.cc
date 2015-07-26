@@ -25,7 +25,7 @@ extern void
 remove_ents_from_surface(int x, int y, int z, int face);
 
 
-struct add_surface_tool : public tool
+struct add_surface_tool : tool
 {
     surface_type st;
     add_surface_tool(surface_type st) : st(st) {}
@@ -36,7 +36,7 @@ struct add_surface_tool : public tool
         return (bl && bl->type == block_support) || (other && other->type == block_support);
     }
 
-    virtual void use(raycast_info *rc)
+    void use(raycast_info *rc) override
     {
         block *bl = rc->block;
 
@@ -69,7 +69,7 @@ struct add_surface_tool : public tool
         }
     }
 
-    virtual void preview(raycast_info *rc)
+    void preview(raycast_info *rc) override
     {
         block *bl = ship->get_block(rc->x, rc->y, rc->z);
         int index = normal_to_surface_index(rc);
@@ -89,7 +89,7 @@ struct add_surface_tool : public tool
         }
     }
 
-    virtual void get_description(char *str)
+    void get_description(char *str) override
     {
         sprintf(str, "Place surface type %d\n", (int)st);
     }

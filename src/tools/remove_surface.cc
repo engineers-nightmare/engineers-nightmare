@@ -34,7 +34,7 @@ struct remove_surface_tool : public tool
         return bl && bl->surfs[index] != surface_none;
     }
 
-    virtual void use(raycast_info *rc)
+    void use(raycast_info *rc) override
     {
         if (!can_use(rc))
             return;
@@ -67,7 +67,7 @@ struct remove_surface_tool : public tool
         ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rc->px, rc->py, rc->pz, index);
     }
 
-    virtual void preview(raycast_info *rc)
+    void preview(raycast_info *rc) override
     {
         if (!can_use(rc))
             return;
@@ -85,7 +85,7 @@ struct remove_surface_tool : public tool
         glUseProgram(simple_shader);
     }
 
-    virtual void get_description(char *str)
+    void get_description(char *str) override
     {
         strcpy(str, "Remove surface");
     }
