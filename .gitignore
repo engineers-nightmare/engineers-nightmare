@@ -10,9 +10,6 @@ test_bin
 libNIGHTMARE.a
 Testing
 
-# user configs
-configs/user/
-
 # Sublime Text
 # workspace files are user-specific
 *.sublime-workspace
@@ -224,3 +221,9 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+
+# user configs
+configs/user/
+
+# don't ignore meshes
+!mesh/*
