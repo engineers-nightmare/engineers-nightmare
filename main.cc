@@ -11,6 +11,7 @@
 #include <algorithm>
 
 #include <unordered_map>
+#include <queue>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -53,6 +54,7 @@ struct wnd {
     int height;
 } wnd;
 
+Uint32 last_frame_time = 0;
 
 void GLAPIENTRY
 gl_debug_callback(GLenum source __unused,
@@ -68,7 +70,7 @@ gl_debug_callback(GLenum source __unused,
 
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
-GLuint simple_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
+GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
 GLuint sky_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
@@ -84,13 +86,19 @@ hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 text_renderer *text;
 light_field *light;
-entity *use_entity = 0;
+entity *use_entity = nullptr;
 
 
 glm::mat4
 mat_position(float x, float y, float z)
 {
     return glm::translate(glm::mat4(1), glm::vec3(x, y, z));
+}
+
+glm::mat4
+mat_position(glm::vec3 pos)
+{
+    return glm::translate(glm::mat4(1), pos);
 }
 
 glm::mat4
@@ -117,17 +125,35 @@ mat_block_face(int x, int y, int z, int face)
 
 struct projectile
 {
-    glm::vec3 pos;
-    glm::vec3 dir;
-    glm::vec3 move;
+    glm::vec3 pos = glm::vec3(0, 0, 0);
+    glm::vec3 dir = glm::vec3(0, 0, 0);
+    float velocity = 0.f;
 
-    sw_mesh *sw;
-    hw_mesh *hw;
-    btTriangleMesh *phys_mesh;
-    btCollisionShape *phys_shape;
+    sw_mesh *sw = nullptr;
+    hw_mesh *hw = nullptr;
+    btTriangleMesh *phys_mesh = nullptr;
+    btCollisionShape *phys_shape = nullptr;
 
+    ~projectile() {}
+        
+    void update(float dt) {
+        auto new_pos = pos + dir * velocity * dt;
 
+        auto hit = phys_raycast_generic(pos.x, pos.y, pos.z,
+            dir.x, dir.y, dir.z,
+            glm::length(new_pos - pos), phy->ghostObj, phy->dynamicsWorld);
+
+        if (hit.hit) {
+            new_pos = hit.hitCoord;
+            velocity = 0.f;
+        }
+
+        pos = new_pos;
+    }
 };
+
+std::deque<projectile*> current_projectiles;
+std::deque<projectile*> available_projectiles;
 
 struct entity_type
 {
@@ -305,7 +331,7 @@ struct game_state {
     virtual ~game_state() {}
 
     virtual void handle_input() = 0;
-    virtual void update() = 0;
+    virtual void update(float dt) = 0;
     virtual void rebuild_ui() = 0;
 
     static game_state *create_play_state();
@@ -351,6 +377,16 @@ init()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);         /* pointers given by other libs may not be aligned */
     glEnable(GL_DEPTH_TEST);
 
+    for (int i = 0; i < 200; ++i) {
+        auto proj = new projectile();
+
+        proj->sw = load_mesh("mesh/cube.obj");
+        set_mesh_material(proj->sw, 3);
+        proj->hw = upload_mesh(proj->sw);
+
+        available_projectiles.push_back(proj);
+    }
+
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
 
     surfs_sw[surface_xp] = load_mesh("mesh/x_quad_p.obj");
@@ -382,6 +418,7 @@ init()
     build_static_physics_mesh(entity_types[2].sw, &entity_types[2].phys_mesh, &entity_types[2].phys_shape);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
+    unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/unlit.frag");
     remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/unlit.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
@@ -711,6 +748,11 @@ add_text_with_outline(char const *s, float x, float y, float r = 1, float g = 1,
 void
 update()
 {
+    Uint32 now = SDL_GetTicks();
+    // frame delta time in seconds
+    float dt = (now - last_frame_time) / 1000.f;
+    last_frame_time = now;
+
     float depthClearValue = 1.0f;
     glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
 
@@ -730,7 +772,7 @@ update()
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->val.inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
     per_camera->upload();
-
+    
     /* rebuild lighting if needed */
     update_lightfield();
 
@@ -784,7 +826,7 @@ update()
         }
     }
 
-    state->update();
+    state->update(dt);
 
     /* draw the sky */
     glUseProgram(sky_shader);
@@ -801,6 +843,18 @@ update()
         text->upload();
         pl.ui_dirty = false;
     }
+
+    glUseProgram(simple_shader);
+    for (auto projectile : current_projectiles) {
+        projectile->update(dt);
+
+        auto pos = projectile->pos;
+        per_object->val.world_matrix = mat_position(pos);
+        per_object->upload();
+        draw_mesh(projectile->hw);
+    }
+    glUseProgram(simple_shader);
+    
 
     glDisable(GL_DEPTH_TEST);
 
@@ -886,7 +940,7 @@ struct play_state : game_state {
         }
     }
 
-    void update() override {
+    void update(float dt) override {
         tool *t = tools[pl.selected_slot];
 
         /* both tool use and overlays need the raycast itself */
@@ -959,6 +1013,7 @@ struct play_state : game_state {
         auto slot8      = get_input(action_slot8)->just_active;
         auto slot9      = get_input(action_slot9)->just_active;
         auto gravity    = get_input(action_gravity)->just_active;
+        auto fire       = get_input(action_fire)->just_active;
         auto use_tool   = get_input(action_use_tool)->just_active;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;
@@ -985,6 +1040,18 @@ struct play_state : game_state {
         pl.use        = use;
         pl.gravity    = gravity;
         pl.use_tool   = use_tool;
+
+        if (fire) {
+            if (available_projectiles.size()) {
+                auto proj = available_projectiles.front();
+                available_projectiles.pop_front();
+
+                proj->pos = glm::vec3(pl.eye.x, pl.eye.y, pl.eye.z);
+                proj->dir = pl.dir;
+                proj->velocity = 2.f;
+                current_projectiles.push_back(proj);
+            }
+        }
 
         if (next_tool) {
             cycle_slot(1);
@@ -1028,7 +1095,7 @@ struct menu_state : game_state
         items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
     }
 
-    void update() override {
+    void update(float dt) override {
     }
 
     void put_item_text(char *dest, char const *src, int index) {
@@ -1116,7 +1183,7 @@ struct menu_settings_state : game_state
         game_settings.input.mouse_invert *= -1;
     }
 
-    void update() override {
+    void update(float dt) override {
     }
 
     void put_item_text(char *dest, char const *src, int index) {
@@ -1281,6 +1348,16 @@ main(int, char **)
     init();
 
     run();
+
+    for (auto proj : available_projectiles) {
+        available_projectiles.pop_front();
+        delete proj;
+    }
+
+    for (auto proj : current_projectiles) {
+        current_projectiles.pop_front();
+        delete proj;
+    }
 
     return 0;
 }

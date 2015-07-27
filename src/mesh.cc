@@ -119,7 +119,7 @@ void
 draw_mesh(hw_mesh *m)
 {
     glBindVertexArray(m->vao);
-    glDrawElements(GL_TRIANGLES, m->num_indices, GL_UNSIGNED_INT, NULL);
+    glDrawElements(GL_TRIANGLES, m->num_indices, GL_UNSIGNED_INT, nullptr);
 }
 
 

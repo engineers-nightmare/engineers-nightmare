@@ -4,7 +4,6 @@
 #include "chunk.h"
 
 #include <glm/glm.hpp> /* ivec3 */
-#include <stdio.h>
 #include <unordered_map>
 
 struct ivec3_hash {
