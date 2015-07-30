@@ -70,6 +70,7 @@ gl_debug_callback(GLenum source __unused,
 
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
+sw_mesh *projectile_sw;
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
 GLuint sky_shader;
 shader_params<per_camera_params> *per_camera;
@@ -84,6 +85,7 @@ unsigned int mouse_buttons[input_mouse_buttons_count];
 int mouse_axes[input_mouse_axes_count];
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
+hw_mesh *projectile_hw;
 text_renderer *text;
 light_field *light;
 entity *use_entity = nullptr;
@@ -129,11 +131,6 @@ struct projectile
     glm::vec3 dir = glm::vec3(0, 0, 0);
     float velocity = 0.f;
 
-    sw_mesh *sw = nullptr;
-    hw_mesh *hw = nullptr;
-    btTriangleMesh *phys_mesh = nullptr;
-    btCollisionShape *phys_shape = nullptr;
-
     ~projectile() {}
         
     void update(float dt) {
@@ -149,6 +146,12 @@ struct projectile
         }
 
         pos = new_pos;
+    }
+
+    void draw() {
+        per_object->val.world_matrix = mat_position(pos);
+        per_object->upload();
+        draw_mesh(projectile_hw);
     }
 };
 
@@ -377,13 +380,12 @@ init()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);         /* pointers given by other libs may not be aligned */
     glEnable(GL_DEPTH_TEST);
 
+    projectile_sw = load_mesh("mesh/cube.obj");
+    set_mesh_material(projectile_sw, 3);
+    projectile_hw = upload_mesh(projectile_sw);
+
     for (int i = 0; i < 200; ++i) {
         auto proj = new projectile();
-
-        proj->sw = load_mesh("mesh/cube.obj");
-        set_mesh_material(proj->sw, 3);
-        proj->hw = upload_mesh(proj->sw);
-
         available_projectiles.push_back(proj);
     }
 
@@ -847,11 +849,7 @@ update()
     glUseProgram(simple_shader);
     for (auto projectile : current_projectiles) {
         projectile->update(dt);
-
-        auto pos = projectile->pos;
-        per_object->val.world_matrix = mat_position(pos);
-        per_object->upload();
-        draw_mesh(projectile->hw);
+        projectile->draw();
     }
     glUseProgram(simple_shader);
     
