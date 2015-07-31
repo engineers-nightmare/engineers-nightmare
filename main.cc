@@ -538,8 +538,8 @@ struct add_block_entity_tool : tool
     explicit add_block_entity_tool(entity_type *type) : type(type) {}
 
     bool can_use(raycast_info *rc) {
-        if (rc->inside)
-            return false; /* n/a */
+        if (!rc->hit || rc->inside)
+            return false;
 
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
@@ -602,6 +602,9 @@ struct add_surface_entity_tool : tool
     add_surface_entity_tool(entity_type *type) : type(type) {}
 
     bool can_use(raycast_info *rc) {
+        if (!rc->hit)
+            return false;
+
         block *bl = rc->block;
 
         int index = normal_to_surface_index(rc);
@@ -675,28 +678,25 @@ struct add_surface_entity_tool : tool
 };
 
 
-struct empty_hands_tool : tool
-{
-    void use(raycast_info *) override {
-    }
-
-    void preview(raycast_info *) override {
-    }
-
-    void get_description(char *str) override {
-        strcpy(str, "(empty hands)");
-    }
-};
-
 struct remove_surface_entity_tool : tool
 {
+    bool can_use(raycast_info *rc) {
+        return rc->hit;
+    }
+
     void use(raycast_info *rc) override {
+        if (!can_use(rc))
+            return;
+
         int index = normal_to_surface_index(rc);
         remove_ents_from_surface(rc->px, rc->py, rc->pz, index^1);
         mark_lightfield_update(rc->px, rc->py, rc->pz);
     }
 
     void preview(raycast_info *rc) override {
+        if (!can_use(rc))
+            return;
+
         int index = normal_to_surface_index(rc);
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
@@ -722,7 +722,7 @@ struct remove_surface_entity_tool : tool
 };
 
 tool *tools[] = {
-    NULL,   /* tool 0 isnt a tool (currently) */
+    tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
     tool::create_remove_block_tool(),
     tool::create_add_surface_tool(surface_wall),
@@ -946,7 +946,7 @@ struct play_state : game_state {
         ship->raycast(pl.eye.x, pl.eye.y, pl.eye.z, pl.dir.x, pl.dir.y, pl.dir.z, &rc);
 
         /* tool use */
-        if (pl.use_tool && rc.hit && t) {
+        if (pl.use_tool && t) {
             t->use(&rc);
         }
 
@@ -1011,7 +1011,6 @@ struct play_state : game_state {
         auto slot8      = get_input(action_slot8)->just_active;
         auto slot9      = get_input(action_slot9)->just_active;
         auto gravity    = get_input(action_gravity)->just_active;
-        auto fire       = get_input(action_fire)->just_active;
         auto use_tool   = get_input(action_use_tool)->just_active;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;
@@ -1039,7 +1038,8 @@ struct play_state : game_state {
         pl.gravity    = gravity;
         pl.use_tool   = use_tool;
 
-        if (fire) {
+        // blech. Tool gets used below, then fire projectile gets hit here
+        if (pl.fire_projectile) {
             if (available_projectiles.size()) {
                 auto proj = available_projectiles.front();
                 available_projectiles.pop_front();
@@ -1049,6 +1049,7 @@ struct play_state : game_state {
                 proj->velocity = 2.f;
                 current_projectiles.push_back(proj);
             }
+            pl.fire_projectile = false;
         }
 
         if (next_tool) {

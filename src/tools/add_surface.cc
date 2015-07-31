@@ -38,6 +38,9 @@ struct add_surface_tool : tool
 
     void use(raycast_info *rc) override
     {
+        if (!rc->hit)
+            return;
+
         block *bl = rc->block;
 
         int index = normal_to_surface_index(rc);
@@ -71,6 +74,9 @@ struct add_surface_tool : tool
 
     void preview(raycast_info *rc) override
     {
+        if (!rc->hit)
+            return;
+
         block *bl = ship->get_block(rc->x, rc->y, rc->z);
         int index = normal_to_surface_index(rc);
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
