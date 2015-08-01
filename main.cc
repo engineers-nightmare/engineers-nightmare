@@ -11,7 +11,6 @@
 #include <algorithm>
 
 #include <unordered_map>
-#include <queue>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -41,6 +40,8 @@
 
 #define MOUSE_Y_LIMIT   1.54
 
+#define MAX_PROJECTILES 200
+
 bool exit_requested = false;
 
 auto hfov = DEG2RAD(90.f);
@@ -68,6 +69,8 @@ gl_debug_callback(GLenum source __unused,
     printf("GL: %s\n", message);
 }
 
+struct projectile;
+
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *projectile_sw;
@@ -89,6 +92,8 @@ hw_mesh *projectile_hw;
 text_renderer *text;
 light_field *light;
 entity *use_entity = nullptr;
+std::vector<projectile*> current_projectiles(MAX_PROJECTILES);
+std::vector<projectile*> available_projectiles;
 
 
 glm::mat4
@@ -130,6 +135,10 @@ struct projectile
     glm::vec3 pos = glm::vec3(0, 0, 0);
     glm::vec3 dir = glm::vec3(0, 0, 0);
     float velocity = 0.f;
+    const float initial_lifetime = 10.f;
+    const float after_collision_lifetime = 0.5f;
+    float lifetime = initial_lifetime;
+    bool alive;
 
     ~projectile() {}
         
@@ -143,9 +152,17 @@ struct projectile
         if (hit.hit) {
             new_pos = hit.hitCoord;
             velocity = 0.f;
+            lifetime = after_collision_lifetime;
         }
 
         pos = new_pos;
+
+        lifetime -= dt;
+        if (lifetime <= 0.f) {
+            alive = false;
+        } else {
+            alive = true;
+        }
     }
 
     void draw() {
@@ -154,9 +171,6 @@ struct projectile
         draw_mesh(projectile_hw);
     }
 };
-
-std::deque<projectile*> current_projectiles;
-std::deque<projectile*> available_projectiles;
 
 struct entity_type
 {
@@ -384,7 +398,7 @@ init()
     set_mesh_material(projectile_sw, 3);
     projectile_hw = upload_mesh(projectile_sw);
 
-    for (int i = 0; i < 200; ++i) {
+    for (int i = 0; i < MAX_PROJECTILES; ++i) {
         auto proj = new projectile();
         available_projectiles.push_back(proj);
     }
@@ -847,10 +861,22 @@ update()
     }
 
     glUseProgram(simple_shader);
-    for (auto projectile : current_projectiles) {
+    for (auto i = 0; i < current_projectiles.size(); ++i) {
+        auto projectile = current_projectiles[i];
+
+        if (projectile == nullptr)
+            continue;
+
         projectile->update(dt);
-        projectile->draw();
+        if (projectile->alive) {
+            projectile->draw();
+        }
+        else {
+            available_projectiles.push_back(projectile);
+            current_projectiles[i] = nullptr;
+        }
     }
+
     glUseProgram(simple_shader);
     
 
@@ -1041,13 +1067,20 @@ struct play_state : game_state {
         // blech. Tool gets used below, then fire projectile gets hit here
         if (pl.fire_projectile) {
             if (available_projectiles.size()) {
-                auto proj = available_projectiles.front();
-                available_projectiles.pop_front();
+                auto proj = available_projectiles.back();
+                available_projectiles.pop_back();
 
                 proj->pos = glm::vec3(pl.eye.x, pl.eye.y, pl.eye.z);
                 proj->dir = pl.dir;
                 proj->velocity = 2.f;
-                current_projectiles.push_back(proj);
+                proj->lifetime = proj->initial_lifetime;
+
+                for (int i = 0; i < current_projectiles.size(); ++i) {
+                    if (current_projectiles[i] == nullptr) {
+                        current_projectiles[i] = proj;
+                        break;
+                    }
+                }
             }
             pl.fire_projectile = false;
         }
@@ -1349,13 +1382,13 @@ main(int, char **)
     run();
 
     for (auto proj : available_projectiles) {
-        available_projectiles.pop_front();
-        delete proj;
+        if (proj != nullptr)
+            delete proj;
     }
 
     for (auto proj : current_projectiles) {
-        current_projectiles.pop_front();
-        delete proj;
+        if (proj != nullptr)
+            delete proj;
     }
 
     return 0;
