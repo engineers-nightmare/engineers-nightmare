@@ -57,22 +57,6 @@ struct ship_space {
 
     topo_info * get_topo_info(int block_x, int block_y, int block_z);
 
-    /* returns a block
-     * finds the block at the position (x,y,z) within
-     * the whole ship_space
-     * will move across chunks
-     * will call ensure_block if needed
-     */
-    block * ensure_and_get_block(int block_x, int block_y, int block_z);
-
-    /* returns the neighbor of a block along a given suface's normal
-     * finds the block at the position (x,y,z) within
-     * the whole ship_space
-     * will move across chunks
-     * will call ensure_block if needed
-     */
-    block * get_block_neighbor(int block_x, int block_y, int block_z, enum surface_index si);
-
     /* returns the chunk containing the block denotated by (x, y, z)
      * or null
      */
