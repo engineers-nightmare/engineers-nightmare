@@ -104,6 +104,7 @@ struct ship_space {
     void ensure_chunk(int chunk_x, int chunk_y, int chunk_z);
 
     zone_info *get_zone_info(topo_info *t);
+    void insert_zone(topo_info *t, zone_info *z);
 
     /* topo info for open vacuum, so we know what pressure to force to zero */
     topo_info outside_topo_info;
