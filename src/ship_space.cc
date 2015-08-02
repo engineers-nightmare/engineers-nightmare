@@ -544,16 +544,11 @@ void
 ship_space::ensure_chunk(int chunk_x, int chunk_y, int chunk_z)
 {
     glm::ivec3 v(chunk_x, chunk_y, chunk_z);
-
-    /* if count is 0 then we do not contain this key */
-    if( ! this->chunks.count(v) ){
-        /* if this is an insert then we need to also
-         * keep track of our min/max bounds
-         */
+    /* automatically creates the entry if not present */
+    auto &ch = this->chunks[v];
+    if (!ch) {
+        ch = new chunk();
         this->_maintain_bounds(chunk_x, chunk_y, chunk_z);
-
-        /* operator[] will create an element */
-        this->chunks[v] = new chunk();
     }
 }
 
