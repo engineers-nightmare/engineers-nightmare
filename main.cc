@@ -475,6 +475,14 @@ init()
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
 
+    ship->rebuild_topology();
+
+    printf("Ship is %u chunks, %d..%d %d..%d %d..%d\n",
+            (unsigned) ship->chunks.size(),
+            ship->min_x, ship->max_x,
+            ship->min_y, ship->max_y,
+            ship->min_z, ship->max_z);
+
     game_settings = load_settings(en_config_base);
     en_settings user_settings = load_settings(en_config_user);
     game_settings.merge_with(user_settings);
