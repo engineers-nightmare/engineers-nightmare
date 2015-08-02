@@ -5,7 +5,8 @@
 
 /* create a ship space of x * y * z instantiated chunks */
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
-    : min_x(0), min_y(0), min_z(0), num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
+    : min_x(0), min_y(0), min_z(0), num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0),
+      num_false_splits(0)
 {
     unsigned int x = 0,
                  y = 0,
@@ -31,7 +32,7 @@ ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
 /* create an empty ship_space */
 ship_space::ship_space(void)
     : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0),
-      num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
+      num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0), num_false_splits(0)
 {
 }
 
@@ -442,6 +443,15 @@ ship_space::update_topology_for_add_surface(int x, int y, int z, int px, int py,
 
     /* we do need to split */
     rebuild_topology();
+
+    topo_info *t1 = topo_find(get_topo_info(x, y, z));
+    topo_info *t2 = topo_find(get_topo_info(px, py, pz));
+    if (t1 == t2) {
+        /* we blew it. we didn't actually split the space, but we did
+         * all the work anyway. this is mostly interesting if you're
+         * tweaking exists_alt_path. */
+        num_false_splits++;
+    }
 }
 
 static glm::ivec3 dirs[] = {
