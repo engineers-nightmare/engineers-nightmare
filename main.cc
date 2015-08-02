@@ -206,6 +206,9 @@ struct entity
         printf("player using the %s at %d %d %d\n",
                type->name, x, y, z);
     }
+
+    void tick() {
+    }
 };
 
 
@@ -790,6 +793,13 @@ update()
 
     /* TODO: only do this when needed */
     ship->rebuild_topology();
+
+    /* allow the entities to tick */
+    for (auto ch : ship->chunks) {
+        for (auto e : ch.second->entities) {
+            e->tick();
+        }
+    }
 
     world_textures->bind(0);
 
