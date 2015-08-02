@@ -116,6 +116,16 @@ ship_space::get_topo_info(int block_x, int block_y, int block_z)
     return c->topo.get(wb_x, wb_y, wb_z);
 }
 
+zone_info *
+ship_space::get_zone_info(topo_info *t)
+{
+    auto it = zones.find(t);
+    if (it == zones.end())
+        return nullptr;
+
+    return it->second;
+}
+
 /* returns the chunk containing the block denotated by (x, y, z)
  * or null
  */

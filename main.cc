@@ -172,6 +172,8 @@ struct entity_type
     char const *name;
     btTriangleMesh *phys_mesh;
     btCollisionShape *phys_shape;
+    float add_air_amount;
+    float max_air_pressure;
 };
 
 
@@ -945,11 +947,14 @@ struct play_state : game_state {
 
             topo_info *t = topo_find(ship->get_topo_info(plx, ply, plz));
             topo_info *outside = topo_find(&ship->outside_topo_info);
+            zone_info *z = ship->get_zone_info(t);
+            float pressure = z ? (z->air_amount / t->size) : 0.0f;
+
             if (t != outside) {
-                sprintf(buf2, "[INSIDE %p %d]", t, t->size);
+                sprintf(buf2, "[INSIDE %p %d %.1f atmo]", t, t->size, pressure);
             }
             else {
-                sprintf(buf2, "[OUTSIDE %p %d]", t, t->size);
+                sprintf(buf2, "[OUTSIDE %p %d %.1f atmo]", t, t->size, pressure);
             }
 
             w = 0; h = 0;
