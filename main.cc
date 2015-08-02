@@ -793,6 +793,16 @@ update()
     /* rebuild lighting if needed */
     update_lightfield();
 
+    /* remove any air that someone managed to get into the outside */
+    {
+        topo_info *t = topo_find(&ship->outside_topo_info);
+        zone_info *z = ship->get_zone_info(t);
+        if (z) {
+            /* try as hard as you like, you cannot fill space with your air system */
+            z->air_amount = 0;
+        }
+    }
+
     /* allow the entities to tick */
     for (auto ch : ship->chunks) {
         for (auto e : ch.second->entities) {
