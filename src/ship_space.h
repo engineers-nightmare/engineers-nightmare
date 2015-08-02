@@ -101,7 +101,6 @@ struct ship_space {
     void rebuild_topology();
     void update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz, int face);
     void update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face);
-    bool topo_dirty;
 
     int num_full_rebuilds;
     int num_fast_unifys;

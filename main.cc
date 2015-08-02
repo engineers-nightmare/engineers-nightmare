@@ -791,9 +791,6 @@ update()
     /* rebuild lighting if needed */
     update_lightfield();
 
-    /* TODO: only do this when needed */
-    ship->rebuild_topology();
-
     /* allow the entities to tick */
     for (auto ch : ship->chunks) {
         for (auto e : ch.second->entities) {

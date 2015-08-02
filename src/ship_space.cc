@@ -5,7 +5,7 @@
 
 /* create a ship space of x * y * z instantiated chunks */
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
-    : min_x(0), min_y(0), min_z(0), topo_dirty(true), num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
+    : min_x(0), min_y(0), min_z(0), num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
 {
     unsigned int x = 0,
                  y = 0,
@@ -30,7 +30,7 @@ ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
 
 /* create an empty ship_space */
 ship_space::ship_space(void)
-    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0), topo_dirty(true),
+    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0),
       num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
 {
 }
@@ -356,11 +356,6 @@ topo_unite(topo_info *from, topo_info *to)
 void
 ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz, int face)
 {
-    if (topo_dirty) {
-        /* if we already dirtied it, we cant assume anything. just take the rebuild */
-        return;
-    }
-
     topo_info *t = topo_find(get_topo_info(x, y, z));
     topo_info *u = topo_find(get_topo_info(px, py, pz));
 
@@ -426,11 +421,6 @@ exists_alt_path(int x, int y, int z, block *a, block *b, ship_space *ship, int f
 void
 ship_space::update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face)
 {
-    if (topo_dirty) {
-        /* if we already dirtied it, we cant assume anything. just take the rebuild */
-        return;
-    }
-
     /* can this surface even split (does it block atmo?) */
     if (get_block(x, y, z)->surfs[face] != surface_wall)
         return;
@@ -447,10 +437,11 @@ ship_space::update_topology_for_add_surface(int x, int y, int z, int px, int py,
     /* try to quickly prove that we don't divide space */
     if (exists_alt_path(x, y, z, get_block(x, y, z), get_block(px, py, pz), this, face)) {
         num_fast_nosplits++;
+        return;
     }
-    else {
-        topo_dirty = true;
-    }
+
+    /* we do need to split */
+    rebuild_topology();
 }
 
 static glm::ivec3 dirs[] = {
@@ -470,10 +461,6 @@ static glm::ivec3 dirs[] = {
 void
 ship_space::rebuild_topology()
 {
-    if (!topo_dirty)
-        return;
-    topo_dirty = false;
-
     num_full_rebuilds++;
 
     /* 1/ initially, every block is its own subtree */
