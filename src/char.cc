@@ -47,63 +47,61 @@ getNormalizedVector(const btVector3& v)
 /// -> Should integrate falling velocity manually and use that in stepDown()
 ///Support jumping
 ///Support ducking
-class btKinematicClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
+class en_ray_result_callback : public btCollisionWorld::ClosestRayResultCallback
 {
-    public:
-        btKinematicClosestNotMeRayResultCallback (btCollisionObject* me) : btCollisionWorld::ClosestRayResultCallback(btVector3(0.0, 0.0, 0.0), btVector3(0.0, 0.0, 0.0))
-    {
-        m_me = me;
+public:
+    en_ray_result_callback (btCollisionObject* me)
+        : btCollisionWorld::ClosestRayResultCallback(btVector3(0.0, 0.0, 0.0), btVector3(0.0, 0.0, 0.0)),
+        m_me(me) {}
+
+    btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) override {
+        if (rayResult.m_collisionObject == m_me)
+            return 1.0;
+
+        return ClosestRayResultCallback::addSingleResult (rayResult, normalInWorldSpace);
     }
 
-        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult,bool normalInWorldSpace) override {
-            if (rayResult.m_collisionObject == m_me)
-                return 1.0;
-
-            return ClosestRayResultCallback::addSingleResult (rayResult, normalInWorldSpace);
-        }
-    protected:
-        btCollisionObject* m_me;
+protected:
+    btCollisionObject* m_me;
 };
 
-class btKinematicClosestNotMeConvexResultCallback : public btCollisionWorld::ClosestConvexResultCallback
+class en_convex_result_callback : public btCollisionWorld::ClosestConvexResultCallback
 {
-    public:
-        btKinematicClosestNotMeConvexResultCallback (btCollisionObject* me, const btVector3& up, btScalar minSlopeDot)
-            : btCollisionWorld::ClosestConvexResultCallback(btVector3(0.0, 0.0, 0.0), btVector3(0.0, 0.0, 0.0))
-              , m_me(me)
-              , m_up(up)
-              , m_minSlopeDot(minSlopeDot)
-    {
-    }
+public:
+    en_convex_result_callback (btCollisionObject* me, const btVector3& up, btScalar minSlopeDot)
+        : btCollisionWorld::ClosestConvexResultCallback(btVector3(0.0, 0.0, 0.0), btVector3(0.0, 0.0, 0.0)),
+        m_me(me),
+        m_up(up),
+        m_minSlopeDot(minSlopeDot) {}
 
-        virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace) override {
-            if (convexResult.m_hitCollisionObject == m_me)
-                return btScalar(1.0);
+    virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace) override {
+        if (convexResult.m_hitCollisionObject == m_me)
+            return btScalar(1.0);
 
-            if (!convexResult.m_hitCollisionObject->hasContactResponse())
-                return btScalar(1.0);
+        if (!convexResult.m_hitCollisionObject->hasContactResponse())
+            return btScalar(1.0);
 
-            btVector3 hitNormalWorld;
-            if (normalInWorldSpace)
-            {
-                hitNormalWorld = convexResult.m_hitNormalLocal;
-            } else
-            {
-                ///need to transform normal into worldspace
-                hitNormalWorld = convexResult.m_hitCollisionObject->getWorldTransform().getBasis()*convexResult.m_hitNormalLocal;
-            }
-
-            btScalar dotUp = m_up.dot(hitNormalWorld);
-            if (dotUp < m_minSlopeDot) {
-                return btScalar(1.0);
-            }
-
-            return ClosestConvexResultCallback::addSingleResult (convexResult, normalInWorldSpace);
+        btVector3 hitNormalWorld;
+        if (normalInWorldSpace)
+        {
+            hitNormalWorld = convexResult.m_hitNormalLocal;
+        } else
+        {
+            ///need to transform normal into worldspace
+            hitNormalWorld = convexResult.m_hitCollisionObject->getWorldTransform().getBasis()*convexResult.m_hitNormalLocal;
         }
-    protected:
-        btCollisionObject* m_me;
-        const btVector3 m_up;
-        btScalar m_minSlopeDot;
+
+        btScalar dotUp = m_up.dot(hitNormalWorld);
+        if (dotUp < m_minSlopeDot) {
+            return btScalar(1.0);
+        }
+
+        return ClosestConvexResultCallback::addSingleResult (convexResult, normalInWorldSpace);
+    }
+protected:
+    btCollisionObject* m_me;
+    const btVector3 m_up;
+    btScalar m_minSlopeDot;
 };
 
 /*
@@ -262,7 +260,7 @@ void en_char_controller::stepUp ( btCollisionWorld* world)
     start.setOrigin (m_currentPosition + getUpAxisDirections()[m_upAxis] * (m_currentShape->getMargin() + m_addedMargin));
     end.setOrigin (m_targetPosition);
 
-    btKinematicClosestNotMeConvexResultCallback callback (m_ghostObject, -getUpAxisDirections()[m_upAxis], btScalar(0.7071));
+    en_convex_result_callback callback(m_ghostObject, -getUpAxisDirections()[m_upAxis], btScalar(0.7071));
     callback.m_collisionFilterGroup = getGhostObject()->getBroadphaseHandle()->m_collisionFilterGroup;
     callback.m_collisionFilterMask = getGhostObject()->getBroadphaseHandle()->m_collisionFilterMask;
 
@@ -363,7 +361,7 @@ void en_char_controller::stepForwardAndStrafe ( btCollisionWorld* collisionWorld
         end.setOrigin (m_targetPosition);
         btVector3 sweepDirNegative(m_currentPosition - m_targetPosition);
 
-        btKinematicClosestNotMeConvexResultCallback callback (m_ghostObject, sweepDirNegative, btScalar(0.0));
+        en_convex_result_callback callback(m_ghostObject, sweepDirNegative, btScalar(0.0));
         callback.m_collisionFilterGroup = getGhostObject()->getBroadphaseHandle()->m_collisionFilterGroup;
         callback.m_collisionFilterMask = getGhostObject()->getBroadphaseHandle()->m_collisionFilterMask;
 
@@ -444,11 +442,11 @@ void en_char_controller::stepDown ( btCollisionWorld* collisionWorld, btScalar d
     btVector3 step_drop = getUpAxisDirections()[m_upAxis] * (m_currentStepOffset + downVelocity);
     m_targetPosition -= step_drop;
 
-    btKinematicClosestNotMeConvexResultCallback callback (m_ghostObject, getUpAxisDirections()[m_upAxis], m_maxSlopeCosine);
+    en_convex_result_callback callback(m_ghostObject, getUpAxisDirections()[m_upAxis], m_maxSlopeCosine);
     callback.m_collisionFilterGroup = getGhostObject()->getBroadphaseHandle()->m_collisionFilterGroup;
     callback.m_collisionFilterMask = getGhostObject()->getBroadphaseHandle()->m_collisionFilterMask;
 
-    btKinematicClosestNotMeConvexResultCallback callback2 (m_ghostObject, getUpAxisDirections()[m_upAxis], m_maxSlopeCosine);
+    en_convex_result_callback callback2(m_ghostObject, getUpAxisDirections()[m_upAxis], m_maxSlopeCosine);
     callback2.m_collisionFilterGroup = getGhostObject()->getBroadphaseHandle()->m_collisionFilterGroup;
     callback2.m_collisionFilterMask = getGhostObject()->getBroadphaseHandle()->m_collisionFilterMask;
 
@@ -829,7 +827,7 @@ bool en_char_controller::can_stand(btCollisionWorld *collisionWorld)
     btVector3 endOrigin = m_currentPosition + btVector3(0, 0, +0.6);    /* hack */
     end.setOrigin(endOrigin);
 
-    btKinematicClosestNotMeConvexResultCallback callback(m_ghostObject, -getUpAxisDirections()[m_upAxis],
+    en_convex_result_callback callback(m_ghostObject, -getUpAxisDirections()[m_upAxis],
             m_maxSlopeCosine);
 
     callback.m_collisionFilterGroup = m_ghostObject->getBroadphaseHandle()->m_collisionFilterGroup;
@@ -866,7 +864,7 @@ void en_char_controller::stand(btCollisionWorld *collisionWorld)
 entity *
 phys_raycast(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollisionWorld *world)
 {
-    btKinematicClosestNotMeRayResultCallback callback(ignore);
+    en_ray_result_callback callback(ignore);
     world->rayTest(btVector3(start.x, start.y, start.z),
                    btVector3(end.x, end.y, end.z), callback);
 
