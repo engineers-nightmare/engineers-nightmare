@@ -140,9 +140,8 @@ struct projectile
     bool update(float dt) {
         auto new_pos = pos + dir * velocity * dt;
 
-        auto hit = phys_raycast_generic(pos.x, pos.y, pos.z,
-            dir.x, dir.y, dir.z,
-            glm::length(new_pos - pos), phy->ghostObj, phy->dynamicsWorld);
+        auto hit = phys_raycast_generic(pos, new_pos,
+            phy->ghostObj, phy->dynamicsWorld);
 
         if (hit.hit) {
             new_pos = hit.hitCoord;

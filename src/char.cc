@@ -877,17 +877,14 @@ phys_raycast(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollis
 
 /* Not part of CC, but reuses the same callbacks etc. */
 generic_raycast_info
-phys_raycast_generic(float ox, float oy, float oz,
-float dx, float dy, float dz, float max_distance,
-btCollisionObject *ignore, btCollisionWorld *world)
+phys_raycast_generic(glm::vec3 start_, glm::vec3 end_,
+        btCollisionObject *ignore, btCollisionWorld *world)
 {
     generic_raycast_info result;
     result.hit = false;
 
-    btVector3 start(ox, oy, oz);
-    btVector3 end(ox + max_distance * dx,
-        oy + max_distance * dy,
-        oz + max_distance * dz);
+    btVector3 start(start_.x, start_.y, start_.z);
+    btVector3 end(end_.x, end_.y, end_.z);
 
     btCollisionWorld::ClosestRayResultCallback callback(start, end);
     world->rayTest(start, end, callback);
