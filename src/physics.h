@@ -71,11 +71,9 @@ teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, b
 struct entity;
 
 entity *
-phys_raycast(float ox, float oy, float oz,
-             float dx, float dy, float dz, float max_distance,
+phys_raycast(glm::vec3 start, glm::vec3 end,
              btCollisionObject *ignore, btCollisionWorld *world);
 
 generic_raycast_info
-phys_raycast_generic(float ox, float oy, float oz,
-                     float dx, float dy, float dz, float max_distance,
+phys_raycast_generic(glm::vec3 start, glm::vec3 end,
                      btCollisionObject *ignore, btCollisionWorld *world);

@@ -69,8 +69,6 @@ gl_debug_callback(GLenum source __unused,
     printf("GL: %s\n", message);
 }
 
-struct projectile;
-
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *projectile_sw;
@@ -92,8 +90,6 @@ hw_mesh *projectile_hw;
 text_renderer *text;
 light_field *light;
 entity *use_entity = nullptr;
-std::vector<projectile*> current_projectiles(MAX_PROJECTILES);
-std::vector<projectile*> available_projectiles;
 
 
 glm::mat4
@@ -135,19 +131,17 @@ struct projectile
     glm::vec3 pos = glm::vec3(0, 0, 0);
     glm::vec3 dir = glm::vec3(0, 0, 0);
     float velocity = 0.f;
-    const float initial_lifetime = 10.f;
-    const float after_collision_lifetime = 0.5f;
     float lifetime = initial_lifetime;
-    bool alive;
 
-    ~projectile() {}
-        
-    void update(float dt) {
+    static constexpr float initial_lifetime = 10.f;
+    static constexpr float after_collision_lifetime = 0.5f;
+
+    /* Returns true if still alive */
+    bool update(float dt) {
         auto new_pos = pos + dir * velocity * dt;
 
-        auto hit = phys_raycast_generic(pos.x, pos.y, pos.z,
-            dir.x, dir.y, dir.z,
-            glm::length(new_pos - pos), phy->ghostObj, phy->dynamicsWorld);
+        auto hit = phys_raycast_generic(pos, new_pos,
+            phy->ghostObj, phy->dynamicsWorld);
 
         if (hit.hit) {
             new_pos = hit.hitCoord;
@@ -158,11 +152,7 @@ struct projectile
         pos = new_pos;
 
         lifetime -= dt;
-        if (lifetime <= 0.f) {
-            alive = false;
-        } else {
-            alive = true;
-        }
+        return lifetime > 0.f;
     }
 
     void draw() {
@@ -171,6 +161,9 @@ struct projectile
         draw_mesh(projectile_hw);
     }
 };
+
+projectile *projectiles = new projectile[MAX_PROJECTILES];
+unsigned num_projectiles = 0;
 
 struct entity_type
 {
@@ -397,11 +390,6 @@ init()
     projectile_sw = load_mesh("mesh/cube.obj");
     set_mesh_material(projectile_sw, 3);
     projectile_hw = upload_mesh(projectile_sw);
-
-    for (int i = 0; i < MAX_PROJECTILES; ++i) {
-        auto proj = new projectile();
-        available_projectiles.push_back(proj);
-    }
 
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
 
@@ -788,7 +776,7 @@ update()
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->val.inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
     per_camera->upload();
-    
+
     /* rebuild lighting if needed */
     update_lightfield();
 
@@ -860,21 +848,21 @@ update()
         pl.ui_dirty = false;
     }
 
-    glUseProgram(simple_shader);
-    for (auto i = 0u; i < current_projectiles.size(); ++i) {
-        auto projectile = current_projectiles[i];
-
-        if (projectile == nullptr)
-            continue;
-
-        projectile->update(dt);
-        if (projectile->alive) {
-            projectile->draw();
+    /* update the projectiles */
+    for (auto i = 0u; i < num_projectiles;) {
+        if (projectiles[i].update(dt)) {
+            ++i;
         }
         else {
-            available_projectiles.push_back(projectile);
-            current_projectiles[i] = nullptr;
+            projectiles[i] = projectiles[--num_projectiles];
         }
+    }
+
+    glUseProgram(simple_shader);
+
+    /* draw the projectiles */
+    for (auto i = 0u; i < num_projectiles; i++) {
+        projectiles[i].draw();
     }
 
     glUseProgram(simple_shader);
@@ -968,7 +956,7 @@ struct play_state : game_state {
 
         /* both tool use and overlays need the raycast itself */
         raycast_info rc;
-        ship->raycast(pl.eye.x, pl.eye.y, pl.eye.z, pl.dir.x, pl.dir.y, pl.dir.z, &rc);
+        ship->raycast(pl.eye, pl.dir, &rc);
 
         /* tool use */
         if (pl.use_tool && t) {
@@ -976,9 +964,8 @@ struct play_state : game_state {
         }
 
         /* interact with ents */
-        entity *hit_ent = phys_raycast(pl.eye.x, pl.eye.y, pl.eye.z,
-                                       pl.dir.x, pl.dir.y, pl.dir.z,
-                                       2 /* dist */, phy->ghostObj, phy->dynamicsWorld);
+        entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
+                                       phy->ghostObj, phy->dynamicsWorld);
 
         if (hit_ent != use_entity) {
             use_entity = hit_ent;
@@ -1065,23 +1052,15 @@ struct play_state : game_state {
 
         // blech. Tool gets used below, then fire projectile gets hit here
         if (pl.fire_projectile) {
-            if (available_projectiles.size()) {
-                auto proj = available_projectiles.back();
-                available_projectiles.pop_back();
+            if (num_projectiles < MAX_PROJECTILES) {
+                auto & proj = projectiles[num_projectiles++];
+                proj.pos = pl.eye;
+                proj.dir = pl.dir;
+                proj.velocity = 2.f;
+                proj.lifetime = proj.initial_lifetime;
 
-                proj->pos = glm::vec3(pl.eye.x, pl.eye.y, pl.eye.z);
-                proj->dir = pl.dir;
-                proj->velocity = 2.f;
-                proj->lifetime = proj->initial_lifetime;
-
-                for (auto i = 0u; i < current_projectiles.size(); ++i) {
-                    if (current_projectiles[i] == nullptr) {
-                        current_projectiles[i] = proj;
-                        break;
-                    }
-                }
+                pl.fire_projectile = false;
             }
-            pl.fire_projectile = false;
         }
 
         if (next_tool) {
@@ -1380,15 +1359,7 @@ main(int, char **)
 
     run();
 
-    for (auto proj : available_projectiles) {
-        if (proj != nullptr)
-            delete proj;
-    }
-
-    for (auto proj : current_projectiles) {
-        if (proj != nullptr)
-            delete proj;
-    }
+    delete [] projectiles;
 
     return 0;
 }
