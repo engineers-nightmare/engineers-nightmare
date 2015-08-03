@@ -861,7 +861,7 @@ update()
     }
 
     glUseProgram(simple_shader);
-    for (auto i = 0; i < current_projectiles.size(); ++i) {
+    for (auto i = 0u; i < current_projectiles.size(); ++i) {
         auto projectile = current_projectiles[i];
 
         if (projectile == nullptr)
@@ -878,7 +878,6 @@ update()
     }
 
     glUseProgram(simple_shader);
-    
 
     glDisable(GL_DEPTH_TEST);
 
@@ -1075,7 +1074,7 @@ struct play_state : game_state {
                 proj->velocity = 2.f;
                 proj->lifetime = proj->initial_lifetime;
 
-                for (int i = 0; i < current_projectiles.size(); ++i) {
+                for (auto i = 0u; i < current_projectiles.size(); ++i) {
                     if (current_projectiles[i] == nullptr) {
                         current_projectiles[i] = proj;
                         break;
