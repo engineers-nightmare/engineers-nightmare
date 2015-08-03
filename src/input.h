@@ -65,6 +65,7 @@ enum en_action : int {
     action_slot7,
     action_slot8,
     action_slot9,
+    action_slot0,
 
     num_actions,
 };
@@ -102,11 +103,12 @@ static const action_lookup_t action_lookup_table[] = {
     { "action_slot7",        action_slot7 },
     { "action_slot8",        action_slot8 },
     { "action_slot9",        action_slot9 },
+    { "action_slot0",        action_slot0 },
 };
 
 /* fairly ugly. non-keyboard inputs go at bottom
  * keyboard entries trimmed down from SDL list
- * 
+ *
  * In order to use these as indexes into arrays
  * (aside from keyboard keys, they shouldn't be indexed)
  * We must ensure that the start of each group == first
@@ -226,7 +228,7 @@ enum en_input : int {
     input_rshift                = SDL_SCANCODE_RSHIFT,
     input_ralt                  = SDL_SCANCODE_RALT,
     input_rgui                  = SDL_SCANCODE_RGUI,
-                                
+
     input_keyboard_keys_end     = input_rgui,
     /* end of keyboard buttons */
 
@@ -244,7 +246,7 @@ enum en_input : int {
 
     input_mouse_buttons_end     = input_mouse_wheelup,
     /* end of mouse buttons */
-    
+
     input_mouse_axes_start,
 
     input_mouse_x               = input_mouse_axes_start,

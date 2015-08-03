@@ -1030,6 +1030,7 @@ struct play_state : game_state {
         auto slot7      = get_input(action_slot7)->just_active;
         auto slot8      = get_input(action_slot8)->just_active;
         auto slot9      = get_input(action_slot9)->just_active;
+        auto slot0      = get_input(action_slot0)->just_active;
         auto gravity    = get_input(action_gravity)->just_active;
         auto use_tool   = get_input(action_use_tool)->just_active;
         auto next_tool  = get_input(action_tool_next)->just_active;
@@ -1087,6 +1088,7 @@ struct play_state : game_state {
         if (slot7) set_slot(7);
         if (slot8) set_slot(8);
         if (slot9) set_slot(9);
+        if (slot0) set_slot(0);
 
         /* limit to unit vector */
         float len = glm::length(pl.move);
