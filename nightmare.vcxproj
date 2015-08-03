@@ -72,8 +72,8 @@
         copy /y "$(SolutionDir)windows-dependencies\mman-win32\bin\*.dll" "$(OutputPath)"
         copy /y "$(SolutionDir)windows-dependencies\epoxy\win32\bin\*.dll" "$(OutputPath)"
         copy /y "$(SolutionDir)windows-dependencies\freetype6\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\libconfig\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\sdl2\lib\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\libconfig\bin\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\sdl2\bin\*.dll" "$(OutputPath)"
         copy /y "$(SolutionDir)windows-dependencies\sdl2_image\bin\x86\*.dll" "$(OutputPath)"
       </Command>
     </PostBuildEvent>
@@ -106,8 +106,8 @@
         copy /y "$(SolutionDir)windows-dependencies\mman-win32\bin\*.dll" "$(OutputPath)"
         copy /y "$(SolutionDir)windows-dependencies\epoxy\win32\bin\*.dll" "$(OutputPath)"
         copy /y "$(SolutionDir)windows-dependencies\freetype6\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\libconfig\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\sdl2\lib\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\libconfig\bin\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\sdl2\bin\*.dll" "$(OutputPath)"
         copy /y "$(SolutionDir)windows-dependencies\sdl2_image\bin\x86\*.dll" "$(OutputPath)"
       </Command>
     </PostBuildEvent>
