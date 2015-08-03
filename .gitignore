@@ -9,6 +9,7 @@ scratch
 test_bin
 libNIGHTMARE.a
 Testing
+windows-dependencies
 
 # Sublime Text
 # workspace files are user-specific
