@@ -965,9 +965,8 @@ struct play_state : game_state {
         }
 
         /* interact with ents */
-        entity *hit_ent = phys_raycast(pl.eye.x, pl.eye.y, pl.eye.z,
-                                       pl.dir.x, pl.dir.y, pl.dir.z,
-                                       2 /* dist */, phy->ghostObj, phy->dynamicsWorld);
+        entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
+                                       phy->ghostObj, phy->dynamicsWorld);
 
         if (hit_ent != use_entity) {
             use_entity = hit_ent;

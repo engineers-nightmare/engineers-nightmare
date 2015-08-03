@@ -864,16 +864,11 @@ void en_char_controller::stand(btCollisionWorld *collisionWorld)
 
 /* Not part of CC, but reuses the same callbacks etc. */
 entity *
-phys_raycast(float ox, float oy, float oz, float dx, float dy, float dz, float max_distance,
-btCollisionObject *ignore, btCollisionWorld *world)
+phys_raycast(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollisionWorld *world)
 {
-    btVector3 start(ox, oy, oz);
-    btVector3 end(ox + max_distance * dx,
-        oy + max_distance * dy,
-        oz + max_distance * dz);
-
     btKinematicClosestNotMeRayResultCallback callback(ignore);
-    world->rayTest(start, end, callback);
+    world->rayTest(btVector3(start.x, start.y, start.z),
+                   btVector3(end.x, end.y, end.z), callback);
 
     if (callback.hasHit()) {
         return (entity *)callback.m_collisionObject->getUserPointer();
