@@ -40,6 +40,8 @@
 
 #define MOUSE_Y_LIMIT   1.54
 
+#define MAX_PROJECTILES 200
+
 bool exit_requested = false;
 
 auto hfov = DEG2RAD(90.f);
@@ -53,6 +55,7 @@ struct wnd {
     int height;
 } wnd;
 
+Uint32 last_frame_time = 0;
 
 void GLAPIENTRY
 gl_debug_callback(GLenum source __unused,
@@ -66,9 +69,12 @@ gl_debug_callback(GLenum source __unused,
     printf("GL: %s\n", message);
 }
 
+struct projectile;
+
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
-GLuint simple_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
+sw_mesh *projectile_sw;
+GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
 GLuint sky_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
@@ -82,15 +88,24 @@ unsigned int mouse_buttons[input_mouse_buttons_count];
 int mouse_axes[input_mouse_axes_count];
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
+hw_mesh *projectile_hw;
 text_renderer *text;
 light_field *light;
-entity *use_entity = 0;
+entity *use_entity = nullptr;
+std::vector<projectile*> current_projectiles(MAX_PROJECTILES);
+std::vector<projectile*> available_projectiles;
 
 
 glm::mat4
 mat_position(float x, float y, float z)
 {
     return glm::translate(glm::mat4(1), glm::vec3(x, y, z));
+}
+
+glm::mat4
+mat_position(glm::vec3 pos)
+{
+    return glm::translate(glm::mat4(1), pos);
 }
 
 glm::mat4
@@ -115,6 +130,47 @@ mat_block_face(int x, int y, int z, int face)
     }
 }
 
+struct projectile
+{
+    glm::vec3 pos = glm::vec3(0, 0, 0);
+    glm::vec3 dir = glm::vec3(0, 0, 0);
+    float velocity = 0.f;
+    const float initial_lifetime = 10.f;
+    const float after_collision_lifetime = 0.5f;
+    float lifetime = initial_lifetime;
+    bool alive;
+
+    ~projectile() {}
+        
+    void update(float dt) {
+        auto new_pos = pos + dir * velocity * dt;
+
+        auto hit = phys_raycast_generic(pos.x, pos.y, pos.z,
+            dir.x, dir.y, dir.z,
+            glm::length(new_pos - pos), phy->ghostObj, phy->dynamicsWorld);
+
+        if (hit.hit) {
+            new_pos = hit.hitCoord;
+            velocity = 0.f;
+            lifetime = after_collision_lifetime;
+        }
+
+        pos = new_pos;
+
+        lifetime -= dt;
+        if (lifetime <= 0.f) {
+            alive = false;
+        } else {
+            alive = true;
+        }
+    }
+
+    void draw() {
+        per_object->val.world_matrix = mat_position(pos);
+        per_object->upload();
+        draw_mesh(projectile_hw);
+    }
+};
 
 struct entity_type
 {
@@ -292,7 +348,7 @@ struct game_state {
     virtual ~game_state() {}
 
     virtual void handle_input() = 0;
-    virtual void update() = 0;
+    virtual void update(float dt) = 0;
     virtual void rebuild_ui() = 0;
 
     static game_state *create_play_state();
@@ -338,6 +394,15 @@ init()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);         /* pointers given by other libs may not be aligned */
     glEnable(GL_DEPTH_TEST);
 
+    projectile_sw = load_mesh("mesh/cube.obj");
+    set_mesh_material(projectile_sw, 3);
+    projectile_hw = upload_mesh(projectile_sw);
+
+    for (int i = 0; i < MAX_PROJECTILES; ++i) {
+        auto proj = new projectile();
+        available_projectiles.push_back(proj);
+    }
+
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
 
     surfs_sw[surface_xp] = load_mesh("mesh/x_quad_p.obj");
@@ -369,6 +434,7 @@ init()
     build_static_physics_mesh(entity_types[2].sw, &entity_types[2].phys_mesh, &entity_types[2].phys_shape);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
+    unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/unlit.frag");
     remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/unlit.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
@@ -486,8 +552,8 @@ struct add_block_entity_tool : tool
     explicit add_block_entity_tool(entity_type *type) : type(type) {}
 
     bool can_use(raycast_info *rc) {
-        if (rc->inside)
-            return false; /* n/a */
+        if (!rc->hit || rc->inside)
+            return false;
 
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
@@ -550,6 +616,9 @@ struct add_surface_entity_tool : tool
     add_surface_entity_tool(entity_type *type) : type(type) {}
 
     bool can_use(raycast_info *rc) {
+        if (!rc->hit)
+            return false;
+
         block *bl = rc->block;
 
         int index = normal_to_surface_index(rc);
@@ -623,28 +692,25 @@ struct add_surface_entity_tool : tool
 };
 
 
-struct empty_hands_tool : tool
-{
-    void use(raycast_info *) override {
-    }
-
-    void preview(raycast_info *) override {
-    }
-
-    void get_description(char *str) override {
-        strcpy(str, "(empty hands)");
-    }
-};
-
 struct remove_surface_entity_tool : tool
 {
+    bool can_use(raycast_info *rc) {
+        return rc->hit;
+    }
+
     void use(raycast_info *rc) override {
+        if (!can_use(rc))
+            return;
+
         int index = normal_to_surface_index(rc);
         remove_ents_from_surface(rc->px, rc->py, rc->pz, index^1);
         mark_lightfield_update(rc->px, rc->py, rc->pz);
     }
 
     void preview(raycast_info *rc) override {
+        if (!can_use(rc))
+            return;
+
         int index = normal_to_surface_index(rc);
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
@@ -670,7 +736,7 @@ struct remove_surface_entity_tool : tool
 };
 
 tool *tools[] = {
-    NULL,   /* tool 0 isnt a tool (currently) */
+    tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
     tool::create_remove_block_tool(),
     tool::create_add_surface_tool(surface_wall),
@@ -698,6 +764,11 @@ add_text_with_outline(char const *s, float x, float y, float r = 1, float g = 1,
 void
 update()
 {
+    Uint32 now = SDL_GetTicks();
+    // frame delta time in seconds
+    float dt = (now - last_frame_time) / 1000.f;
+    last_frame_time = now;
+
     float depthClearValue = 1.0f;
     glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
 
@@ -717,7 +788,7 @@ update()
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->val.inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
     per_camera->upload();
-
+    
     /* rebuild lighting if needed */
     update_lightfield();
 
@@ -771,7 +842,7 @@ update()
         }
     }
 
-    state->update();
+    state->update(dt);
 
     /* draw the sky */
     glUseProgram(sky_shader);
@@ -788,6 +859,25 @@ update()
         text->upload();
         pl.ui_dirty = false;
     }
+
+    glUseProgram(simple_shader);
+    for (auto i = 0u; i < current_projectiles.size(); ++i) {
+        auto projectile = current_projectiles[i];
+
+        if (projectile == nullptr)
+            continue;
+
+        projectile->update(dt);
+        if (projectile->alive) {
+            projectile->draw();
+        }
+        else {
+            available_projectiles.push_back(projectile);
+            current_projectiles[i] = nullptr;
+        }
+    }
+
+    glUseProgram(simple_shader);
 
     glDisable(GL_DEPTH_TEST);
 
@@ -873,7 +963,7 @@ struct play_state : game_state {
         }
     }
 
-    void update() override {
+    void update(float dt) override {
         tool *t = tools[pl.selected_slot];
 
         /* both tool use and overlays need the raycast itself */
@@ -881,7 +971,7 @@ struct play_state : game_state {
         ship->raycast(pl.eye.x, pl.eye.y, pl.eye.z, pl.dir.x, pl.dir.y, pl.dir.z, &rc);
 
         /* tool use */
-        if (pl.use_tool && rc.hit && t) {
+        if (pl.use_tool && t) {
             t->use(&rc);
         }
 
@@ -973,6 +1063,27 @@ struct play_state : game_state {
         pl.gravity    = gravity;
         pl.use_tool   = use_tool;
 
+        // blech. Tool gets used below, then fire projectile gets hit here
+        if (pl.fire_projectile) {
+            if (available_projectiles.size()) {
+                auto proj = available_projectiles.back();
+                available_projectiles.pop_back();
+
+                proj->pos = glm::vec3(pl.eye.x, pl.eye.y, pl.eye.z);
+                proj->dir = pl.dir;
+                proj->velocity = 2.f;
+                proj->lifetime = proj->initial_lifetime;
+
+                for (auto i = 0u; i < current_projectiles.size(); ++i) {
+                    if (current_projectiles[i] == nullptr) {
+                        current_projectiles[i] = proj;
+                        break;
+                    }
+                }
+            }
+            pl.fire_projectile = false;
+        }
+
         if (next_tool) {
             cycle_slot(1);
         }
@@ -1015,7 +1126,7 @@ struct menu_state : game_state
         items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
     }
 
-    void update() override {
+    void update(float dt) override {
     }
 
     void put_item_text(char *dest, char const *src, int index) {
@@ -1103,7 +1214,7 @@ struct menu_settings_state : game_state
         game_settings.input.mouse_invert *= -1;
     }
 
-    void update() override {
+    void update(float dt) override {
     }
 
     void put_item_text(char *dest, char const *src, int index) {
@@ -1268,6 +1379,16 @@ main(int, char **)
     init();
 
     run();
+
+    for (auto proj : available_projectiles) {
+        if (proj != nullptr)
+            delete proj;
+    }
+
+    for (auto proj : current_projectiles) {
+        if (proj != nullptr)
+            delete proj;
+    }
 
     return 0;
 }

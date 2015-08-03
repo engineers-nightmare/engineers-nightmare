@@ -23,7 +23,6 @@
 #include "BulletCollision/BroadphaseCollision/btOverlappingPairCache.h"
 #include "BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h"
 #include "BulletCollision/CollisionDispatch/btCollisionWorld.h"
-#include "LinearMath/btDefaultMotionState.h"
 
 #include "physics.h"
 #include "char.h"
@@ -56,8 +55,7 @@ class btKinematicClosestNotMeRayResultCallback : public btCollisionWorld::Closes
         m_me = me;
     }
 
-        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult,bool normalInWorldSpace)
-        {
+        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult,bool normalInWorldSpace) override {
             if (rayResult.m_collisionObject == m_me)
                 return 1.0;
 
@@ -78,8 +76,7 @@ class btKinematicClosestNotMeConvexResultCallback : public btCollisionWorld::Clo
     {
     }
 
-        virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace)
-        {
+        virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace) override {
             if (convexResult.m_hitCollisionObject == m_me)
                 return btScalar(1.0);
 
@@ -868,19 +865,57 @@ void en_char_controller::stand(btCollisionWorld *collisionWorld)
 /* Not part of CC, but reuses the same callbacks etc. */
 entity *
 phys_raycast(float ox, float oy, float oz, float dx, float dy, float dz, float max_distance,
-             btCollisionObject *ignore, btCollisionWorld *world)
+btCollisionObject *ignore, btCollisionWorld *world)
 {
     btVector3 start(ox, oy, oz);
     btVector3 end(ox + max_distance * dx,
-                  oy + max_distance * dy,
-                  oz + max_distance * dz);
+        oy + max_distance * dy,
+        oz + max_distance * dz);
 
     btKinematicClosestNotMeRayResultCallback callback(ignore);
     world->rayTest(start, end, callback);
 
     if (callback.hasHit()) {
-        return (entity *) callback.m_collisionObject->getUserPointer();
+        return (entity *)callback.m_collisionObject->getUserPointer();
     }
 
-    return NULL;
+    return nullptr;
+}
+
+/* Not part of CC, but reuses the same callbacks etc. */
+generic_raycast_info
+phys_raycast_generic(float ox, float oy, float oz,
+float dx, float dy, float dz, float max_distance,
+btCollisionObject *ignore, btCollisionWorld *world)
+{
+    generic_raycast_info result;
+    result.hit = false;
+
+    btVector3 start(ox, oy, oz);
+    btVector3 end(ox + max_distance * dx,
+        oy + max_distance * dy,
+        oz + max_distance * dz);
+
+    btCollisionWorld::ClosestRayResultCallback callback(start, end);
+    world->rayTest(start, end, callback);
+
+    if (callback.hasHit()) {
+        result.hit = true;
+
+        result.hitCoord = glm::vec3(callback.m_hitPointWorld.x(),
+            callback.m_hitPointWorld.y(),
+            callback.m_hitPointWorld.z());
+
+        result.hitNormal = glm::vec3(callback.m_hitNormalWorld.x(),
+            callback.m_hitNormalWorld.y(),
+            callback.m_hitNormalWorld.z());
+
+        auto toHit = callback.m_rayToWorld - callback.m_rayFromWorld;
+        result.toHit = glm::normalize(glm::vec3(toHit.x(), toHit.y(), toHit.z()));
+
+        auto fromHit = callback.m_rayFromWorld - callback.m_rayToWorld;
+        result.fromHit = glm::normalize(glm::vec3(fromHit.x(), fromHit.y(), fromHit.z()));
+    }
+
+    return result;
 }

@@ -44,6 +44,15 @@ struct physics {
 struct sw_mesh;
 
 
+struct generic_raycast_info {
+    bool hit;
+    glm::vec3 hitCoord;         /* world hit coord */
+    glm::vec3 hitNormal;        /* world hit normal */
+    glm::vec3 toHit;
+    glm::vec3 fromHit;
+};
+
+
 void
 build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBody **rb);
 
@@ -62,5 +71,11 @@ teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, b
 struct entity;
 
 entity *
-phys_raycast(float ox, float oy, float oz, float dx, float dy, float dz, float max_distance,
+phys_raycast(float ox, float oy, float oz,
+             float dx, float dy, float dz, float max_distance,
              btCollisionObject *ignore, btCollisionWorld *world);
+
+generic_raycast_info
+phys_raycast_generic(float ox, float oy, float oz,
+                     float dx, float dy, float dz, float max_distance,
+                     btCollisionObject *ignore, btCollisionWorld *world);

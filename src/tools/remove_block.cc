@@ -24,11 +24,16 @@ extern void
 remove_ents_from_surface(int x, int y, int z, int face);
 
 
-struct remove_block_tool : public tool
+struct remove_block_tool : tool
 {
+    bool can_use(raycast_info *rc) {
+        return rc->hit && !rc->inside;
+    }
+
     void use(raycast_info *rc) override
     {
-        if (rc->inside) return; /* n/a */
+        if (!can_use(rc))
+            return;
 
         block *bl = rc->block;
 
@@ -85,7 +90,8 @@ struct remove_block_tool : public tool
 
     void preview(raycast_info *rc) override
     {
-        if (rc->inside) return; /* n/a */
+        if (!can_use(rc))
+            return;
 
         block *bl = rc->block;
         if (bl->type != block_empty) {

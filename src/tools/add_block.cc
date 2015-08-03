@@ -22,9 +22,14 @@ extern hw_mesh *scaffold_hw;
 
 struct add_block_tool : tool
 {
+    bool can_use(raycast_info *rc) {
+        return rc->hit && !rc->inside;
+    }
+
     void use(raycast_info *rc) override
     {
-        if (rc->inside) return; /* n/a */
+        if (!can_use(rc))
+            return; /* n/a */
 
         /* ensure we can access this x,y,z */
         ship->ensure_block(rc->px, rc->py, rc->pz);
@@ -42,7 +47,8 @@ struct add_block_tool : tool
 
     void preview(raycast_info *rc) override
     {
-        if (rc->inside) return; /* n/a */
+        if (!can_use(rc))
+            return; /* n/a */
 
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 

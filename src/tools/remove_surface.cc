@@ -25,10 +25,13 @@ extern void
 remove_ents_from_surface(int x, int y, int z, int face);
 
 
-struct remove_surface_tool : public tool
+struct remove_surface_tool : tool
 {
     bool can_use(raycast_info *rc)
     {
+        if (!rc->hit)
+            return false;
+
         block *bl = rc->block;
         int index = normal_to_surface_index(rc);
         return bl && bl->surfs[index] != surface_none;
