@@ -163,6 +163,7 @@ copy /y $(SolutionDir)..\sdl2_image\lib\x86\*.dll $(OutputPath)</Command>
     <ClCompile Include="src\input.cc" />
     <ClCompile Include="src\mesh.cc" />
     <ClCompile Include="src\mesher.cc" />
+    <ClCompile Include="src\mock_ship_junk.cc" />
     <ClCompile Include="src\physics.cc" />
     <ClCompile Include="src\settings.cc" />
     <ClCompile Include="src\shader.cc" />

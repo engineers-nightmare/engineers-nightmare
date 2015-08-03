@@ -146,256 +146,7 @@ ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
     return NULL;
 }
 
-/* given the x, y, z of a block and the surface we are interested in,
- * find the co-ords the correspond to the block along the normal of that surace
- *
- * tx, ty, and tz are out params
- */
-static void
-find_neighbor(int fx, int fy, int fz, enum surface_index si, int *tx, int *ty, int *tz){
-    if( ! tx ||
-        ! ty ||
-        ! tz ){
-        errx(1, "ship_space.c: find_neighbor tx, ty or tz null");
-        return;
-    }
 
-    *tx = fx;
-    *ty = fy;
-    *tz = fz;
-
-    switch( si ){
-        case surface_xp:
-            ++*tx;
-            break;
-
-        case surface_xm:
-            --*tx;
-            break;
-
-        case surface_yp:
-            ++*ty;
-            break;
-
-        case surface_ym:
-            --*ty;
-            break;
-
-        case surface_zp:
-            ++*tz;
-            break;
-
-        case surface_zm:
-            --*tz;
-            break;
-
-        case face_count:
-            errx(1, "ship_space.c: find_neighbor supplied surface_index of type 'face_count'");
-            break;
-
-        default:
-            errx(1, "ship_space.c: find_neighbor supplied surface_index of unknown type");
-            break;
-    }
-}
-
-/* returns a block
- * finds the block at the position (x,y,z) within
- * the whole ship_space
- * will move across chunks
- * will call ensure_block if needed
- */
-block *
-ship_space::ensure_and_get_block(int block_x, int block_y, int block_z){
-    block *b = 0;
-
-    this->ensure_block(block_x, block_y, block_z);
-    b = this->get_block(block_x, block_y, block_z);
-
-    if( ! b ){
-        errx(1, "ship_space::ensure_and_get_block: call to get_block failed");
-    }
-
-    return b;
-}
-
-/* returns the neighbor of a block along a given suface's normal
- * finds the block at the position (x,y,z) within
- * the whole ship_space
- * will move across chunks
- * will call ensure_block if needed
- */
-block *
-ship_space::get_block_neighbor(int block_x, int block_y, int block_z, enum surface_index si){
-    int tx, ty, tz;
-    find_neighbor(block_x, block_y, block_z, si, &tx, &ty, &tz);
-    return this->ensure_and_get_block(tx, ty, tz);
-}
-
-/* I am lazy
- * we plan to nuke mock ship space once we have map loading/saving
- *
- * Set Neighbour for block N
- */
-#define sn1(si, type) (ss->get_block_neighbor(x,   y,   z, si)->surfs[si ^ 1] = type)
-#define sn2(si, type) (ss->get_block_neighbor(x,   y+8, z, si)->surfs[si ^ 1] = type)
-#define sn3(si, type) (ss->get_block_neighbor(x+8, y,   z, si)->surfs[si ^ 1] = type)
-#define sn4(si, type) (ss->get_block_neighbor(x+8, y+8, z, si)->surfs[si ^ 1] = type)
-
-/* returns a pointer to a new ship space
- * this ship space will have 2 x 2 rooms and will be 1 room tall
- * each room will have a floor and 4 walls of scaffolding
- * each room will have some doors on all 4 walls
- * there will be a floor of surfaces
- * and will otherwise be empty
- *
- * returns 0 on error
- */
-ship_space *
-ship_space::mock_ship_space(void)
-{
-    /* new ship space of 2 * 2 * 1*/
-    ship_space * ss = new ship_space(2, 2, 1);
-
-    unsigned int x=0, y=0, z=0;
-    block *b1 = 0;
-    block *b2 = 0;
-    block *b3 = 0;
-    block *b4 = 0;
-
-    /* LET THIS SERVE AS MOTIVATION FOR NEEDING MAP LOAD AND SAVE */
-
-    /* first pass build complete outer shell for each chunk */
-    for( z=0; z < 8; ++z ){
-        for( y=0; y < 8; ++y ){
-            for( x=0; x < 8; ++x ){
-
-                b1 = ss->get_block(x,   y,   z);
-                b2 = ss->get_block(x,   y+8, z);
-                b3 = ss->get_block(x+8, y,   z);
-                b4 = ss->get_block(x+8, y+8, z);
-
-                if( z == 0 ){
-                    /* the floor */
-                    b1->type = block_support;
-                    b2->type = block_support;
-                    b3->type = block_support;
-                    b4->type = block_support;
-
-                    /* add surfaces to inside */
-                    b1->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
-                    sn1(surface_zp, ((x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall));
-                    b2->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
-                    sn2(surface_zp, ((x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall));
-                    b3->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
-                    sn3(surface_zp, ((x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall));
-                    b4->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
-                    sn4(surface_zp, ((x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall));
-
-                    /* add surfaces to outside */
-                    b1->surfs[surface_zm] = surface_wall;
-                    sn1(surface_zm, surface_wall);
-                    b2->surfs[surface_zm] = surface_wall;
-                    sn2(surface_zm, surface_wall);
-                    b3->surfs[surface_zm] = surface_wall;
-                    sn3(surface_zm, surface_wall);
-                    b4->surfs[surface_zm] = surface_wall;
-                    sn4(surface_zm, surface_wall);
-
-                } else if( z == 7 ){
-                    /* the roof */
-                    b1->type = block_support;
-                    b2->type = block_support;
-                    b3->type = block_support;
-                    b4->type = block_support;
-
-                    /* add surfaces to outside */
-                    b1->surfs[surface_zp] = surface_wall;
-                    sn1(surface_zp, surface_wall);
-                    b2->surfs[surface_zp] = surface_wall;
-                    sn2(surface_zp, surface_wall);
-                    b3->surfs[surface_zp] = surface_wall;
-                    sn3(surface_zp, surface_wall);
-                    b4->surfs[surface_zp] = surface_wall;
-                    sn4(surface_zp, surface_wall);
-
-                    /* add surfaces to inside */
-                    b1->surfs[surface_zm] = surface_wall;
-                    sn1(surface_zm, surface_wall);
-                    b2->surfs[surface_zm] = surface_wall;
-                    sn2(surface_zm, surface_wall);
-                    b3->surfs[surface_zm] = surface_wall;
-                    sn3(surface_zm, surface_wall);
-                    b4->surfs[surface_zm] = surface_wall;
-                    sn4(surface_zm, surface_wall);
-
-                } else if( y == 0 || y == 7 ){
-                    /* a wall */
-                    b1->type = block_support;
-                    b2->type = block_support;
-                    b3->type = block_support;
-                    b4->type = block_support;
-
-                    /* add surfaces to one side */
-                    b1->surfs[surface_yp] = surface_wall;
-                    sn1(surface_yp, surface_wall);
-                    b2->surfs[surface_yp] = surface_wall;
-                    sn2(surface_yp, surface_wall);
-                    b3->surfs[surface_yp] = surface_wall;
-                    sn3(surface_yp, surface_wall);
-                    b4->surfs[surface_yp] = surface_wall;
-                    sn4(surface_yp, surface_wall);
-
-                    /* add surfaces to other side */
-                    b1->surfs[surface_ym] = surface_wall;
-                    sn1(surface_ym, surface_wall);
-                    b2->surfs[surface_ym] = surface_wall;
-                    sn2(surface_ym, surface_wall);
-                    b3->surfs[surface_ym] = surface_wall;
-                    sn3(surface_ym, surface_wall);
-                    b4->surfs[surface_ym] = surface_wall;
-                    sn4(surface_ym, surface_wall);
-
-                } else if( x == 0 || x == 7 ){
-                    /* a wall */
-                    b1->type = block_support;
-                    b2->type = block_support;
-                    b3->type = block_support;
-                    b4->type = block_support;
-
-                    /* add surfaces to one side */
-                    b1->surfs[surface_xp] = surface_wall;
-                    sn1(surface_xp, surface_wall);
-                    b2->surfs[surface_xp] = surface_wall;
-                    sn2(surface_xp, surface_wall);
-                    b3->surfs[surface_xp] = surface_wall;
-                    sn3(surface_xp, surface_wall);
-                    b4->surfs[surface_xp] = surface_wall;
-                    sn4(surface_xp, surface_wall);
-
-                    /* add surfaces to other side */
-                    b1->surfs[surface_xm] = surface_wall;
-                    sn1(surface_xm, surface_wall);
-                    b2->surfs[surface_xm] = surface_wall;
-                    sn2(surface_xm, surface_wall);
-                    b3->surfs[surface_xm] = surface_wall;
-                    sn3(surface_xm, surface_wall);
-                    b4->surfs[surface_xm] = surface_wall;
-                    sn4(surface_xm, surface_wall);
-
-                } else {
-                    b1->type = block_empty;
-                    b2->type = block_empty;
-                    b3->type = block_empty;
-                    b4->type = block_empty;
-                }
-
-            }
-        }
-    }
-
-    return ss;
-}
 
 static float
 max_along_axis(float o, float d)
@@ -544,16 +295,11 @@ void
 ship_space::ensure_chunk(int chunk_x, int chunk_y, int chunk_z)
 {
     glm::ivec3 v(chunk_x, chunk_y, chunk_z);
-
-    /* if count is 0 then we do not contain this key */
-    if( ! this->chunks.count(v) ){
-        /* if this is an insert then we need to also
-         * keep track of our min/max bounds
-         */
+    /* automatically creates the entry if not present */
+    auto &ch = this->chunks[v];
+    if (!ch) {
+        ch = new chunk();
         this->_maintain_bounds(chunk_x, chunk_y, chunk_z);
-
-        /* operator[] will create an element */
-        this->chunks[v] = new chunk();
     }
 }
 
@@ -631,40 +377,46 @@ ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int 
 }
 
 static bool
+air_permeable(surface_type s)
+{
+    return s != surface_wall;
+}
+
+static bool
 exists_alt_path(int x, int y, int z, block *a, block *b, ship_space *ship, int face)
 {
     block *c;
 
     if (face != surface_xp) {
         c = ship->get_block(x+1, y, z);
-        if (a->surfs[surface_xp] != surface_wall && b->surfs[surface_xp] != surface_wall &&
-                (!c || c->surfs[face] != surface_wall))
+        if (air_permeable(a->surfs[surface_xp]) && air_permeable(b->surfs[surface_xp]) &&
+                (!c || air_permeable(c->surfs[face])))
             return true;
         c = ship->get_block(x-1, y, z);
-        if (a->surfs[surface_xm] != surface_wall && b->surfs[surface_xm] != surface_wall &&
-                (!c || c->surfs[face] != surface_wall))
+        if (air_permeable(a->surfs[surface_xm]) && air_permeable(b->surfs[surface_xm]) &&
+                (!c || air_permeable(c->surfs[face])))
             return true;
     }
 
     if (face != surface_yp) {
         c = ship->get_block(x, y+1, z);
-        if (a->surfs[surface_yp] != surface_wall && b->surfs[surface_yp] != surface_wall &&
-                (!c || c->surfs[face] != surface_wall))
+        if (air_permeable(a->surfs[surface_yp]) && air_permeable(b->surfs[surface_yp]) &&
+                (!c || air_permeable(c->surfs[face])))
             return true;
         c = ship->get_block(x, y-1, z);
-        if (a->surfs[surface_ym] != surface_wall && b->surfs[surface_ym] != surface_wall &&
-                (!c || c->surfs[face] != surface_wall))
+        if (air_permeable(a->surfs[surface_ym]) && air_permeable(b->surfs[surface_ym]) &&
+                (!c || air_permeable(c->surfs[face])))
             return true;
     }
 
     if (face != surface_zp) {
         c = ship->get_block(x, y, z+1);
-        if (a->surfs[surface_zp] != surface_wall && b->surfs[surface_zp] != surface_wall &&
-                (!c || c->surfs[face] != surface_wall))
+        if (air_permeable(a->surfs[surface_zp]) && air_permeable(b->surfs[surface_zp]) &&
+                (!c || air_permeable(c->surfs[face])))
             return true;
         c = ship->get_block(x, y, z-1);
-        if (a->surfs[surface_zm] != surface_wall && b->surfs[surface_zm] != surface_wall &&
-                (!c || c->surfs[face] != surface_wall))
+        if (air_permeable(a->surfs[surface_zm]) && air_permeable(b->surfs[surface_zm]) &&
+                (!c || air_permeable(c->surfs[face])))
             return true;
     }
 
@@ -710,6 +462,7 @@ static glm::ivec3 dirs[] = {
     glm::ivec3(0, 0, -1),
 };
 
+
 /* rebuild the ship topology. this is generally not the optimal thing -
  * we can dynamically rebuild parts of the topology cheaper based on
  * knowing the change that was made.
@@ -748,9 +501,8 @@ ship_space::rebuild_topology()
                 for (int x = 1; x < CHUNK_SIZE - 1; x++) {
                     block *bl = it->second->blocks.get(x, y, z);
 
-                    /* TODO: proper air-permeability query -- soon it will be not just walls! */
                     for (int i = 0; i < 6; i++) {
-                        if (bl->surfs[i] != surface_wall) {
+                        if (air_permeable(bl->surfs[i])) {
                             glm::ivec3 offset = dirs[i];
                             topo_unite(it->second->topo.get(x, y, z),
                                        it->second->topo.get(x + offset.x, y + offset.y, z + offset.z));
@@ -765,9 +517,8 @@ ship_space::rebuild_topology()
                 block *bl = it->second->blocks.get(0, y, z);
                 topo_info *to = it->second->topo.get(0, y, z);
 
-                /* TODO: proper air-permeability query -- soon it will be not just walls! */
                 for (int i = 0; i < 6; i++) {
-                    if (bl->surfs[i] != surface_wall) {
+                    if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
                               get_topo_info(CHUNK_SIZE * it->first.x + 0 + offset.x,
@@ -779,9 +530,8 @@ ship_space::rebuild_topology()
                 bl = it->second->blocks.get(CHUNK_SIZE - 1, y, z);
                 to = it->second->topo.get(CHUNK_SIZE - 1, y, z);
 
-                /* TODO: proper air-permeability query -- soon it will be not just walls! */
                 for (int i = 0; i < 6; i++) {
-                    if (bl->surfs[i] != surface_wall) {
+                    if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
                               get_topo_info(CHUNK_SIZE * it->first.x + CHUNK_SIZE - 1 + offset.x,
@@ -793,9 +543,8 @@ ship_space::rebuild_topology()
                 bl = it->second->blocks.get(y, 0, z);
                 to = it->second->topo.get(y, 0, z);
 
-                /* TODO: proper air-permeability query -- soon it will be not just walls! */
                 for (int i = 0; i < 6; i++) {
-                    if (bl->surfs[i] != surface_wall) {
+                    if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
                               get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
@@ -807,9 +556,8 @@ ship_space::rebuild_topology()
                 bl = it->second->blocks.get(y, CHUNK_SIZE - 1, z);
                 to = it->second->topo.get(y, CHUNK_SIZE - 1, z);
 
-                /* TODO: proper air-permeability query -- soon it will be not just walls! */
                 for (int i = 0; i < 6; i++) {
-                    if (bl->surfs[i] != surface_wall) {
+                    if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
                               get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
@@ -821,9 +569,8 @@ ship_space::rebuild_topology()
                 bl = it->second->blocks.get(y, z, 0);
                 to = it->second->topo.get(y, z, 0);
 
-                /* TODO: proper air-permeability query -- soon it will be not just walls! */
                 for (int i = 0; i < 6; i++) {
-                    if (bl->surfs[i] != surface_wall) {
+                    if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
                               get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
@@ -835,9 +582,8 @@ ship_space::rebuild_topology()
                 bl = it->second->blocks.get(y, z, CHUNK_SIZE - 1);
                 to = it->second->topo.get(y, z, CHUNK_SIZE - 1);
 
-                /* TODO: proper air-permeability query -- soon it will be not just walls! */
                 for (int i = 0; i < 6; i++) {
-                    if (bl->surfs[i] != surface_wall) {
+                    if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
                               get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
