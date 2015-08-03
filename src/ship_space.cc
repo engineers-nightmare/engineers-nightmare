@@ -5,7 +5,8 @@
 
 /* create a ship space of x * y * z instantiated chunks */
 ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
-    : min_x(0), min_y(0), min_z(0), topo_dirty(true), num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
+    : min_x(0), min_y(0), min_z(0), num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0),
+      num_false_splits(0)
 {
     unsigned int x = 0,
                  y = 0,
@@ -30,8 +31,8 @@ ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
 
 /* create an empty ship_space */
 ship_space::ship_space(void)
-    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0), topo_dirty(true),
-      num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0)
+    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0),
+      num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0), num_false_splits(0)
 {
 }
 
@@ -113,6 +114,16 @@ ship_space::get_topo_info(int block_x, int block_y, int block_z)
     }
 
     return c->topo.get(wb_x, wb_y, wb_z);
+}
+
+zone_info *
+ship_space::get_zone_info(topo_info *t)
+{
+    auto it = zones.find(t);
+    if (it == zones.end())
+        return nullptr;
+
+    return it->second;
 }
 
 /* returns the chunk containing the block denotated by (x, y, z)
@@ -353,14 +364,32 @@ topo_unite(topo_info *from, topo_info *to)
     }
 }
 
+/* inserts a zone_info into the zone map. z may be
+ * deleted, if there is an existing zone to merge into. */
 void
-ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz, int face)
+ship_space::insert_zone(topo_info *t, zone_info *z)
 {
-    if (topo_dirty) {
-        /* if we already dirtied it, we cant assume anything. just take the rebuild */
+    if (t == &outside_topo_info) {
+        /* there is no point in combining with the outside. */
+        delete z;
         return;
     }
 
+    zone_info *existing_z = get_zone_info(t);
+    if (existing_z) {
+        /* merge case; mix in this zone, and then we'll delete it. */
+        existing_z->air_amount += z->air_amount;
+        delete z;
+    }
+    else {
+        /* no zone here yet. this one will do fine! */
+        zones[t] = z;
+    }
+}
+
+void
+ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz, int face)
+{
     topo_info *t = topo_find(get_topo_info(x, y, z));
     topo_info *u = topo_find(get_topo_info(px, py, pz));
 
@@ -371,9 +400,20 @@ ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int 
         return;
     }
 
+    zone_info *z1 = get_zone_info(t);
+    zone_info *z2 = get_zone_info(u);
+
+    /* remove the existing zones */
+    if (z1) { zones.erase(zones.find(t)); }
+    if (z2) { zones.erase(zones.find(u)); }
+
     topo_info *v = topo_unite(t, u);
     /* track sizing */
     v->size = t->size + u->size;
+
+    /* reinsert both zones at v */
+    if (z1) { insert_zone(v, z1); }
+    if (z2) { insert_zone(v, z2); }
 }
 
 static bool
@@ -426,11 +466,6 @@ exists_alt_path(int x, int y, int z, block *a, block *b, ship_space *ship, int f
 void
 ship_space::update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face)
 {
-    if (topo_dirty) {
-        /* if we already dirtied it, we cant assume anything. just take the rebuild */
-        return;
-    }
-
     /* can this surface even split (does it block atmo?) */
     if (get_block(x, y, z)->surfs[face] != surface_wall)
         return;
@@ -447,9 +482,41 @@ ship_space::update_topology_for_add_surface(int x, int y, int z, int px, int py,
     /* try to quickly prove that we don't divide space */
     if (exists_alt_path(x, y, z, get_block(x, y, z), get_block(px, py, pz), this, face)) {
         num_fast_nosplits++;
+        return;
     }
-    else {
-        topo_dirty = true;
+
+    /* grab our air amount data before rebuild_topology invalidates the existing zones */
+    zone_info *zone = get_zone_info(topo_find(get_topo_info(x, y, z)));
+    float air_amount = zone ? zone->air_amount : 0.0f;
+
+    /* we do need to split */
+    rebuild_topology();
+
+    topo_info *t1 = topo_find(get_topo_info(x, y, z));
+    topo_info *t2 = topo_find(get_topo_info(px, py, pz));
+    if (t1 == t2) {
+        /* we blew it. we didn't actually split the space, but we did
+         * all the work anyway. this is mostly interesting if you're
+         * tweaking exists_alt_path. */
+        num_false_splits++;
+    }
+    else if (zone) {
+        /* at least one side was real before this split */
+
+        /* fixup the zones for the split. we want to maintain the same pressure
+         * we had on both sides, so distribute the mass */
+        zone_info *z1 = get_zone_info(t1);
+        if (!z1) {
+            z1 = zones[t1] = new zone_info(0);
+        }
+
+        zone_info *z2 = get_zone_info(t2);
+        if (!z2) {
+            z2 = zones[t2] = new zone_info(0);
+        }
+
+        z1->air_amount = air_amount * t1->size / (t1->size + t2->size);
+        z2->air_amount = air_amount - z1->air_amount;
     }
 }
 
@@ -470,10 +537,6 @@ static glm::ivec3 dirs[] = {
 void
 ship_space::rebuild_topology()
 {
-    if (!topo_dirty)
-        return;
-    topo_dirty = false;
-
     num_full_rebuilds++;
 
     /* 1/ initially, every block is its own subtree */
@@ -605,5 +668,11 @@ ship_space::rebuild_topology()
                 }
             }
         }
+    }
+
+    /* 4/ fixup zone_info */
+    std::unordered_map<topo_info *, zone_info *> old_zones(std::move(zones));
+    for (auto it : old_zones) {
+        insert_zone(topo_find(it.first), it.second);
     }
 }

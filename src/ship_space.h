@@ -25,6 +25,12 @@ struct raycast_info {
     struct block *block;
 };
 
+struct zone_info {
+    float air_amount;
+
+    zone_info(float air_amount) : air_amount(air_amount) {}
+};
+
 struct ship_space {
     /* the min and max chunk co-ords ship_space has seen for each axis
      * this is for iteration (min_x..max_x) (inclusive)
@@ -41,6 +47,7 @@ struct ship_space {
     void _maintain_bounds(int x_seen, int y_seen, int z_seen);
 
     std::unordered_map<glm::ivec3, chunk*, ivec3_hash> chunks;
+    std::unordered_map<topo_info *, zone_info *> zones;
 
     /* create a ship space of x * y * z instantiated chunks */
     ship_space(unsigned int xdim, unsigned int ydim, unsigned int zdim);
@@ -96,16 +103,19 @@ struct ship_space {
      */
     void ensure_chunk(int chunk_x, int chunk_y, int chunk_z);
 
+    zone_info *get_zone_info(topo_info *t);
+    void insert_zone(topo_info *t, zone_info *z);
+
     /* topo info for open vacuum, so we know what pressure to force to zero */
     topo_info outside_topo_info;
     void rebuild_topology();
     void update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz, int face);
     void update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face);
-    bool topo_dirty;
 
-    int num_full_rebuilds;
-    int num_fast_unifys;
-    int num_fast_nosplits;
+    int num_full_rebuilds;      /* number of full rebuilds (pretty slow) performed */
+    int num_fast_unifys;        /* number of incremental unify operations performed */
+    int num_fast_nosplits;      /* number of rebuilds avoided because we proved them spurious */
+    int num_false_splits;       /* number of useless rebuilds taken */
 };
 
 /* helper */

@@ -172,6 +172,8 @@ struct entity_type
     char const *name;
     btTriangleMesh *phys_mesh;
     btCollisionShape *phys_shape;
+    float add_air_amount;
+    float max_air_pressure;
 };
 
 
@@ -205,6 +207,27 @@ struct entity
         /* used by the player */
         printf("player using the %s at %d %d %d\n",
                type->name, x, y, z);
+    }
+
+    void tick() {
+        if (type->add_air_amount <= 0) {
+            /* TODO: components */
+            return;
+        }
+
+        /* topo node containing the ent */
+        topo_info *t = topo_find(ship->get_topo_info(x, y, z));
+        /* zoneinfo attached */
+        zone_info *z = ship->get_zone_info(t);
+        if (!z) {
+            /* if there wasnt a zone, make one. */
+            z = ship->zones[t] = new zone_info(0);
+        }
+
+        /* add some air if we can, up to our pressure limit */
+        float max_air = type->max_air_pressure * t->size;
+        if (z->air_amount < max_air)
+            z->air_amount = std::min(max_air, z->air_amount + type->add_air_amount);
     }
 };
 
@@ -407,18 +430,24 @@ init()
     set_mesh_material(entity_types[0].sw, 3);
     entity_types[0].hw = upload_mesh(entity_types[0].sw);
     entity_types[0].name = "Frobnicator";
+    entity_types[0].add_air_amount = 0.1f;
+    entity_types[0].max_air_pressure = 1.0f;
     build_static_physics_mesh(entity_types[0].sw, &entity_types[0].phys_mesh, &entity_types[0].phys_shape);
 
     entity_types[1].sw = load_mesh("mesh/panel_4x4.obj");
     set_mesh_material(entity_types[1].sw, 7);
     entity_types[1].hw = upload_mesh(entity_types[1].sw);
     entity_types[1].name = "Display Panel (4x4)";
+    entity_types[1].add_air_amount = 0.0f;
+    entity_types[1].max_air_pressure = 0.0f;
     build_static_physics_mesh(entity_types[1].sw, &entity_types[1].phys_mesh, &entity_types[1].phys_shape);
 
     entity_types[2].sw = load_mesh("mesh/panel_4x4.obj");
     set_mesh_material(entity_types[2].sw, 8);
     entity_types[2].hw = upload_mesh(entity_types[2].sw);
     entity_types[2].name = "Light (4x4)";
+    entity_types[2].add_air_amount = 0.0f;
+    entity_types[2].max_air_pressure = 0.0f;
     build_static_physics_mesh(entity_types[2].sw, &entity_types[2].phys_mesh, &entity_types[2].phys_shape);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
@@ -788,8 +817,22 @@ update()
     /* rebuild lighting if needed */
     update_lightfield();
 
-    /* TODO: only do this when needed */
-    ship->rebuild_topology();
+    /* remove any air that someone managed to get into the outside */
+    {
+        topo_info *t = topo_find(&ship->outside_topo_info);
+        zone_info *z = ship->get_zone_info(t);
+        if (z) {
+            /* try as hard as you like, you cannot fill space with your air system */
+            z->air_amount = 0;
+        }
+    }
+
+    /* allow the entities to tick */
+    for (auto ch : ship->chunks) {
+        for (auto e : ch.second->entities) {
+            e->tick();
+        }
+    }
 
     world_textures->bind(0);
 
@@ -938,11 +981,14 @@ struct play_state : game_state {
 
             topo_info *t = topo_find(ship->get_topo_info(plx, ply, plz));
             topo_info *outside = topo_find(&ship->outside_topo_info);
+            zone_info *z = ship->get_zone_info(t);
+            float pressure = z ? (z->air_amount / t->size) : 0.0f;
+
             if (t != outside) {
-                sprintf(buf2, "[INSIDE %p %d]", t, t->size);
+                sprintf(buf2, "[INSIDE %p %d %.1f atmo]", t, t->size, pressure);
             }
             else {
-                sprintf(buf2, "[OUTSIDE %p %d]", t, t->size);
+                sprintf(buf2, "[OUTSIDE %p %d %.1f atmo]", t, t->size, pressure);
             }
 
             w = 0; h = 0;
@@ -950,10 +996,11 @@ struct play_state : game_state {
             add_text_with_outline(buf2, -w/2, -100);
 
             w = 0; h = 0;
-            sprintf(buf2, "full: %d fast-unify: %d fast-nosplit: %d",
+            sprintf(buf2, "full: %d fast-unify: %d fast-nosplit: %d false-split: %d",
                     ship->num_full_rebuilds,
                     ship->num_fast_unifys,
-                    ship->num_fast_nosplits);
+                    ship->num_fast_nosplits,
+                    ship->num_false_splits);
             text->measure(buf2, &w, &h);
             add_text_with_outline(buf2, -w/2, -150);
         }
