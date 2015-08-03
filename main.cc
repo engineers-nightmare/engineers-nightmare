@@ -956,7 +956,7 @@ struct play_state : game_state {
 
         /* both tool use and overlays need the raycast itself */
         raycast_info rc;
-        ship->raycast(pl.eye.x, pl.eye.y, pl.eye.z, pl.dir.x, pl.dir.y, pl.dir.z, &rc);
+        ship->raycast(pl.eye, pl.dir, &rc);
 
         /* tool use */
         if (pl.use_tool && t) {

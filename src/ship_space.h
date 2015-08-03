@@ -94,7 +94,7 @@ struct ship_space {
      */
     static ship_space * mock_ship_space(void);
 
-    void raycast(float ox, float oy, float oz, float dx, float dy, float dz, raycast_info *rc);
+    void raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc);
 
     /* ensure that the specified block_{x,y,z} can be fetched with a get_block
      *

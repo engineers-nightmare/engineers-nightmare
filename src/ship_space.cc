@@ -416,7 +416,7 @@ max_along_axis(float o, float d)
 
 
 void
-ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, raycast_info *rc)
+ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
 {
     /* implementation of the algorithm described in
      * http://www.cse.yorku.ca/~amana/research/grid.pdf
@@ -429,9 +429,9 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
      * as float truncation will bias
      * towards 0
      */
-    int x = (int)(ox < 0 ? ox - 1: ox);
-    int y = (int)(oy < 0 ? oy - 1: oy);
-    int z = (int)(oz < 0 ? oz - 1: oz);
+    int x = (int)(o.x < 0 ? o.x - 1: o.x);
+    int y = (int)(o.y < 0 ? o.y - 1: o.y);
+    int z = (int)(o.z < 0 ? o.z - 1: o.z);
 
     int nx = 0;
     int ny = 0;
@@ -442,17 +442,17 @@ ship_space::raycast(float ox, float oy, float oz, float dx, float dy, float dz, 
     bl = this->get_block(x,y,z);
     rc->inside = bl ? bl->type != block_empty : 0;
 
-    int stepX = dx > 0 ? 1 : -1;
-    int stepY = dy > 0 ? 1 : -1;
-    int stepZ = dz > 0 ? 1 : -1;
+    int stepX = d.x > 0 ? 1 : -1;
+    int stepY = d.y > 0 ? 1 : -1;
+    int stepZ = d.z > 0 ? 1 : -1;
 
-    float tDeltaX = fabsf(1/dx);
-    float tDeltaY = fabsf(1/dy);
-    float tDeltaZ = fabsf(1/dz);
+    float tDeltaX = fabsf(1/d.x);
+    float tDeltaY = fabsf(1/d.y);
+    float tDeltaZ = fabsf(1/d.z);
 
-    float tMaxX = max_along_axis(ox, dx);
-    float tMaxY = max_along_axis(oy, dy);
-    float tMaxZ = max_along_axis(oz, dz);
+    float tMaxX = max_along_axis(o.x, d.x);
+    float tMaxY = max_along_axis(o.y, d.y);
+    float tMaxZ = max_along_axis(o.z, d.z);
 
     for (int i = 0; i < MAX_PLAYER_REACH; ++i) {
         if (tMaxX < tMaxY) {
