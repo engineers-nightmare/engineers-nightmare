@@ -93,9 +93,11 @@ physics::~physics()
 }
 
 void
-physics::tick()
+physics::tick_controller(float dt)
 {
-    double x, y, z;
+    /* messy input -> char controller binding
+     * TODO: untangle.
+     */
 
     double c = cos(this->pl->angle);
     double s = sin(this->pl->angle);
@@ -143,16 +145,16 @@ physics::tick()
     else if (pl->crouch_end) {
         this->controller->crouchEnd();
     }
-
-    dynamicsWorld->stepSimulation(1 / 60.f, 10);
-
-    btTransform trans = this->ghostObj->getWorldTransform();
-    x = trans.getOrigin().getX();
-    y = trans.getOrigin().getY();
-    z = trans.getOrigin().getZ();
-
-    this->pl->pos.x = x;
-    this->pl->pos.y = y;
-    this->pl->pos.z = z;
 }
 
+void
+physics::tick(float dt)
+{
+    dynamicsWorld->stepSimulation(dt, 10);
+
+    btTransform trans = this->ghostObj->getWorldTransform();
+
+    this->pl->pos.x = trans.getOrigin().getX();
+    this->pl->pos.y = trans.getOrigin().getY();
+    this->pl->pos.z = trans.getOrigin().getZ();
+}
