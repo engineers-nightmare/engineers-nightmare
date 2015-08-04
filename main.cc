@@ -610,6 +610,12 @@ struct add_block_entity_tool : tool
         if (!rc->hit || rc->inside)
             return false;
 
+        /* don't allow placements that would cause the player to end up inside the ent and get stuck */
+        glm::ivec3 pos(rc->px, rc->py, rc->pz);
+        if (pos == get_block_containing(pl.eye) ||
+            pos == get_block_containing(pl.pos))
+            return false;
+
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         if (bl) {
