@@ -79,7 +79,7 @@ phys_raycast_generic(glm::vec3 start, glm::vec3 end,
                      btCollisionObject *ignore, btCollisionWorld *world);
 
 static inline glm::vec3
-bt_to_glm(btVector3 v)
+bt_to_glm(btVector3 const &v)
 {
     return glm::vec3(v.x(), v.y(), v.z());
 }
