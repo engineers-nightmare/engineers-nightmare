@@ -333,19 +333,19 @@ update_lightfield()
                     if (!b)
                         continue;
 
-                    if (!b->surfs[surface_xm])
+                    if (light_permeable(b->surfs[surface_xm]))
                         level = std::max(level, get_light_level(i - 1, j, k) - light_atten);
-                    if (!b->surfs[surface_xp])
+                    if (light_permeable(b->surfs[surface_xp]))
                         level = std::max(level, get_light_level(i + 1, j, k) - light_atten);
 
-                    if (!b->surfs[surface_ym])
+                    if (light_permeable(b->surfs[surface_ym]))
                         level = std::max(level, get_light_level(i, j - 1, k) - light_atten);
-                    if (!b->surfs[surface_yp])
+                    if (light_permeable(b->surfs[surface_yp]))
                         level = std::max(level, get_light_level(i, j + 1, k) - light_atten);
 
-                    if (!b->surfs[surface_zm])
+                    if (light_permeable(b->surfs[surface_zm]))
                         level = std::max(level, get_light_level(i, j, k - 1) - light_atten);
-                    if (!b->surfs[surface_zp])
+                    if (light_permeable(b->surfs[surface_zp]))
                         level = std::max(level, get_light_level(i, j, k + 1) - light_atten);
 
                     set_light_level(i, j, k, level);
