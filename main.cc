@@ -385,6 +385,21 @@ set_game_state(game_state *s)
     pl.ui_dirty = true; /* state change always requires a ui rebuild. */
 }
 
+void
+prepare_chunks()
+{
+    /* walk all the chunks -- TODO: only walk chunks that might contribute to the view */
+    for (int k = ship->min_z; k <= ship->max_z; k++) {
+        for (int j = ship->min_y; j <= ship->max_y; j++) {
+            for (int i = ship->min_x; i <= ship->max_x; i++) {
+                chunk *ch = ship->get_chunk(i, j, k);
+                if (ch) {
+                    ch->prepare_render(i, j, k);
+                }
+            }
+        }
+    }
+}
 
 void
 init()
@@ -528,6 +543,9 @@ init()
     /* put some crap in the lightfield */
     memset(light->data, 0, sizeof(light->data));
     light->upload();
+
+    /* prepare the chunks -- this populates the physics data */
+    prepare_chunks();
 }
 
 
