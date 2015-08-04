@@ -806,6 +806,33 @@ add_text_with_outline(char const *s, float x, float y, float r = 1, float g = 1,
 }
 
 
+struct time_accumulator
+{
+    float period;
+    float accum;
+
+    time_accumulator(float period) :
+        period(period), accum(0.0f) {}
+
+    void add(float dt) { accum += dt; }
+
+    bool tick()
+    {
+        if (accum >= period) {
+            accum -= period;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+};
+
+
+time_accumulator main_tick_accum(1/15.0f);  /* 15Hz tick for game logic */
+time_accumulator fast_tick_accum(1/60.0f);  /* 60Hz tick for motion */
+
+
 void
 update()
 {
@@ -836,6 +863,9 @@ update()
 
     /* rebuild lighting if needed */
     update_lightfield();
+
+    main_tick_accum.add(dt);
+    fast_tick_accum.add(dt);
 
     /* remove any air that someone managed to get into the outside */
     {
