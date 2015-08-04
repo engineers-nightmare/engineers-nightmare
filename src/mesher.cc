@@ -154,7 +154,7 @@ mesher_init()
 
 
 void
-chunk::prepare_render(int _x, int _y, int _z)
+chunk::prepare_render(int x, int y, int z)
 {
     if (this->render_chunk.valid)
         return;     // nothing to do here.
@@ -200,9 +200,9 @@ chunk::prepare_render(int _x, int _y, int _z)
                               &this->render_chunk.phys_mesh,
                               &this->render_chunk.phys_shape);
 
-    build_static_physics_rb(_x * CHUNK_SIZE,
-                            _y * CHUNK_SIZE,
-                            _z * CHUNK_SIZE,
+    build_static_physics_rb(x * CHUNK_SIZE,
+                            y * CHUNK_SIZE,
+                            z * CHUNK_SIZE,
                             this->render_chunk.phys_shape,
                             &this->render_chunk.phys_body);
 }
