@@ -391,12 +391,6 @@ ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int 
 }
 
 static bool
-air_permeable(surface_type s)
-{
-    return s != surface_wall;
-}
-
-static bool
 exists_alt_path(int x, int y, int z, block *a, block *b, ship_space *ship, int face)
 {
     block *c;

@@ -41,3 +41,9 @@ struct block {
     surface_type surfs[face_count];
     unsigned short surf_space[face_count];
 };
+
+static inline bool
+air_permeable(surface_type s)
+{
+    return s != surface_wall;
+}
