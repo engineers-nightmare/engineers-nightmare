@@ -478,7 +478,7 @@ init()
     world_textures->load(3, "textures/frobnicator.png");
     world_textures->load(4, "textures/grate.png");
     world_textures->load(5, "textures/red.png");
-    world_textures->load(6, "textures/text_example.png");
+    world_textures->load(6, "textures/glass.png");
     world_textures->load(7, "textures/display.png");
     world_textures->load(8, "textures/light.png");
 
@@ -768,7 +768,7 @@ tool *tools[] = {
     tool::create_remove_block_tool(),
     tool::create_add_surface_tool(surface_wall),
     tool::create_add_surface_tool(surface_grate),
-    tool::create_add_surface_tool(surface_text),
+    tool::create_add_surface_tool(surface_glass),
     tool::create_remove_surface_tool(),
     new add_block_entity_tool(&entity_types[0]),
     new add_surface_entity_tool(&entity_types[1]),

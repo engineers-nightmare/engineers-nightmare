@@ -12,9 +12,10 @@ enum surface_type {
     surface_none = 0,
 
     surface_wall = surface_blocks_light | surface_blocks_air,
-    surface_text,
 
     surface_grate = surface_blocks_light,
+
+    surface_glass = surface_blocks_air,
 };
 
 /* 6 surfaces currently, all axis aligned
