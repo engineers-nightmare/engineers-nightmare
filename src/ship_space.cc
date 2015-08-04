@@ -3,32 +3,6 @@
 #include <math.h>
 #include <algorithm>
 
-/* create a ship space of x * y * z instantiated chunks */
-ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
-    : min_x(0), min_y(0), min_z(0), num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0),
-      num_false_splits(0)
-{
-    unsigned int x = 0,
-                 y = 0,
-                 z = 0;
-
-    for( x = 0; x < xd; ++x ){
-        for( y = 0; y < yd; ++y ){
-            for( z = 0; z < zd; ++z ){
-                glm::ivec3 v(x, y, z);
-                this->chunks[v] = new chunk();
-            }
-        }
-    }
-
-    /* dim is exclusive, max is inclusive
-     * so subtract 1 and store
-     */
-    this->max_x = xd - 1;
-    this->max_y = yd - 1;
-    this->max_z = zd - 1;
-}
-
 /* create an empty ship_space */
 ship_space::ship_space(void)
     : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0),
@@ -347,7 +321,7 @@ topo_unite(topo_info *from, topo_info *to)
     from = topo_find(from);
     to = topo_find(to);
 
-    /* already in same subtee? */
+    /* already in same subtree? */
     if (from == to) return from;
 
     if (from->rank < to->rank) {
@@ -388,7 +362,7 @@ ship_space::insert_zone(topo_info *t, zone_info *z)
 }
 
 void
-ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz, int face)
+ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz)
 {
     topo_info *t = topo_find(get_topo_info(x, y, z));
     topo_info *u = topo_find(get_topo_info(px, py, pz));
@@ -414,12 +388,6 @@ ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int 
     /* reinsert both zones at v */
     if (z1) { insert_zone(v, z1); }
     if (z2) { insert_zone(v, z2); }
-}
-
-static bool
-air_permeable(surface_type s)
-{
-    return s != surface_wall;
 }
 
 static bool
@@ -467,7 +435,7 @@ void
 ship_space::update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face)
 {
     /* can this surface even split (does it block atmo?) */
-    if (get_block(x, y, z)->surfs[face] != surface_wall)
+    if (!air_permeable(get_block(x, y, z)->surfs[face]))
         return;
 
     /* collapse an obvious symmetry */

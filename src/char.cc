@@ -865,8 +865,7 @@ entity *
 phys_raycast(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollisionWorld *world)
 {
     en_ray_result_callback callback(ignore);
-    world->rayTest(btVector3(start.x, start.y, start.z),
-                   btVector3(end.x, end.y, end.z), callback);
+    world->rayTest(glm_to_bt(start), glm_to_bt(end), callback);
 
     if (callback.hasHit()) {
         return (entity *)callback.m_collisionObject->getUserPointer();
@@ -892,19 +891,14 @@ phys_raycast_generic(glm::vec3 start_, glm::vec3 end_,
     if (callback.hasHit()) {
         result.hit = true;
 
-        result.hitCoord = glm::vec3(callback.m_hitPointWorld.x(),
-            callback.m_hitPointWorld.y(),
-            callback.m_hitPointWorld.z());
-
-        result.hitNormal = glm::vec3(callback.m_hitNormalWorld.x(),
-            callback.m_hitNormalWorld.y(),
-            callback.m_hitNormalWorld.z());
+        result.hitCoord = bt_to_glm(callback.m_hitPointWorld);
+        result.hitNormal = bt_to_glm(callback.m_hitNormalWorld);
 
         auto toHit = callback.m_rayToWorld - callback.m_rayFromWorld;
-        result.toHit = glm::normalize(glm::vec3(toHit.x(), toHit.y(), toHit.z()));
+        result.toHit = glm::normalize(bt_to_glm(toHit));
 
         auto fromHit = callback.m_rayFromWorld - callback.m_rayToWorld;
-        result.fromHit = glm::normalize(glm::vec3(fromHit.x(), fromHit.y(), fromHit.z()));
+        result.fromHit = glm::normalize(bt_to_glm(fromHit));
     }
 
     return result;

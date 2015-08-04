@@ -6,7 +6,15 @@ void
 simple(void)
 {
     block *b;
-    ship_space space(2, 2, 2);
+    ship_space space;
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            for (int k = 0; k < 2; k++) {
+                space.ensure_chunk(i, j, k);
+            }
+        }
+    }
 
     assert( space.get_block(2*CHUNK_SIZE, 2*CHUNK_SIZE, 2*CHUNK_SIZE) == 0 );
 
@@ -45,7 +53,8 @@ simple(void)
 void
 ensure(void)
 {
-    ship_space space(1, 1, 1);
+    ship_space space;
+    space.ensure_chunk(0, 0, 0);
 
     /* check for chunk within range */
     assert( space.get_chunk(0, 0, 0) );

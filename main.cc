@@ -333,19 +333,19 @@ update_lightfield()
                     if (!b)
                         continue;
 
-                    if (!b->surfs[surface_xm])
+                    if (light_permeable(b->surfs[surface_xm]))
                         level = std::max(level, get_light_level(i - 1, j, k) - light_atten);
-                    if (!b->surfs[surface_xp])
+                    if (light_permeable(b->surfs[surface_xp]))
                         level = std::max(level, get_light_level(i + 1, j, k) - light_atten);
 
-                    if (!b->surfs[surface_ym])
+                    if (light_permeable(b->surfs[surface_ym]))
                         level = std::max(level, get_light_level(i, j - 1, k) - light_atten);
-                    if (!b->surfs[surface_yp])
+                    if (light_permeable(b->surfs[surface_yp]))
                         level = std::max(level, get_light_level(i, j + 1, k) - light_atten);
 
-                    if (!b->surfs[surface_zm])
+                    if (light_permeable(b->surfs[surface_zm]))
                         level = std::max(level, get_light_level(i, j, k - 1) - light_atten);
-                    if (!b->surfs[surface_zp])
+                    if (light_permeable(b->surfs[surface_zp]))
                         level = std::max(level, get_light_level(i, j, k + 1) - light_atten);
 
                     set_light_level(i, j, k, level);
@@ -409,6 +409,8 @@ init()
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);         /* pointers given by other libs may not be aligned */
     glEnable(GL_DEPTH_TEST);
+
+    mesher_init();
 
     projectile_sw = load_mesh("mesh/cube.obj");
     set_mesh_material(projectile_sw, 3);
@@ -476,7 +478,7 @@ init()
     world_textures->load(3, "textures/frobnicator.png");
     world_textures->load(4, "textures/grate.png");
     world_textures->load(5, "textures/red.png");
-    world_textures->load(6, "textures/text_example.png");
+    world_textures->load(6, "textures/glass.png");
     world_textures->load(7, "textures/display.png");
     world_textures->load(8, "textures/light.png");
 
@@ -766,7 +768,7 @@ tool *tools[] = {
     tool::create_remove_block_tool(),
     tool::create_add_surface_tool(surface_wall),
     tool::create_add_surface_tool(surface_grate),
-    tool::create_add_surface_tool(surface_text),
+    tool::create_add_surface_tool(surface_glass),
     tool::create_remove_surface_tool(),
     new add_block_entity_tool(&entity_types[0]),
     new add_surface_entity_tool(&entity_types[1]),

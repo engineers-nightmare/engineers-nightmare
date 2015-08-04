@@ -140,13 +140,24 @@ teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, b
 }
 
 
+static int surface_type_to_material[256];
+
 void
-chunk::prepare_render(int _x, int _y, int _z)
+mesher_init()
+{
+    memset(surface_type_to_material, 0, sizeof(surface_type_to_material));
+    surface_type_to_material[surface_none] = 0;
+    surface_type_to_material[surface_wall] = 2;
+    surface_type_to_material[surface_grate] = 4;
+    surface_type_to_material[surface_glass] = 6;
+}
+
+
+void
+chunk::prepare_render(int x, int y, int z)
 {
     if (this->render_chunk.valid)
         return;     // nothing to do here.
-
-    static const int surface_type_to_material[] = { 0, 2, 4, 6 };
 
     std::vector<vertex> verts;
     std::vector<unsigned> indices;
@@ -189,9 +200,9 @@ chunk::prepare_render(int _x, int _y, int _z)
                               &this->render_chunk.phys_mesh,
                               &this->render_chunk.phys_shape);
 
-    build_static_physics_rb(_x * CHUNK_SIZE,
-                            _y * CHUNK_SIZE,
-                            _z * CHUNK_SIZE,
+    build_static_physics_rb(x * CHUNK_SIZE,
+                            y * CHUNK_SIZE,
+                            z * CHUNK_SIZE,
                             this->render_chunk.phys_shape,
                             &this->render_chunk.phys_body);
 }

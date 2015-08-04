@@ -14,6 +14,7 @@ placing and removing block scaffolding, surfaces of several types, block-mounted
 types; Lightfield propagated from certain entities.
 
 ![example](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-2015-05-18-1.png)
+![example](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-2015-08-04.png)
 
 
 # Building and running

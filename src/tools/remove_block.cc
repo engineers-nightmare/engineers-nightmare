@@ -78,7 +78,7 @@ struct remove_block_tool : tool
 
                     mark_lightfield_update(rx, ry, rz);
 
-                    ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rx, ry, rz, index);
+                    ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rx, ry, rz);
                 }
             }
         }

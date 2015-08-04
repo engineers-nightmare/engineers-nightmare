@@ -45,6 +45,8 @@ struct chunk {
     /* entities */
     std::vector<entity *> entities;
 
-    void prepare_render(int _x, int _y, int _z);
+    void prepare_render(int x, int y, int z);
 };
 
+/* must be called once before the mesher can be used */
+void mesher_init();

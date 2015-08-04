@@ -49,9 +49,6 @@ struct ship_space {
     std::unordered_map<glm::ivec3, chunk*, ivec3_hash> chunks;
     std::unordered_map<topo_info *, zone_info *> zones;
 
-    /* create a ship space of x * y * z instantiated chunks */
-    ship_space(unsigned int xdim, unsigned int ydim, unsigned int zdim);
-
     /* create an empty ship_space */
     ship_space();
 
@@ -109,7 +106,7 @@ struct ship_space {
     /* topo info for open vacuum, so we know what pressure to force to zero */
     topo_info outside_topo_info;
     void rebuild_topology();
-    void update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz, int face);
+    void update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz);
     void update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face);
 
     int num_full_rebuilds;      /* number of full rebuilds (pretty slow) performed */
