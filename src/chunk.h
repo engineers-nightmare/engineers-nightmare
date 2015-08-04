@@ -48,3 +48,5 @@ struct chunk {
     void prepare_render(int _x, int _y, int _z);
 };
 
+/* must be called once before the mesher can be used */
+void mesher_init();

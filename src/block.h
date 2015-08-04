@@ -7,10 +7,14 @@ enum block_type {
 };
 
 enum surface_type {
-    surface_none,
-    surface_wall,
-    surface_grate,
+    surface_blocks_light = 0x40,
+    surface_blocks_air = 0x80,
+    surface_none = 0,
+
+    surface_wall = surface_blocks_light | surface_blocks_air,
     surface_text,
+
+    surface_grate = surface_blocks_light,
 };
 
 /* 6 surfaces currently, all axis aligned
@@ -45,5 +49,5 @@ struct block {
 static inline bool
 air_permeable(surface_type s)
 {
-    return s != surface_wall;
+    return ~s & surface_blocks_air;
 }

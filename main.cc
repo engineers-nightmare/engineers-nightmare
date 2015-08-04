@@ -410,6 +410,8 @@ init()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);         /* pointers given by other libs may not be aligned */
     glEnable(GL_DEPTH_TEST);
 
+    mesher_init();
+
     projectile_sw = load_mesh("mesh/cube.obj");
     set_mesh_material(projectile_sw, 3);
     projectile_hw = upload_mesh(projectile_sw);
