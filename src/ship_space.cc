@@ -3,32 +3,6 @@
 #include <math.h>
 #include <algorithm>
 
-/* create a ship space of x * y * z instantiated chunks */
-ship_space::ship_space(unsigned int xd, unsigned int yd, unsigned int zd)
-    : min_x(0), min_y(0), min_z(0), num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0),
-      num_false_splits(0)
-{
-    unsigned int x = 0,
-                 y = 0,
-                 z = 0;
-
-    for( x = 0; x < xd; ++x ){
-        for( y = 0; y < yd; ++y ){
-            for( z = 0; z < zd; ++z ){
-                glm::ivec3 v(x, y, z);
-                this->chunks[v] = new chunk();
-            }
-        }
-    }
-
-    /* dim is exclusive, max is inclusive
-     * so subtract 1 and store
-     */
-    this->max_x = xd - 1;
-    this->max_y = yd - 1;
-    this->max_z = zd - 1;
-}
-
 /* create an empty ship_space */
 ship_space::ship_space(void)
     : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0),

@@ -115,16 +115,21 @@ ship_space *
 ship_space::mock_ship_space(void)
 {
     /* new ship space of 2 * 2 * 1*/
-    ship_space * ss = new ship_space(2, 2, 1);
-
-    unsigned int x=0, y=0, z=0;
+    ship_space * ss = new ship_space;
+    for (unsigned x = 0; x < 2; x++) {
+        for (unsigned y = 0; y < 2; y++) {
+            for (unsigned z = 0; z < 1; z++) {
+                ss->ensure_chunk(x, y, z);
+            }
+        }
+    }
 
     /* LET THIS SERVE AS MOTIVATION FOR NEEDING MAP LOAD AND SAVE */
 
     /* first pass build complete outer shell for each chunk */
-    for( z=0; z < 8; ++z ){
-        for( y=0; y < 8; ++y ){
-            for( x=0; x < 8; ++x ){
+    for (unsigned z=0; z < 8; ++z) {
+        for (unsigned y=0; y < 8; ++y) {
+            for (unsigned x=0; x < 8; ++x) {
                 for (int i = 0; i < 4; i++) {
                     block *b = ss->get_block(x + block_offsets[i][0], y + block_offsets[i][1], z);
 

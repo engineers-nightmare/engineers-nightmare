@@ -49,9 +49,6 @@ struct ship_space {
     std::unordered_map<glm::ivec3, chunk*, ivec3_hash> chunks;
     std::unordered_map<topo_info *, zone_info *> zones;
 
-    /* create a ship space of x * y * z instantiated chunks */
-    ship_space(unsigned int xdim, unsigned int ydim, unsigned int zdim);
-
     /* create an empty ship_space */
     ship_space();
 
