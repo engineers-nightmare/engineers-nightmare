@@ -321,7 +321,7 @@ topo_unite(topo_info *from, topo_info *to)
     from = topo_find(from);
     to = topo_find(to);
 
-    /* already in same subtee? */
+    /* already in same subtree? */
     if (from == to) return from;
 
     if (from->rank < to->rank) {
