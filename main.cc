@@ -126,27 +126,28 @@ mat_block_face(int x, int y, int z, int face)
     }
 }
 
+#define PROJECTILE_INITIAL_SPEED    2.f
+#define PROJECTILE_INITIAL_LIFETIME 10.f
+#define PROJECTILE_AFTER_COLLISION_LIFETIME 0.5f
+
 struct projectile
 {
-    glm::vec3 pos = glm::vec3(0, 0, 0);
-    glm::vec3 dir = glm::vec3(0, 0, 0);
-    float velocity = 0.f;
-    float lifetime = initial_lifetime;
-
-    static constexpr float initial_lifetime = 10.f;
-    static constexpr float after_collision_lifetime = 0.5f;
+    glm::vec3 pos;
+    glm::vec3 dir;
+    float speed;
+    float lifetime;
 
     /* Returns true if still alive */
     bool update(float dt) {
-        auto new_pos = pos + dir * velocity * dt;
+        auto new_pos = pos + dir * speed * dt;
 
         auto hit = phys_raycast_generic(pos, new_pos,
             phy->ghostObj, phy->dynamicsWorld);
 
         if (hit.hit) {
             new_pos = hit.hitCoord;
-            velocity = 0.f;
-            lifetime = after_collision_lifetime;
+            speed = 0.f;
+            lifetime = PROJECTILE_AFTER_COLLISION_LIFETIME;
         }
 
         pos = new_pos;
@@ -1114,8 +1115,8 @@ struct play_state : game_state {
                 auto & proj = projectiles[num_projectiles++];
                 proj.pos = pl.eye;
                 proj.dir = pl.dir;
-                proj.velocity = 2.f;
-                proj.lifetime = proj.initial_lifetime;
+                proj.speed = PROJECTILE_INITIAL_SPEED;
+                proj.lifetime = PROJECTILE_INITIAL_LIFETIME;
 
                 pl.fire_projectile = false;
             }
