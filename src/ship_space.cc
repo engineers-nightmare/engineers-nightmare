@@ -362,7 +362,7 @@ ship_space::insert_zone(topo_info *t, zone_info *z)
 }
 
 void
-ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz, int face)
+ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz)
 {
     topo_info *t = topo_find(get_topo_info(x, y, z));
     topo_info *u = topo_find(get_topo_info(px, py, pz));

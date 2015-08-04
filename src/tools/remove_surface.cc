@@ -67,7 +67,7 @@ struct remove_surface_tool : tool
         mark_lightfield_update(rc->x, rc->y, rc->z);
         mark_lightfield_update(rc->px, rc->py, rc->pz);
 
-        ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rc->px, rc->py, rc->pz, index);
+        ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rc->px, rc->py, rc->pz);
     }
 
     void preview(raycast_info *rc) override
