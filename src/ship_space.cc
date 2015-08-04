@@ -435,7 +435,7 @@ void
 ship_space::update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face)
 {
     /* can this surface even split (does it block atmo?) */
-    if (!air_permeable(get_block(x, y, z)->surfs[face]))
+    if (air_permeable(get_block(x, y, z)->surfs[face]))
         return;
 
     /* collapse an obvious symmetry */
