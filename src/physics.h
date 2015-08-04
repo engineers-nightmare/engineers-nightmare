@@ -37,7 +37,8 @@ struct physics {
     ~physics();
 
     /* call each physics tick */
-    void tick();
+    void tick_controller(float dt);
+    void tick(float dt);
 };
 
 

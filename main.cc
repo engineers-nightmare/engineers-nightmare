@@ -385,6 +385,21 @@ set_game_state(game_state *s)
     pl.ui_dirty = true; /* state change always requires a ui rebuild. */
 }
 
+void
+prepare_chunks()
+{
+    /* walk all the chunks -- TODO: only walk chunks that might contribute to the view */
+    for (int k = ship->min_z; k <= ship->max_z; k++) {
+        for (int j = ship->min_y; j <= ship->max_y; j++) {
+            for (int i = ship->min_x; i <= ship->max_x; i++) {
+                chunk *ch = ship->get_chunk(i, j, k);
+                if (ch) {
+                    ch->prepare_render(i, j, k);
+                }
+            }
+        }
+    }
+}
 
 void
 init()
@@ -528,6 +543,9 @@ init()
     /* put some crap in the lightfield */
     memset(light->data, 0, sizeof(light->data));
     light->upload();
+
+    /* prepare the chunks -- this populates the physics data */
+    prepare_chunks();
 }
 
 
@@ -788,6 +806,33 @@ add_text_with_outline(char const *s, float x, float y, float r = 1, float g = 1,
 }
 
 
+struct time_accumulator
+{
+    float period;
+    float accum;
+
+    time_accumulator(float period) :
+        period(period), accum(0.0f) {}
+
+    void add(float dt) { accum += dt; }
+
+    bool tick()
+    {
+        if (accum >= period) {
+            accum -= period;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+};
+
+
+time_accumulator main_tick_accum(1/15.0f);  /* 15Hz tick for game logic */
+time_accumulator fast_tick_accum(1/60.0f);  /* 60Hz tick for motion */
+
+
 void
 update()
 {
@@ -816,39 +861,67 @@ update()
     per_camera->val.inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
     per_camera->upload();
 
-    /* rebuild lighting if needed */
-    update_lightfield();
+    main_tick_accum.add(dt);
+    fast_tick_accum.add(dt);
 
-    /* remove any air that someone managed to get into the outside */
-    {
-        topo_info *t = topo_find(&ship->outside_topo_info);
-        zone_info *z = ship->get_zone_info(t);
-        if (z) {
-            /* try as hard as you like, you cannot fill space with your air system */
-            z->air_amount = 0;
+    /* this absolutely must run every frame */
+    state->update(dt);
+
+    /* things that can run at a pretty slow rate */
+    while (main_tick_accum.tick()) {
+
+        /* rebuild lighting if needed */
+        update_lightfield();
+
+        /* remove any air that someone managed to get into the outside */
+        {
+            topo_info *t = topo_find(&ship->outside_topo_info);
+            zone_info *z = ship->get_zone_info(t);
+            if (z) {
+                /* try as hard as you like, you cannot fill space with your air system */
+                z->air_amount = 0;
+            }
+        }
+
+        /* allow the entities to tick */
+        for (auto ch : ship->chunks) {
+            for (auto e : ch.second->entities) {
+                e->tick();
+            }
+        }
+
+        /* HACK: dirty this every frame for now while debugging atmo */
+        if (1 || pl.ui_dirty) {
+            text->reset();
+            state->rebuild_ui();
+            text->upload();
+            pl.ui_dirty = false;
         }
     }
 
-    /* allow the entities to tick */
-    for (auto ch : ship->chunks) {
-        for (auto e : ch.second->entities) {
-            e->tick();
+    /* character controller tick: we'd LIKE to run this off the fast_tick_accum, but it has all kinds of
+     * every-frame assumptions baked in (player impulse state, etc) */
+    phy->tick_controller(dt);
+
+    while (fast_tick_accum.tick()) {
+
+        /* update the projectiles */
+        for (auto i = 0u; i < num_projectiles;) {
+            if (projectiles[i].update(fast_tick_accum.period)) {
+                ++i;
+            }
+            else {
+                projectiles[i] = projectiles[--num_projectiles];
+            }
         }
+
+        phy->tick(fast_tick_accum.period);
+
     }
 
     world_textures->bind(0);
 
-    /* walk all the chunks -- TODO: only walk chunks that might contribute to the view */
-    for (int k = ship->min_z; k <= ship->max_z; k++) {
-        for (int j = ship->min_y; j <= ship->max_y; j++) {
-            for (int i = ship->min_x; i <= ship->max_x; i++) {
-                chunk *ch = ship->get_chunk(i, j, k);
-                if (ch) {
-                    ch->prepare_render(i, j, k);
-                }
-            }
-        }
-    }
+    prepare_chunks();
 
     for (int k = ship->min_z; k <= ship->max_z; k++) {
         for (int j = ship->min_y; j <= ship->max_y; j++) {
@@ -883,7 +956,11 @@ update()
         }
     }
 
-    state->update(dt);
+    /* draw the projectiles */
+    glUseProgram(simple_shader);
+    for (auto i = 0u; i < num_projectiles; i++) {
+        projectiles[i].draw();
+    }
 
     /* draw the sky */
     glUseProgram(sky_shader);
@@ -892,34 +969,7 @@ update()
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glDepthMask(GL_TRUE);
 
-
-    /* HACK: dirty this every frame for now while debugging atmo */
-    if (1 || pl.ui_dirty) {
-        text->reset();
-        state->rebuild_ui();
-        text->upload();
-        pl.ui_dirty = false;
-    }
-
-    /* update the projectiles */
-    for (auto i = 0u; i < num_projectiles;) {
-        if (projectiles[i].update(dt)) {
-            ++i;
-        }
-        else {
-            projectiles[i] = projectiles[--num_projectiles];
-        }
-    }
-
-    glUseProgram(simple_shader);
-
-    /* draw the projectiles */
-    for (auto i = 0u; i < num_projectiles; i++) {
-        projectiles[i].draw();
-    }
-
-    glUseProgram(simple_shader);
-
+    /* draw the ui */
     glDisable(GL_DEPTH_TEST);
 
     glUseProgram(ui_shader);
@@ -1375,9 +1425,6 @@ run()
 
         /* SDL_PollEvent above has already pumped the input, so current key state is available */
         handle_input();
-
-        /* physics tick */
-        phy->tick();
 
         update();
 
