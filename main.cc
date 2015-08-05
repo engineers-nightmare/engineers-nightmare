@@ -1077,6 +1077,47 @@ struct add_wiring_tool : tool
     }
 
     void preview(raycast_info *rc) override {
+        /* do a real, generic raycast */
+
+        /* TODO: handle hitting ents -- we want to connect to the ent. */
+        /* TODO: ignore the player properly. this involves fixing the phys
+         * raycast code slightly */
+        /* TODO: handle some weird cases in negative space. current impl is
+         * not quite correct */
+
+        auto end = pl.eye + pl.dir * 5.0f;
+
+        auto hit = phys_raycast_generic(pl.eye, end,
+            phy->ghostObj, phy->dynamicsWorld);
+
+        if (!hit.hit)
+            return;
+
+        /* get away from the actual surface slightly to avoid instability */
+        auto adjustedPoint = hit.hitCoord + hit.hitNormal * 0.1f;
+
+        auto frac = adjustedPoint - glm::floor(adjustedPoint);
+        auto diff = glm::abs(glm::vec3(0.5f) - frac);
+
+        /* snap the two components closest to the edge, to the edge */
+        if (diff.x > diff.y || diff.x > diff.z) {
+            frac.x = frac.x < 0.5f ? 0.1f : 0.9f;
+        }
+        if (diff.y >= diff.x || diff.y > diff.z) {
+            frac.y = frac.y < 0.5f ? 0.1f : 0.9f;
+        }
+        if (diff.z >= diff.x || diff.z >= diff.y) {
+            frac.z = frac.z < 0.5f ? 0.1f : 0.9f;
+        }
+
+        auto pt = frac + glm::floor(adjustedPoint);
+
+        per_object->val.world_matrix = mat_position(pt.x, pt.y, pt.z);
+        per_object->upload();
+
+        glUseProgram(add_overlay_shader);
+        draw_mesh(projectile_hw);
+        glUseProgram(simple_shader);
     }
 
     void get_description(char *str) override {
