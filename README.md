@@ -53,5 +53,5 @@ run:
 Visual Studio 2015 is the only officially supported Windows build.
 
  * Clone or download this repo.
- * Extract `vs2015.zip` from [windows-dependencies](https://github.com/engineers-nightmare/windows-dependencies) into the cloned folder.
+ * Copy `windows-dependencies` folder from [windows-dependencies](https://github.com/engineers-nightmare/windows-dependencies) into the cloned folder.
  * Open nightmare.sln
