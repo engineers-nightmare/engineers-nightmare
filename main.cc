@@ -1070,6 +1070,21 @@ struct remove_surface_entity_tool : tool
     }
 };
 
+
+struct add_wiring_tool : tool
+{
+    void use(raycast_info *rc) override {
+    }
+
+    void preview(raycast_info *rc) override {
+    }
+
+    void get_description(char *str) override {
+        strcpy(str, "Place wiring");
+    }
+};
+
+
 tool *tools[] = {
     tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
@@ -1083,6 +1098,7 @@ tool *tools[] = {
     new add_surface_entity_tool(&entity_types[2]),
     new add_surface_entity_tool(&entity_types[3]),
     new remove_surface_entity_tool(),
+    new add_wiring_tool(),
 };
 
 
