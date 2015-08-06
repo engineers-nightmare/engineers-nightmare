@@ -97,10 +97,10 @@ upload_mesh(sw_mesh *mesh)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid const *)offsetof(vertex, x));
 
     glEnableVertexAttribArray(1);
-    glVertexAttribIPointer(1, 1, GL_UNSIGNED_SHORT, sizeof(vertex), (GLvoid const *)offsetof(vertex, mat));
+    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(vertex), (GLvoid const *)offsetof(vertex, mat));
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_INT_2_10_10_10_REV, GL_FALSE, sizeof(vertex), (GLvoid const *)offsetof(vertex, normal_packed));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid const *)offsetof(vertex, nx));
 
     glGenBuffers(1, &ret->ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ret->ibo);
