@@ -92,6 +92,15 @@ light_field *light;
 entity *use_entity = nullptr;
 
 
+glm::ivec3
+get_block_containing(glm::vec3 v) {
+    int x = v.x; if (v.x < 0) x--;
+    int y = v.y; if (v.y < 0) y--;
+    int z = v.z; if (v.z < 0) z--;
+
+    return glm::ivec3(x, y, z);
+}
+
 glm::mat4
 mat_position(float x, float y, float z)
 {
@@ -601,6 +610,12 @@ struct add_block_entity_tool : tool
         if (!rc->hit || rc->inside)
             return false;
 
+        /* don't allow placements that would cause the player to end up inside the ent and get stuck */
+        glm::ivec3 pos(rc->px, rc->py, rc->pz);
+        if (pos == get_block_containing(pl.eye) ||
+            pos == get_block_containing(pl.pos))
+            return false;
+
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
 
         if (bl) {
@@ -1028,11 +1043,9 @@ struct play_state : game_state {
 
         {
             /* Atmo status */
-            int plx = pl.eye.x; if (pl.eye.x < 0) plx--;
-            int ply = pl.eye.y; if (pl.eye.y < 0) ply--;
-            int plz = pl.eye.z; if (pl.eye.z < 0) plz--;
+            glm::ivec3 eye_block = get_block_containing(pl.eye);
 
-            topo_info *t = topo_find(ship->get_topo_info(plx, ply, plz));
+            topo_info *t = topo_find(ship->get_topo_info(eye_block.x, eye_block.y, eye_block.z));
             topo_info *outside = topo_find(&ship->outside_topo_info);
             zone_info *z = ship->get_zone_info(t);
             float pressure = z ? (z->air_amount / t->size) : 0.0f;
