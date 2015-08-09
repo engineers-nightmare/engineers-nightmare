@@ -644,3 +644,58 @@ ship_space::rebuild_topology()
         insert_zone(topo_find(it.first), it.second);
     }
 }
+
+
+bool
+ship_space::validate()
+{
+    bool pass = true;
+
+    for (auto ch : chunks) {
+        for (int z = 0; z < CHUNK_SIZE; z++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                for (int x = 0; x < CHUNK_SIZE; x++) {
+                    block *bl = ch.second->blocks.get(x, y, z);
+                    for (int face = 0; face < 6; face++) {
+                        glm::ivec3 offset = dirs[face];
+                        glm::ivec3 other_coord(CHUNK_SIZE * ch.first.x + x + offset.x,
+                                               CHUNK_SIZE * ch.first.y + y + offset.y,
+                                               CHUNK_SIZE * ch.first.z + z + offset.z);
+                        block *other = get_block(other_coord.x, other_coord.y, other_coord.z);
+
+                        if (bl->surfs[face]) {
+                            /* 1/ every surface must be consistent with its far side. this implies that the
+                             *    far side *block* must also exist, so that the surface can
+                             */
+                            if (!other) {
+                                printf("validate(): %d %d %d in nonexistent chunk, but far side of surface %d exists\n",
+                                        other_coord.x, other_coord.y, other_coord.z, face ^ 1);
+                                pass = false;
+                            }
+                            else if (other->surfs[face ^ 1] != bl->surfs[face]) {
+                                printf("validate(): inconsistent surface %d %d %d face %d\n",
+                                        other_coord.x, other_coord.y, other_coord.z, face ^ 1);
+                                pass = false;
+                            }
+
+                            /* 2/ every surface must be supported by scaffolding on at least one side */
+                            if (bl->type != block_support && (!other || other->type != block_support)) {
+                                printf("validate(): %d %d %d face %d has no supporting scaffold\n",
+                                        other_coord.x - offset.x, other_coord.y - offset.y,
+                                        other_coord.z - offset.z, face);
+                                pass = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /* TODO: validate anything else we might have screwed up */
+    if (pass) {
+        printf("validate(): OK\n");
+    }
+
+    return pass;
+}

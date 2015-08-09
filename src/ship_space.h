@@ -113,6 +113,8 @@ struct ship_space {
     int num_fast_unifys;        /* number of incremental unify operations performed */
     int num_fast_nosplits;      /* number of rebuilds avoided because we proved them spurious */
     int num_false_splits;       /* number of useless rebuilds taken */
+
+    bool validate();
 };
 
 /* helper */
