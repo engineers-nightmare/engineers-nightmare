@@ -527,6 +527,8 @@ init()
             ship->min_y, ship->max_y,
             ship->min_z, ship->max_z);
 
+    ship->validate();
+
     game_settings = load_settings(en_config_base);
     en_settings user_settings = load_settings(en_config_user);
     game_settings.merge_with(user_settings);
