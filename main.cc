@@ -9,6 +9,7 @@
 
 #include <epoxy/gl.h>
 #include <algorithm>
+#include <functional>
 
 #include <unordered_map>
 
@@ -1217,8 +1218,7 @@ struct play_state : game_state {
 
 struct menu_state : game_state
 {
-    typedef void item_handler(void);
-    typedef std::pair<char const *, item_handler *> menu_item;
+    typedef std::pair<char const *, std::function<void()>> menu_item;
     std::vector<menu_item> items;
     int selected = 0;
 
@@ -1284,8 +1284,7 @@ struct menu_state : game_state
 
 struct menu_settings_state : game_state
 {
-    typedef void item_handler(void);
-    typedef std::tuple<char const *, char const *, item_handler *> menu_item;
+    typedef std::tuple<char const *, char const *, std::function<void()>> menu_item;
     std::vector<menu_item> items;
     int selected = 0;
 
