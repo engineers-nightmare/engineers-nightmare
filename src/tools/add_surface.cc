@@ -97,7 +97,7 @@ struct add_surface_tool : tool
 
     void get_description(char *str) override
     {
-        sprintf(str, "Place surface type %d\n", (int)st);
+        sprintf(str, "Place surface type %d", (int)st);
     }
 };
 

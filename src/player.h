@@ -4,6 +4,8 @@
 
 #define EYE_OFFSET_Z    0.4
 
+struct tool;
+
 struct player {
     float angle;
     float elev;
@@ -11,6 +13,8 @@ struct player {
     glm::vec3 dir;  /* computed */
     glm::vec3 eye;  /* computed */
     glm::vec2 move;
+
+    tool *active_tool = nullptr;
 
     unsigned int selected_slot;
 
