@@ -447,7 +447,7 @@ init()
     surfs_sw[surface_zp] = load_mesh("mesh/z_quad_p.obj");
     surfs_sw[surface_zm] = load_mesh("mesh/z_quad.obj");
 
-    for (int i = 0; i < 6; i++)
+    for (auto i = 0u; i < 6; i++)
         surfs_hw[i] = upload_mesh(surfs_sw[i]);
 
     entity_types[0].sw = load_mesh("mesh/frobnicator.obj");
@@ -535,11 +535,11 @@ init()
     pl.elev = 0;
     pl.pos = glm::vec3(3,2,2);
 
-    for (int i = 0; i < NUM_TOOL_SLOTS; ++i) {
+    for (auto i = 0u; i < NUM_TOOL_SLOTS; ++i) {
         pl.tool_slots[i] = nullptr;
     }
 
-    pl.selected_slot = 1;
+    pl.selected_slot = 0;
     pl.ui_dirty = true;
     pl.disable_gravity = false;
 
@@ -1028,9 +1028,14 @@ struct play_state : game_state {
         char buf[256];
         char buf2[512];
 
-        {
+        // crosshair
+        auto crosshair = ".";
+        text->measure(crosshair, &w, &h);
+        add_text_with_outline(".", -w/2, -w/2);
+
+        for (auto i = 0u; i < NUM_TOOL_SLOTS; ++i) {
             /* Tool name down the bottom */
-            tool *t = pl.tool_slots[pl.selected_slot];
+            tool *t = pl.tool_slots[i];
 
             if (t) {
                 t->get_description(buf);
@@ -1038,10 +1043,21 @@ struct play_state : game_state {
             else {
                 strcpy(buf, "(no tool)");
             }
+
+            if (i == pl.selected_slot) {
+                sprintf(buf, "%s <==", buf);
+            }
+            add_text_with_outline(buf, -500, 0 - NUM_TOOL_SLOTS * 75 + (signed)i * 125);
         }
 
-        text->measure(".", &w, &h);
-        add_text_with_outline(".", -w/2, -w/2);
+        tool *t = pl.tool_slots[pl.selected_slot];
+
+        if (t) {
+            t->get_description(buf);
+        }
+        else {
+            strcpy(buf, "(no tool)");
+        }
 
         sprintf(buf2, "Left mouse button: %s", buf);
         text->measure(buf2, &w, &h);
@@ -1164,11 +1180,6 @@ struct play_state : game_state {
         auto slot3      = get_input(action_slot3)->just_active;
         auto slot4      = get_input(action_slot4)->just_active;
         auto slot5      = get_input(action_slot5)->just_active;
-        auto slot6      = get_input(action_slot6)->just_active;
-        auto slot7      = get_input(action_slot7)->just_active;
-        auto slot8      = get_input(action_slot8)->just_active;
-        auto slot9      = get_input(action_slot9)->just_active;
-        auto slot0      = get_input(action_slot0)->just_active;
         auto gravity    = get_input(action_gravity)->just_active;
         auto use_tool   = get_input(action_use_tool)->just_active;
         auto next_tool  = get_input(action_tool_next)->just_active;
@@ -1215,11 +1226,6 @@ struct play_state : game_state {
         if (slot3) set_slot(3);
         if (slot4) set_slot(4);
         if (slot5) set_slot(5);
-        if (slot6) set_slot(6);
-        if (slot7) set_slot(7);
-        if (slot8) set_slot(8);
-        if (slot9) set_slot(9);
-        if (slot0) set_slot(0);
 
         /* limit to unit vector */
         float len = glm::length(pl.move);
@@ -1412,7 +1418,7 @@ struct menu_inventory_state : game_state {
             menu_item("Resume",
                 [] { set_game_state(create_play_state()); }));
 
-        for (int i = 0; i < NUM_TOOL_SLOTS; ++i) {
+        for (unsigned int i = 0u; i < NUM_TOOL_SLOTS; ++i) {
             sprintf(slot_descs[i], "Tool Slot %d", i);
             items.push_back(menu_item(slot_descs[i],
                 [this, i] { set_game_state(create_menu_tool_slot_state(i)); }));
