@@ -29,6 +29,7 @@
 #include "src/tools.h"
 #include "src/shader_params.h"
 #include "src/light_field.h"
+#include "src/projectiles.h"
 
 
 #define APP_NAME    "Engineer's Nightmare"
@@ -40,8 +41,6 @@
 #define MAX_WORLD_TEXTURES          64
 
 #define MOUSE_Y_LIMIT   1.54
-
-#define MAX_PROJECTILES 200
 
 bool exit_requested = false;
 
@@ -136,83 +135,6 @@ mat_block_face(int x, int y, int z, int face)
     }
 }
 
-#define PROJECTILE_INITIAL_SPEED    2.f
-#define PROJECTILE_INITIAL_LIFETIME 10.f
-#define PROJECTILE_AFTER_COLLISION_LIFETIME 0.5f
-
-struct projectile
-{
-    glm::vec3 pos;
-    glm::vec3 dir;
-    float speed;
-    float lifetime;
-
-    /* Returns true if still alive */
-    bool update(float dt) {
-        auto new_pos = pos + dir * speed * dt;
-
-        auto hit = phys_raycast_generic(pos, new_pos,
-            phy->ghostObj, phy->dynamicsWorld);
-
-        if (hit.hit) {
-            new_pos = hit.hitCoord;
-            speed = 0.f;
-            lifetime = PROJECTILE_AFTER_COLLISION_LIFETIME;
-        }
-
-        pos = new_pos;
-
-        lifetime -= dt;
-        return lifetime > 0.f;
-    }
-
-    void draw() {
-        per_object->val.world_matrix = mat_position(pos);
-        per_object->upload();
-        draw_mesh(projectile_hw);
-    }
-};
-
-projectile *projectiles = new projectile[MAX_PROJECTILES];
-unsigned num_projectiles = 0;
-
-void
-update_projectiles(float dt)
-{
-    /* update the projectiles */
-    for (auto i = 0u; i < num_projectiles;) {
-        if (projectiles[i].update(dt)) {
-            ++i;
-        }
-        else {
-            projectiles[i] = projectiles[--num_projectiles];
-        }
-    }
-}
-
-void
-draw_projectiles()
-{
-    glUseProgram(simple_shader);
-    for (auto i = 0u; i < num_projectiles; i++) {
-        projectiles[i].draw();
-    }
-}
-
-bool
-spawn_projectile(glm::vec3 pos, glm::vec3 dir)
-{
-    if (num_projectiles >= MAX_PROJECTILES) {
-        return false;
-    }
-
-    auto & proj = projectiles[num_projectiles++];
-    proj.pos = pl.eye;
-    proj.dir = pl.dir;
-    proj.speed = PROJECTILE_INITIAL_SPEED;
-    proj.lifetime = PROJECTILE_INITIAL_LIFETIME;
-    return true;
-}
 
 
 struct entity_type
@@ -1005,6 +927,7 @@ update()
     }
 
     /* draw the projectiles */
+    glUseProgram(simple_shader);
     draw_projectiles();
 
     /* draw the sky */
@@ -1498,8 +1421,6 @@ main(int, char **)
     init();
 
     run();
-
-    delete [] projectiles;
 
     return 0;
 }

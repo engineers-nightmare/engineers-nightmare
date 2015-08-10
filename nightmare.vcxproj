@@ -125,6 +125,7 @@
     <ClCompile Include="src\mesher.cc" />
     <ClCompile Include="src\mock_ship_junk.cc" />
     <ClCompile Include="src\physics.cc" />
+    <ClCompile Include="src\projectiles.cc"/>
     <ClCompile Include="src\settings.cc" />
     <ClCompile Include="src\shader.cc" />
     <ClCompile Include="src\ship_space.cc" />
@@ -149,6 +150,7 @@
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\physics.h" />
     <ClInclude Include="src\player.h" />
+    <ClInclude Include="src\projectiles.h" />
     <ClInclude Include="src\settings.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\ship_space.h" />
