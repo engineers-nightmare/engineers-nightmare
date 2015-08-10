@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #define EYE_OFFSET_Z    0.4
+#define NUM_TOOL_SLOTS 5
 
 struct tool;
 
@@ -14,7 +15,7 @@ struct player {
     glm::vec3 eye;  /* computed */
     glm::vec2 move;
 
-    tool *active_tool = nullptr;
+    tool *tool_slots[NUM_TOOL_SLOTS];
 
     unsigned int selected_slot;
 

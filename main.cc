@@ -375,6 +375,7 @@ struct game_state {
     static game_state *create_play_state();
     static game_state *create_menu_state();
     static game_state *create_menu_inventory_state();
+    static game_state *create_menu_tool_slot_state(unsigned int);
     static game_state *create_menu_settings_state();
 };
 
@@ -533,7 +534,11 @@ init()
     pl.angle = 0;
     pl.elev = 0;
     pl.pos = glm::vec3(3,2,2);
-    pl.active_tool = nullptr;
+
+    for (int i = 0; i < NUM_TOOL_SLOTS; ++i) {
+        pl.tool_slots[i] = nullptr;
+    }
+
     pl.selected_slot = 1;
     pl.ui_dirty = true;
     pl.disable_gravity = false;
@@ -1025,7 +1030,7 @@ struct play_state : game_state {
 
         {
             /* Tool name down the bottom */
-            tool *t = pl.active_tool;
+            tool *t = pl.tool_slots[pl.selected_slot];
 
             if (t) {
                 t->get_description(buf);
@@ -1094,7 +1099,7 @@ struct play_state : game_state {
     }
 
     void update(float dt) override {
-        tool *t = pl.active_tool;
+        tool *t = pl.tool_slots[pl.selected_slot];
 
         /* both tool use and overlays need the raycast itself */
         raycast_info rc;
@@ -1130,9 +1135,8 @@ struct play_state : game_state {
     }
 
     void cycle_slot(int d) {
-        auto num_tools = sizeof(tools) / sizeof(tools[0]);
         unsigned int cur_slot = pl.selected_slot;
-        cur_slot = (cur_slot + num_tools + d) % num_tools;
+        cur_slot = (cur_slot + NUM_TOOL_SLOTS + d) % NUM_TOOL_SLOTS;
 
         pl.selected_slot = cur_slot;
         pl.ui_dirty = true;
@@ -1264,7 +1268,7 @@ struct menu_state : game_state
         float y = 50;
         float dy = -100;
 
-        for (auto it = items.begin(); it != items.end(); it++) {
+        for (auto it = items.begin(); it != items.end(); ++it) {
             w = 0;
             h = 0;
             put_item_text(buf, it->first, it - items.begin());
@@ -1295,14 +1299,17 @@ struct menu_state : game_state
     }
 };
 
-struct menu_inventory_state : game_state {
+struct menu_tool_slot_state : game_state {
     typedef std::tuple<char const *, char const *, std::function<void()>> menu_item;
     std::vector<menu_item> items;
     int selected = 0;
     unsigned int num_tools = sizeof(tools) / sizeof(tools[0]);
     char tool_descs[sizeof(tools) / sizeof(tools[0])][256];
 
-    menu_inventory_state() {
+    unsigned int slot = 0;
+
+    menu_tool_slot_state(unsigned int slot) {
+        this->slot = slot;
     }
 
     void update(float dt) override {
@@ -1310,20 +1317,20 @@ struct menu_inventory_state : game_state {
 
         items.push_back(
             menu_item("Back", "",
-                [] { set_game_state(create_menu_state()); }));
+                [] { set_game_state(create_menu_inventory_state()); }));
 
         items.push_back(
             menu_item("Resume", "",
                 [] { set_game_state(create_play_state()); }));
 
-        for (int i = 0; i < num_tools; ++i) {
+        for (auto i = 0u; i < num_tools; ++i) {
             auto tool = tools[i];
             if (!tool)
                 continue;
             tool->get_description(tool_descs[i]);
-            auto active = pl.active_tool == tool;
+            auto active = pl.tool_slots[slot] == tool;
             items.push_back(menu_item(active ? "*" : "", tool_descs[i],
-                [this, tool] { set_active_tool(tool); }));
+                [this, tool] { set_slot_tool(tool); }));
         }
     }
 
@@ -1334,8 +1341,8 @@ struct menu_inventory_state : game_state {
             strcpy(dest, src);
     }
 
-    void set_active_tool(tool *tool) {
-        pl.active_tool = tool;
+    void set_slot_tool(tool *tool) {
+        pl.tool_slots[slot] = tool;
     }
 
     void rebuild_ui() override {
@@ -1366,6 +1373,87 @@ struct menu_inventory_state : game_state {
     void handle_input() override {
         if (get_input(action_menu_confirm)->just_active) {
             std::get<2>(items[selected])();
+            pl.ui_dirty = true;
+        }
+
+        if (get_input(action_menu_down)->just_active) {
+            selected = (selected + 1) % items.size();
+            pl.ui_dirty = true;
+        }
+
+        if (get_input(action_menu_up)->just_active) {
+            selected = (selected + items.size() - 1) % items.size();
+            pl.ui_dirty = true;
+        }
+
+        if (get_input(action_menu)->just_active) {
+            set_game_state(create_play_state());
+        }
+    }
+};
+
+struct menu_inventory_state : game_state {
+    typedef std::tuple<char const *, std::function<void()>> menu_item;
+    std::vector<menu_item> items;
+    int selected = 0;
+    char slot_descs[NUM_TOOL_SLOTS][256];
+
+    menu_inventory_state() {
+    }
+
+    void update(float dt) override {
+        items.clear();
+
+        items.push_back(
+            menu_item("Back",
+                [] { set_game_state(create_menu_state()); }));
+
+        items.push_back(
+            menu_item("Resume",
+                [] { set_game_state(create_play_state()); }));
+
+        for (int i = 0; i < NUM_TOOL_SLOTS; ++i) {
+            sprintf(slot_descs[i], "Tool Slot %d", i);
+            items.push_back(menu_item(slot_descs[i],
+                [this, i] { set_game_state(create_menu_tool_slot_state(i)); }));
+        }
+    }
+
+    void put_item_text(char *dest, char const *src, int index) {
+        if (index == selected)
+            sprintf(dest, "> %s <", src);
+        else
+            strcpy(dest, src);
+    }
+
+    void rebuild_ui() override {
+        float w = 0;
+        float h = 0;
+        char buf[256];
+        char buf2[256];
+
+        sprintf(buf, "Engineer's Nightmare");
+        text->measure(buf, &w, &h);
+        add_text_with_outline(buf, -w / 2, 300);
+
+        float y = 50;
+        float dy = -30;
+
+        for (auto it = items.begin(); it != items.end(); ++it) {
+            w = 0;
+            h = 0;
+            sprintf(buf2, "%s", std::get<0>(*it));
+            put_item_text(buf, buf2, it - items.begin());
+            text->measure(buf, &w, &h);
+            add_text_with_outline(buf, -w / 2, y);
+            y += dy;
+        }
+    }
+
+
+    void handle_input() override {
+        if (get_input(action_menu_confirm)->just_active) {
+            std::get<1>(items[selected])();
             pl.ui_dirty = true;
         }
 
@@ -1482,6 +1570,7 @@ struct menu_settings_state : game_state
 game_state *game_state::create_play_state() { return new play_state; }
 game_state *game_state::create_menu_state() { return new menu_state; }
 game_state *game_state::create_menu_inventory_state() { return new menu_inventory_state; }
+game_state *game_state::create_menu_tool_slot_state(unsigned int slot) { return new menu_tool_slot_state(slot); }
 game_state *game_state::create_menu_settings_state() { return new menu_settings_state; }
 
 
