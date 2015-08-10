@@ -176,6 +176,45 @@ struct projectile
 projectile *projectiles = new projectile[MAX_PROJECTILES];
 unsigned num_projectiles = 0;
 
+void
+update_projectiles(float dt)
+{
+    /* update the projectiles */
+    for (auto i = 0u; i < num_projectiles;) {
+        if (projectiles[i].update(dt)) {
+            ++i;
+        }
+        else {
+            projectiles[i] = projectiles[--num_projectiles];
+        }
+    }
+}
+
+void
+draw_projectiles()
+{
+    glUseProgram(simple_shader);
+    for (auto i = 0u; i < num_projectiles; i++) {
+        projectiles[i].draw();
+    }
+}
+
+bool
+spawn_projectile(glm::vec3 pos, glm::vec3 dir)
+{
+    if (num_projectiles >= MAX_PROJECTILES) {
+        return false;
+    }
+
+    auto & proj = projectiles[num_projectiles++];
+    proj.pos = pl.eye;
+    proj.dir = pl.dir;
+    proj.speed = PROJECTILE_INITIAL_SPEED;
+    proj.lifetime = PROJECTILE_INITIAL_LIFETIME;
+    return true;
+}
+
+
 struct entity_type
 {
     sw_mesh *sw;
@@ -922,15 +961,7 @@ update()
 
     while (fast_tick_accum.tick()) {
 
-        /* update the projectiles */
-        for (auto i = 0u; i < num_projectiles;) {
-            if (projectiles[i].update(fast_tick_accum.period)) {
-                ++i;
-            }
-            else {
-                projectiles[i] = projectiles[--num_projectiles];
-            }
-        }
+        update_projectiles(fast_tick_accum.period);
 
         phy->tick(fast_tick_accum.period);
 
@@ -974,10 +1005,7 @@ update()
     }
 
     /* draw the projectiles */
-    glUseProgram(simple_shader);
-    for (auto i = 0u; i < num_projectiles; i++) {
-        projectiles[i].draw();
-    }
+    draw_projectiles();
 
     /* draw the sky */
     glUseProgram(sky_shader);
@@ -1175,15 +1203,8 @@ struct play_state : game_state {
 
         // blech. Tool gets used below, then fire projectile gets hit here
         if (pl.fire_projectile) {
-            if (num_projectiles < MAX_PROJECTILES) {
-                auto & proj = projectiles[num_projectiles++];
-                proj.pos = pl.eye;
-                proj.dir = pl.dir;
-                proj.speed = PROJECTILE_INITIAL_SPEED;
-                proj.lifetime = PROJECTILE_INITIAL_LIFETIME;
-
-                pl.fire_projectile = false;
-            }
+            spawn_projectile(pl.eye, pl.dir);
+            pl.fire_projectile = false;
         }
 
         if (next_tool) {
