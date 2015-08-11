@@ -1045,9 +1045,11 @@ struct play_state : game_state {
             }
 
             if (i == pl.selected_slot) {
-                sprintf(buf, "%s <==", buf);
+                add_text_with_outline(buf, -500, -200 - (NUM_TOOL_SLOTS - (signed)i) * 50, 1, 1, 0);
             }
-            add_text_with_outline(buf, -500, 0 - NUM_TOOL_SLOTS * 75 + (signed)i * 125);
+            else {
+                add_text_with_outline(buf, -500, -200 - (NUM_TOOL_SLOTS - (signed)i) * 50);
+            }
         }
 
         tool *t = pl.tool_slots[pl.selected_slot];
@@ -1221,11 +1223,11 @@ struct play_state : game_state {
             cycle_slot(-1);
         }
 
-        if (slot1) set_slot(1);
-        if (slot2) set_slot(2);
-        if (slot3) set_slot(3);
-        if (slot4) set_slot(4);
-        if (slot5) set_slot(5);
+        if (slot1) set_slot(0);
+        if (slot2) set_slot(1);
+        if (slot3) set_slot(2);
+        if (slot4) set_slot(3);
+        if (slot5) set_slot(4);
 
         /* limit to unit vector */
         float len = glm::length(pl.move);
@@ -1234,6 +1236,10 @@ struct play_state : game_state {
 
         if (get_input(action_menu)->just_active) {
             set_game_state(create_menu_state());
+        }
+
+        if (get_input(action_open_inventory)->just_active) {
+            set_game_state(create_menu_inventory_state());
         }
     }
 };
@@ -1247,7 +1253,6 @@ struct menu_state : game_state
 
     menu_state() : items() {
         items.push_back(menu_item("Resume Game", []{ set_game_state(create_play_state()); }));
-        items.push_back(menu_item("Inventory", [] { set_game_state(create_menu_inventory_state()); }));
         items.push_back(menu_item("Settings", []{ set_game_state(create_menu_settings_state()); }));
         items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
     }
@@ -1325,10 +1330,6 @@ struct menu_tool_slot_state : game_state {
             menu_item("Back", "",
                 [] { set_game_state(create_menu_inventory_state()); }));
 
-        items.push_back(
-            menu_item("Resume", "",
-                [] { set_game_state(create_play_state()); }));
-
         for (auto i = 0u; i < num_tools; ++i) {
             auto tool = tools[i];
             if (!tool)
@@ -1336,7 +1337,9 @@ struct menu_tool_slot_state : game_state {
             tool->get_description(tool_descs[i]);
             auto active = pl.tool_slots[slot] == tool;
             items.push_back(menu_item(active ? "*" : "", tool_descs[i],
-                [this, tool] { set_slot_tool(tool); }));
+                [this, tool] { 
+                set_slot_tool(tool); 
+                set_game_state(create_menu_inventory_state()); }));
         }
     }
 
@@ -1411,25 +1414,20 @@ struct menu_inventory_state : game_state {
         items.clear();
 
         items.push_back(
-            menu_item("Back",
-                [] { set_game_state(create_menu_state()); }));
-
-        items.push_back(
             menu_item("Resume",
                 [] { set_game_state(create_play_state()); }));
 
-        for (unsigned int i = 0u; i < NUM_TOOL_SLOTS; ++i) {
-            sprintf(slot_descs[i], "Tool Slot %d", i);
+        for (auto i = NUM_TOOL_SLOTS - 1; i >= 0; --i) {
+            auto tool = pl.tool_slots[i];
+            if (tool) {
+                tool->get_description(slot_descs[i]);
+            }
+            else {
+                sprintf(slot_descs[i], "(no tool)");
+            }
             items.push_back(menu_item(slot_descs[i],
                 [this, i] { set_game_state(create_menu_tool_slot_state(i)); }));
         }
-    }
-
-    void put_item_text(char *dest, char const *src, int index) {
-        if (index == selected)
-            sprintf(dest, "> %s <", src);
-        else
-            strcpy(dest, src);
     }
 
     void rebuild_ui() override {
@@ -1442,17 +1440,25 @@ struct menu_inventory_state : game_state {
         text->measure(buf, &w, &h);
         add_text_with_outline(buf, -w / 2, 300);
 
-        float y = 50;
-        float dy = -30;
+        constexpr float x = -500;
+        float y = -200;
+        constexpr float dy = 50;
 
         for (auto it = items.begin(); it != items.end(); ++it) {
             w = 0;
             h = 0;
             sprintf(buf2, "%s", std::get<0>(*it));
-            put_item_text(buf, buf2, it - items.begin());
+
             text->measure(buf, &w, &h);
-            add_text_with_outline(buf, -w / 2, y);
-            y += dy;
+
+            auto index = it - items.begin();
+            if (index == selected) {
+                add_text_with_outline(buf2, x, y, 1, 1, 0);
+            }
+            else {
+                add_text_with_outline(buf2, x, y);
+            }
+            y -= dy;
         }
     }
 
