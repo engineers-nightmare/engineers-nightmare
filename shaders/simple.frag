@@ -18,7 +18,7 @@ const float light_pos_quantize_factor = 4;
 
 void main(void)
 {
-    if(ws_mat == 6)
+    if((ws_mat == 4 || ws_mat == 1))
     	discard;
 
     /* lighting */

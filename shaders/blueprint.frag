@@ -18,7 +18,7 @@ const float light_pos_quantize_factor = 4;
 
 void main(void)
 {
-    if(ws_mat != 6)
+    if(!(ws_mat == 4 || ws_mat == 1))
     	discard;
 
     /* lighting */
@@ -37,7 +37,8 @@ void main(void)
         discard;
 
     color.rgb *= color.a;
-    color.rgb *= 0.2;
+    color.rgb *= 0.5;
     color.rg *= color.rg;
+    color.rgb *= 0.2/0.5;
 }
 

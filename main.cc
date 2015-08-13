@@ -897,60 +897,20 @@ update()
 
     prepare_chunks();
 
-    for (int current_pass = 1; current_pass <= 2; current_pass++) {
-        /* prepare pass */
-        switch(current_pass) {
-            case 1:
-                break;
-
-            case 2:
-                //glBlendFunc(GL_ONE, GL_SRC_ALPHA);
-                glBlendFunc(GL_ONE, GL_ONE);
-                glEnable(GL_BLEND);
-                glDepthMask(GL_FALSE);
-                glUseProgram(blueprint_shader);
-                break;
-        }
-
-        /* load/draw chunks */
-        for (int k = ship->min_z; k <= ship->max_z; k++) {
-            for (int j = ship->min_y; j <= ship->max_y; j++) {
-                for (int i = ship->min_x; i <= ship->max_x; i++) {
-                    /* TODO: prepare all the matrices first, and do ONE upload */
-                    chunk *ch = ship->get_chunk(i, j, k);
-                    if (ch) {
-                        switch(current_pass) {
-                            case 1:
-                                // opaque pass
-                                per_object->val.world_matrix = mat_position(
-                                            (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
-                                per_object->upload();
-                                draw_mesh(ch->render_chunk.mesh);
-                                break;
-
-                            case 2:
-                                // blueprint add blend pass
-                                per_object->val.world_matrix = mat_position(
-                                            (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
-                                per_object->upload();
-                                draw_mesh(ch->render_chunk.mesh);
-                                break;
-                        }
-                    }
+    /* load/draw chunks */
+    for (int k = ship->min_z; k <= ship->max_z; k++) {
+        for (int j = ship->min_y; j <= ship->max_y; j++) {
+            for (int i = ship->min_x; i <= ship->max_x; i++) {
+                /* TODO: prepare all the matrices first, and do ONE upload */
+                chunk *ch = ship->get_chunk(i, j, k);
+                if (ch) {
+                    // opaque pass
+                    per_object->val.world_matrix = mat_position(
+                                (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
+                    per_object->upload();
+                    draw_mesh(ch->render_chunk.mesh);
                 }
             }
-        }
-
-        /* clean up pass */
-        switch(current_pass) {
-            case 1:
-                break;
-
-            case 2:
-                glDepthMask(GL_TRUE);
-                glDisable(GL_BLEND);
-                glUseProgram(simple_shader);
-                break;
         }
     }
 
@@ -982,6 +942,34 @@ update()
     glDepthMask(GL_FALSE);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glDepthMask(GL_TRUE);
+
+    /* apply blueprint shader */
+    glBlendFunc(GL_ONE, GL_ONE);
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
+    glUseProgram(blueprint_shader);
+
+    /* load/draw chunks through blueprint */
+    for (int k = ship->min_z; k <= ship->max_z; k++) {
+        for (int j = ship->min_y; j <= ship->max_y; j++) {
+            for (int i = ship->min_x; i <= ship->max_x; i++) {
+                /* TODO: prepare all the matrices first, and do ONE upload */
+                chunk *ch = ship->get_chunk(i, j, k);
+                if (ch) {
+                    // opaque pass
+                    per_object->val.world_matrix = mat_position(
+                                (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
+                    per_object->upload();
+                    draw_mesh(ch->render_chunk.mesh);
+                }
+            }
+        }
+    }
+
+    /* unapply blueprint shader */
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    glUseProgram(simple_shader);
 
     /* draw the ui */
     glDisable(GL_DEPTH_TEST);
