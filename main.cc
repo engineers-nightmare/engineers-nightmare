@@ -73,7 +73,7 @@ sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *projectile_sw;
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
-GLuint sky_shader;
+GLuint sky_shader, blueprint_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
 texture_set *world_textures;
@@ -445,6 +445,7 @@ init()
     remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/unlit.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
+    blueprint_shader = load_shader("shaders/blueprint.vert", "shaders/blueprint.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
 
@@ -822,6 +823,7 @@ update()
     last_frame_time = now;
 
     float depthClearValue = 1.0f;
+    glClear(GL_COLOR_BUFFER_BIT);
     glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
 
     pl.dir = glm::vec3(
@@ -895,18 +897,60 @@ update()
 
     prepare_chunks();
 
-    for (int k = ship->min_z; k <= ship->max_z; k++) {
-        for (int j = ship->min_y; j <= ship->max_y; j++) {
-            for (int i = ship->min_x; i <= ship->max_x; i++) {
-                /* TODO: prepare all the matrices first, and do ONE upload */
-                chunk *ch = ship->get_chunk(i, j, k);
-                if (ch) {
-                    per_object->val.world_matrix = mat_position(
-                                (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
-                    per_object->upload();
-                    draw_mesh(ch->render_chunk.mesh);
+    for (int current_pass = 1; current_pass <= 2; current_pass++) {
+        /* prepare pass */
+        switch(current_pass) {
+            case 1:
+                break;
+
+            case 2:
+                //glBlendFunc(GL_ONE, GL_SRC_ALPHA);
+                glBlendFunc(GL_ONE, GL_ONE);
+                glEnable(GL_BLEND);
+                glDepthMask(GL_FALSE);
+                glUseProgram(blueprint_shader);
+                break;
+        }
+
+        /* load/draw chunks */
+        for (int k = ship->min_z; k <= ship->max_z; k++) {
+            for (int j = ship->min_y; j <= ship->max_y; j++) {
+                for (int i = ship->min_x; i <= ship->max_x; i++) {
+                    /* TODO: prepare all the matrices first, and do ONE upload */
+                    chunk *ch = ship->get_chunk(i, j, k);
+                    if (ch) {
+                        switch(current_pass) {
+                            case 1:
+                                // opaque pass
+                                per_object->val.world_matrix = mat_position(
+                                            (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
+                                per_object->upload();
+                                draw_mesh(ch->render_chunk.mesh);
+                                break;
+
+                            case 2:
+                                // blueprint add blend pass
+                                per_object->val.world_matrix = mat_position(
+                                            (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
+                                per_object->upload();
+                                draw_mesh(ch->render_chunk.mesh);
+                                break;
+                        }
+                    }
                 }
             }
+        }
+
+        /* clean up pass */
+        switch(current_pass) {
+            case 1:
+                break;
+
+            case 2:
+                glDepthMask(GL_TRUE);
+                glDisable(GL_BLEND);
+                glUseProgram(simple_shader);
+                break;
         }
     }
 

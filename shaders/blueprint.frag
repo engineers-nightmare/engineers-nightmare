@@ -12,13 +12,13 @@ layout(binding=1) uniform sampler3D s_light_field;
 
 layout(location=0) out vec4 color;
 
-const float ambientAmount = 0.2;
+const float ambientAmount = 0.4;
 const float light_step = -0.5;
 const float light_pos_quantize_factor = 4;
 
 void main(void)
 {
-    if(ws_mat == 6)
+    if(ws_mat != 6)
     	discard;
 
     /* lighting */
@@ -30,8 +30,14 @@ void main(void)
 		1.0,
 		ambientAmount);
 
-    color = texture(s_albedo, texcoord) * light;
+    //color = texture(s_albedo, texcoord) * light;
+    color = texture(s_albedo, texcoord);
 
     if (color.a == 0.0)
-	discard;
+        discard;
+
+    color.rgb *= color.a;
+    color.rgb *= 0.2;
+    color.rg *= color.rg;
 }
+

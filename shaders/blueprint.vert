@@ -30,7 +30,9 @@ out flat int ws_mat;
 void main(void)
 {
     vec4 world_pos = world_matrix * pos;
-	gl_Position = view_proj_matrix * world_pos;
+    vec4 output_pos = view_proj_matrix * world_pos;
+    output_pos.z -= 0.01/max(0.01,output_pos.w);
+    gl_Position = output_pos;
     texcoord.z = mat;
 
     vec3 n = normalize(mat3(world_matrix) * norm);
@@ -50,7 +52,9 @@ void main(void)
         texcoord.xy = world_pos.xy;
     }
 
+
     ws_pos = world_pos.xyz;
     ws_norm = n;
     ws_mat = mat;
 }
+
