@@ -72,7 +72,7 @@ gl_debug_callback(GLenum source __unused,
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *projectile_sw;
-GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
+GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
@@ -88,6 +88,7 @@ hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 hw_mesh *projectile_hw;
 text_renderer *text;
+sprite_renderer *ui_sprites;
 light_field *light;
 entity *use_entity = nullptr;
 
@@ -444,6 +445,7 @@ init()
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/unlit.frag");
     remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/unlit.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
+    ui_sprites_shader = load_shader("shaders/ui_sprites.vert", "shaders/ui_sprites.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
@@ -508,6 +510,8 @@ init()
     glFrontFace(GL_CW);
 
     text = new text_renderer("fonts/pixelmix.ttf", 16);
+
+    ui_sprites = new sprite_renderer();
 
     printf("World vertex size: %lu bytes\n", sizeof(vertex));
 
@@ -874,8 +878,10 @@ update()
         /* HACK: dirty this every frame for now while debugging atmo */
         if (1 || pl.ui_dirty) {
             text->reset();
+            ui_sprites->reset();
             state->rebuild_ui();
             text->upload();
+            ui_sprites->upload();
             pl.ui_dirty = false;
         }
     }
@@ -945,6 +951,11 @@ update()
 
     glUseProgram(ui_shader);
     text->draw();
+    glUseProgram(ui_sprites_shader);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    ui_sprites->draw();
+    glDisable(GL_BLEND);
     glUseProgram(simple_shader);
 
     glEnable(GL_DEPTH_TEST);
