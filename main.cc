@@ -1033,7 +1033,8 @@ struct play_state : game_state {
             }
         }
 
-        add_text_with_outline(".", 0, 0);
+        text->measure(".", &w, &h);
+        add_text_with_outline(".", -w/2, -w/2);
 
         sprintf(buf2, "Left mouse button: %s", buf);
         text->measure(buf2, &w, &h);
