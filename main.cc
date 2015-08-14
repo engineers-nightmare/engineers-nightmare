@@ -375,6 +375,9 @@ struct game_state {
     static game_state *create_play_state();
     static game_state *create_menu_state();
     static game_state *create_menu_settings_state();
+
+    static void lock_mouse();
+    static void unlock_mouse();
 };
 
 
@@ -1014,6 +1017,9 @@ action const* get_input(en_action a) {
 
 
 struct play_state : game_state {
+    play_state() {
+        lock_mouse();
+    }
 
     void rebuild_ui() override {
         float w = 0;
@@ -1237,6 +1243,8 @@ struct menu_state : game_state
         items.push_back(menu_item("Resume Game", []{ set_game_state(create_play_state()); }));
         items.push_back(menu_item("Settings", []{ set_game_state(create_menu_settings_state()); }));
         items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
+
+        unlock_mouse();
     }
 
     void update(float dt) override {
@@ -1391,6 +1399,12 @@ game_state *game_state::create_play_state() { return new play_state; }
 game_state *game_state::create_menu_state() { return new menu_state; }
 game_state *game_state::create_menu_settings_state() { return new menu_settings_state; }
 
+void game_state::lock_mouse() { SDL_SetRelativeMouseMode(SDL_TRUE); }
+void game_state::unlock_mouse() {
+    SDL_SetRelativeMouseMode(SDL_FALSE);
+    SDL_WarpMouseInWindow(wnd.ptr, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2);
+}
+
 
 void
 handle_input()
@@ -1480,7 +1494,6 @@ main(int, char **)
 
     wnd.gl_ctx = SDL_GL_CreateContext(wnd.ptr);
 
-    SDL_SetRelativeMouseMode(SDL_TRUE);
     keys = SDL_GetKeyboardState(nullptr);
 
     resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
