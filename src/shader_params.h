@@ -35,6 +35,7 @@ struct shader_params
 struct per_camera_params {
     glm::mat4 view_proj_matrix;
     glm::mat4 inv_centered_view_proj_matrix;
+    float aspect;
 };
 
 

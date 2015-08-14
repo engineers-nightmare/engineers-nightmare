@@ -102,7 +102,7 @@ gl_debug_callback(GLenum source __unused,
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *projectile_sw;
-GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
+GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
@@ -118,8 +118,11 @@ hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 hw_mesh *projectile_hw;
 text_renderer *text;
+sprite_renderer *ui_sprites;
 light_field *light;
 entity *use_entity = nullptr;
+
+sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
 
 glm::ivec3
@@ -474,6 +477,7 @@ init()
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/unlit.frag");
     remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/unlit.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
+    ui_sprites_shader = load_shader("shaders/ui_sprites.vert", "shaders/ui_sprites.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
@@ -538,6 +542,10 @@ init()
     glFrontFace(GL_CW);
 
     text = new text_renderer("fonts/pixelmix.ttf", 16);
+
+    ui_sprites = new sprite_renderer();
+    unlit_ui_slot_sprite = ui_sprites->load("textures/ui-slot.png");
+    lit_ui_slot_sprite = ui_sprites->load("textures/ui-slot-lit.png");
 
     printf("World vertex size: %lu bytes\n", sizeof(vertex));
 
@@ -865,6 +873,7 @@ update()
     glm::mat4 centered_view = glm::lookAt(glm::vec3(0), pl.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->val.inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
+    per_camera->val.aspect = (float)wnd.width / wnd.height;
     per_camera->upload();
 
     main_tick_accum.add(dt);
@@ -899,6 +908,7 @@ update()
         /* HACK: dirty this every frame for now while debugging atmo */
         if (1 || pl.ui_dirty) {
             text->reset();
+            ui_sprites->reset();
             state->rebuild_ui();
 
             char buf[3][256];
@@ -917,6 +927,7 @@ update()
             add_text_with_outline(buf[2], -DEFAULT_WIDTH / 2 + (100 - w[2]), DEFAULT_HEIGHT / 2 + 64);
 
             text->upload();
+            ui_sprites->upload();
             pl.ui_dirty = false;
         }
     }
@@ -986,6 +997,11 @@ update()
 
     glUseProgram(ui_shader);
     text->draw();
+    glUseProgram(ui_sprites_shader);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    ui_sprites->draw();
+    glDisable(GL_BLEND);
     glUseProgram(simple_shader);
 
     glEnable(GL_DEPTH_TEST);
@@ -1065,6 +1081,12 @@ struct play_state : game_state {
                     ship->num_false_splits);
             text->measure(buf2, &w, &h);
             add_text_with_outline(buf2, -w/2, -150);
+        }
+
+        unsigned num_tools = sizeof(tools) / sizeof(tools[0]);
+        for (unsigned i = 0; i < num_tools; i++) {
+            ui_sprites->add(pl.selected_slot == i ? &lit_ui_slot_sprite : &unlit_ui_slot_sprite,
+                    (i - num_tools/2.0) * 34, -220);
         }
     }
 
