@@ -73,7 +73,7 @@ sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *projectile_sw;
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader;
-GLuint sky_shader, blueprint_shader;
+GLuint sky_shader, blueprint_shader, bluefill_shader;
 shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
 texture_set *world_textures;
@@ -446,6 +446,7 @@ init()
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
     blueprint_shader = load_shader("shaders/blueprint.vert", "shaders/blueprint.frag");
+    bluefill_shader = load_shader("shaders/bluefill.vert", "shaders/bluefill.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
 
@@ -813,6 +814,7 @@ struct time_accumulator
 time_accumulator main_tick_accum(1/15.0f);  /* 15Hz tick for game logic */
 time_accumulator fast_tick_accum(1/60.0f);  /* 60Hz tick for motion */
 
+float shtime = -10.0f;
 
 void
 update()
@@ -821,6 +823,9 @@ update()
     // frame delta time in seconds
     float dt = (now - last_frame_time) / 1000.f;
     last_frame_time = now;
+
+    // HACK: this should be defined elsewhere, it's used to test
+    shtime += dt;
 
     float depthClearValue = 1.0f;
     glClear(GL_COLOR_BUFFER_BIT);
@@ -898,6 +903,8 @@ update()
     prepare_chunks();
 
     /* load/draw chunks */
+    glUseProgram(bluefill_shader);
+    glUniform1f(0, shtime);
     for (int k = ship->min_z; k <= ship->max_z; k++) {
         for (int j = ship->min_y; j <= ship->max_y; j++) {
             for (int i = ship->min_x; i <= ship->max_x; i++) {
@@ -913,6 +920,8 @@ update()
             }
         }
     }
+
+    glUseProgram(simple_shader);
 
     /* walk all the entities in the (visible) chunks */
     for (int k = ship->min_z; k <= ship->max_z; k++) {
@@ -933,7 +942,6 @@ update()
     }
 
     /* draw the projectiles */
-    glUseProgram(simple_shader);
     draw_projectiles();
 
     /* draw the sky */
@@ -948,6 +956,8 @@ update()
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glUseProgram(blueprint_shader);
+    glUniform1f(0, shtime);
+    //glPolygonOffset(-30.0, 40.2);
 
     /* load/draw chunks through blueprint */
     for (int k = ship->min_z; k <= ship->max_z; k++) {
@@ -970,6 +980,7 @@ update()
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
     glUseProgram(simple_shader);
+    glPolygonOffset(0.0, 0.0);
 
     /* draw the ui */
     glDisable(GL_DEPTH_TEST);
