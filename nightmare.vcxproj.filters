@@ -16,6 +16,12 @@
     <Filter Include="Source Files\tools">
       <UniqueIdentifier>{f13d420f-690b-4f89-976d-7d2348605b64}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\component">
+      <UniqueIdentifier>{ac9a6816-f0d5-425d-8408-f576a583b6ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\component">
+      <UniqueIdentifier>{94aad1c7-e07b-4aeb-9ced-2958c568ac5b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\blob.cc">
@@ -77,6 +83,9 @@
     </ClCompile>
     <ClCompile Include="src\projectiles.cc">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\component.cc">
+      <Filter>Source Files\component</Filter>
     </ClCompile>
     <ClCompile Include="src\atlas.cc">
       <Filter>Source Files</Filter>
@@ -154,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="src\timer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\component.h">
+      <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

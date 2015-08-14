@@ -1,5 +1,6 @@
 #pragma once
 
+#include <epoxy/gl.h>
 
 /* where T is std140-conforming, and agrees with the shader. */
 template<typename T>
