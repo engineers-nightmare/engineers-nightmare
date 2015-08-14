@@ -111,7 +111,7 @@ projectile_manager::destroy(instance i) {
     projectile_pool.mass[i.i] = projectile_pool.mass[last_id];
     projectile_pool.lifetime[i.i] = projectile_pool.lifetime[last_id];
     projectile_pool.position[i.i] = projectile_pool.position[last_id];
-    projectile_pool.velocity[i.i] = projectile_pool.position[last_id];
+    projectile_pool.velocity[i.i] = projectile_pool.velocity[last_id];
 
     map[last.id] = i.i;
     map.erase(i.i);
