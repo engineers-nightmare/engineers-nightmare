@@ -98,13 +98,59 @@ bool request_whole_ship(ENetPeer *peer) {
     return basic_ship_message(peer, ALL_SHIP_REQUEST);
 }
 
-/* TODO: actually send the whole ship */
+bool
+send_ship_chunk(ENetPeer *peer, ship_space *space, int chunk_x, int chunk_y, int chunk_z)
+{
+    // Get data
+    std::vector<unsigned char> *vbuf = space->serialize_chunk(chunk_x, chunk_y, chunk_z);
+    if (!vbuf) {
+        return false;
+    }
+
+    // Allocate packet
+    ENetPacket *packet = enet_packet_create(NULL, vbuf->size() + 8, ENET_PACKET_FLAG_RELIABLE);
+    assert( packet );
+
+    // Add in standard header
+    packet->data[0] = SHIP_MSG;
+    packet->data[1] = CHUNK_SHIP_REPLY;
+
+    // Add in chunk coordinates
+    // TODO: proper endian-safe integer pack/unpack
+    packet->data[2+0] = (uint8_t)(chunk_x>>8);
+    packet->data[2+1] = (uint8_t)(chunk_x);
+    packet->data[2+2] = (uint8_t)(chunk_y>>8);
+    packet->data[2+3] = (uint8_t)(chunk_y);
+    packet->data[2+4] = (uint8_t)(chunk_z>>8);
+    packet->data[2+5] = (uint8_t)(chunk_z);
+
+    // Add in data
+    memcpy(packet->data + 8, vbuf->data(), vbuf->size());
+    delete vbuf;
+
+    // Send and return!
+    return send_packet(peer, packet);
+}
+
 bool reply_whole_ship(ENetPeer *peer, ship_space *space) {
     ENetPacket *packet;
 
     assert(peer && space);
 
+    // TODO: send more than one chunk
+    for (auto c : space->chunks) {
+        int chunk_x = c.first.x;
+        int chunk_y = c.first.y;
+        int chunk_z = c.first.z;
+
+        if(!send_ship_chunk(peer, space, chunk_x, chunk_y, chunk_z)) {
+            // FIXME: need to work out what to do if something fails
+            return false;
+        }
+    }
+
     uint8_t data[2] = {SHIP_MSG, ALL_SHIP_REPLY};
     packet = enet_packet_create(data, 2, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
 }
+
