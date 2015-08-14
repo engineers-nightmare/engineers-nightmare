@@ -11,7 +11,8 @@ layout(location=2) in vec4 color;
 layout(std140, binding=0) uniform per_camera {
 
 	mat4 view_proj_matrix;
-
+    mat4 inv_centered_view_proj_matrix;
+    float aspect;
 };
 
 
@@ -29,6 +30,7 @@ out vec4 tint;
 void main(void)
 {
     gl_Position = vec4(pos.xy * (1/512.0), 0, 1);
+    gl_Position.x /= aspect;
     texcoord = uv;
     tint = color;
 }

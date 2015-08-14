@@ -839,6 +839,7 @@ update()
     glm::mat4 centered_view = glm::lookAt(glm::vec3(0), pl.dir, glm::vec3(0, 0, 1));
     per_camera->val.view_proj_matrix = proj * view;
     per_camera->val.inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
+    per_camera->val.aspect = (float)wnd.width / wnd.height;
     per_camera->upload();
 
     main_tick_accum.add(dt);
