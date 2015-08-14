@@ -16,12 +16,35 @@
 #define TEXT_ATLAS_HEIGHT   512
 
 
-texture_atlas::texture_atlas()
-    : tex(0), x(0), y(0), h(0)
+static GLenum
+channels_to_internalformat(unsigned channels)
+{
+    switch (channels) {
+        case 1: return GL_R8;
+        case 4: return GL_RGBA8;
+        default: errx(1, "unsupported channel count");
+    }
+}
+
+
+static GLenum
+channels_to_clientformat(unsigned channels)
+{
+    switch (channels) {
+        case 1: return GL_RED;
+        case 4: return GL_RGBA;
+        default: errx(1, "unsupported channel count");
+    }
+}
+
+
+texture_atlas::texture_atlas(unsigned channels)
+    : tex(0), x(0), y(0), h(0), channels(channels)
 {
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
-    glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT);
+    glTexStorage2D(GL_TEXTURE_2D, 1, channels_to_internalformat(channels),
+                   TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -42,12 +65,12 @@ texture_atlas::add_bitmap(unsigned char *src, int pitch, unsigned width, unsigne
     /* adjust height of atlas row */
     h = std::max(h, height);
 
-    unsigned char *dest = buf + x + y * TEXT_ATLAS_WIDTH;
+    unsigned char *dest = buf + (x + y * TEXT_ATLAS_WIDTH) * channels;
 
     for (unsigned int r = 0; r < height; r++) {
-        memcpy(dest, src, width);
+        memcpy(dest, src, width * channels);
         src += pitch;
-        dest += TEXT_ATLAS_WIDTH;
+        dest += TEXT_ATLAS_WIDTH * channels;
     }
 
     *out_x = x;
@@ -61,7 +84,8 @@ void
 texture_atlas::upload()
 {
     glBindTexture(GL_TEXTURE_2D, tex);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT, GL_RED, GL_UNSIGNED_BYTE, buf);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT,
+                    channels_to_clientformat(channels), GL_UNSIGNED_BYTE, buf);
 }
 
 
@@ -77,7 +101,7 @@ text_renderer::text_renderer(char const *font, int size)
     : bo(0), bo_vertex_count(0), bo_capacity(0), vao(0), verts()
 {
     /* load the font into metrics array + texture */
-    atlas = new texture_atlas();
+    atlas = new texture_atlas(1);   /* text will be 1 channel, 8 bit */
 
     FT_Library ft_library;
     if (FT_Init_FreeType(&ft_library))

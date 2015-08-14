@@ -25,8 +25,9 @@ struct texture_atlas
     GLuint tex;
     unsigned x, y, h;
     unsigned char *buf;
+    unsigned channels;
 
-    texture_atlas();
+    texture_atlas(unsigned channels);
     void add_bitmap(unsigned char *src, int pitch, unsigned width, unsigned height, int *out_x, int *out_y);
     void upload();
     void bind(int texunit);
