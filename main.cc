@@ -524,6 +524,8 @@ prepare_chunks()
     }
 }
 
+bool negotiate_ship(void);
+
 void
 init()
 {
@@ -669,9 +671,12 @@ init()
     skybox->load(4, "textures/sky_front5.png");
     skybox->load(5, "textures/sky_back6.png");
 
-    ship = ship_space::mock_ship_space();
+    ship = new ship_space::ship_space();
     if( ! ship )
-        errx(1, "Ship_space::mock_ship_space failed\n");
+        errx(1, "Ship_space::ship_space failed\n");
+
+    if(!negotiate_ship())
+        errx(1, "Ship not negotiated with server\n");
 
     ship->rebuild_topology();
 
@@ -2102,7 +2107,7 @@ connect_server(char *host, int port)
 }
 
 bool
-handle_server_message(ENetEvent *event, uint8_t *data)
+handle_server_message(ENetEvent *event, uint8_t *data, size_t)
 {
     switch(*data) {
         case SERVER_VSN_MSG:
@@ -2137,11 +2142,25 @@ handle_server_message(ENetEvent *event, uint8_t *data)
 }
 
 bool
-handle_ship_message(ENetEvent *event, uint8_t *data)
+handle_ship_message(ENetEvent *event, uint8_t *data, size_t len)
 {
     switch(*data) {
         case ALL_SHIP_REPLY:
             return  true;
+        case CHUNK_SHIP_REPLY:
+            {
+                // Get chunk coordinates (signed 16-bit x3)
+                // TODO: proper endian-safe integer pack/unpack
+                int x = (((int)data[1])<<8) | ((int)data[2]);
+                int y = (((int)data[3])<<8) | ((int)data[4]);
+                int z = (((int)data[5])<<8) | ((int)data[6]);
+                if(x >= 0x8000) x -= 0x10000;
+                if(y >= 0x8000) y -= 0x10000;
+                if(z >= 0x8000) z -= 0x10000;
+
+                ship->unserialize_chunk(x, y, z, data + 7, len - 7);
+            }
+            return false;
     }
 
     return false;
@@ -2154,9 +2173,9 @@ handle_message(ENetEvent *event) {
     data = event->packet->data;
     switch(*data) {
         case SERVER_MSG:
-            return handle_server_message(event, data + 1);
+            return handle_server_message(event, data + 1, event->packet->dataLength - 1);
         case SHIP_MSG:
-            return handle_ship_message(event, data + 1);
+            return handle_ship_message(event, data + 1, event->packet->dataLength - 1);
     }
 
     return false;
@@ -2178,7 +2197,7 @@ negotiate_ship(void)
                     return true;
                 break;
             case ENET_EVENT_TYPE_DISCONNECT:
-                printf("disconnected\n!");
+                printf("disconnected!\n");
                 disconnected = true;
                 break;
             case ENET_EVENT_TYPE_CONNECT:
@@ -2229,9 +2248,6 @@ main(int argc, char *argv[])
         fprintf(stderr, "failed to connect to server!\n");
         return 1;
     }
-
-    if(!negotiate_ship())
-        return 0;
 
     init();
 

@@ -22,6 +22,7 @@
 /* SHIP_MSG subtype */
 #define ALL_SHIP_REQUEST    0x00
 #define ALL_SHIP_REPLY      0x01
+#define CHUNK_SHIP_REPLY    0x02
 
 
 /* version messages */
@@ -41,4 +42,5 @@ bool send_not_in_slot(ENetPeer *peer);
 
 /* ship messages */
 bool request_whole_ship(ENetPeer *peer);
+bool send_ship_chunk(ENetPeer *peer, ship_space *space, int chunk_x, int chunk_y, int chunk_z);
 bool reply_whole_ship(ENetPeer *peer, ship_space *space);
