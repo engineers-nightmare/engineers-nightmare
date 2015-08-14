@@ -182,7 +182,7 @@ text_renderer::measure(char const *str, float *x, float *y)
 
         metrics *m = &ms[(unsigned) *str];
 
-        xx += m->xoffset + m->advance;
+        xx += m->xoffset + (str[1] && str[1] != '\n') ? m->advance : (m->xoffset + m->w);
     }
 
     *x = std::max(*x, xx);
