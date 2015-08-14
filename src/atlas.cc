@@ -11,10 +11,6 @@
 #endif
 
 
-#define TEXT_ATLAS_WIDTH    512
-#define TEXT_ATLAS_HEIGHT   512
-
-
 static GLenum
 channels_to_internalformat(unsigned channels)
 {
@@ -37,17 +33,17 @@ channels_to_clientformat(unsigned channels)
 }
 
 
-texture_atlas::texture_atlas(unsigned channels)
-    : tex(0), x(0), y(0), h(0), channels(channels)
+texture_atlas::texture_atlas(unsigned channels, unsigned width, unsigned height)
+    : tex(0), x(0), y(0), h(0), channels(channels), width(width), height(height)
 {
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexStorage2D(GL_TEXTURE_2D, 1, channels_to_internalformat(channels),
-                   TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT);
+                   width, height);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    buf = new unsigned char[TEXT_ATLAS_WIDTH * TEXT_ATLAS_HEIGHT];
+    buf = new unsigned char[width * height * channels];
 }
 
 
@@ -55,7 +51,7 @@ void
 texture_atlas::add_bitmap(unsigned char *src, int pitch, unsigned width, unsigned height, int *out_x, int *out_y)
 {
     /* overflow to next row */
-    if (x + width > TEXT_ATLAS_WIDTH) {
+    if (x + width > this->width) {
         y += h;
         x = 0;
         h = 0;
@@ -64,12 +60,12 @@ texture_atlas::add_bitmap(unsigned char *src, int pitch, unsigned width, unsigne
     /* adjust height of atlas row */
     h = std::max(h, height);
 
-    unsigned char *dest = buf + (x + y * TEXT_ATLAS_WIDTH) * channels;
+    unsigned char *dest = buf + (x + y * this->width) * channels;
 
     for (unsigned int r = 0; r < height; r++) {
         memcpy(dest, src, width * channels);
         src += pitch;
-        dest += TEXT_ATLAS_WIDTH * channels;
+        dest += this->width * channels;
     }
 
     *out_x = x;
@@ -83,7 +79,7 @@ void
 texture_atlas::upload()
 {
     glBindTexture(GL_TEXTURE_2D, tex);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT,
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height,
                     channels_to_clientformat(channels), GL_UNSIGNED_BYTE, buf);
 }
 

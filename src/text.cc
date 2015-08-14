@@ -20,7 +20,7 @@ text_renderer::text_renderer(char const *font, int size)
     : bo(0), bo_vertex_count(0), bo_capacity(0), vao(0), verts()
 {
     /* load the font into metrics array + texture */
-    atlas = new texture_atlas(1);   /* text will be 1 channel, 8 bit */
+    atlas = new texture_atlas(1, TEXT_ATLAS_WIDTH, TEXT_ATLAS_HEIGHT);   /* text will be 1 channel, 8 bit */
 
     FT_Library ft_library;
     if (FT_Init_FreeType(&ft_library))
