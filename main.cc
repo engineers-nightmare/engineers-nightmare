@@ -992,7 +992,9 @@ update()
     glUseProgram(sky_shader);
     skybox->bind(0);
     glDepthMask(GL_FALSE);
+    glDepthFunc(GL_LEQUAL);
     glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
 
     /* draw the ui */

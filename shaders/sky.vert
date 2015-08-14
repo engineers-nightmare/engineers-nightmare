@@ -17,7 +17,7 @@ out vec3 view_dir;
 
 void main(void)
 {
-    gl_Position = vec4(-1, -1, 0.999999, 1);
+    gl_Position = vec4(-1, -1, 1.0, 1);
     if (gl_VertexID == 2) gl_Position.x += 4;
     if (gl_VertexID == 1) gl_Position.y += 4;
 
