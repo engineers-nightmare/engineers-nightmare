@@ -92,6 +92,8 @@ sprite_renderer *ui_sprites;
 light_field *light;
 entity *use_entity = nullptr;
 
+sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
+
 
 glm::ivec3
 get_block_containing(glm::vec3 v) {
@@ -512,6 +514,8 @@ init()
     text = new text_renderer("fonts/pixelmix.ttf", 16);
 
     ui_sprites = new sprite_renderer();
+    unlit_ui_slot_sprite = ui_sprites->load("textures/ui-slot.png");
+    lit_ui_slot_sprite = ui_sprites->load("textures/ui-slot-lit.png");
 
     printf("World vertex size: %lu bytes\n", sizeof(vertex));
 
@@ -1035,6 +1039,12 @@ struct play_state : game_state {
                     ship->num_false_splits);
             text->measure(buf2, &w, &h);
             add_text_with_outline(buf2, -w/2, -150);
+        }
+
+        unsigned num_tools = sizeof(tools) / sizeof(tools[0]);
+        for (unsigned i = 0; i < num_tools; i++) {
+            ui_sprites->add(pl.selected_slot == i ? &lit_ui_slot_sprite : &unlit_ui_slot_sprite,
+                    (i - num_tools/2.0) * 34, -220);
         }
     }
 
