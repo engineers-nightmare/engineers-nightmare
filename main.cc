@@ -991,7 +991,7 @@ update()
     }
 
     /* draw the projectiles */
-    glUseProgram(simple_shader);
+    glUseProgram(unlit_shader);
     draw_projectiles();
 
     /* draw the sky */
@@ -1188,6 +1188,7 @@ struct play_state : game_state {
         auto use_tool   = get_input(action_use_tool)->just_active;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;
+        auto fire = get_input(action_use_tool)->active;
 
         /* persistent */
 
@@ -1213,7 +1214,7 @@ struct play_state : game_state {
         pl.use_tool   = use_tool;
 
         // blech. Tool gets used below, then fire projectile gets hit here
-        if (pl.fire_projectile) {
+        if (pl.selected_slot == 0 && fire) {
             spawn_projectile(pl.eye, pl.dir);
             pl.fire_projectile = false;
         }
@@ -1500,6 +1501,8 @@ run()
         update();
 
         SDL_GL_SwapWindow(wnd.ptr);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         if (exit_requested) return;
     }

@@ -26,7 +26,7 @@ projectile_manager::create_projectile_instance_data(unsigned count) {
         return;
 
     projectile_instance_data data;
-    const auto bytes = count * (sizeof(c_entity) + sizeof(float) + 2 * sizeof(glm::vec3));
+    const auto bytes = count * (sizeof(c_entity) + 2 * sizeof(float) + 2 * sizeof(glm::vec3));
     data.buffer = malloc(bytes);
     data.num = projectile_pool.num;
     data.allocated = count;
@@ -74,7 +74,24 @@ projectile_manager::draw() {
 }
 
 void
-projectile_manager::simulate(float dt) {
+projectile_manager::destroy(instance i) {
+    auto last_id = projectile_pool.num - 1;
+    auto e = projectile_pool.entity[i.i];
+    auto last = projectile_pool.entity[last_id];
+
+    projectile_pool.entity[i.i] = projectile_pool.entity[last_id];
+    projectile_pool.mass[i.i] = projectile_pool.mass[last_id];
+    projectile_pool.lifetime[i.i] = projectile_pool.lifetime[last_id];
+    projectile_pool.position[i.i] = projectile_pool.position[last_id];
+    projectile_pool.velocity[i.i] = projectile_pool.velocity[last_id];
+
+    map[last.id] = i.i;
+    map.erase(i.i);
+
+    --projectile_pool.num;
+}
+
+void projectile_linear_manager::simulate(float dt) {
     for (auto i = 0u; i < projectile_pool.num; ) {
         auto inst = make_instance(i);
         auto new_pos = position(inst) + velocity(inst) * dt;
@@ -101,20 +118,34 @@ projectile_manager::simulate(float dt) {
     }
 }
 
-void
-projectile_manager::destroy(instance i) {
-    auto last_id = projectile_pool.num - 1;
-    auto e = projectile_pool.entity[i.i];
-    auto last = projectile_pool.entity[last_id];
+void projectile_sine_manager::simulate(float dt) {
+    static auto time = 0.f;
+    time += dt;
+    for (auto i = 0u; i < projectile_pool.num; ) {
+        auto inst = make_instance(i);
+        if (velocity(inst) != glm::vec3(0)) {
+            auto new_pos = position(inst) + velocity(inst) * dt;
+            new_pos.z += sin(lifetime(inst) * 20)* 0.01f;
 
-    projectile_pool.entity[i.i] = projectile_pool.entity[last_id];
-    projectile_pool.mass[i.i] = projectile_pool.mass[last_id];
-    projectile_pool.lifetime[i.i] = projectile_pool.lifetime[last_id];
-    projectile_pool.position[i.i] = projectile_pool.position[last_id];
-    projectile_pool.velocity[i.i] = projectile_pool.velocity[last_id];
+            auto hit = phys_raycast_generic(position(inst), new_pos,
+                phy->ghostObj, phy->dynamicsWorld);
 
-    map[last.id] = i.i;
-    map.erase(i.i);
+            if (hit.hit) {
+                new_pos = hit.hitCoord;
+                set_velocity(inst, glm::vec3(0));
+                set_lifetime(inst, after_collision_lifetime);
+            }
 
-    --projectile_pool.num;
+            set_position(inst, new_pos);
+        }
+
+        set_lifetime(inst, lifetime(inst) - dt);
+
+        if (lifetime(inst) <= 0.f) {
+            destroy(inst);
+            --i;
+        }
+
+        ++i;
+    }
 }

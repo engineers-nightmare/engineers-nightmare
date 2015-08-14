@@ -80,14 +80,29 @@ struct projectile_manager {
 
     void draw();
 
-    void simulate(float dt);
+    virtual void simulate(float dt) = 0;
 
     void destroy(instance i);
-    
-    ~projectile_manager() {
-        free(projectile_pool.mass);
-        free(projectile_pool.lifetime);
-        free(projectile_pool.position);
-        free(projectile_pool.velocity);
+
+    virtual ~projectile_manager() {
+        free(projectile_pool.buffer);
     }
+};
+
+struct projectile_linear_manager : projectile_manager {
+
+    explicit projectile_linear_manager(unsigned count)
+        : projectile_manager(count) {
+    }
+
+    void simulate(float dt) override;
+};
+
+struct projectile_sine_manager : projectile_manager {
+
+    explicit projectile_sine_manager(unsigned count)
+        : projectile_manager(count) {
+    }
+
+    void simulate(float dt) override;
 };
