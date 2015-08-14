@@ -69,7 +69,7 @@ handle_server_message(ENetEvent *event, uint8_t *data)
                 event->peer->data = pi;
             }else {
                 printf("incompatible!\n");
-                send_incomptible_version(event->peer, MIN_CLIENT_MAJOR,
+                send_incompatible_version(event->peer, MIN_CLIENT_MAJOR,
                         MIN_CLIENT_MINOR, MIN_CLIENT_PATCH);
             }
             break;

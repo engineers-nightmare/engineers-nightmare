@@ -27,7 +27,7 @@
 /* version messages */
 bool send_client_version(ENetPeer *peer, uint8_t major, uint8_t minor,
         uint8_t patch);
-bool send_incomptible_version(ENetPeer *peer, uint8_t major, uint8_t minor,
+bool send_incompatible_version(ENetPeer *peer, uint8_t major, uint8_t minor,
         uint8_t patch);
 bool send_server_version(ENetPeer *peer, uint8_t major, uint8_t minor,
         uint8_t patch);

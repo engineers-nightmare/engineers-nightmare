@@ -41,13 +41,13 @@ bool send_server_version(ENetPeer *peer, uint8_t major, uint8_t minor,
     return send_version_message(peer, SERVER_VSN_MSG, major, minor, patch);
 }
 
-bool send_incomptible_version(ENetPeer *peer, uint8_t major, uint8_t minor,
+bool send_incompatible_version(ENetPeer *peer, uint8_t major, uint8_t minor,
         uint8_t patch)
 {
     return send_version_message(peer, INCOMPAT_VSN_MSG, major, minor, patch);
 }
 
-bool basic_sever_message(ENetPeer *peer, uint8_t subtype)
+bool basic_server_message(ENetPeer *peer, uint8_t subtype)
 {
     ENetPacket *packet;
 
@@ -60,27 +60,27 @@ bool basic_sever_message(ENetPeer *peer, uint8_t subtype)
 
 bool request_slot(ENetPeer *peer)
 {
-    return basic_sever_message(peer, SLOT_REQUEST);
+    return basic_server_message(peer, SLOT_REQUEST);
 }
 
 bool send_register_required(ENetPeer *peer)
 {
-    return basic_sever_message(peer, REGISTER_REQUIRED);
+    return basic_server_message(peer, REGISTER_REQUIRED);
 }
 
 bool send_slots_full(ENetPeer *peer)
 {
-    return basic_sever_message(peer, SERVER_FULL);
+    return basic_server_message(peer, SERVER_FULL);
 }
 
 bool send_slot_granted(ENetPeer *peer)
 {
-    return basic_sever_message(peer, SLOT_GRANTED);
+    return basic_server_message(peer, SLOT_GRANTED);
 }
 
 bool send_not_in_slot(ENetPeer *peer)
 {
-    return basic_sever_message(peer, NOT_IN_SLOT);
+    return basic_server_message(peer, NOT_IN_SLOT);
 }
 
 bool basic_ship_message(ENetPeer *peer, uint8_t subtype)
