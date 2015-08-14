@@ -117,6 +117,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cc" />
+    <ClCompile Include="src\atlas.cc" />
     <ClCompile Include="src\blob.cc" />
     <ClCompile Include="src\char.cc" />
     <ClCompile Include="src\config.cc" />
@@ -125,10 +126,11 @@
     <ClCompile Include="src\mesher.cc" />
     <ClCompile Include="src\mock_ship_junk.cc" />
     <ClCompile Include="src\physics.cc" />
-    <ClCompile Include="src\projectiles.cc"/>
+    <ClCompile Include="src\projectiles.cc" />
     <ClCompile Include="src\settings.cc" />
     <ClCompile Include="src\shader.cc" />
     <ClCompile Include="src\ship_space.cc" />
+    <ClCompile Include="src\sprites.cc" />
     <ClCompile Include="src\text.cc" />
     <ClCompile Include="src\textureset.cc" />
     <ClCompile Include="src\tools\add_block.cc" />

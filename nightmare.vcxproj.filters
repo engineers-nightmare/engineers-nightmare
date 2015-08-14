@@ -75,6 +75,15 @@
     <ClCompile Include="src\mock_ship_junk.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\projectiles.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\atlas.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sprites.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -135,6 +144,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\tools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\projectiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
