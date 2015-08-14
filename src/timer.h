@@ -17,7 +17,7 @@ public:
         m_time.frequency = SDL_GetPerformanceFrequency();
     }
 
-    // Note: delta is since last touch OR peek
+    // Note: delta is since last touch
     const TimeData &touch() {
         m_time.then = m_time.now;
         m_time.now = SDL_GetPerformanceCounter();
@@ -27,8 +27,8 @@ public:
     }
     // Note: delta is since last touch
     const TimeData &peek() {
-        m_time.now = SDL_GetPerformanceCounter();
-        m_time.delta = double(m_time.now - m_time.then) / double(m_time.frequency);
+        Uint64 now = SDL_GetPerformanceCounter();
+        m_time.delta = double(now - m_time.then) / double(m_time.frequency);
         return m_time;
     }
 
