@@ -135,6 +135,10 @@ clamp(T t, T lower, T upper) {
     return t;
 }
 
+power_component_manager power_man;
+gas_production_component_manager gas_man;
+relative_position_component_manager pos_man;
+
 glm::ivec3
 get_block_containing(glm::vec3 v) {
     int x = v.x; if (v.x < 0) x--;
@@ -203,6 +207,7 @@ struct entity
     btRigidBody *phys_body;
     int face;
     glm::mat4 mat;
+    c_entity c_entity;
 
     entity(int x, int y, int z, entity_type *type, int face)
         : x(x), y(y), z(z), type(type), phys_body(nullptr), face(face) {
@@ -212,6 +217,14 @@ struct entity
 
         /* so that we can get back to the entity from a phys raycast */
         phys_body->setUserPointer(this);
+
+        if (type == &entity_types[0]) {
+            auto power_component = power_man.get_next_component(c_entity);
+
+            auto gas_component = gas_man.get_next_component(c_entity);
+
+            auto pos_component = pos_man.get_next_component(c_entity);
+        }
     }
 
     ~entity() {
@@ -419,10 +432,8 @@ prepare_chunks()
 void
 init()
 {
-    c_entity entity;
-
-
-
+    power_man.create_component_instance_data(20);
+    gas_man.create_component_instance_data(20);
 
     printf("%s starting up.\n", APP_NAME);
     printf("OpenGL version: %.1f\n", epoxy_gl_version() / 10.0f);
@@ -594,6 +605,14 @@ remove_ents_from_surface(int x, int y, int z, int face)
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
         entity *e = *it;
         if (e->x == x && e->y == y && e->z == z && e->face == face) {
+            if (e->type == &entity_types[0]) {
+                auto inst = power_man.lookup(e->c_entity);
+                power_man.destroy_instance(inst);
+                inst = gas_man.lookup(e->c_entity);
+                gas_man.destroy_instance(inst);
+                inst = pos_man.lookup(e->c_entity);
+                pos_man.destroy_instance(inst);
+            }
             delete e;
             it = ch->entities.erase(it);
         }
