@@ -137,26 +137,26 @@ en_char_controller::en_char_controller (btPairCachingGhostObject* ghostObject,
                                         btScalar stepHeight, int upAxis)
 {
     m_upAxis = upAxis;
-    m_addedMargin = 0.02;
+    m_addedMargin = 0.02f;
     m_walkDirection.setValue(0,0,0);
     m_useGhostObjectSweepTest = true;
     m_ghostObject = ghostObject;
     m_stepHeight = stepHeight;
-    m_turnAngle = btScalar(0.0);
+    m_turnAngle = btScalar(0.0f);
     m_standShape = standShape;
     m_crouchShape = crouchShape;
     m_currentShape = standShape;
     m_useWalkDirection = true;	// use walk direction by default, legacy behavior
-    m_velocityTimeInterval = 0.0;
-    m_verticalVelocity = 0.0;
-    m_verticalOffset = 0.0;
-    m_gravity = 9.8 * 3 ; // 3G acceleration.
-    m_fallSpeed = 55.0; // Terminal velocity of a sky diver in m/s.
-    m_jumpSpeed = 10.0; // ?
+    m_velocityTimeInterval = 0.0f;
+    m_verticalVelocity = 0.0f;
+    m_verticalOffset = 0.0f;
+    m_gravity = 9.8f * 3 ; // 3G acceleration.
+    m_fallSpeed = 55.0f; // Terminal velocity of a sky diver in m/s.
+    m_jumpSpeed = 10.0f; // ?
     m_wasOnGround = false;
     m_wasJumping = false;
     m_interpolateUp = true;
-    setMaxSlope(btRadians(45.0));
+    setMaxSlope(btRadians(45.0f));
     m_currentStepOffset = 0;
     full_drop = false;
     bounce_fix = false;
@@ -793,7 +793,7 @@ void en_char_controller::crouch(btCollisionWorld *collisionWorld)
 
     /* adjust position to avoid bouncing */
     btTransform & transform = m_ghostObject->getWorldTransform();
-    transform.setOrigin(transform.getOrigin() + btVector3(0, 0, -0.3)); /* hack */
+    transform.setOrigin(transform.getOrigin() + btVector3(0, 0, -0.3f)); /* hack */
 
     reset(collisionWorld);
 }
@@ -824,7 +824,7 @@ bool en_char_controller::can_stand(btCollisionWorld *collisionWorld)
     start.setIdentity();
     end.setIdentity();
     start.setOrigin(m_currentPosition);
-    btVector3 endOrigin = m_currentPosition + btVector3(0, 0, +0.6);    /* hack */
+    btVector3 endOrigin = m_currentPosition + btVector3(0.0f, 0.0f, +0.6f);    /* hack */
     end.setOrigin(endOrigin);
 
     en_convex_result_callback callback(m_ghostObject, -getUpAxisDirections()[m_upAxis],
@@ -854,7 +854,7 @@ void en_char_controller::stand(btCollisionWorld *collisionWorld)
 
     /* adjust position to avoid bouncing */
     btTransform & transform = m_ghostObject->getWorldTransform();
-    transform.setOrigin(transform.getOrigin() + btVector3(0, 0, +0.3)); /* hack */
+    transform.setOrigin(transform.getOrigin() + btVector3(0.0f, 0.0f, +0.3f)); /* hack */
 
     reset(collisionWorld);
 }

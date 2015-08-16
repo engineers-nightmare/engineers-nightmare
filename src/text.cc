@@ -45,9 +45,9 @@ text_renderer::text_renderer(char const *font, int size)
         m->w = bitmap->width;
         m->h = bitmap->rows;
 
-        m->xoffset = ft_face->glyph->bitmap_left;
+        m->xoffset = (float) ft_face->glyph->bitmap_left;
         m->advance = ft_face->glyph->linearHoriAdvance / 65536.0f;   /* 16.16 -> float */
-        m->yoffset = ft_face->glyph->bitmap_top;
+        m->yoffset = (float) ft_face->glyph->bitmap_top;
     }
 
     atlas->upload();

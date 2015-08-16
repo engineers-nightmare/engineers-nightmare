@@ -43,7 +43,7 @@
 #define WORLD_TEXTURE_DIMENSION     32
 #define MAX_WORLD_TEXTURES          64
 
-#define MOUSE_Y_LIMIT   1.54
+#define MOUSE_Y_LIMIT   1.54f
 #define MAX_AXIS_PER_EVENT 128
 
 bool exit_requested = false;
@@ -76,7 +76,7 @@ struct {
     void tick() {
         auto t = timer.touch();
 
-        dt = t.delta;
+        dt = (float) t.delta;   /* narrowing */
         frame++;
 
         fps_frame++;
@@ -141,9 +141,10 @@ relative_position_component_manager pos_man;
 
 glm::ivec3
 get_block_containing(glm::vec3 v) {
-    int x = v.x; if (v.x < 0) x--;
-    int y = v.y; if (v.y < 0) y--;
-    int z = v.z; if (v.z < 0) z--;
+    /* truncating via int cast */
+    int x = (int) v.x; if (v.x < 0) x--;
+    int y = (int) v.y; if (v.y < 0) y--;
+    int z = (int) v.z; if (v.z < 0) z--;
 
     return glm::ivec3(x, y, z);
 }
@@ -694,7 +695,7 @@ struct add_block_entity_tool : tool
         if (!can_use(rc))
             return;
 
-        per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
+        per_object->val.world_matrix = mat_position((float)rc->px, (float)rc->py, (float)rc->pz);
         per_object->upload();
 
         draw_mesh(type->hw);
@@ -776,14 +777,14 @@ struct add_surface_entity_tool : tool
 
         /* draw a surface overlay here too */
         /* TODO: sub-block placement granularity -- will need a different overlay */
-        per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
+        per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);
         per_object->upload();
 
         glUseProgram(add_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-0.1, -0.1);
+        glPolygonOffset(-0.1f, -0.1f);
         draw_mesh(surfs_hw[index]);
-        glPolygonOffset(0, 0);
+        glPolygonOffset(0.0f, 0.0f);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }
@@ -820,14 +821,14 @@ struct remove_surface_entity_tool : tool
             return;
         }
 
-        per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
+        per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);
         per_object->upload();
 
         glUseProgram(remove_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-0.1, -0.1);
+        glPolygonOffset(-0.1f, -0.1f);
         draw_mesh(surfs_hw[index]);
-        glPolygonOffset(0, 0);
+        glPolygonOffset(0.0f, 0.0f);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }
@@ -1130,7 +1131,7 @@ struct play_state : game_state {
         unsigned num_tools = sizeof(tools) / sizeof(tools[0]);
         for (unsigned i = 0; i < num_tools; i++) {
             ui_sprites->add(pl.selected_slot == i ? &lit_ui_slot_sprite : &unlit_ui_slot_sprite,
-                    (i - num_tools/2.0) * 34, -220);
+                    (i - num_tools/2.0f) * 34, -220);
         }
     }
 
@@ -1232,8 +1233,7 @@ struct play_state : game_state {
         if (pl.elev > MOUSE_Y_LIMIT)
             pl.elev = MOUSE_Y_LIMIT;
 
-        pl.move.x = moveX;
-        pl.move.y = moveY;
+        pl.move = glm::vec2((float) moveX, (float) moveY);
 
         pl.jump       = jump;
         pl.crouch     = crouch;
@@ -1473,8 +1473,8 @@ run()
         mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheeldown)] = false;
         mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheelup)]   = false;
 
-        mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] = 0.f;
-        mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] = 0.f;
+        mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] = 0;
+        mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] = 0;
 
         SDL_Event e;
         while (SDL_PollEvent(&e)) {

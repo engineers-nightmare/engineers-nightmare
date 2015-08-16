@@ -46,7 +46,7 @@ build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBod
     else {
         /* Rigid body doesn't exist yet -- build one, along with all th motionstate junk */
         btDefaultMotionState *ms = new btDefaultMotionState(
-            btTransform(btQuaternion(0, 0, 0, 1), btVector3(x, y, z)));
+            btTransform(btQuaternion(0, 0, 0, 1), btVector3((float)x, (float)y, (float)z)));
         btRigidBody::btRigidBodyConstructionInfo
                     ci(0, ms, shape, btVector3(0, 0, 0));
         *rb = new btRigidBody(ci);
