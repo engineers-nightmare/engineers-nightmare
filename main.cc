@@ -30,6 +30,7 @@
 #include "src/shader_params.h"
 #include "src/light_field.h"
 #include "src/projectiles.h"
+#include "src/component/component.h"
 
 #include "src/scopetimer.h"
 
@@ -418,6 +419,11 @@ prepare_chunks()
 void
 init()
 {
+    c_entity entity;
+
+
+
+
     printf("%s starting up.\n", APP_NAME);
     printf("OpenGL version: %.1f\n", epoxy_gl_version() / 10.0f);
 

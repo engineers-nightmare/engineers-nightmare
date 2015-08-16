@@ -16,8 +16,15 @@ T* align_ptr(T* p) {
     return (T*)align_size<T>((size_t)p);
 }
 
+static unsigned entities_id_ref = 0;
 struct c_entity {
     unsigned id;
+
+    c_entity() : id(entities_id_ref++) {
+    }
+
+    c_entity(const c_entity &other) : id(other.id) {
+    }
 
     bool operator==(const c_entity &other) const {
         return this->id == other.id;
@@ -28,7 +35,7 @@ namespace std {
     template<>
     struct hash<c_entity> {
         size_t operator()(c_entity const &e) const {
-            return std::hash<unsigned>()(e.id);
+            return hash<unsigned>()(e.id);
         }
     };
 }
