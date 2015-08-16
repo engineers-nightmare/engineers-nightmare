@@ -449,6 +449,7 @@ init()
 {
     power_man.create_component_instance_data(20);
     gas_man.create_component_instance_data(20);
+    pos_man.create_component_instance_data(20);
 
     printf("%s starting up.\n", APP_NAME);
     printf("OpenGL version: %.1f\n", epoxy_gl_version() / 10.0f);
