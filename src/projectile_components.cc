@@ -12,6 +12,19 @@ mat_position(glm::vec3);
 
 #define MAX_PROJECTILES 2000
 
+template<typename T>
+size_t align_size(size_t s)
+{
+    s += alignof(T) - 1;
+    s &= ~(alignof(T) - 1);
+    return s;
+}
+
+template<typename T>
+T* align_ptr(T* p) {
+    return (T*) align_size<T>((size_t) p);
+}
+
 void
 projectile_manager::create_component_instance_data(unsigned count) {
     if (count <= projectile_pool.allocated)
@@ -19,39 +32,22 @@ projectile_manager::create_component_instance_data(unsigned count) {
 
     projectile_instance_data data;
 
-    auto entity_size = sizeof(c_entity) * count;
+    size_t size = 0u;
+    size = align_size<float>(sizeof(c_entity) * count + size);
+    size = align_size<float>(sizeof(float) * count + size);
+    size = align_size<glm::vec3>(sizeof(float) * count + size);
+    size = align_size<glm::vec3>(sizeof(glm::vec3) * count + size);
+    size = align_size<glm::vec3>(sizeof(glm::vec3) * count + size);     /* this last type is arbitrary */
 
-    auto mass_size = sizeof(float) * count;
-    mass_size += mass_size % alignof(float);
-
-    auto lifetime_size = sizeof(float) * count;
-    lifetime_size += lifetime_size % alignof(float);
-
-    auto position_size = sizeof(glm::vec3) * count;
-    position_size += position_size % alignof(glm::vec3);
-
-    auto velocity_size = sizeof(glm::vec3) * count;
-    velocity_size += velocity_size % alignof(glm::vec3);
-
-    const auto bytes = entity_size + mass_size + lifetime_size + position_size + velocity_size;
-
-    data.buffer = malloc(bytes);
+    data.buffer = malloc(size);
     data.num = projectile_pool.num;
     data.allocated = count;
 
     data.entity = (c_entity *)data.buffer;
-
-    data.mass = (float *)(data.entity + count);
-    data.mass = (float*)((size_t)data.mass + alignof(float)-1 & ~(alignof(float)-1));
-
-    data.lifetime = (float *)(data.mass + count);
-    data.lifetime = (float*)((size_t)data.lifetime + alignof(float)-1 & ~(alignof(float)-1));
-
-    data.position = (glm::vec3 *)(data.lifetime + count);
-    data.position = (glm::vec3*)((size_t)data.position + alignof(glm::vec3) - 1 & ~(alignof(glm::vec3) - 1));
-
-    data.velocity = data.position + count;
-    data.velocity = (glm::vec3*)((size_t)data.velocity + alignof(glm::vec3) - 1 & ~(alignof(glm::vec3) - 1));
+    data.mass = align_ptr((float *)(data.entity + count));
+    data.lifetime = align_ptr((float *)(data.mass + count));
+    data.position = align_ptr((glm::vec3 *)(data.lifetime + count));
+    data.velocity = align_ptr((glm::vec3 *)(data.position + count));
 
     memcpy(data.entity, projectile_pool.entity, projectile_pool.num * sizeof(c_entity));
     memcpy(data.mass, projectile_pool.mass, projectile_pool.num * sizeof(float));
