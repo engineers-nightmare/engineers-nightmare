@@ -122,6 +122,8 @@ struct frame_data {
         base_ptr = glMapBufferRange(GL_UNIFORM_BUFFER, 0, FRAME_DATA_SIZE,
             GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
         glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &hw_align);
+
+        printf("frame_data base=%p hw_align=%d\n", base_ptr, hw_align);
     }
 
     /* Prepare for filling this frame_data. If the backing BO is still in flight,
@@ -159,6 +161,10 @@ struct frame_data {
         T* ptr;
         size_t off;
         size_t size;
+
+        void bind(GLuint index, frame_data *f) {
+            glBindBufferRange(GL_UNIFORM_BUFFER, index, f->bo, off, size);
+        }
     };
 
     /* Allocate a chunk of frame_data for an array of T*, aligned appropriately for
@@ -1110,7 +1116,7 @@ update()
     camera_params.ptr->view_proj_matrix = proj * view;
     camera_params.ptr->inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
     camera_params.ptr->aspect = (float)wnd.width / wnd.height;
-    glBindBufferRange(GL_UNIFORM_BUFFER, 0, frame->bo, camera_params.off, camera_params.size);
+    camera_params.bind(0, frame);
 
     main_tick_accum.add(dt);
     fast_tick_accum.add(dt);
@@ -1189,8 +1195,7 @@ update()
                     auto chunk_matrix = frame->alloc_aligned<glm::mat4>(1);
                     *chunk_matrix.ptr = mat_position(
                                 (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
-                    glBindBufferRange(GL_UNIFORM_BUFFER, 1, frame->bo,
-                                      chunk_matrix.off, chunk_matrix.size);
+                    chunk_matrix.bind(1, frame);
                     draw_mesh(ch->render_chunk.mesh);
                 }
             }
