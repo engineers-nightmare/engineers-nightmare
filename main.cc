@@ -245,34 +245,37 @@ struct entity
             power_man.enabled(ce) ^= true;
         }
     }
+};
 
-    void tick() {
-        // frobnicator
-        if (type != &entity_types[0]) {
-            /* TODO: components */
+
+void
+tick_gas_producers()
+{
+    for (auto i = 0u; i < gas_man.buffer.num; i++) {
+        auto ce = gas_man.instance_pool.entity[i];
+
+        /* gas producers require: power, position */
+        auto should_produce = power_man.enabled(ce) && power_man.powered(ce);
+        if (!should_produce) {
             return;
         }
 
-        auto frobnicate = power_man.enabled(ce) && power_man.powered(ce);
-        if (!frobnicate) {
-            return;
-        }
+        auto pos = get_block_containing(pos_man.position(ce));
 
-        /* topo node containing the ent */
-        topo_info *t = topo_find(ship->get_topo_info(x, y, z));
-        /* zoneinfo attached */
+        /* topo node containing the entity */
+        topo_info *t = topo_find(ship->get_topo_info(pos.x, pos.y, pos.z));
         zone_info *z = ship->get_zone_info(t);
         if (!z) {
-            /* if there wasnt a zone, make one. */
+            /* if there wasn't a zone, make one */
             z = ship->zones[t] = new zone_info(0);
         }
 
-        /* add some air if we can, up to our pressure limit */
-        float max_air = gas_man.max_pressure(ce) * t->size;
-        if (z->air_amount < max_air)
-            z->air_amount = std::min(max_air, z->air_amount + gas_man.flow_rate(ce));
+        /* add some gas if we can, up to our pressure limit */
+        float max_gas = gas_man.max_pressure(ce) * t->size;
+        if (z->air_amount < max_gas)
+            z->air_amount = std::min(max_gas, z->air_amount + gas_man.flow_rate(ce));
     }
-};
+}
 
 
 void
@@ -940,11 +943,7 @@ update()
         }
 
         /* allow the entities to tick */
-        for (auto ch : ship->chunks) {
-            for (auto e : ch.second->entities) {
-                e->tick();
-            }
-        }
+        tick_gas_producers();
 
         /* HACK: dirty this every frame for now while debugging atmo */
         if (1 || pl.ui_dirty) {
