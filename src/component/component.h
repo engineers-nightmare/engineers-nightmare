@@ -23,9 +23,6 @@ struct c_entity {
     c_entity() : id(entities_id_ref++) {
     }
 
-    c_entity(const c_entity &other) : id(other.id) {
-    }
-
     bool operator==(const c_entity &other) const {
         return this->id == other.id;
     }
