@@ -52,6 +52,13 @@ struct component_manager {
 
     virtual void create_component_instance_data(unsigned count) = 0;
 
+    instance assign_entity(c_entity e, unsigned index) {
+        auto i = make_instance(index);
+        entity_instance_map[e] = i.index;
+
+        return i;
+    }
+
     instance lookup(c_entity e) {
         return make_instance(entity_instance_map.find(e)->second);
     }
