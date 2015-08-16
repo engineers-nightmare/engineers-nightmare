@@ -191,7 +191,6 @@ struct entity_type
     char const *name;
     btTriangleMesh *phys_mesh;
     btCollisionShape *phys_shape;
-    float max_air_pressure;
 };
 
 
@@ -228,6 +227,7 @@ struct entity
 
             gas_man.assign_entity(ce);
             gas_man.flow_rate(ce) = 0.1f;
+            gas_man.max_pressure(ce) = 1.0f;
         }
     }
 
@@ -267,7 +267,7 @@ struct entity
         }
 
         /* add some air if we can, up to our pressure limit */
-        float max_air = type->max_air_pressure * t->size;
+        float max_air = gas_man.max_pressure(ce) * t->size;
         if (z->air_amount < max_air)
             z->air_amount = std::min(max_air, z->air_amount + gas_man.flow_rate(ce));
     }
@@ -492,21 +492,18 @@ init()
     set_mesh_material(entity_types[0].sw, 3);
     entity_types[0].hw = upload_mesh(entity_types[0].sw);
     entity_types[0].name = "Frobnicator";
-    entity_types[0].max_air_pressure = 1.0f;
     build_static_physics_mesh(entity_types[0].sw, &entity_types[0].phys_mesh, &entity_types[0].phys_shape);
 
     entity_types[1].sw = load_mesh("mesh/panel_4x4.obj");
     set_mesh_material(entity_types[1].sw, 7);
     entity_types[1].hw = upload_mesh(entity_types[1].sw);
     entity_types[1].name = "Display Panel (4x4)";
-    entity_types[1].max_air_pressure = 0.0f;
     build_static_physics_mesh(entity_types[1].sw, &entity_types[1].phys_mesh, &entity_types[1].phys_shape);
 
     entity_types[2].sw = load_mesh("mesh/panel_4x4.obj");
     set_mesh_material(entity_types[2].sw, 8);
     entity_types[2].hw = upload_mesh(entity_types[2].sw);
     entity_types[2].name = "Light (4x4)";
-    entity_types[2].max_air_pressure = 0.0f;
     build_static_physics_mesh(entity_types[2].sw, &entity_types[2].phys_mesh, &entity_types[2].phys_shape);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");

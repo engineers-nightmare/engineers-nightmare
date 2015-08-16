@@ -126,6 +126,7 @@ struct gas_production_component_manager : component_manager {
         c_entity *entity;
         unsigned *gas_type;
         float *flow_rate;
+        float *max_pressure;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -144,6 +145,12 @@ struct gas_production_component_manager : component_manager {
         auto inst = lookup(e);
 
         return instance_pool.flow_rate[inst.index];
+    }
+
+    float & max_pressure(c_entity e) {
+        auto inst = lookup(e);
+
+        return instance_pool.max_pressure[inst.index];
     }
 };
 
