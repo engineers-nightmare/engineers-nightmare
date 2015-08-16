@@ -1,5 +1,5 @@
 #include "projectiles.h"
-#include "component/component.h"
+#include "projectile_components.h"
 
 #define PROJECTILE_INITIAL_SPEED    2.f
 #define PROJECTILE_INITIAL_LIFETIME 10.f

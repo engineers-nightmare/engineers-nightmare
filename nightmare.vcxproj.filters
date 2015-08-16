@@ -93,6 +93,9 @@
     <ClCompile Include="src\sprites.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\projectile_components.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -165,6 +168,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\component\component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\projectile_components.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
