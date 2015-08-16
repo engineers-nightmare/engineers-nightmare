@@ -55,7 +55,7 @@ power_component_manager::destroy_instance(instance i) {
 void
 power_component_manager::entity(const c_entity &e) {
     if (buffer.num >= buffer.allocated) {
-        printf("Increasing size of power_component buffer. Please adjust");
+        printf("Increasing size of power_component buffer. Please adjust\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);
     }
 
@@ -119,7 +119,7 @@ gas_production_component_manager::destroy_instance(instance i) {
 void
 gas_production_component_manager::entity(const c_entity &e) {
     if (buffer.num >= buffer.allocated) {
-        printf("Increasing size of gas_production buffer. Please adjust");
+        printf("Increasing size of gas_production buffer. Please adjust\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);
     }
 
@@ -175,7 +175,7 @@ relative_position_component_manager::destroy_instance(instance i) {
 void
 relative_position_component_manager::entity(const c_entity &e) {
     if (buffer.num >= buffer.allocated) {
-        printf("Increasing size of relative_position buffer. Please adjust");
+        printf("Increasing size of relative_position buffer. Please adjust\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);
     }
 
