@@ -6,6 +6,7 @@
 #include "../physics.h"
 #include "../shader_params.h"
 #include "../mesh.h"
+#include <algorithm>
 
 extern physics *phy;
 extern hw_mesh *projectile_hw;
@@ -13,15 +14,10 @@ extern hw_mesh *projectile_hw;
 extern glm::mat4
 mat_position(glm::vec3);
 
-projectile_manager::projectile_manager(unsigned count) {
-    if (count > 0) {
-        create_projectile_instance_data(count);
-    }
-}
-
+#define MAX_PROJECTILES 2000
 
 void
-projectile_manager::create_projectile_instance_data(unsigned count) {
+projectile_manager::create_component_instance_data(unsigned count) {
     if (count <= projectile_pool.allocated)
         return;
 
@@ -50,7 +46,9 @@ projectile_manager::create_projectile_instance_data(unsigned count) {
 void
 projectile_manager::spawn(glm::vec3 pos, glm::vec3 vel) {
     if (projectile_pool.num >= projectile_pool.allocated) {
-        return;
+        // lazy allocate more than we need with room to spare
+        auto count = std::max(projectile_pool.num, (unsigned)MAX_PROJECTILES);
+        create_component_instance_data(count * 2);
     }
 
     auto i = make_instance(projectile_pool.num);
@@ -74,19 +72,18 @@ projectile_manager::draw() {
 }
 
 void
-projectile_manager::destroy(instance i) {
+projectile_manager::destroy_instance(instance i) {
     auto last_id = projectile_pool.num - 1;
-    auto e = projectile_pool.entity[i.i];
     auto last = projectile_pool.entity[last_id];
 
-    projectile_pool.entity[i.i] = projectile_pool.entity[last_id];
-    projectile_pool.mass[i.i] = projectile_pool.mass[last_id];
-    projectile_pool.lifetime[i.i] = projectile_pool.lifetime[last_id];
-    projectile_pool.position[i.i] = projectile_pool.position[last_id];
-    projectile_pool.velocity[i.i] = projectile_pool.velocity[last_id];
+    projectile_pool.entity[i.index] = projectile_pool.entity[last_id];
+    projectile_pool.mass[i.index] = projectile_pool.mass[last_id];
+    projectile_pool.lifetime[i.index] = projectile_pool.lifetime[last_id];
+    projectile_pool.position[i.index] = projectile_pool.position[last_id];
+    projectile_pool.velocity[i.index] = projectile_pool.velocity[last_id];
 
-    map[last.id] = i.i;
-    map.erase(i.i);
+    entity_instance_map[last] = i.index;
+    entity_instance_map.erase(last);
 
     --projectile_pool.num;
 }
@@ -110,7 +107,7 @@ void projectile_linear_manager::simulate(float dt) {
         set_lifetime(inst, lifetime(inst) - dt);
 
         if (lifetime(inst) <= 0.f) {
-            destroy(inst);
+            destroy_instance(inst);
             --i;
         }
 
@@ -142,7 +139,7 @@ void projectile_sine_manager::simulate(float dt) {
         set_lifetime(inst, lifetime(inst) - dt);
 
         if (lifetime(inst) <= 0.f) {
-            destroy(inst);
+            destroy_instance(inst);
             --i;
         }
 

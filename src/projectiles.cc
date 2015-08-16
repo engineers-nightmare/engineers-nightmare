@@ -1,12 +1,11 @@
 #include "projectiles.h"
 #include "component/component.h"
 
-#define MAX_PROJECTILES 2000
 #define PROJECTILE_INITIAL_SPEED    2.f
 #define PROJECTILE_INITIAL_LIFETIME 10.f
 #define PROJECTILE_AFTER_COLLISION_LIFETIME 0.5f
 
-projectile_sine_manager proj_man(MAX_PROJECTILES);
+projectile_sine_manager proj_man;
 
 void
 update_projectiles(float dt)

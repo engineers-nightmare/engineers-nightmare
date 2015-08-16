@@ -3,13 +3,56 @@
 #include <unordered_map>
 #include <glm/glm.hpp>
 
-//extern hw_mesh *projectile_hw;
-
 struct c_entity {
     unsigned id;
+
+    bool operator==(const c_entity &other) const {
+        return this->id == other.id;
+    }
 };
 
-struct projectile_manager {
+struct c_entity_hasher {
+    size_t operator()(const c_entity &e) const {
+        return std::hash<unsigned>()(e.id);
+    }
+};
+
+struct component_manager {
+    struct component_instance_data {
+        unsigned num;
+        unsigned allocated;
+        void *buffer;
+    } instance_pool;
+
+    struct instance {
+        unsigned index;
+    };
+
+    std::unordered_map<c_entity, unsigned, c_entity_hasher> entity_instance_map;
+    
+    virtual void create_component_instance_data(unsigned count) = 0;
+
+    instance lookup(c_entity e) {
+        return make_instance(entity_instance_map.find(e)->second);
+    }
+
+    instance make_instance(unsigned i) {
+        return { i };
+    }
+
+    void destroy_instance(c_entity e) {
+        auto i = lookup(e);
+        destroy_instance(i);
+    }
+
+    virtual void destroy_instance(instance i) = 0;
+
+    virtual ~component_manager() {
+        free(instance_pool.buffer);
+    }
+};
+
+struct projectile_manager : component_manager {
     struct projectile_instance_data {
         unsigned num;
         unsigned allocated;
@@ -25,84 +68,53 @@ struct projectile_manager {
     static constexpr float initial_lifetime = 10.f;
     static constexpr float after_collision_lifetime = 0.5f;
 
-    projectile_manager(unsigned count);
+    void create_component_instance_data(unsigned count) override;
 
-    void create_projectile_instance_data(unsigned size);
+    void destroy_instance(instance i) override;
 
-    std::unordered_map<unsigned, unsigned> map;
-
-    struct instance {
-        unsigned i;
-    };
-
-    instance make_instance(unsigned i) {
-        instance inst = { i };
-        return inst;
-    }
-
-    instance lookup(c_entity e) {
-        return make_instance(map.find(e.id)->second);
-    }
-
-    float mass(instance i) {
-        return projectile_pool.mass[i.i];
-    }
-
-    float lifetime(instance i) {
-        return projectile_pool.lifetime[i.i];
-    }
-
-    glm::vec3 position(instance i) {
-        return projectile_pool.position[i.i];
-    }
-
-    glm::vec3 velocity(instance i) {
-        return projectile_pool.velocity[i.i];
-    }
-
-    void set_mass(instance i, float mass) {
-        projectile_pool.mass[i.i] = mass;
-    }
-
-    void set_lifetime(instance i, float lifetime) {
-        projectile_pool.lifetime[i.i] = lifetime;
-    }
-
-    void set_position(instance i, glm::vec3 pos) {
-        projectile_pool.position[i.i] = pos;
-    }
-
-    void set_velocity(instance i, glm::vec3 velocity) {
-        projectile_pool.velocity[i.i] = velocity;
-    }
+    virtual void simulate(float dt) = 0;
 
     void spawn(glm::vec3 pos, glm::vec3 vel);
 
     void draw();
 
-    virtual void simulate(float dt) = 0;
+    float mass(instance i) {
+        return projectile_pool.mass[i.index];
+    }
 
-    void destroy(instance i);
+    float lifetime(instance i) {
+        return projectile_pool.lifetime[i.index];
+    }
 
-    virtual ~projectile_manager() {
-        free(projectile_pool.buffer);
+    glm::vec3 position(instance i) {
+        return projectile_pool.position[i.index];
+    }
+
+    glm::vec3 velocity(instance i) {
+        return projectile_pool.velocity[i.index];
+    }
+
+    void set_mass(instance i, float mass) {
+        projectile_pool.mass[i.index] = mass;
+    }
+
+    void set_lifetime(instance i, float lifetime) {
+        projectile_pool.lifetime[i.index] = lifetime;
+    }
+
+    void set_position(instance i, glm::vec3 pos) {
+        projectile_pool.position[i.index] = pos;
+    }
+
+    void set_velocity(instance i, glm::vec3 velocity) {
+        projectile_pool.velocity[i.index] = velocity;
     }
 };
 
 struct projectile_linear_manager : projectile_manager {
-
-    explicit projectile_linear_manager(unsigned count)
-        : projectile_manager(count) {
-    }
-
     void simulate(float dt) override;
 };
 
 struct projectile_sine_manager : projectile_manager {
-
-    explicit projectile_sine_manager(unsigned count)
-        : projectile_manager(count) {
-    }
-
     void simulate(float dt) override;
 };
