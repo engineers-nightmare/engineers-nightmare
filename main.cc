@@ -1186,15 +1186,18 @@ update()
                 /* TODO: prepare all the matrices first, and do ONE upload */
                 chunk *ch = ship->get_chunk(i, j, k);
                 if (ch) {
-                    per_object->val.world_matrix = mat_position(
+                    auto chunk_matrix = frame->alloc_aligned<glm::mat4>(1);
+                    *chunk_matrix.ptr = mat_position(
                                 (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
-                    per_object->upload();
+                    glBindBufferRange(GL_UNIFORM_BUFFER, 1, frame->bo,
+                                      chunk_matrix.off, chunk_matrix.size);
                     draw_mesh(ch->render_chunk.mesh);
                 }
             }
         }
     }
 
+    per_object->bind(1);
     draw_renderables();
 
     /* draw the projectiles */
