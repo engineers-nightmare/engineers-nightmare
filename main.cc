@@ -180,14 +180,14 @@ struct frame_data {
     }
 };
 
-frame_data *frames;
+frame_data *frames, *frame;
 unsigned frame_index;
 
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *projectile_sw;
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
-GLuint sky_shader;
+GLuint sky_shader, unlit_instanced_shader;
 shader_params<per_object_params> *per_object;
 texture_set *world_textures;
 texture_set *skybox;
@@ -268,7 +268,6 @@ mat_block_face(int x, int y, int z, int face)
         return glm::mat4(1);    /* unreachable */
     }
 }
-
 
 
 struct entity_type
@@ -442,6 +441,25 @@ draw_renderables(frame_data *frame)
         entity_matrix.bind(1, frame);
 
         draw_mesh(&mesh);
+    }
+}
+
+
+#define INSTANCE_BATCH_SIZE 256u        /* needs to be <= the value in the shader */
+
+void
+draw_projectiles(frame_data *frame)
+{
+    for (auto i = 0u; i < proj_man.buffer.num; i += INSTANCE_BATCH_SIZE) {
+        auto batch_size = std::min(INSTANCE_BATCH_SIZE, proj_man.buffer.num - i);
+        auto projectile_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
+
+        for (auto j = 0u; j < batch_size; j++) {
+            projectile_matrices.ptr[j] = mat_position(proj_man.position(i + j));
+        }
+
+        projectile_matrices.bind(1, frame);
+        draw_mesh_instanced(projectile_hw, batch_size);
     }
 }
 
@@ -685,6 +703,7 @@ init()
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
+    unlit_instanced_shader = load_shader("shaders/simple_instanced.vert", "shaders/unlit.frag");
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/unlit.frag");
     remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/unlit.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
@@ -1089,7 +1108,7 @@ update()
     frame_info.tick();
     auto dt = frame_info.dt;
 
-    frame_data *frame = &frames[frame_index++];
+    frame = &frames[frame_index++];
     if (frame_index >= NUM_INFLIGHT_FRAMES) {
         frame_index = 0;
     }
@@ -1206,11 +1225,11 @@ update()
 
     draw_renderables(frame);
 
-    per_object->bind(1);
-
     /* draw the projectiles */
-    glUseProgram(unlit_shader);
-    proj_man.draw();
+    glUseProgram(unlit_instanced_shader);
+    draw_projectiles(frame);
+
+    per_object->bind(1);
 
     /* draw the sky */
     glUseProgram(sky_shader);

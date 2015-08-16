@@ -78,20 +78,6 @@ projectile_manager::spawn(glm::vec3 pos, glm::vec3 dir, hw_mesh m) {
     mesh(index) = m;
 }
 
-void
-projectile_manager::draw() {
-    for (auto i = 0u; i < buffer.num; ++i) {
-        /* TODO: instancing etc to get rid of this upload/draw loop */
-
-        auto pos = projectile_pool.position[i];
-        auto mesh = projectile_pool.mesh;
-
-        per_object->val.world_matrix = mat_position(pos);
-        per_object->upload();
-        draw_mesh(mesh);
-    }
-}
-
 void projectile_linear_manager::simulate(float dt) {
     for (auto i = 0u; i < buffer.num; ) {
         auto new_pos = projectile_pool.position[i] + projectile_pool.velocity[i] * dt;

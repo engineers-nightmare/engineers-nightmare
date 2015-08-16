@@ -22,7 +22,7 @@ struct projectile_manager {
     float initial_lifetime = 10.f;
     float after_collision_lifetime = 0.5f;
 
-    projectile_manager(){
+    projectile_manager() {
     }
 
     virtual void create_projectile_data(unsigned count);
@@ -32,8 +32,6 @@ struct projectile_manager {
     virtual void simulate(float dt) = 0;
 
     virtual void spawn(glm::vec3 pos, glm::vec3 vel, hw_mesh m);
-
-    virtual void draw();
 
     float & mass(unsigned index) {
         return projectile_pool.mass[index];

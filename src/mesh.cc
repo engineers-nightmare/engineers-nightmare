@@ -124,6 +124,15 @@ draw_mesh(hw_mesh *m)
 
 
 void
+draw_mesh_instanced(hw_mesh *m, unsigned num_instances)
+{
+    glBindVertexArray(m->vao);
+    glDrawElementsInstanced(GL_TRIANGLES, m->num_indices,
+                            GL_UNSIGNED_INT, nullptr, num_instances);
+}
+
+
+void
 free_mesh(hw_mesh *m)
 {
     /* TODO: try to reuse BO */
