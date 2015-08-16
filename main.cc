@@ -138,6 +138,7 @@ clamp(T t, T lower, T upper) {
 power_component_manager power_man;
 gas_production_component_manager gas_man;
 relative_position_component_manager pos_man;
+light_component_manager light_man;
 
 glm::ivec3
 get_block_containing(glm::vec3 v) {
@@ -197,6 +198,10 @@ struct entity_type
 
 entity_type entity_types[3];
 
+/* fwd for temp spawn logic just below */
+void
+mark_lightfield_update(int x, int y, int z);
+
 
 struct entity
 {
@@ -230,6 +235,15 @@ struct entity
             gas_man.flow_rate(ce) = 0.1f;
             gas_man.max_pressure(ce) = 1.0f;
         }
+
+        if (type == &entity_types[2]) {
+            light_man.assign_entity(ce);
+
+            power_man.assign_entity(ce);
+            power_man.enabled(ce) = false;
+            //default to powered state for now
+            power_man.powered(ce) = true;
+        }
     }
 
     ~entity() {
@@ -243,6 +257,11 @@ struct entity
 
         if (type == &entity_types[0]) {
             power_man.enabled(ce) ^= true;
+        }
+
+        if (type == &entity_types[2]) {
+            power_man.enabled(ce) ^= true;
+            mark_lightfield_update(x, y, z);
         }
     }
 };
@@ -350,20 +369,12 @@ update_lightfield()
 
     /* 2. inject sources. the box is guaranteed to be big enough for max propagation
      * for all sources we'll add here. */
-    /* TODO: inject only required sources. */
-    for (int k = ship->min_z; k <= ship->max_z; k++) {
-        for (int j = ship->min_y; j <= ship->max_y; j++) {
-            for (int i = ship->min_x; i <= ship->max_x; i++) {
-                chunk *ch = ship->get_chunk(i, j, k);
-                if (ch) {
-                    for (auto e : ch->entities) {
-                        /* TODO: only some entities should do this. */
-                        if (e->type == &entity_types[2]) {
-                            set_light_level(e->x, e->y, e->z, 255);
-                        }
-                    }
-                }
-            }
+    for (auto i = 0u; i < light_man.buffer.num; i++) {
+        auto ce = light_man.instance_pool.entity[i];
+        auto pos = get_block_containing(pos_man.position(ce));
+        auto should_emit = power_man.enabled(ce) && power_man.powered(ce);
+        if (should_emit) {
+            set_light_level(pos.x, pos.y, pos.z, 255);
         }
     }
 
@@ -453,6 +464,7 @@ init()
     power_man.create_component_instance_data(20);
     gas_man.create_component_instance_data(20);
     pos_man.create_component_instance_data(20);
+    light_man.create_component_instance_data(20);
 
     printf("%s starting up.\n", APP_NAME);
     printf("OpenGL version: %.1f\n", epoxy_gl_version() / 10.0f);

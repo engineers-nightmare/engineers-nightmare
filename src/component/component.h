@@ -176,3 +176,18 @@ struct relative_position_component_manager : component_manager {
         return instance_pool.position[inst.index];
     }
 };
+
+// light component
+// no data
+
+struct light_component_manager : component_manager {
+    struct light_instance_data {
+        c_entity *entity;
+    } instance_pool;
+
+    void create_component_instance_data(unsigned count) override;
+
+    void destroy_instance(instance i) override;
+
+    void entity(const c_entity &e) override;
+};
