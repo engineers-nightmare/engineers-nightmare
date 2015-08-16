@@ -45,6 +45,12 @@ struct component_manager {
         unsigned index;
     };
 
+    struct component_buffer {
+        unsigned num;
+        unsigned allocated;
+        void *buffer;
+    } buffer;
+    
     std::unordered_map<c_entity, unsigned> entity_instance_map;
 
     virtual void create_component_instance_data(unsigned count) = 0;
@@ -64,7 +70,9 @@ struct component_manager {
 
     virtual void destroy_instance(instance i) = 0;
 
-    virtual ~component_manager() {}
+    virtual ~component_manager() {
+        free(buffer.buffer);
+    }
 };
 
 // power component

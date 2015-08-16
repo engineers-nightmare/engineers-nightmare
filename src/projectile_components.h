@@ -5,10 +5,6 @@
 
 struct projectile_manager : component_manager {
     struct projectile_instance_data {
-        unsigned num;
-        unsigned allocated;
-        void *buffer;
-
         c_entity *entity;
         float *mass;
         float *lifetime;
@@ -59,10 +55,6 @@ struct projectile_manager : component_manager {
 
     void set_velocity(instance i, glm::vec3 velocity) {
         projectile_pool.velocity[i.index] = velocity;
-    }
-
-    ~projectile_manager() {
-        free(projectile_pool.buffer);
     }
 };
 

@@ -14,10 +14,11 @@ mat_position(glm::vec3);
 
 void
 projectile_manager::create_component_instance_data(unsigned count) {
-    if (count <= projectile_pool.allocated)
+    if (count <= buffer.allocated)
         return;
 
-    projectile_instance_data data;
+    component_buffer data;
+    projectile_instance_data pool;
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(float) * count + align_size<float>(size);
@@ -26,45 +27,48 @@ projectile_manager::create_component_instance_data(unsigned count) {
     size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
 
     data.buffer = malloc(size);
-    data.num = projectile_pool.num;
+    data.num = buffer.num;
     data.allocated = count;
 
-    data.entity = (c_entity *)data.buffer;
-    data.mass = align_ptr((float *)(data.entity + count));
-    data.lifetime = align_ptr((float *)(data.mass + count));
-    data.position = align_ptr((glm::vec3 *)(data.lifetime + count));
-    data.velocity = align_ptr((glm::vec3 *)(data.position + count));
+    pool.entity = (c_entity *)data.buffer;
+    pool.mass = align_ptr((float *)(pool.entity + count));
+    pool.lifetime = align_ptr((float *)(pool.mass + count));
+    pool.position = align_ptr((glm::vec3 *)(pool.lifetime + count));
+    pool.velocity = align_ptr((glm::vec3 *)(pool.position + count));
 
-    memcpy(data.entity, projectile_pool.entity, projectile_pool.num * sizeof(c_entity));
-    memcpy(data.mass, projectile_pool.mass, projectile_pool.num * sizeof(float));
-    memcpy(data.lifetime, projectile_pool.lifetime, projectile_pool.num * sizeof(float));
-    memcpy(data.position, projectile_pool.position, projectile_pool.num * sizeof(glm::vec3));
-    memcpy(data.velocity, projectile_pool.velocity, projectile_pool.num * sizeof(glm::vec3));
+    auto num = buffer.num;
+    memcpy(pool.entity, projectile_pool.entity, num * sizeof(c_entity));
+    memcpy(pool.mass, projectile_pool.mass, num * sizeof(float));
+    memcpy(pool.lifetime, projectile_pool.lifetime, num * sizeof(float));
+    memcpy(pool.position, projectile_pool.position, num * sizeof(glm::vec3));
+    memcpy(pool.velocity, projectile_pool.velocity, num * sizeof(glm::vec3));
 
-    free(projectile_pool.buffer);
-    projectile_pool = data;
+    free(buffer.buffer);
+    buffer = data;
+
+    projectile_pool = pool;
 }
 
 void
 projectile_manager::spawn(glm::vec3 pos, glm::vec3 vel) {
-    if (projectile_pool.num >= projectile_pool.allocated) {
+    if (buffer.num >= buffer.allocated) {
         // lazy allocate more than we need with room to spare
-        auto count = std::max(projectile_pool.num, (unsigned)MAX_PROJECTILES);
+        auto count = std::max(buffer.num, (unsigned)MAX_PROJECTILES);
         create_component_instance_data(count * 2);
     }
 
-    auto i = make_instance(projectile_pool.num);
+    auto i = make_instance(buffer.num);
 
     set_position(i, pos);
     set_velocity(i, vel);
     set_lifetime(i, initial_lifetime);
 
-    ++projectile_pool.num;
+    ++buffer.num;
 }
 
 void
 projectile_manager::draw() {
-    for (auto i = 0u; i < projectile_pool.num; ++i) {
+    for (auto i = 0u; i < buffer.num; ++i) {
         auto inst = make_instance(i);
         /* TODO: instancing etc to get rid of this upload/draw loop */
         per_object->val.world_matrix = mat_position(position(inst));
@@ -75,7 +79,7 @@ projectile_manager::draw() {
 
 void
 projectile_manager::destroy_instance(instance i) {
-    auto last_id = projectile_pool.num - 1;
+    auto last_id = buffer.num - 1;
     auto last = projectile_pool.entity[last_id];
 
     projectile_pool.entity[i.index] = projectile_pool.entity[last_id];
@@ -87,11 +91,11 @@ projectile_manager::destroy_instance(instance i) {
     entity_instance_map[last] = i.index;
     entity_instance_map.erase(last);
 
-    --projectile_pool.num;
+    --buffer.num;
 }
 
 void projectile_linear_manager::simulate(float dt) {
-    for (auto i = 0u; i < projectile_pool.num; ) {
+    for (auto i = 0u; i < buffer.num; ) {
         auto inst = make_instance(i);
         auto new_pos = position(inst) + velocity(inst) * dt;
 
@@ -120,7 +124,7 @@ void projectile_linear_manager::simulate(float dt) {
 void projectile_sine_manager::simulate(float dt) {
     static auto time = 0.f;
     time += dt;
-    for (auto i = 0u; i < projectile_pool.num; ) {
+    for (auto i = 0u; i < buffer.num; ) {
         auto inst = make_instance(i);
         if (velocity(inst) != glm::vec3(0)) {
             auto new_pos = position(inst) + velocity(inst) * dt;
