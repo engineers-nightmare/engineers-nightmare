@@ -11,11 +11,14 @@ struct c_entity {
     }
 };
 
-struct c_entity_hasher {
-    size_t operator()(const c_entity &e) const {
-        return std::hash<unsigned>()(e.id);
-    }
-};
+namespace std {
+    template<>
+    struct std::hash<c_entity> {
+        size_t operator()(c_entity const &e) const {
+            return std::hash<unsigned>()(e.id);
+        }
+    };
+}
 
 struct component_manager {
     struct component_instance_data {
@@ -28,7 +31,7 @@ struct component_manager {
         unsigned index;
     };
 
-    std::unordered_map<c_entity, unsigned, c_entity_hasher> entity_instance_map;
+    std::unordered_map<c_entity, unsigned> entity_instance_map;
     
     virtual void create_component_instance_data(unsigned count) = 0;
 
