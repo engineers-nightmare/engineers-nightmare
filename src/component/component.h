@@ -3,6 +3,19 @@
 #include <unordered_map>
 #include <glm/glm.hpp>
 
+template<typename T>
+size_t align_size(size_t s)
+{
+    s += alignof(T)-1;
+    s &= ~(alignof(T)-1);
+    return s;
+}
+
+template<typename T>
+T* align_ptr(T* p) {
+    return (T*)align_size<T>((size_t)p);
+}
+
 struct c_entity {
     unsigned id;
 
@@ -83,7 +96,7 @@ struct gas_production_component_manager : component_manager {
 
         c_entity *entity;
         unsigned *gas_type;
-        float *rate;
+        float *flow_rate;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;

@@ -9,30 +9,18 @@ void power_component_manager::create_component_instance_data(unsigned count) {
 
     power_instance_data data;
 
-    auto entity_size = sizeof(c_entity) * count;
+    size_t size = sizeof(c_entity) * count;
+    size = sizeof(bool) * count + align_size<bool>(size);
+    size = sizeof(bool) * count + align_size<bool>(size);
 
-    auto powered_size = sizeof(bool) * count;
-    powered_size += powered_size % alignof(bool);
-
-    auto enabled_size = sizeof(bool) * count;
-    enabled_size += enabled_size % alignof(bool);
-
-    auto b2 = count * (sizeof(c_entity) + sizeof(bool) * 2);
-    const auto bytes = entity_size + powered_size + enabled_size;
-
-    assert(b2 == bytes);
-
-    data.buffer = malloc(bytes);
+    data.buffer = malloc(size);
     data.num = instance_pool.num;
     data.allocated = count;
 
     data.entity = (c_entity *)data.buffer;
 
-    data.powered = (bool *)(data.entity + count);
-    data.powered = (bool*)((size_t)data.powered + alignof(bool)-1 & ~(alignof(bool)-1));
-
-    data.enabled = (bool *)(data.powered + count);
-    data.enabled = (bool*)((size_t)data.enabled + alignof(bool)-1 & ~(alignof(bool)-1));
+    data.powered = align_ptr((bool *)(data.entity + count));
+    data.enabled = align_ptr((bool *)(data.powered + count));
 
     memcpy(data.entity, instance_pool.entity, instance_pool.num * sizeof(c_entity));
     memcpy(data.powered, instance_pool.powered, instance_pool.num * sizeof(bool));
@@ -62,34 +50,22 @@ void gas_production_component_manager::create_component_instance_data(unsigned c
 
     gas_production_instance_data data;
 
-    auto entity_size = sizeof(c_entity) * count;
+    size_t size = sizeof(c_entity) * count;
+    size = sizeof(unsigned) * count + align_size<unsigned>(size);
+    size = sizeof(float) * count + align_size<float>(size);
 
-    auto gas_type_size = sizeof(unsigned) * count;
-    gas_type_size += gas_type_size % alignof(unsigned);
-
-    auto rate_size = sizeof(float) * count;
-    rate_size += rate_size % alignof(float);
-
-    auto b2 = count * (sizeof(c_entity) + sizeof(unsigned) + sizeof(float));
-    const auto bytes = entity_size + gas_type_size + rate_size;
-
-    assert(b2 == bytes);
-
-    data.buffer = malloc(bytes);
+    data.buffer = malloc(size);
     data.num = instance_pool.num;
     data.allocated = count;
 
     data.entity = (c_entity *)data.buffer;
 
-    data.gas_type = (unsigned *)(data.entity + count);
-    data.gas_type = (unsigned*)((size_t)data.gas_type + alignof(unsigned)-1 & ~(alignof(unsigned)-1));
-
-    data.rate = (float *)(data.gas_type + count);
-    data.rate = (float*)((size_t)data.rate + alignof(float)-1 & ~(alignof(float)-1));
+    data.gas_type = align_ptr((unsigned *)(data.entity + count));
+    data.flow_rate = align_ptr((float *)(data.gas_type + count));
 
     memcpy(data.entity, instance_pool.entity, instance_pool.num * sizeof(c_entity));
     memcpy(data.gas_type, instance_pool.gas_type, instance_pool.num * sizeof(unsigned));
-    memcpy(data.rate, instance_pool.rate, instance_pool.num * sizeof(float));
+    memcpy(data.flow_rate, instance_pool.flow_rate, instance_pool.num * sizeof(float));
 
     free(instance_pool.buffer);
     instance_pool = data;
@@ -101,7 +77,7 @@ void gas_production_component_manager::destroy_instance(instance i) {
 
     instance_pool.entity[i.index] = instance_pool.entity[last_id];
     instance_pool.gas_type[i.index] = instance_pool.gas_type[last_id];
-    instance_pool.rate[i.index] = instance_pool.rate[last_id];
+    instance_pool.flow_rate[i.index] = instance_pool.flow_rate[last_id];
 
     entity_instance_map[last] = i.index;
     entity_instance_map.erase(last);
@@ -115,24 +91,16 @@ void relative_position_component_manager::create_component_instance_data(unsigne
 
     relative_position_instance_data data;
 
-    auto entity_size = sizeof(c_entity) * count;
+    size_t size = sizeof(c_entity) * count;
+    size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
 
-    auto pos_size = sizeof(glm::vec3) * count;
-    pos_size += pos_size % alignof(glm::vec3);
-
-    auto b2 = count * (sizeof(c_entity) + sizeof(glm::vec3));
-    const auto bytes = entity_size + pos_size;
-
-    assert(b2 == bytes);
-
-    data.buffer = malloc(bytes);
+    data.buffer = malloc(size);
     data.num = instance_pool.num;
     data.allocated = count;
 
     data.entity = (c_entity *)data.buffer;
 
-    data.position = (glm::vec3 *)(data.entity + count);
-    data.position = (glm::vec3 *)((size_t)data.position + alignof(glm::vec3)-1 & ~(alignof(glm::vec3)-1));
+    data.position = align_ptr((glm::vec3 *)(data.entity + count));
 
     memcpy(data.entity, instance_pool.entity, instance_pool.num * sizeof(c_entity));
     memcpy(data.position, instance_pool.position, instance_pool.num * sizeof(glm::vec3));

@@ -12,19 +12,6 @@ mat_position(glm::vec3);
 
 #define MAX_PROJECTILES 2000
 
-template<typename T>
-size_t align_size(size_t s)
-{
-    s += alignof(T) - 1;
-    s &= ~(alignof(T) - 1);
-    return s;
-}
-
-template<typename T>
-T* align_ptr(T* p) {
-    return (T*) align_size<T>((size_t) p);
-}
-
 void
 projectile_manager::create_component_instance_data(unsigned count) {
     if (count <= projectile_pool.allocated)
