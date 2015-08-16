@@ -29,6 +29,7 @@ projectile_manager::create_component_instance_data(unsigned count) {
     new_buffer.buffer = malloc(size);
     new_buffer.num = buffer.num;
     new_buffer.allocated = count;
+    memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = (c_entity *)new_buffer.buffer;
     new_pool.mass = align_ptr((float *)(new_pool.entity + count));
