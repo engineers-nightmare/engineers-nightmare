@@ -182,7 +182,6 @@ sw_mesh *surfs_sw[6];
 sw_mesh *projectile_sw;
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader;
-shader_params<per_camera_params> *per_camera;
 shader_params<per_object_params> *per_object;
 texture_set *world_textures;
 texture_set *skybox;
@@ -688,12 +687,10 @@ init()
 
     glUseProgram(simple_shader);
 
-    per_camera = new shader_params<per_camera_params>;
     per_object = new shader_params<per_object_params>;
 
     per_object->val.world_matrix = glm::mat4(1);    /* identity */
 
-    per_camera->bind(0);
     per_object->bind(1);
 
     world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
@@ -1107,10 +1104,13 @@ update()
     glm::mat4 proj = glm::perspective(vfov, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
     glm::mat4 view = glm::lookAt(pl.eye, pl.eye + pl.dir, glm::vec3(0, 0, 1));
     glm::mat4 centered_view = glm::lookAt(glm::vec3(0), pl.dir, glm::vec3(0, 0, 1));
-    per_camera->val.view_proj_matrix = proj * view;
-    per_camera->val.inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
-    per_camera->val.aspect = (float)wnd.width / wnd.height;
-    per_camera->upload();
+
+    auto camera_params = frame->alloc_aligned<per_camera_params>(1);
+
+    camera_params.ptr->view_proj_matrix = proj * view;
+    camera_params.ptr->inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
+    camera_params.ptr->aspect = (float)wnd.width / wnd.height;
+    glBindBufferRange(GL_UNIFORM_BUFFER, 0, frame->bo, camera_params.off, camera_params.size);
 
     main_tick_accum.add(dt);
     fast_tick_accum.add(dt);

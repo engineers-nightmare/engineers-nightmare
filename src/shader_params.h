@@ -44,5 +44,5 @@ struct per_object_params {
     glm::mat4 world_matrix;
 };
 
-extern shader_params<per_camera_params> *per_camera;
+
 extern shader_params<per_object_params> *per_object;
