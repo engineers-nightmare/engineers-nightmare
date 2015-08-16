@@ -21,12 +21,6 @@ namespace std {
 }
 
 struct component_manager {
-    struct component_instance_data {
-        unsigned num;
-        unsigned allocated;
-        void *buffer;
-    } instance_pool;
-
     struct instance {
         unsigned index;
     };
@@ -50,7 +44,7 @@ struct component_manager {
 
     virtual void destroy_instance(instance i) = 0;
 
-    virtual ~component_manager() {
-        free(instance_pool.buffer);
-    }
+    virtual ~component_manager() {}
+};
+
 };

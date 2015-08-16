@@ -60,6 +60,10 @@ struct projectile_manager : component_manager {
     void set_velocity(instance i, glm::vec3 velocity) {
         projectile_pool.velocity[i.index] = velocity;
     }
+
+    ~projectile_manager() {
+        free(projectile_pool.buffer);
+    }
 };
 
 struct projectile_linear_manager : projectile_manager {
