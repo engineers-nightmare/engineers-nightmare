@@ -32,12 +32,11 @@ projectile_manager::create_component_instance_data(unsigned count) {
 
     projectile_instance_data data;
 
-    size_t size = 0u;
-    size = align_size<float>(sizeof(c_entity) * count + size);
-    size = align_size<float>(sizeof(float) * count + size);
-    size = align_size<glm::vec3>(sizeof(float) * count + size);
-    size = align_size<glm::vec3>(sizeof(glm::vec3) * count + size);
-    size = align_size<glm::vec3>(sizeof(glm::vec3) * count + size);     /* this last type is arbitrary */
+    size_t size = sizeof(c_entity) * count;
+    size = sizeof(float) * count + align_size<float>(size);
+    size = sizeof(float) * count + align_size<float>(size);
+    size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
+    size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
 
     data.buffer = malloc(size);
     data.num = projectile_pool.num;
