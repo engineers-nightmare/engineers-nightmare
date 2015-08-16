@@ -2,8 +2,10 @@
 #include <string.h>
 
 #include "component.h"
+#include <algorithm>
 
-void power_component_manager::create_component_instance_data(unsigned count) {
+void
+power_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
         return;
 
@@ -17,6 +19,7 @@ void power_component_manager::create_component_instance_data(unsigned count) {
     new_buffer.buffer = malloc(size);
     new_buffer.num = buffer.num;
     new_buffer.allocated = count;
+    memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = (c_entity *)new_buffer.buffer;
 
@@ -33,21 +36,43 @@ void power_component_manager::create_component_instance_data(unsigned count) {
     instance_pool = new_pool;
 }
 
-void power_component_manager::destroy_instance(instance i) {
-    auto last_id = buffer.num - 1;
-    auto last = instance_pool.entity[last_id];
+void
+power_component_manager::destroy_instance(instance i) {
+    auto last_index = buffer.num - 1;
+    auto last_entity = instance_pool.entity[last_index];
+    auto current_entity = instance_pool.entity[i.index];
 
-    instance_pool.entity[i.index] = instance_pool.entity[last_id];
-    instance_pool.powered[i.index] = instance_pool.powered[last_id];
-    instance_pool.enabled[i.index] = instance_pool.enabled[last_id];
+    instance_pool.entity[i.index] = instance_pool.entity[last_index];
+    instance_pool.powered[i.index] = instance_pool.powered[last_index];
+    instance_pool.enabled[i.index] = instance_pool.enabled[last_index];
 
-    entity_instance_map[last] = i.index;
-    entity_instance_map.erase(last);
+    entity_instance_map[last_entity] = i.index;
+    entity_instance_map.erase(current_entity);
 
     --buffer.num;
 }
 
-void gas_production_component_manager::create_component_instance_data(unsigned count) {
+power_component_manager::power_instance_data
+power_component_manager::get_next_component(c_entity e) {
+    if (buffer.num >= buffer.allocated) {
+        printf("Increasing size of power_component buffer. Please adjust");
+        create_component_instance_data(std::max(1u, buffer.allocated) * 2);
+    }
+
+    auto i = assign_entity(e, buffer.num++);
+
+    power_instance_data comp;
+    comp.entity = &instance_pool.entity[i.index];
+    comp.powered = &instance_pool.powered[i.index];
+    comp.enabled = &instance_pool.enabled[i.index];
+
+    *comp.entity = e;
+
+    return comp;
+}
+
+void
+gas_production_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
         return;
 
@@ -61,6 +86,7 @@ void gas_production_component_manager::create_component_instance_data(unsigned c
     new_buffer.buffer = malloc(size);
     new_buffer.num = buffer.num;
     new_buffer.allocated = count;
+    memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = (c_entity *)new_buffer.buffer;
 
@@ -77,21 +103,43 @@ void gas_production_component_manager::create_component_instance_data(unsigned c
     instance_pool = new_pool;
 }
 
-void gas_production_component_manager::destroy_instance(instance i) {
-    auto last_id = buffer.num - 1;
-    auto last = instance_pool.entity[last_id];
+void
+gas_production_component_manager::destroy_instance(instance i) {
+    auto last_index = buffer.num - 1;
+    auto last_entity = instance_pool.entity[last_index];
+    auto current_entity = instance_pool.entity[i.index];
 
-    instance_pool.entity[i.index] = instance_pool.entity[last_id];
-    instance_pool.gas_type[i.index] = instance_pool.gas_type[last_id];
-    instance_pool.flow_rate[i.index] = instance_pool.flow_rate[last_id];
+    instance_pool.entity[i.index] = instance_pool.entity[last_index];
+    instance_pool.gas_type[i.index] = instance_pool.gas_type[last_index];
+    instance_pool.flow_rate[i.index] = instance_pool.flow_rate[last_index];
 
-    entity_instance_map[last] = i.index;
-    entity_instance_map.erase(last);
+    entity_instance_map[last_entity] = i.index;
+    entity_instance_map.erase(current_entity);
 
     --buffer.num;
 }
 
-void relative_position_component_manager::create_component_instance_data(unsigned count) {
+gas_production_component_manager::gas_production_instance_data
+gas_production_component_manager::get_next_component(c_entity e) {
+    if (buffer.num >= buffer.allocated) {
+        printf("Increasing size of power_component buffer. Please adjust");
+        create_component_instance_data(std::max(1u, buffer.allocated) * 2);
+    }
+
+    auto i = assign_entity(e, buffer.num++);
+
+    gas_production_instance_data comp;
+    comp.entity = &instance_pool.entity[i.index];
+    comp.gas_type = &instance_pool.gas_type[i.index];
+    comp.flow_rate = &instance_pool.flow_rate[i.index];
+
+    *comp.entity = e;
+
+    return comp;
+}
+
+void
+relative_position_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
         return;
 
@@ -104,6 +152,7 @@ void relative_position_component_manager::create_component_instance_data(unsigne
     new_buffer.buffer = malloc(size);
     new_buffer.num = buffer.num;
     new_buffer.allocated = count;
+    memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = (c_entity *)new_buffer.buffer;
 
@@ -118,15 +167,35 @@ void relative_position_component_manager::create_component_instance_data(unsigne
     instance_pool = new_pool;
 }
 
-void relative_position_component_manager::destroy_instance(instance i) {
-    auto last_id = buffer.num - 1;
-    auto last = instance_pool.entity[last_id];
+void
+relative_position_component_manager::destroy_instance(instance i) {
+    auto last_index = buffer.num - 1;
+    auto last_entity = instance_pool.entity[last_index];
+    auto current_entity = instance_pool.entity[i.index];
 
-    instance_pool.entity[i.index] = instance_pool.entity[last_id];
-    instance_pool.position[i.index] = instance_pool.position[last_id];
+    instance_pool.entity[i.index] = instance_pool.entity[last_index];
+    instance_pool.position[i.index] = instance_pool.position[last_index];
 
-    entity_instance_map[last] = i.index;
-    entity_instance_map.erase(last);
+    entity_instance_map[last_entity] = i.index;
+    entity_instance_map.erase(current_entity);
 
     --buffer.num;
+}
+
+relative_position_component_manager::relative_position_instance_data
+relative_position_component_manager::get_next_component(c_entity e) {
+    if (buffer.num >= buffer.allocated) {
+        printf("Increasing size of relative_position buffer. Please adjust");
+        create_component_instance_data(std::max(1u, buffer.allocated) * 2);
+    }
+
+    auto i = assign_entity(e, buffer.num++);
+
+    relative_position_instance_data comp;
+    comp.entity = &instance_pool.entity[i.index];
+    comp.position = &instance_pool.position[i.index];
+
+    *comp.entity = e;
+
+    return comp;
 }

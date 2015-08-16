@@ -96,6 +96,8 @@ struct power_component_manager : component_manager {
     void create_component_instance_data(unsigned count) override;
 
     void destroy_instance(instance i) override;
+
+    power_instance_data get_next_component(c_entity e);
 };
 
 // gas production component
@@ -114,6 +116,8 @@ struct gas_production_component_manager : component_manager {
     void create_component_instance_data(unsigned count) override;
 
     void destroy_instance(instance i) override;
+
+    gas_production_instance_data get_next_component(c_entity e);
 };
 
 // position relative to ship component
@@ -129,4 +133,5 @@ struct relative_position_component_manager : component_manager {
     void create_component_instance_data(unsigned count) override;
 
     void destroy_instance(instance i) override;
+    relative_position_instance_data get_next_component(c_entity e);
 };
