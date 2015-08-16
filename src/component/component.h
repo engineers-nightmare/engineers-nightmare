@@ -98,6 +98,17 @@ struct power_component_manager : component_manager {
     void destroy_instance(instance i) override;
 
     power_instance_data get_next_component(c_entity e);
+    void set_enabled(c_entity e, bool enabled) {
+        auto inst = lookup(e);
+
+        instance_pool.enabled[inst.index] = enabled;
+    }
+
+    bool enabled(c_entity e) {
+        auto inst = lookup(e);
+
+        return instance_pool.enabled[inst.index];
+    }
 };
 
 // gas production component

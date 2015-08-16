@@ -235,11 +235,20 @@ struct entity
         /* used by the player */
         printf("player using the %s at %d %d %d\n",
                type->name, x, y, z);
+
+        if (type == &entity_types[0]) {
+            power_man.set_enabled(c_entity, !power_man.enabled(c_entity));
+        }
     }
 
     void tick() {
         if (type->add_air_amount <= 0) {
             /* TODO: components */
+            return;
+        }
+
+        auto frobnicate = power_man.enabled(c_entity);
+        if (!frobnicate) {
             return;
         }
 
