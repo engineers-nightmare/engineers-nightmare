@@ -152,6 +152,7 @@
     <ClInclude Include="src\fixed_grid.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\memory.h" />
+    <ClInclude Include="src\light_field.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\physics.h" />
     <ClInclude Include="src\player.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="src\scopetimer.h" />
     <ClInclude Include="src\settings.h" />
     <ClInclude Include="src\shader.h" />
+    <ClInclude Include="src\shader_params.h" />
     <ClInclude Include="src\ship_space.h" />
     <ClInclude Include="src\text.h" />
     <ClInclude Include="src\textureset.h" />
