@@ -4,34 +4,37 @@
 #include "component.h"
 
 void power_component_manager::create_component_instance_data(unsigned count) {
-    if (count <= instance_pool.allocated)
+    if (count <= buffer.allocated)
         return;
 
-    power_instance_data data;
+    component_buffer new_buffer;
+    power_instance_data new_pool;
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(bool) * count + align_size<bool>(size);
     size = sizeof(bool) * count + align_size<bool>(size);
 
-    data.buffer = malloc(size);
-    data.num = instance_pool.num;
-    data.allocated = count;
+    new_buffer.buffer = malloc(size);
+    new_buffer.num = buffer.num;
+    new_buffer.allocated = count;
 
-    data.entity = (c_entity *)data.buffer;
+    new_pool.entity = (c_entity *)new_buffer.buffer;
 
-    data.powered = align_ptr((bool *)(data.entity + count));
-    data.enabled = align_ptr((bool *)(data.powered + count));
+    new_pool.powered = align_ptr((bool *)(new_pool.entity + count));
+    new_pool.enabled = align_ptr((bool *)(new_pool.powered + count));
 
-    memcpy(data.entity, instance_pool.entity, instance_pool.num * sizeof(c_entity));
-    memcpy(data.powered, instance_pool.powered, instance_pool.num * sizeof(bool));
-    memcpy(data.enabled, instance_pool.enabled, instance_pool.num * sizeof(bool));
+    memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
+    memcpy(new_pool.powered, instance_pool.powered, buffer.num * sizeof(bool));
+    memcpy(new_pool.enabled, instance_pool.enabled, buffer.num * sizeof(bool));
 
-    free(instance_pool.buffer);
-    instance_pool = data;
+    free(buffer.buffer);
+    buffer = new_buffer;
+
+    instance_pool = new_pool;
 }
 
 void power_component_manager::destroy_instance(instance i) {
-    auto last_id = instance_pool.num - 1;
+    auto last_id = buffer.num - 1;
     auto last = instance_pool.entity[last_id];
 
     instance_pool.entity[i.index] = instance_pool.entity[last_id];
@@ -41,38 +44,41 @@ void power_component_manager::destroy_instance(instance i) {
     entity_instance_map[last] = i.index;
     entity_instance_map.erase(last);
 
-    --instance_pool.num;
+    --buffer.num;
 }
 
 void gas_production_component_manager::create_component_instance_data(unsigned count) {
-    if (count <= instance_pool.allocated)
+    if (count <= buffer.allocated)
         return;
 
-    gas_production_instance_data data;
+    component_buffer new_buffer;
+    gas_production_instance_data new_pool;
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(unsigned) * count + align_size<unsigned>(size);
     size = sizeof(float) * count + align_size<float>(size);
 
-    data.buffer = malloc(size);
-    data.num = instance_pool.num;
-    data.allocated = count;
+    new_buffer.buffer = malloc(size);
+    new_buffer.num = buffer.num;
+    new_buffer.allocated = count;
 
-    data.entity = (c_entity *)data.buffer;
+    new_pool.entity = (c_entity *)new_buffer.buffer;
 
-    data.gas_type = align_ptr((unsigned *)(data.entity + count));
-    data.flow_rate = align_ptr((float *)(data.gas_type + count));
+    new_pool.gas_type = align_ptr((unsigned *)(new_pool.entity + count));
+    new_pool.flow_rate = align_ptr((float *)(new_pool.gas_type + count));
 
-    memcpy(data.entity, instance_pool.entity, instance_pool.num * sizeof(c_entity));
-    memcpy(data.gas_type, instance_pool.gas_type, instance_pool.num * sizeof(unsigned));
-    memcpy(data.flow_rate, instance_pool.flow_rate, instance_pool.num * sizeof(float));
+    memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
+    memcpy(new_pool.gas_type, instance_pool.gas_type, buffer.num * sizeof(unsigned));
+    memcpy(new_pool.flow_rate, instance_pool.flow_rate, buffer.num * sizeof(float));
 
-    free(instance_pool.buffer);
-    instance_pool = data;
+    free(buffer.buffer);
+    buffer = new_buffer;
+
+    instance_pool = new_pool;
 }
 
 void gas_production_component_manager::destroy_instance(instance i) {
-    auto last_id = instance_pool.num - 1;
+    auto last_id = buffer.num - 1;
     auto last = instance_pool.entity[last_id];
 
     instance_pool.entity[i.index] = instance_pool.entity[last_id];
@@ -82,35 +88,38 @@ void gas_production_component_manager::destroy_instance(instance i) {
     entity_instance_map[last] = i.index;
     entity_instance_map.erase(last);
 
-    --instance_pool.num;
+    --buffer.num;
 }
 
 void relative_position_component_manager::create_component_instance_data(unsigned count) {
-    if (count <= instance_pool.allocated)
+    if (count <= buffer.allocated)
         return;
 
-    relative_position_instance_data data;
+    component_buffer new_buffer;
+    relative_position_instance_data new_pool;
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
 
-    data.buffer = malloc(size);
-    data.num = instance_pool.num;
-    data.allocated = count;
+    new_buffer.buffer = malloc(size);
+    new_buffer.num = buffer.num;
+    new_buffer.allocated = count;
 
-    data.entity = (c_entity *)data.buffer;
+    new_pool.entity = (c_entity *)new_buffer.buffer;
 
-    data.position = align_ptr((glm::vec3 *)(data.entity + count));
+    new_pool.position = align_ptr((glm::vec3 *)(new_pool.entity + count));
 
-    memcpy(data.entity, instance_pool.entity, instance_pool.num * sizeof(c_entity));
-    memcpy(data.position, instance_pool.position, instance_pool.num * sizeof(glm::vec3));
-   
-    free(instance_pool.buffer);
-    instance_pool = data;
+    memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
+    memcpy(new_pool.position, instance_pool.position, buffer.num * sizeof(glm::vec3));
+
+    free(new_buffer.buffer);
+    buffer = new_buffer;
+
+    instance_pool = new_pool;
 }
 
 void relative_position_component_manager::destroy_instance(instance i) {
-    auto last_id = instance_pool.num - 1;
+    auto last_id = buffer.num - 1;
     auto last = instance_pool.entity[last_id];
 
     instance_pool.entity[i.index] = instance_pool.entity[last_id];
@@ -119,5 +128,5 @@ void relative_position_component_manager::destroy_instance(instance i) {
     entity_instance_map[last] = i.index;
     entity_instance_map.erase(last);
 
-    --instance_pool.num;
+    --buffer.num;
 }

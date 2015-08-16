@@ -17,8 +17,8 @@ projectile_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
         return;
 
-    component_buffer data;
-    projectile_instance_data pool;
+    component_buffer new_buffer;
+    projectile_instance_data new_pool;
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(float) * count + align_size<float>(size);
@@ -26,27 +26,26 @@ projectile_manager::create_component_instance_data(unsigned count) {
     size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
     size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
 
-    data.buffer = malloc(size);
-    data.num = buffer.num;
-    data.allocated = count;
+    new_buffer.buffer = malloc(size);
+    new_buffer.num = buffer.num;
+    new_buffer.allocated = count;
 
-    pool.entity = (c_entity *)data.buffer;
-    pool.mass = align_ptr((float *)(pool.entity + count));
-    pool.lifetime = align_ptr((float *)(pool.mass + count));
-    pool.position = align_ptr((glm::vec3 *)(pool.lifetime + count));
-    pool.velocity = align_ptr((glm::vec3 *)(pool.position + count));
+    new_pool.entity = (c_entity *)new_buffer.buffer;
+    new_pool.mass = align_ptr((float *)(new_pool.entity + count));
+    new_pool.lifetime = align_ptr((float *)(new_pool.mass + count));
+    new_pool.position = align_ptr((glm::vec3 *)(new_pool.lifetime + count));
+    new_pool.velocity = align_ptr((glm::vec3 *)(new_pool.position + count));
 
-    auto num = buffer.num;
-    memcpy(pool.entity, projectile_pool.entity, num * sizeof(c_entity));
-    memcpy(pool.mass, projectile_pool.mass, num * sizeof(float));
-    memcpy(pool.lifetime, projectile_pool.lifetime, num * sizeof(float));
-    memcpy(pool.position, projectile_pool.position, num * sizeof(glm::vec3));
-    memcpy(pool.velocity, projectile_pool.velocity, num * sizeof(glm::vec3));
+    memcpy(new_pool.entity, projectile_pool.entity, buffer.num * sizeof(c_entity));
+    memcpy(new_pool.mass, projectile_pool.mass, buffer.num * sizeof(float));
+    memcpy(new_pool.lifetime, projectile_pool.lifetime, buffer.num * sizeof(float));
+    memcpy(new_pool.position, projectile_pool.position, buffer.num * sizeof(glm::vec3));
+    memcpy(new_pool.velocity, projectile_pool.velocity, buffer.num * sizeof(glm::vec3));
 
     free(buffer.buffer);
-    buffer = data;
+    buffer = new_buffer;
 
-    projectile_pool = pool;
+    projectile_pool = new_pool;
 }
 
 void

@@ -71,6 +71,7 @@ struct component_manager {
     virtual void destroy_instance(instance i) = 0;
 
     virtual ~component_manager() {
+        // allocated in derived create_component_instance_data() calls
         free(buffer.buffer);
     }
 };
@@ -83,10 +84,6 @@ struct component_manager {
 
 struct power_component_manager : component_manager {
     struct power_instance_data {
-        unsigned num;
-        unsigned allocated;
-        void *buffer;
-
         c_entity *entity;
         bool *powered;
         bool *enabled;
@@ -105,10 +102,6 @@ struct power_component_manager : component_manager {
 
 struct gas_production_component_manager : component_manager {
     struct gas_production_instance_data {
-        unsigned num;
-        unsigned allocated;
-        void *buffer;
-
         c_entity *entity;
         unsigned *gas_type;
         float *flow_rate;
@@ -125,10 +118,6 @@ struct gas_production_component_manager : component_manager {
 
 struct relative_position_component_manager : component_manager {
     struct relative_position_instance_data {
-        unsigned num;
-        unsigned allocated;
-        void *buffer;
-
         c_entity *entity;
         glm::vec3 *position;
     } instance_pool;
