@@ -429,7 +429,7 @@ tick_gas_producers()
 }
 
 void
-draw_renderables()
+draw_renderables(frame_data *frame)
 {
     for (auto i = 0u; i < render_man.buffer.num; i++) {
         auto ce = render_man.instance_pool.entity[i];
@@ -437,8 +437,10 @@ draw_renderables()
         auto mat = pos_man.mat(ce);
         auto mesh = render_man.mesh(ce);
 
-        per_object->val.world_matrix = mat;
-        per_object->upload();
+        auto entity_matrix = frame->alloc_aligned<glm::mat4>(1);
+        *entity_matrix.ptr = mat;
+        entity_matrix.bind(1, frame);
+
         draw_mesh(&mesh);
     }
 }
@@ -1202,8 +1204,9 @@ update()
         }
     }
 
+    draw_renderables(frame);
+
     per_object->bind(1);
-    draw_renderables();
 
     /* draw the projectiles */
     glUseProgram(unlit_shader);
