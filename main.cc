@@ -105,7 +105,7 @@ gl_debug_callback(GLenum source __unused,
 
 // 16M per frame
 #define FRAME_DATA_SIZE     (16u * 1024 * 1024)
-
+#define NUM_INFLIGHT_FRAMES 3
 
 struct frame_data {
     GLuint bo;
@@ -174,6 +174,8 @@ struct frame_data {
     }
 };
 
+frame_data *frames;
+unsigned frame_index;
 
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
@@ -732,6 +734,9 @@ init()
     en_settings user_settings = load_settings(en_config_user);
     game_settings.merge_with(user_settings);
 
+    frames = new frame_data[NUM_INFLIGHT_FRAMES];
+    frame_index = 0;
+
     pl.angle = 0;
     pl.elev = 0;
     pl.pos = glm::vec3(3,2,2);
@@ -1079,6 +1084,13 @@ update()
     frame_info.tick();
     auto dt = frame_info.dt;
 
+    frame_data *frame = &frames[frame_index++];
+    if (frame_index >= NUM_INFLIGHT_FRAMES) {
+        frame_index = 0;
+    }
+
+    frame->begin();
+
     float depthClearValue = 1.0f;
     glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
 
@@ -1211,6 +1223,8 @@ update()
     glUseProgram(simple_shader);
 
     glEnable(GL_DEPTH_TEST);
+
+    frame->end();
 }
 
 
