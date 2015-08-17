@@ -139,6 +139,7 @@ power_component_manager power_man;
 gas_production_component_manager gas_man;
 relative_position_component_manager pos_man;
 light_component_manager light_man;
+renderable_component_manager render_man;
 
 glm::ivec3
 get_block_containing(glm::vec3 v) {
@@ -210,12 +211,11 @@ struct entity
     entity_type *type;
     btRigidBody *phys_body;
     int face;
-    glm::mat4 mat;
     c_entity ce;
 
     entity(int x, int y, int z, entity_type *type, int face)
         : x(x), y(y), z(z), type(type), phys_body(nullptr), face(face) {
-        mat = mat_block_face(x, y, z, face);
+        auto mat = mat_block_face(x, y, z, face);
 
         build_static_physics_rb_mat(&mat, type->phys_shape, &phys_body);
 
@@ -224,6 +224,10 @@ struct entity
 
         pos_man.assign_entity(ce);
         pos_man.position(ce) = glm::vec3(x, y, z);
+        pos_man.mat(ce) = mat;
+
+        render_man.assign_entity(ce);
+        render_man.mesh(ce) = *type->hw;
 
         if (type == &entity_types[0]) {
             power_man.assign_entity(ce);
@@ -295,6 +299,21 @@ tick_gas_producers()
         float max_gas = gas_man.max_pressure(ce) * t->size;
         if (z->air_amount < max_gas)
             z->air_amount = std::min(max_gas, z->air_amount + gas_man.flow_rate(ce));
+    }
+}
+
+void
+draw_renderables()
+{
+    for (auto i = 0u; i < render_man.buffer.num; i++) {
+        auto ce = render_man.instance_pool.entity[i];
+
+        auto mat = pos_man.mat(ce);
+        auto mesh = render_man.mesh(ce);
+
+        per_object->val.world_matrix = mat;
+        per_object->upload();
+        draw_mesh(&mesh);
     }
 }
 
@@ -467,6 +486,7 @@ init()
     gas_man.create_component_instance_data(20);
     pos_man.create_component_instance_data(20);
     light_man.create_component_instance_data(20);
+    render_man.create_component_instance_data(20);
 
     printf("%s starting up.\n", APP_NAME);
     printf("OpenGL version: %.1f\n", epoxy_gl_version() / 10.0f);
@@ -633,6 +653,7 @@ remove_ents_from_surface(int x, int y, int z, int face)
         entity *e = *it;
         if (e->x == x && e->y == y && e->z == z && e->face == face) {
             pos_man.destroy_entity_instance(e->ce);
+            render_man.destroy_entity_instance(e->ce);
 
             if (e->type == &entity_types[0]) {
                 power_man.destroy_entity_instance(e->ce);
@@ -1021,23 +1042,7 @@ update()
         }
     }
 
-    /* walk all the entities in the (visible) chunks */
-    for (int k = ship->min_z; k <= ship->max_z; k++) {
-        for (int j = ship->min_y; j <= ship->max_y; j++) {
-            for (int i = ship->min_x; i <= ship->max_x; i++) {
-                chunk *ch = ship->get_chunk(i, j, k);
-                if (ch) {
-                    for (auto e : ch->entities) {
-                        /* TODO: batch these matrix uploads too! */
-                        per_object->val.world_matrix = e->mat;
-                        per_object->upload();
-
-                        draw_mesh(e->type->hw);
-                    }
-                }
-            }
-        }
-    }
+    draw_renderables();
 
     /* draw the projectiles */
     glUseProgram(unlit_shader);

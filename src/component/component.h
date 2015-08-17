@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <glm/glm.hpp>
+#include "../mesh.h"
 
 template<typename T>
 size_t align_size(size_t s)
@@ -159,11 +160,14 @@ struct gas_production_component_manager : component_manager {
 // position relative to ship component
 // position -- relative to ship. :)
 // glm::vec3
+// mat      -- matrix for above
+// glm::mat4
 
 struct relative_position_component_manager : component_manager {
     struct relative_position_instance_data {
         c_entity *entity;
         glm::vec3 *position;
+        glm::mat4 *mat;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -176,6 +180,12 @@ struct relative_position_component_manager : component_manager {
         auto inst = lookup(e);
 
         return instance_pool.position[inst.index];
+    }
+
+    glm::mat4 & mat(c_entity e) {
+        auto inst = lookup(e);
+
+        return instance_pool.mat[inst.index];
     }
 };
 
@@ -199,5 +209,27 @@ struct light_component_manager : component_manager {
         auto inst = lookup(e);
 
         return instance_pool.intensity[inst.index];
+    }
+};
+
+// renderable component
+// no data
+
+struct renderable_component_manager : component_manager {
+    struct renderable_instance_data {
+        c_entity *entity;
+        hw_mesh *mesh;
+    } instance_pool;
+
+    void create_component_instance_data(unsigned count) override;
+
+    void destroy_instance(instance i) override;
+
+    void entity(const c_entity &e) override;
+
+    hw_mesh & mesh(c_entity e) {
+        auto inst = lookup(e);
+
+        return instance_pool.mesh[inst.index];
     }
 };
