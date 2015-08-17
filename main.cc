@@ -126,9 +126,12 @@ entity *use_entity = nullptr;
 
 sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
-template<typename T> T clamp(T t, T lower, T upper) {
-    if (t < lower) return
-        lower; if (t > upper) return upper; return t;
+template<typename T>
+T
+clamp(T t, T lower, T upper) {
+    if (t < lower) return lower;
+    if (t > upper) return upper;
+    return t;
 }
 
 glm::ivec3
