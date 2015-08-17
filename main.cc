@@ -217,6 +217,9 @@ struct entity
         /* so that we can get back to the entity from a phys raycast */
         phys_body->setUserPointer(this);
 
+        pos_man.assign_entity(ce);
+        pos_man.position(ce) = glm::vec3(x, y, z);
+
         if (type == &entity_types[0]) {
             power_man.assign_entity(ce);
             power_man.enabled(ce) = false;
@@ -225,8 +228,6 @@ struct entity
 
             gas_man.assign_entity(ce);
             gas_man.flow_rate(ce) = 0.1f;
-
-            pos_man.assign_entity(ce);
         }
     }
 
