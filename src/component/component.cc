@@ -52,23 +52,16 @@ power_component_manager::destroy_instance(instance i) {
     --buffer.num;
 }
 
-power_component_manager::power_instance_data
-power_component_manager::get_next_component(c_entity e) {
+void
+power_component_manager::entity(const c_entity &e) {
     if (buffer.num >= buffer.allocated) {
         printf("Increasing size of power_component buffer. Please adjust");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);
     }
 
-    auto i = assign_entity(e, buffer.num++);
+    auto inst = lookup(e);
 
-    power_instance_data comp;
-    comp.entity = &instance_pool.entity[i.index];
-    comp.powered = &instance_pool.powered[i.index];
-    comp.enabled = &instance_pool.enabled[i.index];
-
-    *comp.entity = e;
-
-    return comp;
+    instance_pool.entity[inst.index] = e;
 }
 
 void
@@ -119,23 +112,16 @@ gas_production_component_manager::destroy_instance(instance i) {
     --buffer.num;
 }
 
-gas_production_component_manager::gas_production_instance_data
-gas_production_component_manager::get_next_component(c_entity e) {
+void
+gas_production_component_manager::entity(const c_entity &e) {
     if (buffer.num >= buffer.allocated) {
-        printf("Increasing size of power_component buffer. Please adjust");
+        printf("Increasing size of gas_production buffer. Please adjust");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);
     }
 
-    auto i = assign_entity(e, buffer.num++);
+    auto inst = lookup(e);
 
-    gas_production_instance_data comp;
-    comp.entity = &instance_pool.entity[i.index];
-    comp.gas_type = &instance_pool.gas_type[i.index];
-    comp.flow_rate = &instance_pool.flow_rate[i.index];
-
-    *comp.entity = e;
-
-    return comp;
+    instance_pool.entity[inst.index] = e;
 }
 
 void
@@ -182,20 +168,14 @@ relative_position_component_manager::destroy_instance(instance i) {
     --buffer.num;
 }
 
-relative_position_component_manager::relative_position_instance_data
-relative_position_component_manager::get_next_component(c_entity e) {
+void
+relative_position_component_manager::entity(const c_entity &e) {
     if (buffer.num >= buffer.allocated) {
         printf("Increasing size of relative_position buffer. Please adjust");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);
     }
 
-    auto i = assign_entity(e, buffer.num++);
+    auto inst = lookup(e);
 
-    relative_position_instance_data comp;
-    comp.entity = &instance_pool.entity[i.index];
-    comp.position = &instance_pool.position[i.index];
-
-    *comp.entity = e;
-
-    return comp;
+    instance_pool.entity[inst.index] = e;
 }

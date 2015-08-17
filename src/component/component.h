@@ -52,12 +52,14 @@ struct component_manager {
 
     virtual void create_component_instance_data(unsigned count) = 0;
 
-    instance assign_entity(c_entity e, unsigned index) {
-        auto i = make_instance(index);
+    void assign_entity(const c_entity &e) {
+        auto i = make_instance(buffer.num);
         entity_instance_map[e] = i.index;
-
-        return i;
+        entity(e);
+        ++buffer.num;
     }
+
+    virtual void entity(const c_entity &e) = 0;
 
     instance lookup(c_entity e) {
         return make_instance(entity_instance_map.find(e)->second);
@@ -97,12 +99,12 @@ struct power_component_manager : component_manager {
 
     void destroy_instance(instance i) override;
 
-    power_instance_data get_next_component(c_entity e);
+    void entity(const c_entity &e) override;
 
     bool powered(c_entity e) {
         auto inst = lookup(e);
 
-        return instance_pool.enabled[inst.index];
+        return instance_pool.powered[inst.index];
     }
 
     void powered(c_entity e, bool set) {
@@ -141,7 +143,7 @@ struct gas_production_component_manager : component_manager {
 
     void destroy_instance(instance i) override;
 
-    gas_production_instance_data get_next_component(c_entity e);
+    void entity(const c_entity &e) override;
 
     unsigned gas_type(c_entity e) {
         auto inst = lookup(e);
@@ -181,7 +183,8 @@ struct relative_position_component_manager : component_manager {
     void create_component_instance_data(unsigned count) override;
 
     void destroy_instance(instance i) override;
-    relative_position_instance_data get_next_component(c_entity e);
+
+    void entity(const c_entity &e) override;
 
     glm::vec3 position(c_entity e) {
         auto inst = lookup(e);

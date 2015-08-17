@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "component/component.h"
+#include <algorithm>
 
 struct projectile_manager : component_manager {
     struct projectile_instance_data {
@@ -15,6 +16,11 @@ struct projectile_manager : component_manager {
     static constexpr float initial_lifetime = 10.f;
     static constexpr float after_collision_lifetime = 0.5f;
 
+    c_entity owner;
+
+    projectile_manager(c_entity owner) : owner(owner) {
+    }
+
     void create_component_instance_data(unsigned count) override;
 
     void destroy_instance(instance i) override;
@@ -25,43 +31,96 @@ struct projectile_manager : component_manager {
 
     void draw();
 
-    float mass(instance i) {
-        return projectile_pool.mass[i.index];
+    float mass(c_entity e) {
+        auto inst = lookup(owner);
+
+        return projectile_pool.mass[inst.index];
     }
 
-    float lifetime(instance i) {
-        return projectile_pool.lifetime[i.index];
+    void mass(c_entity e, float mass) {
+        auto inst = lookup(owner);
+
+        projectile_pool.mass[inst.index] = mass;
     }
 
-    glm::vec3 position(instance i) {
-        return projectile_pool.position[i.index];
+    float lifetime(c_entity e) {
+        auto inst = lookup(owner);
+
+        return projectile_pool.lifetime[inst.index];
     }
 
-    glm::vec3 velocity(instance i) {
-        return projectile_pool.velocity[i.index];
+    void lifetime(c_entity e, float lifetime) {
+        auto inst = lookup(owner);
+
+        projectile_pool.lifetime[inst.index] = lifetime;
     }
 
-    void set_mass(instance i, float mass) {
-        projectile_pool.mass[i.index] = mass;
+    glm::vec3 position(c_entity e) {
+        auto inst = lookup(owner);
+
+        return projectile_pool.position[inst.index];
     }
 
-    void set_lifetime(instance i, float lifetime) {
-        projectile_pool.lifetime[i.index] = lifetime;
+    void position(c_entity e, glm::vec3 pos) {
+        auto inst = lookup(owner);
+
+        projectile_pool.position[inst.index] = pos;
     }
 
-    void set_position(instance i, glm::vec3 pos) {
-        projectile_pool.position[i.index] = pos;
+    glm::vec3 velocity(c_entity e) {
+        auto inst = lookup(owner);
+
+        return projectile_pool.velocity[inst.index];
     }
 
-    void set_velocity(instance i, glm::vec3 velocity) {
-        projectile_pool.velocity[i.index] = velocity;
+    void velocity(c_entity e, glm::vec3 velocity) {
+        auto inst = lookup(owner);
+
+        projectile_pool.velocity[inst.index] = velocity;
     }
 };
 
 struct projectile_linear_manager : projectile_manager {
+    explicit projectile_linear_manager(const c_entity& owner)
+        : projectile_manager(owner) {
+    }
+
+    void entity(const c_entity &e) override {
+        if (buffer.num >= buffer.allocated) {
+            printf("Increasing size of projectile_linear buffer. Please adjust");
+            create_component_instance_data(std::max(1u, buffer.allocated) * 2);
+        }
+
+        auto inst = lookup(e);
+
+        projectile_pool.entity[inst.index] = e;
+    }
+
     void simulate(float dt) override;
+
+    ~projectile_linear_manager() {
+        // allocated in derived create_component_instance_data() calls
+        free(buffer.buffer);
+        buffer.buffer = nullptr;
+    }
 };
 
 struct projectile_sine_manager : projectile_manager {
+    explicit projectile_sine_manager(const c_entity& owner)
+        : projectile_manager(owner) {
+    }
+
+    void entity(const c_entity &e) override {
+        auto inst = lookup(e);
+
+        projectile_pool.entity[inst.index] = e;
+    }
+
     void simulate(float dt) override;
+
+    ~projectile_sine_manager() {
+        // allocated in derived create_component_instance_data() calls
+        free(buffer.buffer);
+        buffer.buffer = nullptr;
+    }
 };

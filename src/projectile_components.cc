@@ -10,7 +10,7 @@ extern hw_mesh *projectile_hw;
 extern glm::mat4
 mat_position(glm::vec3);
 
-#define MAX_PROJECTILES 2000
+#define MAX_PROJECTILES 1
 
 void
 projectile_manager::create_component_instance_data(unsigned count) {
@@ -51,19 +51,20 @@ projectile_manager::create_component_instance_data(unsigned count) {
 
 void
 projectile_manager::spawn(glm::vec3 pos, glm::vec3 vel) {
-    if (buffer.num >= buffer.allocated) {
-        // lazy allocate more than we need with room to spare
-        auto count = std::max(buffer.num, (unsigned)MAX_PROJECTILES);
-        create_component_instance_data(count * 2);
+    if (buffer.allocated != MAX_PROJECTILES) {
+        create_component_instance_data(MAX_PROJECTILES);
     }
 
-    auto i = make_instance(buffer.num);
+    if (buffer.num >= buffer.allocated) {
+        return;
+    }
 
-    set_position(i, pos);
-    set_velocity(i, vel);
-    set_lifetime(i, initial_lifetime);
+    assign_entity(owner);
 
-    ++buffer.num;
+    entity(owner);
+    position(owner, pos);
+    velocity(owner, vel);
+    lifetime(owner, initial_lifetime);
 }
 
 void
@@ -71,7 +72,11 @@ projectile_manager::draw() {
     for (auto i = 0u; i < buffer.num; ++i) {
         auto inst = make_instance(i);
         /* TODO: instancing etc to get rid of this upload/draw loop */
-        per_object->val.world_matrix = mat_position(position(inst));
+
+        // yuck
+        auto pos = projectile_pool.position[i];
+
+        per_object->val.world_matrix = mat_position(pos);
         per_object->upload();
         draw_mesh(projectile_hw);
     }
@@ -96,24 +101,23 @@ projectile_manager::destroy_instance(instance i) {
 
 void projectile_linear_manager::simulate(float dt) {
     for (auto i = 0u; i < buffer.num; ) {
-        auto inst = make_instance(i);
-        auto new_pos = position(inst) + velocity(inst) * dt;
+        auto new_pos = projectile_pool.position[i] + projectile_pool.velocity[i] * dt;
 
-        auto hit = phys_raycast_generic(position(inst), new_pos,
+        auto hit = phys_raycast_generic(projectile_pool.position[i], new_pos,
             phy->ghostObj, phy->dynamicsWorld);
 
         if (hit.hit) {
             new_pos = hit.hitCoord;
-            set_velocity(inst, glm::vec3(0));
-            set_lifetime(inst, after_collision_lifetime);
+            projectile_pool.velocity[i] = glm::vec3(0);
+            projectile_pool.lifetime[i] = after_collision_lifetime;
         }
 
-        set_position(inst, new_pos);
+        projectile_pool.position[i] = new_pos;
 
-        set_lifetime(inst, lifetime(inst) - dt);
+        projectile_pool.lifetime[i] -= dt;
 
-        if (lifetime(inst) <= 0.f) {
-            destroy_instance(inst);
+        if (projectile_pool.lifetime[i] <= 0.f) {
+            destroy_instance(make_instance(i));
             --i;
         }
 
@@ -125,27 +129,24 @@ void projectile_sine_manager::simulate(float dt) {
     static auto time = 0.f;
     time += dt;
     for (auto i = 0u; i < buffer.num; ) {
-        auto inst = make_instance(i);
-        if (velocity(inst) != glm::vec3(0)) {
-            auto new_pos = position(inst) + velocity(inst) * dt;
-            new_pos.z += sin(lifetime(inst) * 20)* 0.01f;
+        auto new_pos = projectile_pool.position[i] + projectile_pool.velocity[i] * dt;
+        new_pos.z += sin(projectile_pool.lifetime[i] * 20)* 0.01f;
 
-            auto hit = phys_raycast_generic(position(inst), new_pos,
-                phy->ghostObj, phy->dynamicsWorld);
+        auto hit = phys_raycast_generic(projectile_pool.position[i], new_pos,
+            phy->ghostObj, phy->dynamicsWorld);
 
-            if (hit.hit) {
-                new_pos = hit.hitCoord;
-                set_velocity(inst, glm::vec3(0));
-                set_lifetime(inst, after_collision_lifetime);
-            }
-
-            set_position(inst, new_pos);
+        if (hit.hit) {
+            new_pos = hit.hitCoord;
+            projectile_pool.velocity[i] = glm::vec3(0);
+            projectile_pool.lifetime[i] = after_collision_lifetime;
         }
 
-        set_lifetime(inst, lifetime(inst) - dt);
+        projectile_pool.position[i] = new_pos;
 
-        if (lifetime(inst) <= 0.f) {
-            destroy_instance(inst);
+        projectile_pool.lifetime[i] -= dt;
+
+        if (projectile_pool.lifetime[i] <= 0.f) {
+            destroy_instance(make_instance(i));
             --i;
         }
 

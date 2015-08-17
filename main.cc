@@ -207,7 +207,7 @@ struct entity
     btRigidBody *phys_body;
     int face;
     glm::mat4 mat;
-    c_entity c_entity;
+    c_entity ce;
 
     entity(int x, int y, int z, entity_type *type, int face)
         : x(x), y(y), z(z), type(type), phys_body(nullptr), face(face) {
@@ -219,14 +219,14 @@ struct entity
         phys_body->setUserPointer(this);
 
         if (type == &entity_types[0]) {
-            auto power_component = power_man.get_next_component(c_entity);
-            power_man.enabled(c_entity, false);
+            power_man.assign_entity(ce);
+            power_man.enabled(ce, false);
             //default to powered state for now
-            power_man.powered(c_entity, true);
+            power_man.powered(ce, true);
 
-            auto gas_component = gas_man.get_next_component(c_entity);
+            gas_man.assign_entity(ce);
 
-            auto pos_component = pos_man.get_next_component(c_entity);
+            pos_man.assign_entity(ce);
         }
     }
 
@@ -240,7 +240,7 @@ struct entity
                type->name, x, y, z);
 
         if (type == &entity_types[0]) {
-            power_man.enabled(c_entity, !power_man.enabled(c_entity));
+            power_man.enabled(ce, !power_man.enabled(ce));
         }
     }
 
@@ -250,7 +250,7 @@ struct entity
             return;
         }
 
-        auto frobnicate = power_man.enabled(c_entity) && power_man.powered(c_entity);
+        auto frobnicate = power_man.enabled(ce) && power_man.powered(ce);
         if (!frobnicate) {
             return;
         }
@@ -618,9 +618,9 @@ remove_ents_from_surface(int x, int y, int z, int face)
         entity *e = *it;
         if (e->x == x && e->y == y && e->z == z && e->face == face) {
             if (e->type == &entity_types[0]) {
-                power_man.destroy_entity_instance(e->c_entity);
-                gas_man.destroy_entity_instance(e->c_entity);
-                pos_man.destroy_entity_instance(e->c_entity);
+                power_man.destroy_entity_instance(e->ce);
+                gas_man.destroy_entity_instance(e->ce);
+                pos_man.destroy_entity_instance(e->ce);
             }
             delete e;
             it = ch->entities.erase(it);

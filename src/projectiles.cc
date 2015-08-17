@@ -5,7 +5,8 @@
 #define PROJECTILE_INITIAL_LIFETIME 10.f
 #define PROJECTILE_AFTER_COLLISION_LIFETIME 0.5f
 
-projectile_sine_manager proj_man;
+c_entity proj_entity;
+projectile_sine_manager proj_man(proj_entity);
 
 void
 update_projectiles(float dt)
