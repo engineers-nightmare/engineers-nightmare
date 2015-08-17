@@ -84,9 +84,9 @@ struct component_manager {
 };
 
 // power component
-// has-power // connected to power
+// powered -- connected to power
 // bool
-// enabled   // switched on
+// enabled   -- switched on
 // bool
 
 struct power_component_manager : component_manager {
@@ -116,9 +116,11 @@ struct power_component_manager : component_manager {
 };
 
 // gas production component
-// type // not set yet
+// gas_type -- not set yet
 // unsigned
-// rate // rate of flow
+// flow_rate -- rate of flow
+// float
+// max_pressure -- don't fill past the line
 // float
 
 struct gas_production_component_manager : component_manager {
@@ -155,7 +157,7 @@ struct gas_production_component_manager : component_manager {
 };
 
 // position relative to ship component
-// position // relative to ship. :)
+// position -- relative to ship. :)
 // glm::vec3
 
 struct relative_position_component_manager : component_manager {
@@ -178,7 +180,8 @@ struct relative_position_component_manager : component_manager {
 };
 
 // light component
-// no data
+// intensity -- 0-1
+// glm::vec3
 
 struct light_component_manager : component_manager {
     struct light_instance_data {
