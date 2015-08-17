@@ -193,6 +193,7 @@ light_component_manager::create_component_instance_data(unsigned count) {
     light_instance_data new_pool;
 
     size_t size = sizeof(c_entity) * count;
+    size = sizeof(float) * count + align_size<float>(size);
 
     new_buffer.buffer = malloc(size);
     new_buffer.num = buffer.num;
@@ -201,7 +202,11 @@ light_component_manager::create_component_instance_data(unsigned count) {
 
     new_pool.entity = (c_entity *)new_buffer.buffer;
 
+    new_pool.intensity = align_ptr((float *)(new_pool.entity + count));
+
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
+    memcpy(new_pool.intensity, instance_pool.intensity, buffer.num * sizeof(float));
+
 
     free(buffer.buffer);
     buffer = new_buffer;
