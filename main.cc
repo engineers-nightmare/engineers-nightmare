@@ -615,12 +615,9 @@ remove_ents_from_surface(int x, int y, int z, int face)
         entity *e = *it;
         if (e->x == x && e->y == y && e->z == z && e->face == face) {
             if (e->type == &entity_types[0]) {
-                auto inst = power_man.lookup(e->c_entity);
-                power_man.destroy_instance(inst);
-                inst = gas_man.lookup(e->c_entity);
-                gas_man.destroy_instance(inst);
-                inst = pos_man.lookup(e->c_entity);
-                pos_man.destroy_instance(inst);
+                power_man.destroy_entity_instance(e->c_entity);
+                gas_man.destroy_entity_instance(e->c_entity);
+                pos_man.destroy_entity_instance(e->c_entity);
             }
             delete e;
             it = ch->entities.erase(it);

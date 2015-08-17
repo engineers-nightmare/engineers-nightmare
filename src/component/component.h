@@ -67,7 +67,7 @@ struct component_manager {
         return { i };
     }
 
-    void destroy_instance(c_entity e) {
+    void destroy_entity_instance(c_entity e) {
         auto i = lookup(e);
         destroy_instance(i);
     }
