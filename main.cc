@@ -220,6 +220,9 @@ struct entity
 
         if (type == &entity_types[0]) {
             auto power_component = power_man.get_next_component(c_entity);
+            power_man.enabled(c_entity, false);
+            //default to powered state for now
+            power_man.powered(c_entity, true);
 
             auto gas_component = gas_man.get_next_component(c_entity);
 
@@ -237,7 +240,7 @@ struct entity
                type->name, x, y, z);
 
         if (type == &entity_types[0]) {
-            power_man.set_enabled(c_entity, !power_man.enabled(c_entity));
+            power_man.enabled(c_entity, !power_man.enabled(c_entity));
         }
     }
 
@@ -247,7 +250,7 @@ struct entity
             return;
         }
 
-        auto frobnicate = power_man.enabled(c_entity);
+        auto frobnicate = power_man.enabled(c_entity) && power_man.powered(c_entity);
         if (!frobnicate) {
             return;
         }
