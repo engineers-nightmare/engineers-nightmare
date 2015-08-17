@@ -221,6 +221,7 @@ light_component_manager::destroy_instance(instance i) {
     auto current_entity = instance_pool.entity[i.index];
 
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
+    instance_pool.intensity[i.index] = instance_pool.intensity[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
