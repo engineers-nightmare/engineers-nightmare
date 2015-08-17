@@ -102,28 +102,16 @@ struct power_component_manager : component_manager {
 
     void entity(const c_entity &e) override;
 
-    bool powered(c_entity e) {
+    bool & powered(c_entity e) {
         auto inst = lookup(e);
 
         return instance_pool.powered[inst.index];
     }
 
-    void powered(c_entity e, bool set) {
-        auto inst = lookup(e);
-
-        instance_pool.powered[inst.index] = set;
-    }
-
-    bool enabled(c_entity e) {
+    bool & enabled(c_entity e) {
         auto inst = lookup(e);
 
         return instance_pool.enabled[inst.index];
-    }
-
-    void enabled(c_entity e, bool set) {
-        auto inst = lookup(e);
-
-        instance_pool.enabled[inst.index] = set;
     }
 };
 
@@ -146,28 +134,16 @@ struct gas_production_component_manager : component_manager {
 
     void entity(const c_entity &e) override;
 
-    unsigned gas_type(c_entity e) {
+    unsigned & gas_type(c_entity e) {
         auto inst = lookup(e);
 
         return instance_pool.gas_type[inst.index];
     }
 
-    void gas_type(c_entity e, unsigned set) {
-        auto inst = lookup(e);
-
-        instance_pool.gas_type[inst.index] = set;
-    }
-
-    float flow_rate(c_entity e) {
+    float & flow_rate(c_entity e) {
         auto inst = lookup(e);
 
         return instance_pool.flow_rate[inst.index];
-    }
-
-    void flow_rate(c_entity e, float set) {
-        auto inst = lookup(e);
-
-        instance_pool.flow_rate[inst.index] = set;
     }
 };
 
@@ -187,15 +163,9 @@ struct relative_position_component_manager : component_manager {
 
     void entity(const c_entity &e) override;
 
-    glm::vec3 position(c_entity e) {
+    glm::vec3 & position(c_entity e) {
         auto inst = lookup(e);
 
         return instance_pool.position[inst.index];
-    }
-
-    void position(c_entity e, glm::vec3 set) {
-        auto inst = lookup(e);
-
-        instance_pool.position[inst.index] = set;
     }
 };

@@ -220,9 +220,9 @@ struct entity
 
         if (type == &entity_types[0]) {
             power_man.assign_entity(ce);
-            power_man.enabled(ce, false);
+            power_man.enabled(ce) = false;
             //default to powered state for now
-            power_man.powered(ce, true);
+            power_man.powered(ce) = true;
 
             gas_man.assign_entity(ce);
 
@@ -240,7 +240,7 @@ struct entity
                type->name, x, y, z);
 
         if (type == &entity_types[0]) {
-            power_man.enabled(ce, !power_man.enabled(ce));
+            power_man.enabled(ce) ^= true;
         }
     }
 
