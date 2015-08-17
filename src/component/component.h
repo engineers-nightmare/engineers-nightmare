@@ -16,7 +16,7 @@ T* align_ptr(T* p) {
     return (T*)align_size<T>((size_t)p);
 }
 
-static unsigned entities_id_ref = 0;
+static unsigned entities_id_ref = 1;
 struct c_entity {
     unsigned id;
 
