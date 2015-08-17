@@ -79,6 +79,7 @@ struct component_manager {
     virtual ~component_manager() {
         // allocated in derived create_component_instance_data() calls
         free(buffer.buffer);
+        buffer.buffer = nullptr;
     }
 };
 

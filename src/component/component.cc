@@ -147,7 +147,7 @@ relative_position_component_manager::create_component_instance_data(unsigned cou
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.position, instance_pool.position, buffer.num * sizeof(glm::vec3));
 
-    free(new_buffer.buffer);
+    free(buffer.buffer);
     buffer = new_buffer;
 
     instance_pool = new_pool;
