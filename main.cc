@@ -512,7 +512,7 @@ init()
     world_textures->load(7, "textures/display.png");
     world_textures->load(8, "textures/light.png");
 
-    skybox = new texture_set(GL_TEXTURE_CUBE_MAP_ARRAY, 2048, 6);
+    skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
     skybox->load(1, "textures/sky_left2.png");
     skybox->load(2, "textures/sky_top3.png");
