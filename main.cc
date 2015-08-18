@@ -397,7 +397,7 @@ update_lightfield()
         auto pos = get_block_containing(pos_man.position(ce));
         auto should_emit = power_man.enabled(ce) && power_man.powered(ce);
         if (should_emit) {
-            set_light_level(pos.x, pos.y, pos.z, 255 * light_man.intensity(ce));
+            set_light_level(pos.x, pos.y, pos.z, (int)(255 * light_man.intensity(ce)));
         }
     }
 
