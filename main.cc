@@ -43,6 +43,7 @@
 #define MAX_WORLD_TEXTURES          64
 
 #define MOUSE_Y_LIMIT   1.54
+#define MAX_AXIS_PER_EVENT 128
 
 bool exit_requested = false;
 
@@ -55,6 +56,7 @@ struct {
     SDL_GLContext gl_ctx;
     int width;
     int height;
+    bool has_focus;
 } wnd;
 
 struct {
@@ -124,6 +126,10 @@ entity *use_entity = nullptr;
 
 sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
+template<typename T> T clamp(T t, T lower, T upper) {
+    if (t < lower) return
+        lower; if (t > upper) return upper; return t;
+}
 
 glm::ivec3
 get_block_containing(glm::vec3 v) {
@@ -375,9 +381,6 @@ struct game_state {
     static game_state *create_play_state();
     static game_state *create_menu_state();
     static game_state *create_menu_settings_state();
-
-    static void lock_mouse();
-    static void unlock_mouse();
 };
 
 
@@ -1020,7 +1023,6 @@ action const* get_input(en_action a) {
 
 struct play_state : game_state {
     play_state() {
-        lock_mouse();
     }
 
     void rebuild_ui() override {
@@ -1100,6 +1102,14 @@ struct play_state : game_state {
     }
 
     void update(float dt) override {
+        if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_FALSE) {
+            SDL_SetRelativeMouseMode(SDL_TRUE);
+        }
+
+        if (!wnd.has_focus && SDL_GetRelativeMouseMode() != SDL_FALSE) {
+            SDL_SetRelativeMouseMode(SDL_FALSE);            
+        }
+
         tool *t = tools[pl.selected_slot];
 
         /* both tool use and overlays need the raycast itself */
@@ -1245,11 +1255,12 @@ struct menu_state : game_state
         items.push_back(menu_item("Resume Game", []{ set_game_state(create_play_state()); }));
         items.push_back(menu_item("Settings", []{ set_game_state(create_menu_settings_state()); }));
         items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
-
-        unlock_mouse();
     }
 
     void update(float dt) override {
+        if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+        }
     }
 
     void put_item_text(char *dest, char const *src, int index) {
@@ -1337,6 +1348,9 @@ struct menu_settings_state : game_state
     }
 
     void update(float dt) override {
+        if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+        }
     }
 
     void put_item_text(char *dest, char const *src, int index) {
@@ -1401,18 +1415,14 @@ game_state *game_state::create_play_state() { return new play_state; }
 game_state *game_state::create_menu_state() { return new menu_state; }
 game_state *game_state::create_menu_settings_state() { return new menu_settings_state; }
 
-void game_state::lock_mouse() { SDL_SetRelativeMouseMode(SDL_TRUE); }
-void game_state::unlock_mouse() {
-    SDL_SetRelativeMouseMode(SDL_FALSE);
-    SDL_WarpMouseInWindow(wnd.ptr, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2);
-}
-
 
 void
 handle_input()
 {
-    set_inputs(keys, mouse_buttons, mouse_axes, game_settings.bindings.bindings);
-    state->handle_input();
+    if (wnd.has_focus) {
+        set_inputs(keys, mouse_buttons, mouse_axes, game_settings.bindings.bindings);
+        state->handle_input();
+    }
 }
 
 
@@ -1444,14 +1454,32 @@ run()
                  * don't really care about resizing, because a tiling
                  * WM isn't going to give us what we asked for anyway!
                  */
-                if (e.window.event == SDL_WINDOWEVENT_RESIZED)
+                switch (e.window.event) {
+                case SDL_WINDOWEVENT_RESIZED:
                     resize(e.window.data1, e.window.data2);
-                break;
+                    break;
+
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                    wnd.has_focus = false;
+                    break;
+
+                case SDL_WINDOWEVENT_FOCUS_GAINED:
+                    wnd.has_focus = true;
+                    break;
+                }
 
             case SDL_MOUSEMOTION:
-                mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] += e.motion.xrel;
-                mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] += e.motion.yrel;
+            {
+                auto x = e.motion.xrel;
+                auto y = e.motion.yrel;
+
+                x = clamp(x, -MAX_AXIS_PER_EVENT, MAX_AXIS_PER_EVENT);
+                y = clamp(y, -MAX_AXIS_PER_EVENT, MAX_AXIS_PER_EVENT);
+
+                mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] += x;
+                mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] += y;
                 break;
+            }
 
             case SDL_MOUSEWHEEL:
                 if (e.wheel.y != 0) {
