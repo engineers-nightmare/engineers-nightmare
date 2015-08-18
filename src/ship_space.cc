@@ -285,6 +285,23 @@ ship_space::ensure_chunk(int chunk_x, int chunk_y, int chunk_z)
     if (!ch) {
         ch = new chunk();
         this->_maintain_bounds(chunk_x, chunk_y, chunk_z);
+
+        /* All the topo nodes in the new chunk should be attached
+         * to the outside node.
+         */
+        for (auto k = 0; k < CHUNK_SIZE; k++) {
+            for (auto j = 0; j < CHUNK_SIZE; j++) {
+                for (auto i = 0; i < CHUNK_SIZE; i++) {
+                    topo_info *t = ch->topo.get(i, j, k);
+                    t->p = &this->outside_topo_info;
+                }
+            }
+        }
+
+        /* Adjust the size of the outside chunk. This is currently not
+         * used for anything, but the consistency is nice and the cost is negligible.
+         */
+        this->outside_topo_info.size += CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
     }
 }
 
