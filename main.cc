@@ -29,7 +29,6 @@
 #include "src/tools.h"
 #include "src/shader_params.h"
 #include "src/light_field.h"
-#include "src/projectiles.h"
 #include "src/component/component.h"
 
 #include "src/scopetimer.h"
@@ -45,6 +44,7 @@
 
 #define MOUSE_Y_LIMIT   1.54f
 #define MAX_AXIS_PER_EVENT 128
+#include "src/projectile/projectile.h"
 
 bool exit_requested = false;
 
@@ -140,6 +140,8 @@ gas_production_component_manager gas_man;
 relative_position_component_manager pos_man;
 light_component_manager light_man;
 renderable_component_manager render_man;
+
+projectile_linear_manager proj_man;
 
 glm::ivec3
 get_block_containing(glm::vec3 v) {
@@ -487,6 +489,8 @@ init()
     pos_man.create_component_instance_data(20);
     light_man.create_component_instance_data(20);
     render_man.create_component_instance_data(20);
+
+    proj_man.create_projectile_data(1000);
 
     printf("%s starting up.\n", APP_NAME);
     printf("OpenGL version: %.1f\n", epoxy_gl_version() / 10.0f);
@@ -1017,7 +1021,7 @@ update()
 
     while (fast_tick_accum.tick()) {
 
-        update_projectiles(fast_tick_accum.period);
+        proj_man.simulate(fast_tick_accum.period);
 
         phy->tick(fast_tick_accum.period);
 
@@ -1046,7 +1050,7 @@ update()
 
     /* draw the projectiles */
     glUseProgram(unlit_shader);
-    draw_projectiles();
+    proj_man.draw();
 
     /* draw the sky */
     glUseProgram(sky_shader);
@@ -1267,8 +1271,9 @@ struct play_state : game_state {
         pl.use_tool   = use_tool;
 
         // blech. Tool gets used below, then fire projectile gets hit here
-        if (pl.selected_slot == 0 && fire) {
-            spawn_projectile(pl.eye, pl.dir);
+        if (pl.fire_projectile) {
+            auto below_eye = glm::vec3(pl.eye.x, pl.eye.y, pl.eye.z - 0.1);
+            proj_man.spawn(below_eye, pl.dir, *projectile_hw);
             pl.fire_projectile = false;
         }
 

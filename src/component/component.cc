@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-
-#include "component.h"
 #include <algorithm>
+#include "component.h"
+#include "../memory.h"
 
 void
 power_component_manager::create_component_instance_data(unsigned count) {
