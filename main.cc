@@ -656,16 +656,26 @@ remove_ents_from_surface(int x, int y, int z, int face)
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
         entity *e = *it;
         if (e->x == x && e->y == y && e->z == z && e->face == face) {
-            pos_man.destroy_entity_instance(e->ce);
-            render_man.destroy_entity_instance(e->ce);
+            if (pos_man.exists(e->ce)) {
+                pos_man.destroy_entity_instance(e->ce);
+            }
 
-            if (e->type == &entity_types[0]) {
+            if (render_man.exists(e->ce)) {
+                render_man.destroy_entity_instance(e->ce);
+            }
+
+            if (power_man.exists(e->ce)) {
                 power_man.destroy_entity_instance(e->ce);
+            }
+
+            if (gas_man.exists(e->ce)) {
                 gas_man.destroy_entity_instance(e->ce);
             }
-            else if (e->type == &entity_types[2]) {
+
+            if (light_man.exists(e->ce)) {
                 light_man.destroy_entity_instance(e->ce);
             }
+
             delete e;
             it = ch->entities.erase(it);
         }
