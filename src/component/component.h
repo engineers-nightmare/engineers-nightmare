@@ -78,14 +78,11 @@ struct component_manager {
 // power component
 // powered -- connected to power
 // bool
-// enabled   -- switched on
-// bool
 
 struct power_component_manager : component_manager {
     struct power_instance_data {
         c_entity *entity;
         bool *powered;
-        bool *enabled;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -99,18 +96,12 @@ struct power_component_manager : component_manager {
 
         return instance_pool.powered[inst.index];
     }
-
-    bool & enabled(const c_entity &e) {
-        auto inst = lookup(e);
-
-        return instance_pool.enabled[inst.index];
-    }
 };
 
 // gas production component
-// gas_type -- not set yet
+// gas_type     -- not set yet
 // unsigned
-// flow_rate -- rate of flow
+// flow_rate    -- rate of flow
 // float
 // max_pressure -- don't fill past the line
 // float
@@ -204,7 +195,8 @@ struct light_component_manager : component_manager {
 };
 
 // renderable component
-// no data
+// mesh -- render mesh
+// hw_mesh
 
 struct renderable_component_manager : component_manager {
     struct renderable_instance_data {
@@ -223,4 +215,42 @@ struct renderable_component_manager : component_manager {
 
         return instance_pool.mesh[inst.index];
     }
+};
+
+// switchable component
+// enabled -- switched on
+// bool
+
+struct switchable_component_manager : component_manager {
+    struct switchable_instance_data {
+        c_entity *entity;
+        bool *enabled;
+    } instance_pool;
+
+    void create_component_instance_data(unsigned count) override;
+
+    void destroy_instance(instance i) override;
+
+    void entity(const c_entity &e) override;
+
+    bool & enabled(const c_entity &e) {
+        auto inst = lookup(e);
+
+        return instance_pool.enabled[inst.index];
+    }
+};
+
+// switch component
+// no data
+
+struct switch_component_manager : component_manager {
+    struct switch_instance_data {
+        c_entity *entity;
+    } instance_pool;
+
+    void create_component_instance_data(unsigned count) override;
+
+    void destroy_instance(instance i) override;
+
+    void entity(const c_entity &e) override;
 };

@@ -140,6 +140,8 @@ gas_production_component_manager gas_man;
 relative_position_component_manager pos_man;
 light_component_manager light_man;
 renderable_component_manager render_man;
+switchable_component_manager switchable_man;
+switch_component_manager switch_man;
 
 projectile_linear_manager proj_man;
 
@@ -199,7 +201,7 @@ struct entity_type
 };
 
 
-entity_type entity_types[3];
+entity_type entity_types[4];
 
 /* fwd for temp spawn logic just below */
 void
@@ -231,14 +233,14 @@ struct entity
         render_man.assign_entity(ce);
         render_man.mesh(ce) = *type->hw;
 
-        // based on the assumption all entities will require power
-        power_man.assign_entity(ce);
-        //default to powered state for now
-        power_man.powered(ce) = true;
-
         // frobnicator
         if (type == &entity_types[0]) {
-            power_man.enabled(ce) = false;
+            power_man.assign_entity(ce);
+            //default to powered state for now
+            power_man.powered(ce) = true;
+
+            switchable_man.assign_entity(ce);
+            switchable_man.enabled(ce) = false;
 
             gas_man.assign_entity(ce);
             gas_man.flow_rate(ce) = 0.1f;
@@ -246,17 +248,28 @@ struct entity
         }
         // display panel
         else if (type == &entity_types[1]) {
-            power_man.enabled(ce) = true;
+            power_man.assign_entity(ce);
+            //default to powered state for now
+            power_man.powered(ce) = true;
 
             light_man.assign_entity(ce);
             light_man.intensity(ce) = 0.15f;
         }
         // light
         else if (type == &entity_types[2]) {
-            power_man.enabled(ce) = true;
+            power_man.assign_entity(ce);
+            //default to powered state for now
+            power_man.powered(ce) = true;
+
+            switchable_man.assign_entity(ce);
+            switchable_man.enabled(ce) = false;
 
             light_man.assign_entity(ce);
             light_man.intensity(ce) = 1.f;
+        }
+        // switch
+        else if (type == &entity_types[3]) {
+            switch_man.assign_entity(ce);
         }
     }
 
@@ -269,13 +282,36 @@ struct entity
         printf("player using the %s at %d %d %d\n",
                type->name, x, y, z);
 
-        if (type == &entity_types[0]) {
-            power_man.enabled(ce) ^= true;
+        assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
+
+        // hacks abound until we get wiring in
+        if (switchable_man.exists(ce)) {
+            // gas producer toggles directly
+            if (gas_man.exists(ce)) {
+                switchable_man.enabled(ce) ^= true;
+            }
         }
 
-        if (type == &entity_types[2]) {
-            power_man.enabled(ce) ^= true;
-            mark_lightfield_update(x, y, z);
+        if (switch_man.exists(ce)) {
+            // switch toggles directly
+            // finds any switchable in the 6 adjacent blocks and toggles
+            auto pos = pos_man.position(ce);
+
+            for (auto i = 0u; i < pos_man.buffer.num; ++i) {
+                auto pos2 = pos_man.instance_pool.position[i];
+                auto entity = pos_man.instance_pool.entity[i];
+                if (pos == glm::vec3(pos2.x + 1, pos2.y, pos2.z) ||
+                    pos == glm::vec3(pos2.x - 1, pos2.y, pos2.z) ||
+                    pos == glm::vec3(pos2.x, pos2.y + 1, pos2.z) ||
+                    pos == glm::vec3(pos2.x, pos2.y - 1, pos2.z) ||
+                    pos == glm::vec3(pos2.x, pos2.y, pos2.z + 1) ||
+                    pos == glm::vec3(pos2.x, pos2.y, pos2.z - 1)) {
+                    if (light_man.exists(entity) && switchable_man.exists(entity)) {
+                        switchable_man.enabled(entity) ^= true;
+                        mark_lightfield_update(x, y, z);
+                    }
+                }
+            }
         }
     }
 };
@@ -288,7 +324,9 @@ tick_gas_producers()
         auto ce = gas_man.instance_pool.entity[i];
 
         /* gas producers require: power, position */
-        auto should_produce = power_man.enabled(ce) && power_man.powered(ce);
+        assert(switchable_man.exists(ce) || !"gas producer must be switchable");
+
+        auto should_produce = switchable_man.enabled(ce) && power_man.powered(ce);
         if (!should_produce) {
             return;
         }
@@ -401,7 +439,7 @@ update_lightfield()
     for (auto i = 0u; i < light_man.buffer.num; i++) {
         auto ce = light_man.instance_pool.entity[i];
         auto pos = get_block_containing(pos_man.position(ce));
-        auto should_emit = power_man.enabled(ce) && power_man.powered(ce);
+        auto should_emit = switchable_man.enabled(ce) && power_man.powered(ce);
         if (should_emit) {
             set_light_level(pos.x, pos.y, pos.z, (int)(255 * light_man.intensity(ce)));
         }
@@ -495,6 +533,8 @@ init()
     pos_man.create_component_instance_data(20);
     light_man.create_component_instance_data(20);
     render_man.create_component_instance_data(20);
+    switchable_man.create_component_instance_data(20);
+    switch_man.create_component_instance_data(20);
 
     proj_man.create_projectile_data(1000);
 
@@ -555,6 +595,12 @@ init()
     entity_types[2].name = "Light (4x4)";
     build_static_physics_mesh(entity_types[2].sw, &entity_types[2].phys_mesh, &entity_types[2].phys_shape);
 
+    entity_types[3].sw = load_mesh("mesh/panel_1x1.obj");
+    set_mesh_material(entity_types[3].sw, 9);
+    entity_types[3].hw = upload_mesh(entity_types[3].sw);
+    entity_types[3].name = "Switch";
+    build_static_physics_mesh(entity_types[3].sw, &entity_types[3].phys_mesh, &entity_types[3].phys_shape);
+
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/unlit.frag");
@@ -585,6 +631,7 @@ init()
     world_textures->load(6, "textures/glass.png");
     world_textures->load(7, "textures/display.png");
     world_textures->load(8, "textures/light.png");
+    world_textures->load(9, "textures/switch.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
@@ -912,6 +959,7 @@ tool *tools[] = {
     new add_block_entity_tool(&entity_types[0]),
     new add_surface_entity_tool(&entity_types[1]),
     new add_surface_entity_tool(&entity_types[2]),
+    new add_surface_entity_tool(&entity_types[3]),
     new remove_surface_entity_tool(),
 };
 
