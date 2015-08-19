@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/packing.hpp>
 
+#include <epoxy/gl.h>
+
 struct hw_mesh {
     GLuint vbo;
     GLuint ibo;

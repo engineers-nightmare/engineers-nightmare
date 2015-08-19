@@ -6,7 +6,7 @@ enum block_type {
     block_entity,
 };
 
-enum surface_type {
+enum surface_type : unsigned char {
     surface_blocks_light = 0x40,
     surface_blocks_air = 0x80,
     surface_none = 0,
@@ -47,13 +47,13 @@ struct block {
     unsigned short surf_space[face_count];
 };
 
-static inline bool
+static inline unsigned char  /* bool */
 air_permeable(surface_type s)
 {
     return ~s & surface_blocks_air;
 }
 
-static inline bool
+static inline unsigned char  /* bool */
 light_permeable(surface_type s)
 {
     return ~s & surface_blocks_light;

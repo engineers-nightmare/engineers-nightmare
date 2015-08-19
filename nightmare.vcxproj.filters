@@ -16,6 +16,18 @@
     <Filter Include="Source Files\tools">
       <UniqueIdentifier>{f13d420f-690b-4f89-976d-7d2348605b64}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\component">
+      <UniqueIdentifier>{ac9a6816-f0d5-425d-8408-f576a583b6ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\component">
+      <UniqueIdentifier>{94aad1c7-e07b-4aeb-9ced-2958c568ac5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\projectile">
+      <UniqueIdentifier>{793116b6-757c-4c79-a313-bc0309bba547}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\projectile">
+      <UniqueIdentifier>{f0db0e48-0c3a-4dcb-b7e5-570dfad8baf2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\blob.cc">
@@ -75,14 +87,17 @@
     <ClCompile Include="src\mock_ship_junk.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\projectiles.cc">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\component\component.cc">
+      <Filter>Source Files\component</Filter>
     </ClCompile>
     <ClCompile Include="src\atlas.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\sprites.cc">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\projectile\projectile.cc">
+      <Filter>Source Files\projectile</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -149,10 +164,16 @@
     <ClInclude Include="src\scopetimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\projectiles.h">
+    <ClInclude Include="src\timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\timer.h">
+    <ClInclude Include="src\component\component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\projectile\projectile.h">
+      <Filter>Header Files\projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

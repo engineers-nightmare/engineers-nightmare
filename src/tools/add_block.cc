@@ -54,7 +54,7 @@ struct add_block_tool : tool
 
         /* can only build on the side of an existing scaffold */
         if ((!bl || bl->type == block_empty) && rc->block->type == block_support) {
-            per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
+            per_object->val.world_matrix = mat_position((float)rc->px, (float)rc->py, (float)rc->pz);
             per_object->upload();
 
             glUseProgram(add_overlay_shader);

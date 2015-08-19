@@ -4,13 +4,13 @@
 #include "player.h"
 #include "physics.h"
 
-#define PLAYER_START_X 4
-#define PLAYER_START_Y 4
-#define PLAYER_START_Z 1.5
+#define PLAYER_START_X 4.0f
+#define PLAYER_START_Y 4.0f
+#define PLAYER_START_Z 1.5f
 
-#define MOVE_SPEED  0.07
-#define CROUCH_FACTOR 0.4
-#define AIR_CONTROL_FACTOR 0.25
+#define MOVE_SPEED  0.07f
+#define CROUCH_FACTOR 0.4f
+#define AIR_CONTROL_FACTOR 0.25f
 
 /* a simple constructor hacked together based on
  * http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World
@@ -54,8 +54,8 @@ physics::physics(player *p)
 
 
     /* setup player rigid body */
-    this->standShape = new btCapsuleShapeZ(0.35, 0.6);
-    this->crouchShape = new btCapsuleShapeZ(0.35, 0.0);
+    this->standShape = new btCapsuleShapeZ(0.35f, 0.6f);
+    this->crouchShape = new btCapsuleShapeZ(0.35f, 0.0f);
     float maxStepHeight = 0.15f;
 
     /* setup the character controller. this gets a bit fiddly. */
@@ -99,8 +99,8 @@ physics::tick_controller(float dt)
      * TODO: untangle.
      */
 
-    double c = cos(this->pl->angle);
-    double s = sin(this->pl->angle);
+    float c = cosf(this->pl->angle);
+    float s = sinf(this->pl->angle);
 
     btVector3 fwd(c, s, 0);
     btVector3 right(s, -c, 0);
@@ -114,7 +114,7 @@ physics::tick_controller(float dt)
             /* http://bulletphysics.org/Bullet/BulletFull/btKinematicCharacterController_8cpp_source.html : 144
              * 3G acceleration.
              */
-            this->controller->setGravity(9.8 * 3);
+            this->controller->setGravity(9.8f * 3);
         }
 
         pl->ui_dirty = true;

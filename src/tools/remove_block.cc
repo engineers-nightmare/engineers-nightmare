@@ -95,14 +95,14 @@ struct remove_block_tool : tool
 
         block *bl = rc->block;
         if (bl->type != block_empty) {
-            per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
+            per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);
             per_object->upload();
 
             glUseProgram(remove_overlay_shader);
             glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(-0.1, -0.1);
+            glPolygonOffset(-0.1f, -0.1f);
             draw_mesh(scaffold_hw);
-            glPolygonOffset(0, 0);
+            glPolygonOffset(0.0f, 0.0f);
             glDisable(GL_POLYGON_OFFSET_FILL);
             glUseProgram(simple_shader);
         }

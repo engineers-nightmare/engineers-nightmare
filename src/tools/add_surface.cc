@@ -82,14 +82,14 @@ struct add_surface_tool : tool
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
         if (can_use(bl, other_side, index)) {
-            per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
+            per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);
             per_object->upload();
 
             glUseProgram(add_overlay_shader);
             glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(-0.1, -0.1);
+            glPolygonOffset(-0.1f, -0.1f);
             draw_mesh(surfs_hw[index]);
-            glPolygonOffset(0, 0);
+            glPolygonOffset(0.0f, 0.0f);
             glDisable(GL_POLYGON_OFFSET_FILL);
             glUseProgram(simple_shader);
         }

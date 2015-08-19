@@ -29,7 +29,7 @@
 #include "src/tools.h"
 #include "src/shader_params.h"
 #include "src/light_field.h"
-#include "src/projectiles.h"
+#include "src/component/component.h"
 
 #include "src/scopetimer.h"
 
@@ -42,8 +42,9 @@
 #define WORLD_TEXTURE_DIMENSION     32
 #define MAX_WORLD_TEXTURES          64
 
-#define MOUSE_Y_LIMIT   1.54
+#define MOUSE_Y_LIMIT   1.54f
 #define MAX_AXIS_PER_EVENT 128
+#include "src/projectile/projectile.h"
 
 bool exit_requested = false;
 
@@ -75,7 +76,7 @@ struct {
     void tick() {
         auto t = timer.touch();
 
-        dt = t.delta;
+        dt = (float) t.delta;   /* narrowing */
         frame++;
 
         fps_frame++;
@@ -134,11 +135,20 @@ clamp(T t, T lower, T upper) {
     return t;
 }
 
+power_component_manager power_man;
+gas_production_component_manager gas_man;
+relative_position_component_manager pos_man;
+light_component_manager light_man;
+renderable_component_manager render_man;
+
+projectile_linear_manager proj_man;
+
 glm::ivec3
 get_block_containing(glm::vec3 v) {
-    int x = v.x; if (v.x < 0) x--;
-    int y = v.y; if (v.y < 0) y--;
-    int z = v.z; if (v.z < 0) z--;
+    /* truncating via int cast */
+    int x = (int) v.x; if (v.x < 0) x--;
+    int y = (int) v.y; if (v.y < 0) y--;
+    int z = (int) v.z; if (v.z < 0) z--;
 
     return glm::ivec3(x, y, z);
 }
@@ -186,12 +196,14 @@ struct entity_type
     char const *name;
     btTriangleMesh *phys_mesh;
     btCollisionShape *phys_shape;
-    float add_air_amount;
-    float max_air_pressure;
 };
 
 
 entity_type entity_types[3];
+
+/* fwd for temp spawn logic just below */
+void
+mark_lightfield_update(int x, int y, int z);
 
 
 struct entity
@@ -201,16 +213,45 @@ struct entity
     entity_type *type;
     btRigidBody *phys_body;
     int face;
-    glm::mat4 mat;
+    c_entity ce;
 
     entity(int x, int y, int z, entity_type *type, int face)
         : x(x), y(y), z(z), type(type), phys_body(nullptr), face(face) {
-        mat = mat_block_face(x, y, z, face);
+        auto mat = mat_block_face(x, y, z, face);
 
         build_static_physics_rb_mat(&mat, type->phys_shape, &phys_body);
 
         /* so that we can get back to the entity from a phys raycast */
         phys_body->setUserPointer(this);
+
+        pos_man.assign_entity(ce);
+        pos_man.position(ce) = glm::vec3(x, y, z);
+        pos_man.mat(ce) = mat;
+
+        render_man.assign_entity(ce);
+        render_man.mesh(ce) = *type->hw;
+
+        if (type == &entity_types[0]) {
+            power_man.assign_entity(ce);
+            power_man.enabled(ce) = false;
+            //default to powered state for now
+            power_man.powered(ce) = true;
+
+            gas_man.assign_entity(ce);
+            gas_man.flow_rate(ce) = 0.1f;
+            gas_man.max_pressure(ce) = 1.0f;
+        }
+
+        if (type == &entity_types[2]) {
+            light_man.assign_entity(ce);
+
+            power_man.assign_entity(ce);
+            power_man.enabled(ce) = false;
+            //default to powered state for now
+            power_man.powered(ce) = true;
+
+            light_man.intensity(ce) = 1.f;
+        }
     }
 
     ~entity() {
@@ -221,29 +262,62 @@ struct entity
         /* used by the player */
         printf("player using the %s at %d %d %d\n",
                type->name, x, y, z);
-    }
 
-    void tick() {
-        if (type->add_air_amount <= 0) {
-            /* TODO: components */
+        if (type == &entity_types[0]) {
+            power_man.enabled(ce) ^= true;
+        }
+
+        if (type == &entity_types[2]) {
+            power_man.enabled(ce) ^= true;
+            mark_lightfield_update(x, y, z);
+        }
+    }
+};
+
+
+void
+tick_gas_producers()
+{
+    for (auto i = 0u; i < gas_man.buffer.num; i++) {
+        auto ce = gas_man.instance_pool.entity[i];
+
+        /* gas producers require: power, position */
+        auto should_produce = power_man.enabled(ce) && power_man.powered(ce);
+        if (!should_produce) {
             return;
         }
 
-        /* topo node containing the ent */
-        topo_info *t = topo_find(ship->get_topo_info(x, y, z));
-        /* zoneinfo attached */
+        auto pos = get_block_containing(pos_man.position(ce));
+
+        /* topo node containing the entity */
+        topo_info *t = topo_find(ship->get_topo_info(pos.x, pos.y, pos.z));
         zone_info *z = ship->get_zone_info(t);
         if (!z) {
-            /* if there wasnt a zone, make one. */
+            /* if there wasn't a zone, make one */
             z = ship->zones[t] = new zone_info(0);
         }
 
-        /* add some air if we can, up to our pressure limit */
-        float max_air = type->max_air_pressure * t->size;
-        if (z->air_amount < max_air)
-            z->air_amount = std::min(max_air, z->air_amount + type->add_air_amount);
+        /* add some gas if we can, up to our pressure limit */
+        float max_gas = gas_man.max_pressure(ce) * t->size;
+        if (z->air_amount < max_gas)
+            z->air_amount = std::min(max_gas, z->air_amount + gas_man.flow_rate(ce));
     }
-};
+}
+
+void
+draw_renderables()
+{
+    for (auto i = 0u; i < render_man.buffer.num; i++) {
+        auto ce = render_man.instance_pool.entity[i];
+
+        auto mat = pos_man.mat(ce);
+        auto mesh = render_man.mesh(ce);
+
+        per_object->val.world_matrix = mat;
+        per_object->upload();
+        draw_mesh(&mesh);
+    }
+}
 
 
 void
@@ -318,20 +392,12 @@ update_lightfield()
 
     /* 2. inject sources. the box is guaranteed to be big enough for max propagation
      * for all sources we'll add here. */
-    /* TODO: inject only required sources. */
-    for (int k = ship->min_z; k <= ship->max_z; k++) {
-        for (int j = ship->min_y; j <= ship->max_y; j++) {
-            for (int i = ship->min_x; i <= ship->max_x; i++) {
-                chunk *ch = ship->get_chunk(i, j, k);
-                if (ch) {
-                    for (auto e : ch->entities) {
-                        /* TODO: only some entities should do this. */
-                        if (e->type == &entity_types[2]) {
-                            set_light_level(e->x, e->y, e->z, 255);
-                        }
-                    }
-                }
-            }
+    for (auto i = 0u; i < light_man.buffer.num; i++) {
+        auto ce = light_man.instance_pool.entity[i];
+        auto pos = get_block_containing(pos_man.position(ce));
+        auto should_emit = power_man.enabled(ce) && power_man.powered(ce);
+        if (should_emit) {
+            set_light_level(pos.x, pos.y, pos.z, 255 * light_man.intensity(ce));
         }
     }
 
@@ -418,6 +484,14 @@ prepare_chunks()
 void
 init()
 {
+    power_man.create_component_instance_data(20);
+    gas_man.create_component_instance_data(20);
+    pos_man.create_component_instance_data(20);
+    light_man.create_component_instance_data(20);
+    render_man.create_component_instance_data(20);
+
+    proj_man.create_projectile_data(1000);
+
     printf("%s starting up.\n", APP_NAME);
     printf("OpenGL version: %.1f\n", epoxy_gl_version() / 10.0f);
 
@@ -461,24 +535,18 @@ init()
     set_mesh_material(entity_types[0].sw, 3);
     entity_types[0].hw = upload_mesh(entity_types[0].sw);
     entity_types[0].name = "Frobnicator";
-    entity_types[0].add_air_amount = 0.1f;
-    entity_types[0].max_air_pressure = 1.0f;
     build_static_physics_mesh(entity_types[0].sw, &entity_types[0].phys_mesh, &entity_types[0].phys_shape);
 
     entity_types[1].sw = load_mesh("mesh/panel_4x4.obj");
     set_mesh_material(entity_types[1].sw, 7);
     entity_types[1].hw = upload_mesh(entity_types[1].sw);
     entity_types[1].name = "Display Panel (4x4)";
-    entity_types[1].add_air_amount = 0.0f;
-    entity_types[1].max_air_pressure = 0.0f;
     build_static_physics_mesh(entity_types[1].sw, &entity_types[1].phys_mesh, &entity_types[1].phys_shape);
 
     entity_types[2].sw = load_mesh("mesh/panel_4x4.obj");
     set_mesh_material(entity_types[2].sw, 8);
     entity_types[2].hw = upload_mesh(entity_types[2].sw);
     entity_types[2].name = "Light (4x4)";
-    entity_types[2].add_air_amount = 0.0f;
-    entity_types[2].max_air_pressure = 0.0f;
     build_static_physics_mesh(entity_types[2].sw, &entity_types[2].phys_mesh, &entity_types[2].phys_shape);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
@@ -588,6 +656,16 @@ remove_ents_from_surface(int x, int y, int z, int face)
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
         entity *e = *it;
         if (e->x == x && e->y == y && e->z == z && e->face == face) {
+            pos_man.destroy_entity_instance(e->ce);
+            render_man.destroy_entity_instance(e->ce);
+
+            if (e->type == &entity_types[0]) {
+                power_man.destroy_entity_instance(e->ce);
+                gas_man.destroy_entity_instance(e->ce);
+            }
+            else if (e->type == &entity_types[2]) {
+                light_man.destroy_entity_instance(e->ce);
+            }
             delete e;
             it = ch->entities.erase(it);
         }
@@ -664,7 +742,7 @@ struct add_block_entity_tool : tool
         if (!can_use(rc))
             return;
 
-        per_object->val.world_matrix = mat_position(rc->px, rc->py, rc->pz);
+        per_object->val.world_matrix = mat_position((float)rc->px, (float)rc->py, (float)rc->pz);
         per_object->upload();
 
         draw_mesh(type->hw);
@@ -746,14 +824,14 @@ struct add_surface_entity_tool : tool
 
         /* draw a surface overlay here too */
         /* TODO: sub-block placement granularity -- will need a different overlay */
-        per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
+        per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);
         per_object->upload();
 
         glUseProgram(add_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-0.1, -0.1);
+        glPolygonOffset(-0.1f, -0.1f);
         draw_mesh(surfs_hw[index]);
-        glPolygonOffset(0, 0);
+        glPolygonOffset(0.0f, 0.0f);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }
@@ -790,14 +868,14 @@ struct remove_surface_entity_tool : tool
             return;
         }
 
-        per_object->val.world_matrix = mat_position(rc->x, rc->y, rc->z);
+        per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);
         per_object->upload();
 
         glUseProgram(remove_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-0.1, -0.1);
+        glPolygonOffset(-0.1f, -0.1f);
         draw_mesh(surfs_hw[index]);
-        glPolygonOffset(0, 0);
+        glPolygonOffset(0.0f, 0.0f);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }
@@ -908,11 +986,7 @@ update()
         }
 
         /* allow the entities to tick */
-        for (auto ch : ship->chunks) {
-            for (auto e : ch.second->entities) {
-                e->tick();
-            }
-        }
+        tick_gas_producers();
 
         /* HACK: dirty this every frame for now while debugging atmo */
         if (1 || pl.ui_dirty) {
@@ -947,7 +1021,7 @@ update()
 
     while (fast_tick_accum.tick()) {
 
-        update_projectiles(fast_tick_accum.period);
+        proj_man.simulate(fast_tick_accum.period);
 
         phy->tick(fast_tick_accum.period);
 
@@ -972,27 +1046,11 @@ update()
         }
     }
 
-    /* walk all the entities in the (visible) chunks */
-    for (int k = ship->min_z; k <= ship->max_z; k++) {
-        for (int j = ship->min_y; j <= ship->max_y; j++) {
-            for (int i = ship->min_x; i <= ship->max_x; i++) {
-                chunk *ch = ship->get_chunk(i, j, k);
-                if (ch) {
-                    for (auto e : ch->entities) {
-                        /* TODO: batch these matrix uploads too! */
-                        per_object->val.world_matrix = e->mat;
-                        per_object->upload();
-
-                        draw_mesh(e->type->hw);
-                    }
-                }
-            }
-        }
-    }
+    draw_renderables();
 
     /* draw the projectiles */
-    glUseProgram(simple_shader);
-    draw_projectiles();
+    glUseProgram(unlit_shader);
+    proj_man.draw();
 
     /* draw the sky */
     glUseProgram(sky_shader);
@@ -1100,7 +1158,7 @@ struct play_state : game_state {
         unsigned num_tools = sizeof(tools) / sizeof(tools[0]);
         for (unsigned i = 0; i < num_tools; i++) {
             ui_sprites->add(pl.selected_slot == i ? &lit_ui_slot_sprite : &unlit_ui_slot_sprite,
-                    (i - num_tools/2.0) * 34, -220);
+                    (i - num_tools/2.0f) * 34, -220);
         }
     }
 
@@ -1188,6 +1246,7 @@ struct play_state : game_state {
         auto use_tool   = get_input(action_use_tool)->just_active;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;
+        auto fire = get_input(action_use_tool)->active;
 
         /* persistent */
 
@@ -1201,8 +1260,7 @@ struct play_state : game_state {
         if (pl.elev > MOUSE_Y_LIMIT)
             pl.elev = MOUSE_Y_LIMIT;
 
-        pl.move.x = moveX;
-        pl.move.y = moveY;
+        pl.move = glm::vec2((float) moveX, (float) moveY);
 
         pl.jump       = jump;
         pl.crouch     = crouch;
@@ -1214,7 +1272,8 @@ struct play_state : game_state {
 
         // blech. Tool gets used below, then fire projectile gets hit here
         if (pl.fire_projectile) {
-            spawn_projectile(pl.eye, pl.dir);
+            auto below_eye = glm::vec3(pl.eye.x, pl.eye.y, pl.eye.z - 0.1);
+            proj_man.spawn(below_eye, pl.dir, *projectile_hw);
             pl.fire_projectile = false;
         }
 
@@ -1442,8 +1501,8 @@ run()
         mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheeldown)] = false;
         mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheelup)]   = false;
 
-        mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] = 0.f;
-        mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] = 0.f;
+        mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] = 0;
+        mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] = 0;
 
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
@@ -1500,6 +1559,8 @@ run()
         update();
 
         SDL_GL_SwapWindow(wnd.ptr);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         if (exit_requested) return;
     }
