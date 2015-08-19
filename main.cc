@@ -231,25 +231,31 @@ struct entity
         render_man.assign_entity(ce);
         render_man.mesh(ce) = *type->hw;
 
+        // based on the assumption all entities will require power
+        power_man.assign_entity(ce);
+        //default to powered state for now
+        power_man.powered(ce) = true;
+
+        // frobnicator
         if (type == &entity_types[0]) {
-            power_man.assign_entity(ce);
             power_man.enabled(ce) = false;
-            //default to powered state for now
-            power_man.powered(ce) = true;
 
             gas_man.assign_entity(ce);
             gas_man.flow_rate(ce) = 0.1f;
             gas_man.max_pressure(ce) = 1.0f;
         }
+        // display panel
+        else if (type == &entity_types[1]) {
+            power_man.enabled(ce) = true;
 
-        if (type == &entity_types[2]) {
             light_man.assign_entity(ce);
+            light_man.intensity(ce) = 0.15f;
+        }
+        // light
+        else if (type == &entity_types[2]) {
+            power_man.enabled(ce) = true;
 
-            power_man.assign_entity(ce);
-            power_man.enabled(ce) = false;
-            //default to powered state for now
-            power_man.powered(ce) = true;
-
+            light_man.assign_entity(ce);
             light_man.intensity(ce) = 1.f;
         }
     }
