@@ -53,9 +53,8 @@ texture_set::load(int slot, char const *filename)
     /* bring on DSA... for now, we disturb the tex0 binding */
     glActiveTexture(GL_TEXTURE0);
 
-
+    glBindTexture(target, texobj);
     if (target == GL_TEXTURE_CUBE_MAP) {
-        glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X + slot, texobj);
         glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + slot, 0,
                         0, 0, dim, dim,
                         surf->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB,
@@ -63,7 +62,6 @@ texture_set::load(int slot, char const *filename)
                         surf->pixels);
     }
     else {
-        glBindTexture(target, texobj);
         glTexSubImage3D(target, 0,
                         0, 0, slot,
                         dim, dim, 1,
