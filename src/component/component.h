@@ -19,7 +19,7 @@ struct c_entity {
 namespace std {
     template<>
     struct hash<c_entity> {
-        size_t operator()(c_entity const &e) const {
+        size_t operator()(const c_entity &e) const {
             return hash<unsigned>()(e.id);
         }
     };
@@ -49,7 +49,11 @@ struct component_manager {
 
     virtual void entity(const c_entity &e) = 0;
 
-    instance lookup(c_entity e) {
+    bool exists(const c_entity & e) {
+        return entity_instance_map.find(e) != entity_instance_map.end();
+    }
+
+    instance lookup(const c_entity &e) {
         return make_instance(entity_instance_map.find(e)->second);
     }
 
@@ -57,7 +61,7 @@ struct component_manager {
         return { i };
     }
 
-    void destroy_entity_instance(c_entity e) {
+    void destroy_entity_instance(const c_entity &e) {
         auto i = lookup(e);
         destroy_instance(i);
     }
@@ -74,14 +78,11 @@ struct component_manager {
 // power component
 // powered -- connected to power
 // bool
-// enabled   -- switched on
-// bool
 
 struct power_component_manager : component_manager {
     struct power_instance_data {
         c_entity *entity;
         bool *powered;
-        bool *enabled;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -90,23 +91,17 @@ struct power_component_manager : component_manager {
 
     void entity(const c_entity &e) override;
 
-    bool & powered(c_entity e) {
+    bool & powered(const c_entity &e) {
         auto inst = lookup(e);
 
         return instance_pool.powered[inst.index];
     }
-
-    bool & enabled(c_entity e) {
-        auto inst = lookup(e);
-
-        return instance_pool.enabled[inst.index];
-    }
 };
 
 // gas production component
-// gas_type -- not set yet
+// gas_type     -- not set yet
 // unsigned
-// flow_rate -- rate of flow
+// flow_rate    -- rate of flow
 // float
 // max_pressure -- don't fill past the line
 // float
@@ -125,19 +120,19 @@ struct gas_production_component_manager : component_manager {
 
     void entity(const c_entity &e) override;
 
-    unsigned & gas_type(c_entity e) {
+    unsigned & gas_type(const c_entity &e) {
         auto inst = lookup(e);
 
         return instance_pool.gas_type[inst.index];
     }
 
-    float & flow_rate(c_entity e) {
+    float & flow_rate(const c_entity &e) {
         auto inst = lookup(e);
 
         return instance_pool.flow_rate[inst.index];
     }
 
-    float & max_pressure(c_entity e) {
+    float & max_pressure(const c_entity &e) {
         auto inst = lookup(e);
 
         return instance_pool.max_pressure[inst.index];
@@ -163,13 +158,13 @@ struct relative_position_component_manager : component_manager {
 
     void entity(const c_entity &e) override;
 
-    glm::vec3 & position(c_entity e) {
+    glm::vec3 & position(const c_entity &e) {
         auto inst = lookup(e);
 
         return instance_pool.position[inst.index];
     }
 
-    glm::mat4 & mat(c_entity e) {
+    glm::mat4 & mat(const c_entity &e) {
         auto inst = lookup(e);
 
         return instance_pool.mat[inst.index];
@@ -192,7 +187,7 @@ struct light_component_manager : component_manager {
 
     void entity(const c_entity &e) override;
 
-    float & intensity(c_entity e) {
+    float & intensity(const c_entity &e) {
         auto inst = lookup(e);
 
         return instance_pool.intensity[inst.index];
@@ -200,7 +195,8 @@ struct light_component_manager : component_manager {
 };
 
 // renderable component
-// no data
+// mesh -- render mesh
+// hw_mesh
 
 struct renderable_component_manager : component_manager {
     struct renderable_instance_data {
@@ -214,9 +210,47 @@ struct renderable_component_manager : component_manager {
 
     void entity(const c_entity &e) override;
 
-    hw_mesh & mesh(c_entity e) {
+    hw_mesh & mesh(const c_entity &e) {
         auto inst = lookup(e);
 
         return instance_pool.mesh[inst.index];
     }
+};
+
+// switchable component
+// enabled -- switched on
+// bool
+
+struct switchable_component_manager : component_manager {
+    struct switchable_instance_data {
+        c_entity *entity;
+        bool *enabled;
+    } instance_pool;
+
+    void create_component_instance_data(unsigned count) override;
+
+    void destroy_instance(instance i) override;
+
+    void entity(const c_entity &e) override;
+
+    bool & enabled(const c_entity &e) {
+        auto inst = lookup(e);
+
+        return instance_pool.enabled[inst.index];
+    }
+};
+
+// switch component
+// no data
+
+struct switch_component_manager : component_manager {
+    struct switch_instance_data {
+        c_entity *entity;
+    } instance_pool;
+
+    void create_component_instance_data(unsigned count) override;
+
+    void destroy_instance(instance i) override;
+
+    void entity(const c_entity &e) override;
 };
