@@ -16,9 +16,9 @@ struct switchable_component_manager : component_manager {
 
     void destroy_instance(instance i) override;
 
-    void entity(const c_entity &e) override;
+    void entity(c_entity const &e) override;
 
-    bool & enabled(const c_entity &e) {
+    bool & enabled(c_entity const &e) {
         auto inst = lookup(e);
 
         return instance_pool.enabled[inst.index];

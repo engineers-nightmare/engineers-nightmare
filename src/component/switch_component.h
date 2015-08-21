@@ -14,5 +14,5 @@ struct switch_component_manager : component_manager {
 
     void destroy_instance(instance i) override;
 
-    void entity(const c_entity &e) override;
+    void entity(c_entity const &e) override;
 };

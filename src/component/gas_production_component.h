@@ -22,21 +22,21 @@ struct gas_production_component_manager : component_manager {
 
     void destroy_instance(instance i) override;
 
-    void entity(const c_entity &e) override;
+    void entity(c_entity const &e) override;
 
-    unsigned & gas_type(const c_entity &e) {
+    unsigned & gas_type(c_entity const &e) {
         auto inst = lookup(e);
 
         return instance_pool.gas_type[inst.index];
     }
 
-    float & flow_rate(const c_entity &e) {
+    float & flow_rate(c_entity const &e) {
         auto inst = lookup(e);
 
         return instance_pool.flow_rate[inst.index];
     }
 
-    float & max_pressure(const c_entity &e) {
+    float & max_pressure(c_entity const &e) {
         auto inst = lookup(e);
 
         return instance_pool.max_pressure[inst.index];

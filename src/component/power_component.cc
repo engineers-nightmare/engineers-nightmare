@@ -47,7 +47,7 @@ power_component_manager::destroy_instance(instance i) {
 }
 
 void
-power_component_manager::entity(const c_entity &e) {
+power_component_manager::entity(c_entity const &e) {
     if (buffer.num >= buffer.allocated) {
         printf("Increasing size of power_component buffer. Please adjust\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);

@@ -21,15 +21,15 @@ struct relative_position_component_manager : component_manager {
 
     void destroy_instance(instance i) override;
 
-    void entity(const c_entity &e) override;
+    void entity(c_entity const &e) override;
 
-    glm::vec3 & position(const c_entity &e) {
+    glm::vec3 & position(c_entity const &e) {
         auto inst = lookup(e);
 
         return instance_pool.position[inst.index];
     }
 
-    glm::mat4 & mat(const c_entity &e) {
+    glm::mat4 & mat(c_entity const &e) {
         auto inst = lookup(e);
 
         return instance_pool.mat[inst.index];
