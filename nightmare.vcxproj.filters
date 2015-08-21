@@ -87,9 +87,6 @@
     <ClCompile Include="src\mock_ship_junk.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\component\component.cc">
-      <Filter>Source Files\component</Filter>
-    </ClCompile>
     <ClCompile Include="src\atlas.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -98,6 +95,27 @@
     </ClCompile>
     <ClCompile Include="src\projectile\projectile.cc">
       <Filter>Source Files\projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\gas_production_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\light_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\power_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\relative_position.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\renderable_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\switch_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\switchable_component.cc">
+      <Filter>Source Files\component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,9 +185,6 @@
     <ClInclude Include="src\timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\component\component.h">
-      <Filter>Header Files\component</Filter>
-    </ClInclude>
     <ClInclude Include="src\projectile\projectile.h">
       <Filter>Header Files\projectile</Filter>
     </ClInclude>
@@ -181,6 +196,30 @@
     </ClInclude>
     <ClInclude Include="src\shader_params.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\component_manager.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\gas_production_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\light_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\power_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\relative_position.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\renderable_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\switch_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\switchable_component.h">
+      <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

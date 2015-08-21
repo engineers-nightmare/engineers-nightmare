@@ -29,7 +29,17 @@
 #include "src/tools.h"
 #include "src/shader_params.h"
 #include "src/light_field.h"
-#include "src/component/component.h"
+
+#include "src/component/component_manager.h"
+#include "src/component/gas_production_component.h"
+#include "src/component/light_component.h"
+#include "src/component/power_component.h"
+#include "src/component/relative_position.h"
+#include "src/component/renderable_component.h"
+#include "src/component/switch_component.h"
+#include "src/component/switchable_component.h"
+
+#include "src/projectile/projectile.h"
 
 #include "src/scopetimer.h"
 
@@ -44,7 +54,6 @@
 
 #define MOUSE_Y_LIMIT   1.54f
 #define MAX_AXIS_PER_EVENT 128
-#include "src/projectile/projectile.h"
 
 bool exit_requested = false;
 
