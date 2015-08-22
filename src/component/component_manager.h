@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <string.h>
 
 static unsigned entities_id_ref = 1;
 struct c_entity {

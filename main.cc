@@ -1445,7 +1445,6 @@ struct play_state : game_state {
         auto use_tool   = get_input(action_use_tool)->just_active;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;
-        auto fire = get_input(action_use_tool)->active;
 
         /* persistent */
 
