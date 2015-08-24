@@ -257,17 +257,19 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
  *
  * this will not instantiate or modify any other chunks
  */
-void
+block *
 ship_space::ensure_block(int block_x, int block_y, int block_z)
 {
     int chunk_x, chunk_y, chunk_z;
 
-    split_coord(block_x, NULL, &chunk_x);
-    split_coord(block_y, NULL, &chunk_y);
-    split_coord(block_z, NULL, &chunk_z);
+    split_coord(block_x, nullptr, &chunk_x);
+    split_coord(block_y, nullptr, &chunk_y);
+    split_coord(block_z, nullptr, &chunk_z);
 
     /* guarantee we have the size we need */
     this->ensure_chunk(chunk_x, chunk_y, chunk_z);
+
+    return get_block(block_x, block_y, block_z);
 }
 
 /* ensure that the specified chunk exists
@@ -276,7 +278,7 @@ ship_space::ensure_block(int block_x, int block_y, int block_z)
  *
  * this will not instantiate or modify any other chunks
  */
-void
+chunk *
 ship_space::ensure_chunk(int chunk_x, int chunk_y, int chunk_z)
 {
     glm::ivec3 v(chunk_x, chunk_y, chunk_z);
@@ -303,6 +305,8 @@ ship_space::ensure_chunk(int chunk_x, int chunk_y, int chunk_z)
          */
         this->outside_topo_info.size += CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
     }
+
+    return ch;
 }
 
 /* internal method which updated {min,max}_{x,y,z}

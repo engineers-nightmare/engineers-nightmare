@@ -29,7 +29,17 @@
 #include "src/tools.h"
 #include "src/shader_params.h"
 #include "src/light_field.h"
-#include "src/component/component.h"
+
+#include "src/component/component_manager.h"
+#include "src/component/gas_production_component.h"
+#include "src/component/light_component.h"
+#include "src/component/power_component.h"
+#include "src/component/relative_position.h"
+#include "src/component/renderable_component.h"
+#include "src/component/switch_component.h"
+#include "src/component/switchable_component.h"
+
+#include "src/projectile/projectile.h"
 
 #include "src/scopetimer.h"
 
@@ -44,9 +54,10 @@
 
 #define MOUSE_Y_LIMIT   1.54f
 #define MAX_AXIS_PER_EVENT 128
-#include "src/projectile/projectile.h"
 
 bool exit_requested = false;
+
+bool draw_hud = true;
 
 auto hfov = DEG2RAD(90.f);
 
@@ -215,13 +226,13 @@ clamp(T t, T lower, T upper) {
     return t;
 }
 
-power_component_manager power_man;
 gas_production_component_manager gas_man;
-relative_position_component_manager pos_man;
 light_component_manager light_man;
+power_component_manager power_man;
+relative_position_component_manager pos_man;
 renderable_component_manager render_man;
-switchable_component_manager switchable_man;
 switch_component_manager switch_man;
+switchable_component_manager switchable_man;
 
 projectile_linear_manager proj_man;
 
@@ -539,7 +550,8 @@ update_lightfield()
     for (auto i = 0u; i < light_man.buffer.num; i++) {
         auto ce = light_man.instance_pool.entity[i];
         auto pos = get_block_containing(pos_man.position(ce));
-        auto should_emit = switchable_man.enabled(ce) && power_man.powered(ce);
+        auto exists = switchable_man.exists(ce);
+        auto should_emit = exists ? switchable_man.enabled(ce) && power_man.powered(ce) : power_man.powered(ce);
         if (should_emit) {
             set_light_level(pos.x, pos.y, pos.z, (int)(255 * light_man.intensity(ce)));
         }
@@ -628,13 +640,13 @@ prepare_chunks()
 void
 init()
 {
-    power_man.create_component_instance_data(20);
     gas_man.create_component_instance_data(20);
-    pos_man.create_component_instance_data(20);
     light_man.create_component_instance_data(20);
+    pos_man.create_component_instance_data(20);
+    power_man.create_component_instance_data(20);
     render_man.create_component_instance_data(20);
-    switchable_man.create_component_instance_data(20);
     switch_man.create_component_instance_data(20);
+    switchable_man.create_component_instance_data(20);
 
     proj_man.create_projectile_data(1000);
 
@@ -829,6 +841,14 @@ remove_ents_from_surface(int x, int y, int z, int face)
 
             if (light_man.exists(e->ce)) {
                 light_man.destroy_entity_instance(e->ce);
+            }
+
+            if (switch_man.exists(e->ce)) {
+                switch_man.destroy_entity_instance(e->ce);
+            }
+
+            if (switchable_man.exists(e->ce)) {
+                switchable_man.destroy_entity_instance(e->ce);
             }
 
             delete e;
@@ -1029,7 +1049,7 @@ struct remove_surface_entity_tool : tool
         int index = normal_to_surface_index(rc);
         block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
 
-        if (!other_side->surf_space[index ^ 1]) {
+        if (!other_side || !other_side->surf_space[index ^ 1]) {
             return;
         }
 
@@ -1240,19 +1260,22 @@ update()
     glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
 
-    /* draw the ui */
-    glDisable(GL_DEPTH_TEST);
+    if (draw_hud) {
+        /* draw the ui */
+        glDisable(GL_DEPTH_TEST);
 
-    glUseProgram(ui_shader);
-    text->draw();
-    glUseProgram(ui_sprites_shader);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    ui_sprites->draw();
-    glDisable(GL_BLEND);
+        glUseProgram(ui_shader);
+        text->draw();
+        glUseProgram(ui_sprites_shader);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        ui_sprites->draw();
+        glDisable(GL_BLEND);
+
+        glEnable(GL_DEPTH_TEST);
+    }
+
     glUseProgram(simple_shader);
-
-    glEnable(GL_DEPTH_TEST);
 
     frame->end();
 }
@@ -1427,7 +1450,6 @@ struct play_state : game_state {
         auto use_tool   = get_input(action_use_tool)->just_active;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;
-        auto fire = get_input(action_use_tool)->active;
 
         /* persistent */
 

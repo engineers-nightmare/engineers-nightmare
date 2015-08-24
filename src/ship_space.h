@@ -90,7 +90,7 @@ struct ship_space {
      *
      * this will not instantiate or modify any other chunks
      */
-    void ensure_block(int block_x, int block_y, int block_z);
+    block * ensure_block(int block_x, int block_y, int block_z);
 
     /* ensure that the specified chunk exists
      *
@@ -98,7 +98,7 @@ struct ship_space {
      *
      * this will not instantiate or modify any other chunks
      */
-    void ensure_chunk(int chunk_x, int chunk_y, int chunk_z);
+    chunk * ensure_chunk(int chunk_x, int chunk_y, int chunk_z);
 
     zone_info *get_zone_info(topo_info *t);
     void insert_zone(topo_info *t, zone_info *z);
