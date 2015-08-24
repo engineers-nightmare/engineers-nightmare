@@ -57,6 +57,8 @@
 
 bool exit_requested = false;
 
+bool draw_hud = true;
+
 auto hfov = DEG2RAD(90.f);
 
 en_settings game_settings;
@@ -1258,19 +1260,22 @@ update()
     glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
 
-    /* draw the ui */
-    glDisable(GL_DEPTH_TEST);
+    if (draw_hud) {
+        /* draw the ui */
+        glDisable(GL_DEPTH_TEST);
 
-    glUseProgram(ui_shader);
-    text->draw();
-    glUseProgram(ui_sprites_shader);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    ui_sprites->draw();
-    glDisable(GL_BLEND);
+        glUseProgram(ui_shader);
+        text->draw();
+        glUseProgram(ui_sprites_shader);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        ui_sprites->draw();
+        glDisable(GL_BLEND);
+
+        glEnable(GL_DEPTH_TEST);
+    }
+
     glUseProgram(simple_shader);
-
-    glEnable(GL_DEPTH_TEST);
 
     frame->end();
 }
