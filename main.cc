@@ -197,6 +197,7 @@ unsigned frame_index;
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *projectile_sw;
+sw_mesh *attachment_sw;
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, unlit_instanced_shader;
 shader_params<per_object_params> *per_object;
@@ -211,6 +212,7 @@ int mouse_axes[input_mouse_axes_count];
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 hw_mesh *projectile_hw;
+hw_mesh *attachment_hw;
 text_renderer *text;
 sprite_renderer *ui_sprites;
 light_field *light;
@@ -677,6 +679,10 @@ init()
     set_mesh_material(projectile_sw, 3);
     projectile_hw = upload_mesh(projectile_sw);
 
+    attachment_sw = load_mesh("mesh/attach.obj");
+    set_mesh_material(attachment_sw, 7);
+    attachment_hw = upload_mesh(attachment_sw);
+
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
 
     surfs_sw[surface_xp] = load_mesh("mesh/x_quad_p.obj");
@@ -1087,36 +1093,42 @@ struct add_wiring_tool : tool
 
         auto end = pl.eye + pl.dir * 5.0f;
 
+        // don't clamp to edges if we're looking at entity
+        auto hit_entity = nullptr != phys_raycast(pl.eye, end,
+            phy->ghostObj, phy->dynamicsWorld);
+
         auto hit = phys_raycast_generic(pl.eye, end,
             phy->ghostObj, phy->dynamicsWorld);
 
         if (!hit.hit)
             return;
 
-        /* get away from the actual surface slightly to avoid instability */
-        auto adjustedPoint = hit.hitCoord + hit.hitNormal * 0.1f;
+        // offset some epsilon to fix disappearing
+        auto pt = hit.hitCoord + hit.hitNormal * 0.000001f;
 
-        auto frac = adjustedPoint - glm::floor(adjustedPoint);
-        auto diff = glm::abs(glm::vec3(0.5f) - frac);
+        if (!hit_entity) {
+            auto frac = pt - glm::floor(pt);
+            auto diff = glm::abs(glm::vec3(0.5f) - frac);
 
-        /* snap the two components closest to the edge, to the edge */
-        if (diff.x > diff.y || diff.x > diff.z) {
-            frac.x = frac.x < 0.5f ? 0.1f : 0.9f;
+            /* snap the two components closest to the edge, to the edge */
+            if (diff.x > diff.y || diff.x > diff.z) {
+                frac.x = frac.x < 0.5f ? 0.1f : 0.9f;
+            }
+            if (diff.y >= diff.x || diff.y > diff.z) {
+                frac.y = frac.y < 0.5f ? 0.1f : 0.9f;
+            }
+            if (diff.z >= diff.x || diff.z >= diff.y) {
+                frac.z = frac.z < 0.5f ? 0.1f : 0.9f;
+            }
+
+            pt = frac + glm::floor(pt);
         }
-        if (diff.y >= diff.x || diff.y > diff.z) {
-            frac.y = frac.y < 0.5f ? 0.1f : 0.9f;
-        }
-        if (diff.z >= diff.x || diff.z >= diff.y) {
-            frac.z = frac.z < 0.5f ? 0.1f : 0.9f;
-        }
 
-        auto pt = frac + glm::floor(adjustedPoint);
-
-        per_object->val.world_matrix = mat_position(pt.x, pt.y, pt.z);
+        per_object->val.world_matrix = mat_position(pt);
         per_object->upload();
 
-        glUseProgram(add_overlay_shader);
-        draw_mesh(projectile_hw);
+        glUseProgram(unlit_shader);
+        draw_mesh(attachment_hw);
         glUseProgram(simple_shader);
     }
 
