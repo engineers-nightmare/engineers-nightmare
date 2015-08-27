@@ -1205,6 +1205,9 @@ struct remove_surface_entity_tool : tool
 
 struct add_wiring_tool : tool
 {
+    wire *active_wire = nullptr;
+    wire_segment *current_segment = nullptr;
+
     bool get_attach_point(bool & is_entity, glm::vec3 & pt, glm::vec3 & normal) {
         auto end = pl.eye + pl.dir * 5.0f;
 
@@ -1259,6 +1262,9 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
+        if (!hit_entity && (!active_wire || !active_wire->segments.size()))
+            return;
+
         per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
         per_object->upload();
 
@@ -1266,9 +1272,6 @@ struct add_wiring_tool : tool
         draw_mesh(attachment_hw);
         glUseProgram(simple_shader);
     }
-
-    wire *active_wire = nullptr;
-    wire_segment *current_segment = nullptr;
 
     void use(raycast_info *rc) override {
         bool hit_entity;
@@ -1278,7 +1281,10 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
-        if (!active_wire) {
+        if (!hit_entity && (!active_wire || !active_wire->segments.size()))
+            return;
+
+        if (!active_wire && hit_entity) {
             wire w;
             wires.push_back(w);
             active_wire = &wires[wires.size() - 1];
@@ -1302,6 +1308,9 @@ struct add_wiring_tool : tool
         }
         else {
             current_segment->second = wire_attachments.size() - 1;
+
+            if (hit_entity)
+                active_wire = nullptr;
         }
     }
 
