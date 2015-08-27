@@ -63,6 +63,19 @@ auto hfov = DEG2RAD(90.f);
 
 en_settings game_settings;
 
+struct wire_attachment {
+    glm::mat4 transform;
+};
+
+struct wire_segment {
+    wire_attachment *first;
+    wire_attachment *second;
+};
+
+struct wire {
+    std::vector<wire_segment> segments;
+};
+
 struct {
     SDL_Window *ptr;
     SDL_GLContext gl_ctx;
@@ -219,6 +232,9 @@ light_field *light;
 entity *use_entity = nullptr;
 
 sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
+
+std::vector<wire_attachment> wire_attachments;
+std::vector<wire> wires;
 
 template<typename T>
 T
@@ -476,6 +492,69 @@ draw_projectiles(frame_data *frame)
     }
 }
 
+void
+draw_attachments(frame_data *frame)
+{
+    auto count = wire_attachments.size();
+    for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
+        auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
+        auto attachment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
+
+        for (auto j = 0u; j < batch_size; j++) {
+            attachment_matrices.ptr[j] = wire_attachments[i + j].transform;
+        }
+
+        attachment_matrices.bind(1, frame);
+        draw_mesh_instanced(attachment_hw, batch_size);
+    }
+}
+
+void
+draw_segments(frame_data *frame)
+{
+    if (wires.size() <= 0) {
+        return;
+    }
+
+    for (auto h = 0u; h < wires.size(); ++h) {
+        auto count = wires[h].segments.size();
+        for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
+            auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
+            auto attachment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
+
+            auto added = 0u;
+            for (auto j = 0u; j < batch_size; j++) {
+                auto segment = wires[h].segments[i];
+                if (!segment_finished(&segment))
+                    continue;
+
+                auto a1 = segment.first->transform;
+                auto a2 = segment.second->transform;
+
+                auto p1_4 = a1[3];
+                auto p2_4 = a2[3];
+
+                auto p1 = glm::vec3(p1_4.x, p1_4.y, p1_4.z);
+                auto p2 = glm::vec3(p2_4.x, p2_4.y, p2_4.z);
+
+                auto seg = p1 - p2;
+                auto len = glm::length(seg);
+
+                auto scale = mat_scale(1, 1, len);
+                auto pos = mat_position(p1);
+
+                ++added;
+                attachment_matrices.ptr[j] = pos * scale;
+            }
+
+            if (added) {
+                attachment_matrices.bind(1, frame);
+                draw_mesh_instanced(wire_hw, added);
+            }
+        }
+    }
+}
+
 
 void
 set_light_level(int x, int y, int z, int level)
@@ -680,7 +759,7 @@ init()
     projectile_hw = upload_mesh(projectile_sw);
 
     attachment_sw = load_mesh("mesh/attach.obj");
-    set_mesh_material(attachment_sw, 7);
+    set_mesh_material(attachment_sw, 10);
     attachment_hw = upload_mesh(attachment_sw);
 
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
@@ -749,6 +828,7 @@ init()
     world_textures->load(7, "textures/display.png");
     world_textures->load(8, "textures/light.png");
     world_textures->load(9, "textures/switch.png");
+    world_textures->load(10, "textures/attach.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
@@ -1076,37 +1156,36 @@ struct remove_surface_entity_tool : tool
     }
 };
 
+bool segment_finished(wire_segment *segment) {
+    if (!segment) {
+        return true;
+    }
+
+    return segment->first && segment->second;
+}
 
 struct add_wiring_tool : tool
 {
-    void use(raycast_info *rc) override {
-    }
-
-    void preview(raycast_info *rc) override {
-        /* do a real, generic raycast */
-
-        /* TODO: handle hitting ents -- we want to connect to the ent. */
-        /* TODO: ignore the player properly. this involves fixing the phys
-         * raycast code slightly */
-        /* TODO: handle some weird cases in negative space. current impl is
-         * not quite correct */
-
+    bool get_attach_point(bool & is_entity, glm::vec3 & pt, glm::vec3 & normal) {
         auto end = pl.eye + pl.dir * 5.0f;
 
         // don't clamp to edges if we're looking at entity
-        auto hit_entity = nullptr != phys_raycast(pl.eye, end,
-            phy->ghostObj, phy->dynamicsWorld);
+
+        is_entity = nullptr != phys_raycast(pl.eye, end,
+                                                  phy->ghostObj, phy->dynamicsWorld);
 
         auto hit = phys_raycast_generic(pl.eye, end,
-            phy->ghostObj, phy->dynamicsWorld);
+                                        phy->ghostObj, phy->dynamicsWorld);
 
         if (!hit.hit)
-            return;
+            return false;
 
         // offset some epsilon to fix disappearing
-        auto pt = hit.hitCoord + hit.hitNormal * 0.000001f;
 
-        if (!hit_entity) {
+        pt = hit.hitCoord + hit.hitNormal * 0.000001f;
+        normal = hit.hitNormal;
+
+        if (!is_entity) {
             auto frac = pt - glm::floor(pt);
             auto diff = glm::abs(glm::vec3(0.5f) - frac);
 
@@ -1123,6 +1202,24 @@ struct add_wiring_tool : tool
 
             pt = frac + glm::floor(pt);
         }
+        return true;
+    }
+
+    void preview(raycast_info *rc) override {
+        /* do a real, generic raycast */
+
+        /* TODO: handle hitting ents -- we want to connect to the ent. */
+        /* TODO: ignore the player properly. this involves fixing the phys
+         * raycast code slightly */
+        /* TODO: handle some weird cases in negative space. current impl is
+         * not quite correct */
+
+        bool hit_entity;
+        glm::vec3 pt;
+        glm::vec3 normal;
+
+        if (!get_attach_point(hit_entity, pt, normal))
+            return;
 
         per_object->val.world_matrix = mat_position(pt);
         per_object->upload();
@@ -1130,6 +1227,40 @@ struct add_wiring_tool : tool
         glUseProgram(unlit_shader);
         draw_mesh(attachment_hw);
         glUseProgram(simple_shader);
+    }
+
+    wire *active_wire = nullptr;
+    wire_segment *current_segment = nullptr;
+
+    void use(raycast_info *rc) override {
+        bool hit_entity;
+        glm::vec3 pt;
+        glm::vec3 normal;
+
+        if (!get_attach_point(hit_entity, pt, normal))
+            return;
+
+        if (!active_wire) {
+            wire w;
+            wires.push_back(w);
+            active_wire = &wires.back();
+        }
+
+        if (!current_segment || segment_finished(current_segment)) {
+            active_wire->segments.push_back(wire_segment());
+            current_segment = &active_wire->segments.back();
+        }
+
+        wire_attachment wa;
+        wa.transform = mat_position(pt);
+        wire_attachments.push_back(wa);
+
+        if (!current_segment->first) {
+            current_segment->first = &wire_attachments.back();
+        }
+        else {
+            current_segment->second = &wire_attachments.back();
+        }
     }
 
     void get_description(char *str) override {
@@ -1317,6 +1448,7 @@ update()
     /* draw the projectiles */
     glUseProgram(unlit_instanced_shader);
     draw_projectiles(frame);
+    draw_attachments(frame);
 
     per_object->bind(1);
 
