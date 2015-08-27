@@ -1205,6 +1205,23 @@ struct add_wiring_tool : tool
         return true;
     }
 
+    glm::mat4 make_matrix(glm::vec3 pt, glm::vec3 normal) {
+        auto abs_normal = glm::abs(normal);
+        glm::vec3 temp_up(1,0,0);
+        if (abs_normal.x > abs_normal.y && abs_normal.x > abs_normal.z) {
+            /* avoid degeneracy at the `poles` */
+            temp_up = glm::vec3(0,1,0);
+        }
+        glm::mat4 m = glm::transpose(glm::lookAt(normal, glm::vec3(0, 0, 0), temp_up));
+        m[3][0] = pt.x;
+        m[3][1] = pt.y;
+        m[3][2] = pt.z;
+        m[0][3] = 0;
+        m[1][3] = 0;
+        m[2][3] = 0;
+        return m;
+    }
+
     void preview(raycast_info *rc) override {
         /* do a real, generic raycast */
 
@@ -1221,7 +1238,7 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
-        per_object->val.world_matrix = mat_position(pt);
+        per_object->val.world_matrix = make_matrix(pt, normal);
         per_object->upload();
 
         glUseProgram(unlit_shader);
@@ -1252,7 +1269,7 @@ struct add_wiring_tool : tool
         }
 
         wire_attachment wa;
-        wa.transform = mat_position(pt);
+        wa.transform = make_matrix(pt, normal);
         wire_attachments.push_back(wa);
 
         if (!current_segment->first) {
