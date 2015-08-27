@@ -1268,7 +1268,7 @@ struct add_wiring_tool : tool
         per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
         per_object->upload();
 
-        glUseProgram(simple_shader);
+        glUseProgram(unlit_shader);
         draw_mesh(attachment_hw);
         glUseProgram(simple_shader);
     }
