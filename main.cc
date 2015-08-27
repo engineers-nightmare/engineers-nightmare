@@ -1287,6 +1287,10 @@ struct add_wiring_tool : tool
         if (!current_segment || segment_finished(current_segment)) {
             active_wire->segments.push_back(wire_segment());
             current_segment = &active_wire->segments[active_wire->segments.size() - 1];
+            if (active_wire->segments.size() > 1) {
+                current_segment->first =
+                    active_wire->segments[active_wire->segments.size() - 2].second;
+            }
         }
 
         wire_attachment wa;
