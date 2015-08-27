@@ -68,8 +68,8 @@ struct wire_attachment {
 };
 
 struct wire_segment {
-    wire_attachment *first;
-    wire_attachment *second;
+    unsigned first = -1;
+    unsigned second = -1;
 };
 
 struct wire {
@@ -131,7 +131,7 @@ bool segment_finished(wire_segment *segment) {
         return true;
     }
 
-    return segment->first && segment->second;
+    return segment->first != ~0u && segment->second != ~0u;
 }
 
 
@@ -566,8 +566,11 @@ draw_segments(frame_data *frame)
                 if (!segment_finished(&segment))
                     continue;
 
-                auto a1 = segment.first->transform;
-                auto a2 = segment.second->transform;
+                auto i1 = segment.first;
+                auto i2 = segment.second;
+
+                auto a1 = wire_attachments[i1].transform;
+                auto a2 = wire_attachments[i2].transform;
 
                 auto p1_4 = a1[3];
                 auto p2_4 = a2[3];
@@ -1278,23 +1281,23 @@ struct add_wiring_tool : tool
         if (!active_wire) {
             wire w;
             wires.push_back(w);
-            active_wire = &wires.back();
+            active_wire = &wires[wires.size() - 1];
         }
 
         if (!current_segment || segment_finished(current_segment)) {
             active_wire->segments.push_back(wire_segment());
-            current_segment = &active_wire->segments.back();
+            current_segment = &active_wire->segments[active_wire->segments.size() - 1];
         }
 
         wire_attachment wa;
         wa.transform = mat_rotate_mesh(pt, normal);
         wire_attachments.push_back(wa);
 
-        if (!current_segment->first) {
-            current_segment->first = &wire_attachments.back();
+        if (current_segment->first == ~0u) {
+            current_segment->first = wire_attachments.size() - 1;
         }
         else {
-            current_segment->second = &wire_attachments.back();
+            current_segment->second = wire_attachments.size() - 1;
         }
     }
 
