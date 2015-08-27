@@ -221,7 +221,7 @@ sw_mesh *projectile_sw;
 sw_mesh *attachment_sw;
 sw_mesh *wire_sw;
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
-GLuint sky_shader, unlit_instanced_shader;
+GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader;
 shader_params<per_object_params> *per_object;
 texture_set *world_textures;
 texture_set *skybox;
@@ -272,6 +272,24 @@ get_block_containing(glm::vec3 v) {
     int z = (int) v.z; if (v.z < 0) z--;
 
     return glm::ivec3(x, y, z);
+}
+
+glm::mat4
+mat_rotate_mesh(glm::vec3 pt, glm::vec3 dir) {
+    auto abs_normal = glm::abs(dir);
+    glm::vec3 temp_up(1, 0, 0);
+    if (abs_normal.x > abs_normal.y && abs_normal.x > abs_normal.z) {
+        /* avoid degeneracy at the `poles` */
+        temp_up = glm::vec3(0, 1, 0);
+    }
+    glm::mat4 m = glm::transpose(glm::lookAt(dir, glm::vec3(0, 0, 0), temp_up));
+    m[3][0] = pt.x;
+    m[3][1] = pt.y;
+    m[3][2] = pt.z;
+    m[0][3] = 0;
+    m[1][3] = 0;
+    m[2][3] = 0;
+    return m;
 }
 
 glm::mat4
@@ -544,7 +562,7 @@ draw_segments(frame_data *frame)
 
             auto added = 0u;
             for (auto j = 0u; j < batch_size; j++) {
-                auto segment = wires[h].segments[i];
+                auto segment = wires[h].segments[i + j];
                 if (!segment_finished(&segment))
                     continue;
 
@@ -561,9 +579,10 @@ draw_segments(frame_data *frame)
                 auto len = glm::length(seg);
 
                 auto scale = mat_scale(1, 1, len);
-                auto pos = mat_position(p1);
 
-                segment_matrices.ptr[added] = pos * scale;
+                auto rot = mat_rotate_mesh(p2, glm::normalize(p2 - p1));
+
+                segment_matrices.ptr[added] = rot * scale;
                 ++added;
             }
 
@@ -825,6 +844,7 @@ init()
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
     unlit_instanced_shader = load_shader("shaders/simple_instanced.vert", "shaders/unlit.frag");
+    lit_instanced_shader = load_shader("shaders/simple_instanced.vert", "shaders/simple.frag");
     add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/unlit.frag");
     remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/unlit.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
@@ -1196,9 +1216,8 @@ struct add_wiring_tool : tool
         if (!hit.hit)
             return false;
 
-        // offset some epsilon to fix disappearing
-
-        pt = hit.hitCoord + hit.hitNormal * 0.000001f;
+        // offset 0.05 as that's how model is
+        pt = hit.hitCoord + hit.hitNormal * 0.05f;
         normal = hit.hitNormal;
 
         if (!is_entity) {
@@ -1221,23 +1240,6 @@ struct add_wiring_tool : tool
         return true;
     }
 
-    glm::mat4 make_matrix(glm::vec3 pt, glm::vec3 normal) {
-        auto abs_normal = glm::abs(normal);
-        glm::vec3 temp_up(1,0,0);
-        if (abs_normal.x > abs_normal.y && abs_normal.x > abs_normal.z) {
-            /* avoid degeneracy at the `poles` */
-            temp_up = glm::vec3(0,1,0);
-        }
-        glm::mat4 m = glm::transpose(glm::lookAt(normal, glm::vec3(0, 0, 0), temp_up));
-        m[3][0] = pt.x;
-        m[3][1] = pt.y;
-        m[3][2] = pt.z;
-        m[0][3] = 0;
-        m[1][3] = 0;
-        m[2][3] = 0;
-        return m;
-    }
-
     void preview(raycast_info *rc) override {
         /* do a real, generic raycast */
 
@@ -1254,10 +1256,10 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
-        per_object->val.world_matrix = make_matrix(pt, normal);
+        per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
         per_object->upload();
 
-        glUseProgram(unlit_shader);
+        glUseProgram(simple_shader);
         draw_mesh(attachment_hw);
         glUseProgram(simple_shader);
     }
@@ -1285,7 +1287,7 @@ struct add_wiring_tool : tool
         }
 
         wire_attachment wa;
-        wa.transform = make_matrix(pt, normal);
+        wa.transform = mat_rotate_mesh(pt, normal);
         wire_attachments.push_back(wa);
 
         if (!current_segment->first) {
@@ -1481,6 +1483,7 @@ update()
     /* draw the projectiles */
     glUseProgram(unlit_instanced_shader);
     draw_projectiles(frame);
+    glUseProgram(lit_instanced_shader);
     draw_attachments(frame);
     draw_segments(frame);
 
