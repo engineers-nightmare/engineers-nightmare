@@ -547,6 +547,27 @@ draw_attachments(frame_data *frame)
     }
 }
 
+glm::mat4
+calc_segment_matrices(const wire_attachment &start, const wire_attachment &end) {
+    auto a1 = start.transform;
+    auto a2 = end.transform;
+
+    auto p1_4 = a1[3];
+    auto p2_4 = a2[3];
+
+    auto p1 = glm::vec3(p1_4.x, p1_4.y, p1_4.z);
+    auto p2 = glm::vec3(p2_4.x, p2_4.y, p2_4.z);
+
+    auto seg = p1 - p2;
+    auto len = glm::length(seg);
+
+    auto scale = mat_scale(1, 1, len);
+
+    auto rot = mat_rotate_mesh(p2, glm::normalize(p2 - p1));
+
+    return rot * scale;
+}
+
 void
 draw_segments(frame_data *frame)
 {
@@ -566,26 +587,12 @@ draw_segments(frame_data *frame)
                 if (!segment_finished(&segment))
                     continue;
 
-                auto i1 = segment.first;
-                auto i2 = segment.second;
+                auto a1 = wire_attachments[segment.first];
+                auto a2 = wire_attachments[segment.second];
 
-                auto a1 = wire_attachments[i1].transform;
-                auto a2 = wire_attachments[i2].transform;
+                auto mat = calc_segment_matrices(a1, a2);
 
-                auto p1_4 = a1[3];
-                auto p2_4 = a2[3];
-
-                auto p1 = glm::vec3(p1_4.x, p1_4.y, p1_4.z);
-                auto p2 = glm::vec3(p2_4.x, p2_4.y, p2_4.z);
-
-                auto seg = p1 - p2;
-                auto len = glm::length(seg);
-
-                auto scale = mat_scale(1, 1, len);
-
-                auto rot = mat_rotate_mesh(p2, glm::normalize(p2 - p1));
-
-                segment_matrices.ptr[added] = rot * scale;
+                segment_matrices.ptr[added] = mat;
                 ++added;
             }
 
@@ -1270,6 +1277,29 @@ struct add_wiring_tool : tool
 
         glUseProgram(unlit_shader);
         draw_mesh(attachment_hw);
+        glUseProgram(simple_shader);
+
+        if (!active_wire || !current_segment)
+            return;
+
+        if (current_segment->first == ~0u)
+            return;
+
+        wire_attachment a1;
+        if (current_segment->second == ~0u)
+            a1 = wire_attachments[current_segment->first];
+        else
+            a1 = wire_attachments[current_segment->second];
+
+        wire_attachment a2 = { mat_position(pt) };
+
+        auto mat = calc_segment_matrices(a1, a2);
+
+        per_object->val.world_matrix = mat;
+        per_object->upload();
+
+        glUseProgram(unlit_shader);
+        draw_mesh(wire_hw);
         glUseProgram(simple_shader);
     }
 
