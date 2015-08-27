@@ -126,6 +126,14 @@ gl_debug_callback(GLenum source __unused,
     printf("GL: %s\n", message);
 }
 
+bool segment_finished(wire_segment *segment) {
+    if (!segment) {
+        return true;
+    }
+
+    return segment->first && segment->second;
+}
+
 
 // 16M per frame
 #define FRAME_DATA_SIZE     (16u * 1024 * 1024)
@@ -211,6 +219,7 @@ sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 sw_mesh *projectile_sw;
 sw_mesh *attachment_sw;
+sw_mesh *wire_sw;
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, unlit_instanced_shader;
 shader_params<per_object_params> *per_object;
@@ -226,6 +235,7 @@ hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
 hw_mesh *projectile_hw;
 hw_mesh *attachment_hw;
+hw_mesh *wire_hw;
 text_renderer *text;
 sprite_renderer *ui_sprites;
 light_field *light;
@@ -265,15 +275,25 @@ get_block_containing(glm::vec3 v) {
 }
 
 glm::mat4
-mat_position(float x, float y, float z)
-{
-    return glm::translate(glm::mat4(1), glm::vec3(x, y, z));
-}
-
-glm::mat4
 mat_position(glm::vec3 pos)
 {
     return glm::translate(glm::mat4(1), pos);
+}
+
+glm::mat4
+mat_position(float x, float y, float z)
+{
+    return mat_position(glm::vec3(x, y, z));
+}
+
+glm::mat4
+mat_scale(glm::vec3 scale) {
+    return glm::scale(glm::mat4(1), scale);
+}
+
+glm::mat4
+mat_scale(float x, float y, float z) {
+    return mat_scale(glm::vec3(x, y, z));
 }
 
 glm::mat4
@@ -520,7 +540,7 @@ draw_segments(frame_data *frame)
         auto count = wires[h].segments.size();
         for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
             auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
-            auto attachment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
+            auto segment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
 
             auto added = 0u;
             for (auto j = 0u; j < batch_size; j++) {
@@ -543,12 +563,12 @@ draw_segments(frame_data *frame)
                 auto scale = mat_scale(1, 1, len);
                 auto pos = mat_position(p1);
 
+                segment_matrices.ptr[added] = pos * scale;
                 ++added;
-                attachment_matrices.ptr[j] = pos * scale;
             }
 
             if (added) {
-                attachment_matrices.bind(1, frame);
+                segment_matrices.bind(1, frame);
                 draw_mesh_instanced(wire_hw, added);
             }
         }
@@ -761,6 +781,10 @@ init()
     attachment_sw = load_mesh("mesh/attach.obj");
     set_mesh_material(attachment_sw, 10);
     attachment_hw = upload_mesh(attachment_sw);
+
+    wire_sw = load_mesh("mesh/wire.obj");
+    set_mesh_material(wire_sw, 10);
+    wire_hw = upload_mesh(wire_sw);
 
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
 
@@ -1156,14 +1180,6 @@ struct remove_surface_entity_tool : tool
     }
 };
 
-bool segment_finished(wire_segment *segment) {
-    if (!segment) {
-        return true;
-    }
-
-    return segment->first && segment->second;
-}
-
 struct add_wiring_tool : tool
 {
     bool get_attach_point(bool & is_entity, glm::vec3 & pt, glm::vec3 & normal) {
@@ -1466,6 +1482,7 @@ update()
     glUseProgram(unlit_instanced_shader);
     draw_projectiles(frame);
     draw_attachments(frame);
+    draw_segments(frame);
 
     per_object->bind(1);
 
