@@ -803,8 +803,13 @@ init()
 
     mesher_init();
 
-    projectile_sw = load_mesh("mesh/cube.obj");
-    set_mesh_material(projectile_sw, 3);
+    projectile_sw = load_mesh("mesh/sphere.obj");
+    for (auto i = 0u; i < projectile_sw->num_vertices; ++i) {
+        projectile_sw->verts[i].x *= 0.01f;
+        projectile_sw->verts[i].y *= 0.01f;
+        projectile_sw->verts[i].z *= 0.01f;
+    }
+    set_mesh_material(projectile_sw, 11);
     projectile_hw = upload_mesh(projectile_sw);
 
     attachment_sw = load_mesh("mesh/attach.obj");
