@@ -1599,19 +1599,25 @@ struct play_state : game_state {
         text->measure(".", &w, &h);
         add_text_with_outline(".", -w/2, -w/2);
 
-        sprintf(buf2, "Left mouse button: %s", buf);
+        auto bind = game_settings.bindings.bindings.find(action_use_tool);
+        auto key = lookup_key((*bind).second.binds.inputs[0]);
+        sprintf(buf2, "%s: %s", key, buf);
         text->measure(buf2, &w, &h);
         add_text_with_outline(buf2, -w/2, -400);
 
         /* Gravity state (temp) */
         w = 0; h = 0;
-        sprintf(buf, "Gravity: %s (G to toggle)", pl.disable_gravity ? "OFF" : "ON");
+        bind = game_settings.bindings.bindings.find(action_gravity);
+        key = lookup_key((*bind).second.binds.inputs[0]);
+        sprintf(buf, "Gravity: %s (%s to toggle)", pl.disable_gravity ? "OFF" : "ON", key);
         text->measure(buf, &w, &h);
         add_text_with_outline(buf, -w/2, -430);
 
         /* Use key affordance */
+        bind = game_settings.bindings.bindings.find(action_use);
+        key = lookup_key((*bind).second.binds.inputs[0]);
         if (use_entity) {
-            sprintf(buf2, "(E) Use the %s", use_entity->type->name);
+            sprintf(buf2, "%s Use the %s", key, use_entity->type->name);
             w = 0; h = 0;
             text->measure(buf2, &w, &h);
             add_text_with_outline(buf2, -w/2, -200);

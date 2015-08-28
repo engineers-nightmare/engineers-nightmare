@@ -35,6 +35,10 @@ en_input lookup_input(const char *lookup);
 /* This is probably only useful for populating config files */
 const char* lookup_input(en_input lookup);
 
+/* This is used for getting string representation of input key */
+/* for example input_a => "[ A ]" */
+const char* lookup_key(en_input lookup);
+
 /* keep in sync with its lookup table[s] */
 enum en_action : int {
     action_invalid = -1,
@@ -262,7 +266,8 @@ enum en_input : int {
 };
 
 struct input_lookup_t {
-    const char* name; en_input action;
+    const char* name;
+    en_input action;
 };
 
 static const input_lookup_t input_lookup_table[] = {
@@ -381,6 +386,128 @@ static const input_lookup_t input_lookup_table[] = {
     { "input_mouse_wheelup",   input_mouse_wheelup },
     { "input_mouse_x",         input_mouse_x },
     { "input_mouse_y",         input_mouse_y },
+};
+
+struct key_lookup_t {
+    const char* name;
+    en_input action;
+};
+
+static const key_lookup_t key_lookup_table[] = {
+    { "[None]",              input_unbound },
+    { "[A]",                 input_a },
+    { "[B]",                 input_b },
+    { "[C]",                 input_c },
+    { "[D]",                 input_d },
+    { "[E]",                 input_e },
+    { "[F]",                 input_f },
+    { "[G]",                 input_g },
+    { "[H]",                 input_h },
+    { "[I]",                 input_i },
+    { "[J]",                 input_j },
+    { "[K]",                 input_k },
+    { "[L]",                 input_l },
+    { "[M]",                 input_m },
+    { "[N]",                 input_n },
+    { "[O]",                 input_o },
+    { "[P]",                 input_p },
+    { "[Q]",                 input_q },
+    { "[R]",                 input_r },
+    { "[S]",                 input_s },
+    { "[T]",                 input_t },
+    { "[U]",                 input_u },
+    { "[V]",                 input_v },
+    { "[W]",                 input_w },
+    { "[X]",                 input_x },
+    { "[Y]",                 input_y },
+    { "[Z]",                 input_z },
+    { "[1]",                 input_1 },
+    { "[2]",                 input_2 },
+    { "[3]",                 input_3 },
+    { "[4]",                 input_4 },
+    { "[5]",                 input_5 },
+    { "[6]",                 input_6 },
+    { "[7]",                 input_7 },
+    { "[8]",                 input_8 },
+    { "[9]",                 input_9 },
+    { "[0]",                 input_0 },
+    { "[Return]",            input_return },
+    { "[Escape]",            input_escape },
+    { "[Backspace]",         input_backspace },
+    { "[Tab]",               input_tab },
+    { "[Space]",             input_space },
+    { "[-]",                 input_minus },
+    { "[=]",                 input_equals },
+    { "[[] ",                input_leftbracket },
+    { "[]]",                 input_rightbracket },
+    { "[\]",                 input_backslash },
+    { "[Non US Hash]",       input_nonushash },
+    { "[;]",                 input_semicolon },
+    { "[']",                 input_apostrophe },
+    { "[`]",                 input_grave },
+    { "[,]",                 input_comma },
+    { "[.]",                 input_period },
+    { "[/]",                 input_slash },
+    { "[Capslock]",          input_capslock },
+    { "[F1]",                input_f1 },
+    { "[F2]",                input_f2 },
+    { "[F3]",                input_f3 },
+    { "[F4]",                input_f4 },
+    { "[F5]",                input_f5 },
+    { "[F6]",                input_f6 },
+    { "[F7]",                input_f7 },
+    { "[F8]",                input_f8 },
+    { "[F9]",                input_f9 },
+    { "[F10]",               input_f10 },
+    { "[F11]",               input_f11 },
+    { "[F12]",               input_f12 },
+    { "[Print  Screen]",     input_printscreen },
+    { "[Scroll  Lock]",      input_scrolllock },
+    { "[Pause]",             input_pause },
+    { "[Insert]",            input_insert },
+    { "[Home]",              input_home },
+    { "[Page  Up]",          input_pageup },
+    { "[Delete]",            input_delete },
+    { "[End]",               input_end },
+    { "[Page  Down]",        input_pagedown },
+    { "[Right]",             input_right },
+    { "[Left]",              input_left },
+    { "[Down]",              input_down },
+    { "[Up]",                input_up },
+    { "[Num Lock]",          input_kp_divide },
+    { "[Num Multiply]",      input_kp_multiply },
+    { "[Num Minus]",         input_kp_minus },
+    { "[Num Plus]",          input_kp_plus },
+    { "[Num Enter]",         input_kp_enter },
+    { "[Num 1]",             input_kp_1 },
+    { "[Num 2]",             input_kp_2 },
+    { "[Num 3]",             input_kp_3 },
+    { "[Num 4]",             input_kp_4 },
+    { "[Num 5]",             input_kp_5 },
+    { "[Num 6]",             input_kp_6 },
+    { "[Num 7]",             input_kp_7 },
+    { "[Num 8]",             input_kp_8 },
+    { "[Num 9]",             input_kp_9 },
+    { "[Num 0]",             input_kp_0 },
+    { "[Num Period]",        input_kp_period },
+    { "[Non US Backslash]",  input_nonusbackslash },
+    { "[Left Ctrl]",         input_lctrl },
+    { "[Left Shift]",        input_lshift },
+    { "[Left Alt]",          input_lalt },
+    { "[Left Super]",        input_lgui },
+    { "[Right Ctrl]",        input_rctrl },
+    { "[Right Shift]",       input_rshift },
+    { "[Right Alt]",         input_ralt },
+    { "[Right Super]",       input_rgui },
+    { "[Mouse Left]",        input_mouse_left },
+    { "[Mouse Middle]",      input_mouse_middle },
+    { "[Mouse Right]",       input_mouse_right },
+    { "[Mouse Thumb 1]",     input_mouse_thumb1 },
+    { "[Mouse Thumb 2]",     input_mouse_thumb2 },
+    { "[Mouse Wheel Down]",  input_mouse_wheeldown },
+    { "[Mouse Wheel Up]",    input_mouse_wheelup },
+    { "[Mouse X]",           input_mouse_x },
+    { "[Mouse Y]",           input_mouse_y },
 };
 
 struct binding {

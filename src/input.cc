@@ -71,6 +71,18 @@ lookup_input(en_input lookup) {
     return nullptr;
 }
 
+/* This is used for getting string representation of input key */
+/* for example input_a => "[ A ]" */
+const char*
+lookup_key(en_input lookup) {
+    for (const key_lookup_t *key = key_lookup_table; key->name != nullptr; ++key) {
+        if (key->action == lookup) {
+            return key->name;
+        }
+    }
+    return nullptr;
+}
+
 void
 set_inputs(unsigned char const * keys,
 const unsigned int mouse_buttons[],
