@@ -812,7 +812,7 @@ init()
     attachment_hw = upload_mesh(attachment_sw);
 
     wire_sw = load_mesh("mesh/wire.obj");
-    set_mesh_material(wire_sw, 10);
+    set_mesh_material(wire_sw, 11);
     wire_hw = upload_mesh(wire_sw);
 
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
@@ -883,6 +883,7 @@ init()
     world_textures->load(8, "textures/light.png");
     world_textures->load(9, "textures/switch.png");
     world_textures->load(10, "textures/attach.png");
+    world_textures->load(11, "textures/wire.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
