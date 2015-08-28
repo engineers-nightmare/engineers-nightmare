@@ -20,7 +20,7 @@ struct projectile_manager {
 
     float initial_speed = 10.f;
     float initial_lifetime = 10.f;
-    float after_collision_lifetime = 0.5f;
+    float after_collision_lifetime = 1.f;
 
     projectile_manager() {
     }
