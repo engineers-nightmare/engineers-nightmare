@@ -408,7 +408,7 @@ struct entity
             power_man.powered(ce) = true;
 
             switchable_man.assign_entity(ce);
-            switchable_man.enabled(ce) = false;
+            switchable_man.enabled(ce) = true;
 
             light_man.assign_entity(ce);
             light_man.intensity(ce) = 1.f;
@@ -1096,6 +1096,9 @@ struct add_surface_entity_tool : tool
             return false;
 
         block *bl = rc->block;
+
+        if (!bl)
+            return false;
 
         int index = normal_to_surface_index(rc);
 

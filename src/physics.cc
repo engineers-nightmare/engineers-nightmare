@@ -4,8 +4,8 @@
 #include "player.h"
 #include "physics.h"
 
-#define PLAYER_START_X 4.0f
-#define PLAYER_START_Y 4.0f
+#define PLAYER_START_X 11.0f
+#define PLAYER_START_Y 11.0f
 #define PLAYER_START_Z 1.5f
 
 #define MOVE_SPEED  0.07f
