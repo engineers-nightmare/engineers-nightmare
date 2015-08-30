@@ -442,7 +442,7 @@ static const key_lookup_t key_lookup_table[] = {
     { "[=]",                 input_equals },
     { "[[] ",                input_leftbracket },
     { "[]]",                 input_rightbracket },
-    { "[\]",                 input_backslash },
+    { "[\\]",                 input_backslash },
     { "[Non US Hash]",       input_nonushash },
     { "[;]",                 input_semicolon },
     { "[']",                 input_apostrophe },
