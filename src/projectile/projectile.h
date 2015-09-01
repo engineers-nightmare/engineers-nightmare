@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "../mesh.h"
+#include "../render_data.h"
 
 struct projectile_manager {
     struct projectile_instance_data {
@@ -66,3 +67,7 @@ struct projectile_linear_manager : projectile_manager {
 struct projectile_sine_manager : projectile_manager {
     void simulate(float dt) override;
 };
+
+
+void
+draw_projectiles(projectile_manager & proj_man, frame_data *frame);

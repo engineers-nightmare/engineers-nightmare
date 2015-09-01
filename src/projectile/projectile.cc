@@ -3,7 +3,6 @@
 
 #include "projectile.h"
 #include "../memory.h"
-#include "../shader_params.h"
 #include "../mesh.h"
 #include "../physics.h"
 
@@ -11,6 +10,9 @@ extern physics *phy;
 
 extern glm::mat4
 mat_position(glm::vec3);
+
+hw_mesh *projectile_hw;
+sw_mesh *projectile_sw;
 
 void
 projectile_manager::create_projectile_data(unsigned count) {
@@ -130,5 +132,21 @@ void projectile_sine_manager::simulate(float dt) {
         }
 
         ++i;
+    }
+}
+
+void
+draw_projectiles(projectile_manager & proj_man, frame_data *frame)
+{
+    for (auto i = 0u; i < proj_man.buffer.num; i += INSTANCE_BATCH_SIZE) {
+        auto batch_size = std::min(INSTANCE_BATCH_SIZE, proj_man.buffer.num - i);
+        auto projectile_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
+
+        for (auto j = 0u; j < batch_size; j++) {
+            projectile_matrices.ptr[j] = mat_position(proj_man.position(i + j));
+        }
+
+        projectile_matrices.bind(1, frame);
+        draw_mesh_instanced(projectile_hw, batch_size);
     }
 }

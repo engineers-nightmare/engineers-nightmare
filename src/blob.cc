@@ -12,7 +12,6 @@
 #include <mman.h>
 #endif
 
-#include "common.h"
 #include "blob.h"
 
 

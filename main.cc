@@ -1,50 +1,39 @@
-#include <stdio.h>
-#include <SDL.h>
-
 #ifndef _WIN32
 #include <err.h> /* errx */
 #else
 #include "src/winerr.h"
 #endif
 
-#include <epoxy/gl.h>
 #include <algorithm>
+#include <epoxy/gl.h>
 #include <functional>
-
-#include <unordered_map>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <stdio.h>
+#include <SDL.h>
+#include <unordered_map>
 
 #include "src/common.h"
+#include "src/component/component_system_manager.h"
 #include "src/config.h"
 #include "src/input.h"
+#include "src/light_field.h"
 #include "src/mesh.h"
 #include "src/physics.h"
 #include "src/player.h"
+#include "src/projectile/projectile.h"
+#include "src/render_data.h"
+#include "src/scopetimer.h"
 #include "src/shader.h"
+#include "src/shader_params.h"
 #include "src/ship_space.h"
 #include "src/text.h"
 #include "src/textureset.h"
 #include "src/tools.h"
-#include "src/shader_params.h"
-#include "src/light_field.h"
-
-#include "src/component/component_manager.h"
-#include "src/component/gas_production_component.h"
-#include "src/component/light_component.h"
-#include "src/component/power_component.h"
-#include "src/component/relative_position.h"
-#include "src/component/renderable_component.h"
-#include "src/component/switch_component.h"
-#include "src/component/switchable_component.h"
-
-#include "src/projectile/projectile.h"
-
-#include "src/scopetimer.h"
+#include "src/wiring.h"
 
 
-#define APP_NAME    "Engineer's Nightmare"
+#define APP_NAME        "Engineer's Nightmare"
 #define DEFAULT_WIDTH   1024
 #define DEFAULT_HEIGHT  768
 
@@ -52,7 +41,7 @@
 #define WORLD_TEXTURE_DIMENSION     32
 #define MAX_WORLD_TEXTURES          64
 
-#define MOUSE_Y_LIMIT   1.54f
+#define MOUSE_Y_LIMIT      1.54f
 #define MAX_AXIS_PER_EVENT 128
 
 bool exit_requested = false;
@@ -62,19 +51,6 @@ bool draw_hud = true;
 auto hfov = DEG2RAD(90.f);
 
 en_settings game_settings;
-
-struct wire_attachment {
-    glm::mat4 transform;
-};
-
-struct wire_segment {
-    unsigned first = -1;
-    unsigned second = -1;
-};
-
-struct wire {
-    std::vector<wire_segment> segments;
-};
 
 struct {
     SDL_Window *ptr;
@@ -126,99 +102,11 @@ gl_debug_callback(GLenum source __unused,
     printf("GL: %s\n", message);
 }
 
-bool segment_finished(wire_segment *segment) {
-    if (!segment) {
-        return true;
-    }
-
-    return segment->first != ~0u && segment->second != ~0u;
-}
-
-
-// 16M per frame
-#define FRAME_DATA_SIZE     (16u * 1024 * 1024)
-#define NUM_INFLIGHT_FRAMES 3
-
-struct frame_data {
-    GLuint bo;
-    void *base_ptr;
-    size_t offset;
-    GLsync fence;
-    GLint hw_align;
-
-    frame_data() : bo(0), base_ptr(0), offset(0), fence(0), hw_align(1) {
-        glGenBuffers(1, &bo);
-        glBindBuffer(GL_UNIFORM_BUFFER, bo);
-        glBufferStorage(GL_UNIFORM_BUFFER, FRAME_DATA_SIZE, nullptr,
-            GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-        base_ptr = glMapBufferRange(GL_UNIFORM_BUFFER, 0, FRAME_DATA_SIZE,
-            GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-        glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &hw_align);
-
-        printf("frame_data base=%p hw_align=%d\n", base_ptr, hw_align);
-    }
-
-    /* Prepare for filling this frame_data. If the backing BO is still in flight,
-     * this may stall waiting for the frame to retire.
-     */
-    void begin() {
-        if (fence) {
-            /* Wait on the fence if this frame_data might be in flight. */
-
-            /* TODO: detect case where we are getting throttled by this wait -- it suggests
-             * that either we have insufficient frame_data buffers, or that the driver is
-             * trying to run the GPU an unacceptable number of frames behind.
-             */
-            glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
-            glDeleteSync(fence);
-            fence = 0;
-        }
-
-        offset = 0;
-    }
-
-    /* Signal that all uses of this frame_data have been submitted to the hardware. */
-    void end() {
-        /* All gpu commands using this frame_data have now been issued. Drop a fence
-         * into the pipeline so we know when the buffer can be reused.
-         */
-        fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-    }
-
-    /* A transient GPU memory allocation. Usable until end() is called.
-     */
-    template<typename T>
-    struct alloc
-    {
-        T* ptr;
-        size_t off;
-        size_t size;
-
-        void bind(GLuint index, frame_data *f) {
-            glBindBufferRange(GL_UNIFORM_BUFFER, index, f->bo, off, size);
-        }
-    };
-
-    /* Allocate a chunk of frame_data for an array of T*, aligned appropriately for
-     * use as both a constant buffer, and for CPU access.
-     */
-    template<typename T>
-    alloc<T> alloc_aligned(size_t count, size_t align = alignof(T)) {
-        align = std::max(align, (size_t)hw_align);
-        offset = (offset + align - 1) & ~(align - 1);
-        alloc<T> a{ (T*)(offset + (size_t)base_ptr), offset, count * sizeof(T) };
-        offset += a.size;
-        return a;
-    }
-};
-
 frame_data *frames, *frame;
 unsigned frame_index;
 
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
-sw_mesh *projectile_sw;
-sw_mesh *attachment_sw;
 sw_mesh *wire_sw;
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader;
@@ -233,18 +121,22 @@ unsigned int mouse_buttons[input_mouse_buttons_count];
 int mouse_axes[input_mouse_axes_count];
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
-hw_mesh *projectile_hw;
-hw_mesh *attachment_hw;
 hw_mesh *wire_hw;
 text_renderer *text;
 sprite_renderer *ui_sprites;
 light_field *light;
 entity *use_entity = nullptr;
 
-sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
+extern hw_mesh *projectile_hw;
+extern sw_mesh *projectile_sw;
 
-std::vector<wire_attachment> wire_attachments;
-std::vector<wire> wires;
+extern hw_mesh *attachment_hw;
+extern sw_mesh *attachment_sw;
+
+extern std::vector<wire_attachment> wire_attachments;
+extern std::vector<wire> wires;
+
+sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
 template<typename T>
 T
@@ -254,25 +146,7 @@ clamp(T t, T lower, T upper) {
     return t;
 }
 
-gas_production_component_manager gas_man;
-light_component_manager light_man;
-power_component_manager power_man;
-relative_position_component_manager pos_man;
-renderable_component_manager render_man;
-switch_component_manager switch_man;
-switchable_component_manager switchable_man;
-
 projectile_linear_manager proj_man;
-
-glm::ivec3
-get_block_containing(glm::vec3 v) {
-    /* truncating via int cast */
-    int x = (int) v.x; if (v.x < 0) x--;
-    int y = (int) v.y; if (v.y < 0) y--;
-    int z = (int) v.z; if (v.z < 0) z--;
-
-    return glm::ivec3(x, y, z);
-}
 
 glm::mat4
 mat_rotate_mesh(glm::vec3 pt, glm::vec3 dir) {
@@ -463,90 +337,6 @@ struct entity
 };
 
 
-void
-tick_gas_producers()
-{
-    for (auto i = 0u; i < gas_man.buffer.num; i++) {
-        auto ce = gas_man.instance_pool.entity[i];
-
-        /* gas producers require: power, position */
-        assert(switchable_man.exists(ce) || !"gas producer must be switchable");
-
-        auto should_produce = switchable_man.enabled(ce) && power_man.powered(ce);
-        if (!should_produce) {
-            return;
-        }
-
-        auto pos = get_block_containing(pos_man.position(ce));
-
-        /* topo node containing the entity */
-        topo_info *t = topo_find(ship->get_topo_info(pos.x, pos.y, pos.z));
-        zone_info *z = ship->get_zone_info(t);
-        if (!z) {
-            /* if there wasn't a zone, make one */
-            z = ship->zones[t] = new zone_info(0);
-        }
-
-        /* add some gas if we can, up to our pressure limit */
-        float max_gas = gas_man.max_pressure(ce) * t->size;
-        if (z->air_amount < max_gas)
-            z->air_amount = std::min(max_gas, z->air_amount + gas_man.flow_rate(ce));
-    }
-}
-
-void
-draw_renderables(frame_data *frame)
-{
-    for (auto i = 0u; i < render_man.buffer.num; i++) {
-        auto ce = render_man.instance_pool.entity[i];
-
-        auto mat = pos_man.mat(ce);
-        auto mesh = render_man.mesh(ce);
-
-        auto entity_matrix = frame->alloc_aligned<glm::mat4>(1);
-        *entity_matrix.ptr = mat;
-        entity_matrix.bind(1, frame);
-
-        draw_mesh(&mesh);
-    }
-}
-
-
-#define INSTANCE_BATCH_SIZE 256u        /* needs to be <= the value in the shader */
-
-void
-draw_projectiles(frame_data *frame)
-{
-    for (auto i = 0u; i < proj_man.buffer.num; i += INSTANCE_BATCH_SIZE) {
-        auto batch_size = std::min(INSTANCE_BATCH_SIZE, proj_man.buffer.num - i);
-        auto projectile_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
-
-        for (auto j = 0u; j < batch_size; j++) {
-            projectile_matrices.ptr[j] = mat_position(proj_man.position(i + j));
-        }
-
-        projectile_matrices.bind(1, frame);
-        draw_mesh_instanced(projectile_hw, batch_size);
-    }
-}
-
-void
-draw_attachments(frame_data *frame)
-{
-    auto count = wire_attachments.size();
-    for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
-        auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
-        auto attachment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
-
-        for (auto j = 0u; j < batch_size; j++) {
-            attachment_matrices.ptr[j] = wire_attachments[i + j].transform;
-        }
-
-        attachment_matrices.bind(1, frame);
-        draw_mesh_instanced(attachment_hw, batch_size);
-    }
-}
-
 glm::mat4
 calc_segment_matrices(const wire_attachment &start, const wire_attachment &end) {
     auto a1 = start.transform;
@@ -679,7 +469,7 @@ update_lightfield()
      * for all sources we'll add here. */
     for (auto i = 0u; i < light_man.buffer.num; i++) {
         auto ce = light_man.instance_pool.entity[i];
-        auto pos = get_block_containing(pos_man.position(ce));
+        auto pos = get_coord_containing(pos_man.position(ce));
         auto exists = switchable_man.exists(ce);
         auto should_emit = exists ? switchable_man.enabled(ce) && power_man.powered(ce) : power_man.powered(ce);
         if (should_emit) {
@@ -1032,8 +822,8 @@ struct add_block_entity_tool : tool
 
         /* don't allow placements that would cause the player to end up inside the ent and get stuck */
         glm::ivec3 pos(rc->px, rc->py, rc->pz);
-        if (pos == get_block_containing(pl.eye) ||
-            pos == get_block_containing(pl.pos))
+        if (pos == get_coord_containing(pl.eye) ||
+            pos == get_coord_containing(pl.pos))
             return false;
 
         block *bl = ship->get_block(rc->px, rc->py, rc->pz);
@@ -1271,6 +1061,8 @@ struct add_wiring_tool : tool
         /* TODO: handle some weird cases in negative space. current impl is
          * not quite correct */
 
+        /* TODO: Move the assignment logic into the wiring system */
+
         bool hit_entity;
         glm::vec3 pt;
         glm::vec3 normal;
@@ -1472,7 +1264,7 @@ update()
         }
 
         /* allow the entities to tick */
-        tick_gas_producers();
+        tick_gas_producers(ship);
 
         /* HACK: dirty this every frame for now while debugging atmo */
         if (1 || pl.ui_dirty) {
@@ -1537,7 +1329,7 @@ update()
 
     /* draw the projectiles */
     glUseProgram(unlit_instanced_shader);
-    draw_projectiles(frame);
+    draw_projectiles(proj_man, frame);
     glUseProgram(lit_instanced_shader);
     draw_attachments(frame);
     draw_segments(frame);
@@ -1630,7 +1422,7 @@ struct play_state : game_state {
 
         {
             /* Atmo status */
-            glm::ivec3 eye_block = get_block_containing(pl.eye);
+            glm::ivec3 eye_block = get_coord_containing(pl.eye);
 
             topo_info *t = topo_find(ship->get_topo_info(eye_block.x, eye_block.y, eye_block.z));
             topo_info *outside = topo_find(&ship->outside_topo_info);
