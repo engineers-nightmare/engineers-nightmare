@@ -1567,7 +1567,7 @@ struct play_state : game_state {
         // blech. Tool gets used below, then fire projectile gets hit here
         if (pl.fire_projectile) {
             auto below_eye = glm::vec3(pl.eye.x, pl.eye.y, pl.eye.z - 0.1);
-            proj_man.spawn(below_eye, pl.dir, *projectile_hw);
+            proj_man.spawn(below_eye, pl.dir);
             pl.fire_projectile = false;
         }
 
