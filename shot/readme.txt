@@ -1,0 +1,1 @@
+Screenshots go in this directory. Please leave this file.

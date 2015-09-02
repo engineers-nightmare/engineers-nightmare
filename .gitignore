@@ -6,6 +6,9 @@ nightmare
 scratch
 *.out
 
+# screenshots
+shot/
+
 test_bin
 libNIGHTMARE.a
 Testing
