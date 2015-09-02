@@ -22,7 +22,7 @@ tick_gas_producers(ship_space * ship)
             return;
         }
 
-        auto pos = get_coord_containing (pos_man.position(ce));
+        auto pos = get_coord_containing(pos_man.position(ce));
 
         /* topo node containing the entity */
         topo_info *t = topo_find(ship->get_topo_info(pos.x, pos.y, pos.z));
@@ -33,9 +33,10 @@ tick_gas_producers(ship_space * ship)
         }
 
         /* add some gas if we can, up to our pressure limit */
-        float max_gas = gas_man.max_pressure(ce) * t->size;
-        if (z->air_amount < max_gas)
-            z->air_amount = std::min(max_gas, z->air_amount + gas_man.flow_rate(ce));
+        float max_gas = gas_man.instance_pool.max_pressure[i] * t->size;
+        if (z->air_amount < max_gas) {
+            z->air_amount = std::min(max_gas, z->air_amount + gas_man.instance_pool.flow_rate[i]);
+        }
     }
 }
 
@@ -44,9 +45,8 @@ draw_renderables(frame_data *frame)
 {
     for (auto i = 0u; i < render_man.buffer.num; i++) {
         auto ce = render_man.instance_pool.entity[i];
-
-        auto mat = pos_man.mat(ce);
-        auto mesh = render_man.mesh(ce);
+        auto & mesh = render_man.instance_pool.mesh[i];
+        auto & mat = pos_man.mat(ce);
 
         auto entity_matrix = frame->alloc_aligned<glm::mat4>(1);
         *entity_matrix.ptr = mat;
