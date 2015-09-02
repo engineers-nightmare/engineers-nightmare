@@ -117,6 +117,12 @@
     <ClCompile Include="src\component\switchable_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
+    <ClCompile Include="src\wiring.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\component_system_manager.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -188,9 +194,6 @@
     <ClInclude Include="src\projectile\projectile.h">
       <Filter>Header Files\projectile</Filter>
     </ClInclude>
-    <ClInclude Include="src\memory.h">
-      <Filter>Header Files\projectile</Filter>
-    </ClInclude>
     <ClInclude Include="src\light_field.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -219,6 +222,18 @@
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\component\switchable_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_data.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wiring.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\component_system_manager.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>

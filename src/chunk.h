@@ -2,12 +2,12 @@
 
 #include "block.h"
 #include "fixed_cube.h"
+#include "mesh.h"
 
 #include <vector>
 
 #define CHUNK_SIZE 8
 
-struct hw_mesh;
 struct entity;
 
 class btTriangleMesh;

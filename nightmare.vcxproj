@@ -120,6 +120,7 @@
     <ClCompile Include="src\atlas.cc" />
     <ClCompile Include="src\blob.cc" />
     <ClCompile Include="src\char.cc" />
+    <ClCompile Include="src\component\component_system_manager.cc" />
     <ClCompile Include="src\component\gas_production_component.cc" />
     <ClCompile Include="src\component\light_component.cc" />
     <ClCompile Include="src\component\power_component.cc" />
@@ -145,6 +146,7 @@
     <ClCompile Include="src\tools\fire_projectile.cc" />
     <ClCompile Include="src\tools\remove_block.cc" />
     <ClCompile Include="src\tools\remove_surface.cc" />
+    <ClCompile Include="src\wiring.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h" />
@@ -153,6 +155,7 @@
     <ClInclude Include="src\chunk.h" />
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\component\component_manager.h" />
+    <ClInclude Include="src\component\component_system_manager.h" />
     <ClInclude Include="src\component\gas_production_component.h" />
     <ClInclude Include="src\component\light_component.h" />
     <ClInclude Include="src\component\power_component.h" />
@@ -164,12 +167,13 @@
     <ClInclude Include="src\fixed_cube.h" />
     <ClInclude Include="src\fixed_grid.h" />
     <ClInclude Include="src\input.h" />
-    <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\light_field.h" />
+    <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\physics.h" />
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\projectile\projectile.h" />
+    <ClInclude Include="src\render_data.h" />
     <ClInclude Include="src\scopetimer.h" />
     <ClInclude Include="src\settings.h" />
     <ClInclude Include="src\shader.h" />
@@ -180,6 +184,7 @@
     <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\tools.h" />
     <ClInclude Include="src\winunistd.h" />
+    <ClInclude Include="src\wiring.h" />
     <ClInclude Include="winerr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

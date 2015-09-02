@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component_manager.h"
+#include "../mesh.h"
 
 // renderable component
 // mesh -- render mesh
