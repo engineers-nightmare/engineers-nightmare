@@ -27,6 +27,7 @@ projectile_manager::create_projectile_data(unsigned count) {
     size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
     size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
     size = sizeof(hw_mesh) * count + align_size<hw_mesh>(size);
+    size += alignof(glm::vec3);     // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
     new_buffer.num = buffer.num;

@@ -14,14 +14,14 @@ gas_production_component_manager::create_component_instance_data(unsigned count)
     size = sizeof(unsigned) * count + align_size<unsigned>(size);
     size = sizeof(float) * count + align_size<float>(size);
     size = sizeof(float) * count + align_size<float>(size);
+    size += alignof(float); // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
     new_buffer.num = buffer.num;
     new_buffer.allocated = count;
     memset(new_buffer.buffer, 0, size);
 
-    new_pool.entity = (c_entity *)new_buffer.buffer;
-
+    new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.gas_type = align_ptr((unsigned *)(new_pool.entity + count));
     new_pool.flow_rate = align_ptr((float *)(new_pool.gas_type + count));
     new_pool.max_pressure = align_ptr((float *)(new_pool.flow_rate + count));
