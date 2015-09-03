@@ -221,7 +221,7 @@ struct entity_type
 };
 
 
-entity_type entity_types[4];
+entity_type entity_types[5];
 
 /* fwd for temp spawn logic just below */
 void
@@ -645,6 +645,12 @@ init()
     entity_types[3].hw = upload_mesh(entity_types[3].sw);
     entity_types[3].name = "Switch";
     build_static_physics_mesh(entity_types[3].sw, &entity_types[3].phys_mesh, &entity_types[3].phys_shape);
+
+    entity_types[4].sw = load_mesh("mesh/single_door_frame.obj");
+    set_mesh_material(entity_types[4].sw, 2);
+    entity_types[4].hw = upload_mesh(entity_types[4].sw);
+    entity_types[4].name = "Door";
+    build_static_physics_mesh(entity_types[4].sw, &entity_types[4].phys_mesh, &entity_types[4].phys_shape);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
@@ -1163,6 +1169,7 @@ tool *tools[] = {
     new add_surface_entity_tool(&entity_types[1]),
     new add_surface_entity_tool(&entity_types[2]),
     new add_surface_entity_tool(&entity_types[3]),
+    new add_block_entity_tool(&entity_types[4]),
     new remove_surface_entity_tool(),
     new add_wiring_tool(),
 };
