@@ -10,7 +10,6 @@ struct projectile_manager {
         float *lifetime;
         glm::vec3 *position;
         glm::vec3 *velocity;
-        hw_mesh *mesh;
     } projectile_pool;
 
     struct component_buffer {
@@ -32,7 +31,7 @@ struct projectile_manager {
 
     virtual void simulate(float dt) = 0;
 
-    virtual void spawn(glm::vec3 pos, glm::vec3 vel, hw_mesh m);
+    virtual void spawn(glm::vec3 pos, glm::vec3 vel);
 
     float & mass(unsigned index) {
         return projectile_pool.mass[index];
@@ -48,10 +47,6 @@ struct projectile_manager {
 
     glm::vec3 & velocity(unsigned index) {
         return projectile_pool.velocity[index];
-    }
-
-    hw_mesh & mesh(unsigned index) {
-        return projectile_pool.mesh[index];
     }
 
     virtual ~projectile_manager() {

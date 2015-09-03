@@ -12,14 +12,14 @@ switchable_component_manager::create_component_instance_data(unsigned count) {
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(bool) * count + align_size<bool>(size);
+    size += alignof(c_entity);  // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
     new_buffer.num = buffer.num;
     new_buffer.allocated = count;
     memset(new_buffer.buffer, 0, size);
 
-    new_pool.entity = (c_entity *)new_buffer.buffer;
-
+    new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.enabled = align_ptr((bool *)(new_pool.entity + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));

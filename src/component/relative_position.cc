@@ -15,14 +15,14 @@ relative_position_component_manager::create_component_instance_data(unsigned cou
     size_t size = sizeof(c_entity) * count;
     size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
     size = sizeof(glm::mat4) * count + align_size<glm::mat4>(size);
+    size += alignof(glm::mat4); // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
     new_buffer.num = buffer.num;
     new_buffer.allocated = count;
     memset(new_buffer.buffer, 0, size);
 
-    new_pool.entity = (c_entity *)new_buffer.buffer;
-
+    new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.position = align_ptr((glm::vec3 *)(new_pool.entity + count));
     new_pool.mat = align_ptr((glm::mat4 *)(new_pool.position + count));
 
