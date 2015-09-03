@@ -50,8 +50,8 @@ getNormalizedVector(const btVector3& v)
 class en_ray_result_callback : public btCollisionWorld::ClosestRayResultCallback
 {
 public:
-    en_ray_result_callback (btCollisionObject* me)
-        : btCollisionWorld::ClosestRayResultCallback(btVector3(0.0, 0.0, 0.0), btVector3(0.0, 0.0, 0.0)),
+    en_ray_result_callback(btCollisionObject* me, btVector3 const & from, btVector3 const &to)
+        : btCollisionWorld::ClosestRayResultCallback(from, to),
         m_me(me) {}
 
     btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) override {
@@ -864,8 +864,10 @@ void en_char_controller::stand(btCollisionWorld *collisionWorld)
 entity *
 phys_raycast(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollisionWorld *world)
 {
-    en_ray_result_callback callback(ignore);
-    world->rayTest(glm_to_bt(start), glm_to_bt(end), callback);
+    btVector3 start_bt = glm_to_bt(start);
+    btVector3 end_bt = glm_to_bt(end);
+    en_ray_result_callback callback(ignore, start_bt, end_bt);
+    world->rayTest(start_bt, end_bt, callback);
 
     if (callback.hasHit()) {
         return (entity *)callback.m_collisionObject->getUserPointer();
@@ -876,17 +878,17 @@ phys_raycast(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollis
 
 /* Not part of CC, but reuses the same callbacks etc. */
 generic_raycast_info
-phys_raycast_generic(glm::vec3 start_, glm::vec3 end_,
+phys_raycast_generic(glm::vec3 start, glm::vec3 end,
         btCollisionObject *ignore, btCollisionWorld *world)
 {
     generic_raycast_info result;
     result.hit = false;
 
-    btVector3 start(start_.x, start_.y, start_.z);
-    btVector3 end(end_.x, end_.y, end_.z);
+    btVector3 start_bt = glm_to_bt(start);
+    btVector3 end_bt = glm_to_bt(end);
 
-    btCollisionWorld::ClosestRayResultCallback callback(start, end);
-    world->rayTest(start, end, callback);
+    en_ray_result_callback callback(ignore, start_bt, end_bt);
+    world->rayTest(start_bt, end_bt, callback);
 
     if (callback.hasHit()) {
         result.hit = true;
