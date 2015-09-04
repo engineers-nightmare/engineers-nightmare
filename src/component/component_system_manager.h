@@ -9,7 +9,7 @@
 #include "light_component.h"
 #include "physics_component.h"
 #include "power_component.h"
-#include "relative_position.h"
+#include "relative_position_component.h"
 #include "renderable_component.h"
 #include "surface_attachment_component.h"
 #include "switch_component.h"

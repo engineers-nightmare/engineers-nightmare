@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 
 #include "../memory.h"
-#include "relative_position.h"
+#include "relative_position_component.h"
 
 void
 relative_position_component_manager::create_component_instance_data(unsigned count) {
