@@ -44,6 +44,8 @@
 #define MOUSE_Y_LIMIT      1.54f
 #define MAX_AXIS_PER_EVENT 128
 
+#define INITIAL_MAX_COMPONENTS 20
+
 bool exit_requested = false;
 
 bool draw_hud = true;
@@ -560,13 +562,14 @@ prepare_chunks()
 void
 init()
 {
-    gas_man.create_component_instance_data(20);
-    light_man.create_component_instance_data(20);
-    pos_man.create_component_instance_data(20);
-    power_man.create_component_instance_data(20);
-    render_man.create_component_instance_data(20);
-    switch_man.create_component_instance_data(20);
-    switchable_man.create_component_instance_data(20);
+    gas_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    light_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    pos_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    power_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    render_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    surface_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    switch_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    switchable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
     proj_man.create_projectile_data(1000);
 
