@@ -233,19 +233,19 @@ mark_lightfield_update(int x, int y, int z);
 struct entity
 {
     /* TODO: replace this completely, it's silly. */
-    /*int x, y, z;*/
     entity_type *type;
-    btRigidBody *phys_body;
     c_entity ce;
 
     entity(int x, int y, int z, entity_type *type, int face)
-        : type(type), phys_body(nullptr) {
+        : type(type) {
         auto mat = mat_block_face(x, y, z, face);
 
-        build_static_physics_rb_mat(&mat, type->phys_shape, &phys_body);
-
+        physics_man.assign_entity(ce);
+        build_static_physics_rb_mat(&mat, type->phys_shape, &physics_man.rigid(ce));
         /* so that we can get back to the entity from a phys raycast */
-        phys_body->setUserPointer(this);
+        physics_man.rigid(ce)->setUserPointer(this);
+        physics_man.mesh(ce) = type->phys_mesh;
+        physics_man.collision(ce) = type->phys_shape; 
 
         surface_man.assign_entity(ce);
         surface_man.block(ce) = glm::ivec3(x, y, z);
@@ -299,7 +299,6 @@ struct entity
     }
 
     ~entity() {
-        teardown_static_physics_setup(nullptr, nullptr, &phys_body);
     }
 
     void use() {
@@ -569,6 +568,7 @@ init()
 {
     gas_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     light_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    physics_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     pos_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     power_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     render_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
@@ -780,6 +780,9 @@ remove_ents_from_surface(int x, int y, int z, int face)
             pos_man.destroy_entity_instance(e->ce);
 
             render_man.destroy_entity_instance(e->ce);
+
+            teardown_static_physics_setup(nullptr, nullptr, &physics_man.rigid(e->ce));
+            physics_man.destroy_entity_instance(e->ce);
 
             power_man.destroy_entity_instance(e->ce);
 
