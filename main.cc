@@ -233,20 +233,23 @@ mark_lightfield_update(int x, int y, int z);
 struct entity
 {
     /* TODO: replace this completely, it's silly. */
-    int x, y, z;
+    /*int x, y, z;*/
     entity_type *type;
     btRigidBody *phys_body;
-    int face;
     c_entity ce;
 
     entity(int x, int y, int z, entity_type *type, int face)
-        : x(x), y(y), z(z), type(type), phys_body(nullptr), face(face) {
+        : type(type), phys_body(nullptr) {
         auto mat = mat_block_face(x, y, z, face);
 
         build_static_physics_rb_mat(&mat, type->phys_shape, &phys_body);
 
         /* so that we can get back to the entity from a phys raycast */
         phys_body->setUserPointer(this);
+
+        surface_man.assign_entity(ce);
+        surface_man.block(ce) = glm::ivec3(x, y, z);
+        surface_man.face(ce) = face;
 
         pos_man.assign_entity(ce);
         pos_man.position(ce) = glm::vec3(x, y, z);
@@ -301,10 +304,11 @@ struct entity
 
     void use() {
         /* used by the player */
-        printf("player using the %s at %d %d %d\n",
-               type->name, x, y, z);
-
         assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
+
+        auto pos = pos_man.position(ce);
+        printf("player using the %s at %f %f %f\n",
+            type->name, pos.x, pos.y, pos.z);
 
         // hacks abound until we get wiring in
         if (switchable_man.exists(ce)) {
@@ -317,7 +321,6 @@ struct entity
         if (switch_man.exists(ce)) {
             // switch toggles directly
             // finds any switchable in the 6 adjacent blocks and toggles
-            auto pos = pos_man.position(ce);
 
             for (auto i = 0u; i < pos_man.buffer.num; ++i) {
                 auto pos2 = pos_man.instance_pool.position[i];
@@ -330,7 +333,9 @@ struct entity
                     pos == glm::vec3(pos2.x, pos2.y, pos2.z - 1)) {
                     if (light_man.exists(entity) && switchable_man.exists(entity)) {
                         switchable_man.enabled(entity) ^= true;
-                        mark_lightfield_update(x, y, z);
+
+                        auto block_pos = get_coord_containing(pos);
+                        mark_lightfield_update(block_pos.x, block_pos.y, block_pos.z);
                     }
                 }
             }
@@ -767,10 +772,11 @@ remove_ents_from_surface(int x, int y, int z, int face)
     chunk *ch = ship->get_chunk_containing(x, y, z);
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
         entity *e = *it;
-        if (e->x == x && e->y == y && e->z == z && e->face == face) {
 
-            }
+        const auto & p = surface_man.block(e->ce);
+        const auto & f = surface_man.face(e->ce);
 
+        if (p.x == x && p.y == y && p.z == z && f == face) {
             pos_man.destroy_entity_instance(e->ce);
 
             render_man.destroy_entity_instance(e->ce);
@@ -781,6 +787,8 @@ remove_ents_from_surface(int x, int y, int z, int face)
 
             light_man.destroy_entity_instance(e->ce);
 
+            surface_man.destroy_entity_instance(e->ce);
+
             switch_man.destroy_entity_instance(e->ce);
 
             switchable_man.destroy_entity_instance(e->ce);
@@ -789,7 +797,7 @@ remove_ents_from_surface(int x, int y, int z, int face)
             it = ch->entities.erase(it);
         }
         else {
-            it++;
+            ++it;
         }
     }
 
