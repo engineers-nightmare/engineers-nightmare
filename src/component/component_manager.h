@@ -61,8 +61,10 @@ struct component_manager {
     }
 
     void destroy_entity_instance(c_entity const &e) {
-        auto i = lookup(e);
-        destroy_instance(i);
+        if (exists(e)) {
+            auto i = lookup(e);
+            destroy_instance(i);
+        }
     }
 
     virtual void destroy_instance(instance i) = 0;
