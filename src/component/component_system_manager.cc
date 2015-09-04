@@ -9,6 +9,7 @@ renderable_component_manager render_man;
 surface_attachment_component_manager surface_man;
 switch_component_manager switch_man;
 switchable_component_manager switchable_man;
+type_component_manager type_man;
 
 void
 tick_gas_producers(ship_space * ship)

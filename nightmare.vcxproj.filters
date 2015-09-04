@@ -129,6 +129,9 @@
     <ClCompile Include="src\component\physics_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\type_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -247,6 +250,9 @@
     </ClInclude>
     <ClInclude Include="src\wiring.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\type_component.h">
+      <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

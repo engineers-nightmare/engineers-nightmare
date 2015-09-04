@@ -130,6 +130,7 @@
     <ClCompile Include="src\component\surface_attachment_component.cc" />
     <ClCompile Include="src\component\switchable_component.cc" />
     <ClCompile Include="src\component\switch_component.cc" />
+    <ClCompile Include="src\component\type_component.cc" />
     <ClCompile Include="src\config.cc" />
     <ClCompile Include="src\input.cc" />
     <ClCompile Include="src\mesh.cc" />
@@ -167,6 +168,7 @@
     <ClInclude Include="src\component\surface_attachment_component.h" />
     <ClInclude Include="src\component\switchable_component.h" />
     <ClInclude Include="src\component\switch_component.h" />
+    <ClInclude Include="src\component\type_component.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\fixed_cube.h" />
     <ClInclude Include="src\fixed_grid.h" />
