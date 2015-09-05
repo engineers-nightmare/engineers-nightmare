@@ -305,48 +305,50 @@ struct entity
 
     ~entity() {
     }
+};
 
-    void use() {
-        /* used by the player */
-        assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
 
-        auto pos = pos_man.position(ce);
-        auto type = &entity_types[type_man.type(ce)];
-        printf("player using the %s at %f %f %f\n",
+void use_action_on_entity(c_entity ce) {
+    /* used by the player */
+    assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
+
+    auto pos = pos_man.position(ce);
+    auto type = &entity_types[type_man.type(ce)];
+    printf("player using the %s at %f %f %f\n",
             type->name, pos.x, pos.y, pos.z);
 
-        // hacks abound until we get wiring in
-        if (switchable_man.exists(ce)) {
-            // gas producer toggles directly
-            if (gas_man.exists(ce)) {
-                switchable_man.enabled(ce) ^= true;
-            }
+    // hacks abound until we get wiring in
+    if (switchable_man.exists(ce)) {
+        // gas producer toggles directly
+        if (gas_man.exists(ce)) {
+            switchable_man.enabled(ce) ^= true;
         }
+    }
 
-        if (switch_man.exists(ce)) {
-            // switch toggles directly
-            // finds any switchable in the 6 adjacent blocks and toggles
+    if (switch_man.exists(ce)) {
+        // switch toggles directly
+        // finds any switchable in the 6 adjacent blocks and toggles
 
-            for (auto i = 0u; i < pos_man.buffer.num; ++i) {
-                auto pos2 = pos_man.instance_pool.position[i];
-                auto entity = pos_man.instance_pool.entity[i];
-                if (pos == glm::vec3(pos2.x + 1, pos2.y, pos2.z) ||
+        /* TODO: we can do better than a linear scan over all entities */
+        for (auto i = 0u; i < pos_man.buffer.num; ++i) {
+            auto pos2 = pos_man.instance_pool.position[i];
+            auto entity = pos_man.instance_pool.entity[i];
+            if (pos == glm::vec3(pos2.x + 1, pos2.y, pos2.z) ||
                     pos == glm::vec3(pos2.x - 1, pos2.y, pos2.z) ||
                     pos == glm::vec3(pos2.x, pos2.y + 1, pos2.z) ||
                     pos == glm::vec3(pos2.x, pos2.y - 1, pos2.z) ||
                     pos == glm::vec3(pos2.x, pos2.y, pos2.z + 1) ||
                     pos == glm::vec3(pos2.x, pos2.y, pos2.z - 1)) {
-                    if (light_man.exists(entity) && switchable_man.exists(entity)) {
-                        switchable_man.enabled(entity) ^= true;
+                if (light_man.exists(entity) && switchable_man.exists(entity)) {
+                    switchable_man.enabled(entity) ^= true;
 
-                        auto block_pos = get_coord_containing(pos);
-                        mark_lightfield_update(block_pos.x, block_pos.y, block_pos.z);
-                    }
+                    auto block_pos = get_coord_containing(pos);
+                    mark_lightfield_update(block_pos.x, block_pos.y, block_pos.z);
                 }
             }
         }
     }
-};
+}
 
 
 glm::mat4
@@ -1487,7 +1489,7 @@ struct play_state : game_state {
         }
 
         if (!wnd.has_focus && SDL_GetRelativeMouseMode() != SDL_FALSE) {
-            SDL_SetRelativeMouseMode(SDL_FALSE);            
+            SDL_SetRelativeMouseMode(SDL_FALSE);
         }
 
         tool *t = tools[pl.selected_slot];
@@ -1511,7 +1513,7 @@ struct play_state : game_state {
         }
 
         if (pl.use && hit_ent) {
-            hit_ent->use();
+            use_action_on_entity(hit_ent->ce);
         }
 
         /* tool preview */
