@@ -7,20 +7,19 @@
 
 struct wire_attachment {
     glm::mat4 transform;
+    unsigned parent;
 };
 
 struct wire_segment {
-    unsigned first = -1;
-    unsigned second = -1;
+    unsigned first;
+    unsigned second;
 };
-
-struct wire {
-    std::vector<wire_segment> segments;
-};
-
-
-bool
-segment_finished(wire_segment* segment);
 
 void
 draw_attachments(frame_data *frame);
+
+void
+draw_segments(frame_data *frame);
+
+glm::mat4
+calc_segment_matrix(const wire_attachment &start, const wire_attachment &end);
