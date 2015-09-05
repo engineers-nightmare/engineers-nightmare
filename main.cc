@@ -236,6 +236,8 @@ struct entity
     c_entity ce;
 
     entity(int x, int y, int z, unsigned type, int face) {
+        ce = c_entity::spawn();
+
         auto mat = mat_block_face(x, y, z, face);
 
         auto et = &entity_types[type];

@@ -7,11 +7,13 @@ static unsigned entities_id_ref = 1;
 struct c_entity {
     unsigned id;
 
-    c_entity() : id(entities_id_ref++) {
-    }
-
     bool operator==(c_entity const &other) const {
         return this->id == other.id;
+    }
+
+    static c_entity spawn() {
+        c_entity e = { entities_id_ref++ };
+        return e;
     }
 };
 
@@ -34,7 +36,7 @@ struct component_manager {
         unsigned allocated;
         void *buffer;
     } buffer;
-    
+
     std::unordered_map<c_entity, unsigned> entity_instance_map;
 
     virtual void create_component_instance_data(unsigned count) = 0;
