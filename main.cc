@@ -1068,9 +1068,6 @@ struct add_wiring_tool : tool
     void preview(raycast_info *rc) override {
         /* do a real, generic raycast */
 
-        /* TODO: handle some weird cases in negative space. current impl is
-         * not quite correct */
-
         /* TODO: Move the assignment logic into the wiring system */
 
         bool hit_entity;
