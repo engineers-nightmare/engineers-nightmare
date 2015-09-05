@@ -1,5 +1,7 @@
 #include "text.h"
 
+#if USE_TEXT
+
 #include <algorithm>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -164,3 +166,5 @@ text_renderer::draw()
     atlas->bind(0);
     glDrawArrays(GL_TRIANGLES, 0, bo_vertex_count);
 }
+
+#endif
