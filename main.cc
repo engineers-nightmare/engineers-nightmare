@@ -772,6 +772,14 @@ remove_ents_from_surface(int x, int y, int z, int face)
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
         entity *e = *it;
 
+        /* entities may have been inserted in this chunk which don't have
+         * placement on a surface. don't corrupt everything if we hit one.
+         */
+        if (!surface_man.exists(e->ce)) {
+            ++it;
+            continue;
+        }
+
         const auto & p = surface_man.block(e->ce);
         const auto & f = surface_man.face(e->ce);
 
