@@ -1072,7 +1072,7 @@ struct add_wiring_tool : tool
             return;
 
         unsigned new_attach = wire_attachments.size();
-        wire_attachment wa = { mat_rotate_mesh(pt, normal) };
+        wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach };
         wire_attachments.push_back(wa);
 
         if (current_attach != (unsigned)-1) {
