@@ -70,7 +70,6 @@ draw_segments(frame_data *frame)
         auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
         auto segment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
 
-        auto added = 0u;
         for (auto j = 0u; j < batch_size; j++) {
             auto segment = wire_segments[i + j];
 
@@ -79,13 +78,10 @@ draw_segments(frame_data *frame)
 
             auto mat = calc_segment_matrix(a1, a2);
 
-            segment_matrices.ptr[added] = mat;
-            ++added;
+            segment_matrices.ptr[j] = mat;
         }
 
-        if (added) {
-            segment_matrices.bind(1, frame);
-            draw_mesh_instanced(wire_hw, added);
-        }
+        segment_matrices.bind(1, frame);
+        draw_mesh_instanced(wire_hw, batch_size);
     }
 }
