@@ -109,7 +109,6 @@ unsigned frame_index;
 
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
-sw_mesh *wire_sw;
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader;
 shader_params<per_object_params> *per_object;
@@ -123,7 +122,6 @@ unsigned int mouse_buttons[input_mouse_buttons_count];
 int mouse_axes[input_mouse_axes_count];
 hw_mesh *scaffold_hw;
 hw_mesh *surfs_hw[6];
-hw_mesh *wire_hw;
 text_renderer *text;
 sprite_renderer *ui_sprites;
 light_field *light;
@@ -134,6 +132,9 @@ extern sw_mesh *projectile_sw;
 
 extern hw_mesh *attachment_hw;
 extern sw_mesh *attachment_sw;
+
+extern hw_mesh *wire_hw;
+extern sw_mesh *wire_sw;
 
 extern std::vector<wire_attachment> wire_attachments;
 extern std::vector<wire_segment> wire_segments;
@@ -345,58 +346,6 @@ struct entity
         }
     }
 };
-
-
-glm::mat4
-calc_segment_matrices(const wire_attachment &start, const wire_attachment &end) {
-    auto a1 = start.transform;
-    auto a2 = end.transform;
-
-    auto p1_4 = a1[3];
-    auto p2_4 = a2[3];
-
-    auto p1 = glm::vec3(p1_4.x, p1_4.y, p1_4.z);
-    auto p2 = glm::vec3(p2_4.x, p2_4.y, p2_4.z);
-
-    auto seg = p1 - p2;
-    auto len = glm::length(seg);
-
-    auto scale = mat_scale(1, 1, len);
-
-    auto rot = mat_rotate_mesh(p2, glm::normalize(p2 - p1));
-
-    return rot * scale;
-}
-
-void
-draw_segments(frame_data *frame)
-{
-    auto count = wire_segments.size();
-    for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
-        auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
-        auto segment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
-
-        auto added = 0u;
-        for (auto j = 0u; j < batch_size; j++) {
-            auto segment = wire_segments[i + j];
-            if (!segment_finished(&segment))
-                continue;
-
-            auto a1 = wire_attachments[segment.first];
-            auto a2 = wire_attachments[segment.second];
-
-            auto mat = calc_segment_matrices(a1, a2);
-
-            segment_matrices.ptr[added] = mat;
-            ++added;
-        }
-
-        if (added) {
-            segment_matrices.bind(1, frame);
-            draw_mesh_instanced(wire_hw, added);
-        }
-    }
-}
 
 
 void
@@ -1101,7 +1050,7 @@ struct add_wiring_tool : tool
         auto & a1 = wire_attachments[current_attach];
         wire_attachment a2 = { mat_position(pt) };
 
-        auto mat = calc_segment_matrices(a1, a2);
+        auto mat = calc_segment_matrix(a1, a2);
 
         per_object->val.world_matrix = mat;
         per_object->upload();
