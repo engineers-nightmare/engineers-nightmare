@@ -988,6 +988,20 @@ struct add_wiring_tool : tool
 {
     unsigned current_attach = -1;
 
+    unsigned get_existing_attach_near(glm::vec3 const & pt) {
+        /* Some spatial index might be useful here. */
+        for (auto i = 0u; i < wire_attachments.size(); i++) {
+            auto d = glm::vec3(wire_attachments[i].transform[3][0],
+                wire_attachments[i].transform[3][1],
+                wire_attachments[i].transform[3][2]) - pt;
+            if (glm::dot(d, d) <= 0.05f * 0.05f) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     bool get_attach_point(bool & is_entity, glm::vec3 & pt, glm::vec3 & normal) {
         auto end = pl.eye + pl.dir * 5.0f;
 
@@ -1038,21 +1052,35 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
-        if (!hit_entity && current_attach == (unsigned)-1)
+        unsigned existing_attach = get_existing_attach_near(pt);
+
+        if (!hit_entity && current_attach == (unsigned)-1 &&
+            existing_attach == (unsigned)-1) {
             return;
+        }
 
-        per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
-        per_object->upload();
+        if (existing_attach == (unsigned)-1) {
 
-        glUseProgram(unlit_shader);
-        draw_mesh(attachment_hw);
-        glUseProgram(simple_shader);
+            per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
+            per_object->upload();
+
+            glUseProgram(unlit_shader);
+            draw_mesh(attachment_hw);
+            glUseProgram(simple_shader);
+
+        }
 
         if (current_attach == (unsigned)-1)
             return;
 
         auto & a1 = wire_attachments[current_attach];
-        wire_attachment a2 = { mat_position(pt) };
+        wire_attachment a2;
+        if (existing_attach != (unsigned)-1) {
+            a2 = wire_attachments[existing_attach];
+        }
+        else {
+            a2 = { mat_position(pt) };
+        }
 
         auto mat = calc_segment_matrix(a1, a2);
 
@@ -1072,12 +1100,22 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
-        if (!hit_entity && current_attach == (unsigned)-1)
-            return;
+        unsigned existing_attach = get_existing_attach_near(pt);
 
-        unsigned new_attach = wire_attachments.size();
-        wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
-        wire_attachments.push_back(wa);
+        if (!hit_entity && current_attach == (unsigned)-1 &&
+            existing_attach == (unsigned)-1) {
+            return;
+        }
+
+        unsigned new_attach;
+        if (existing_attach == (unsigned)-1) {
+            new_attach = wire_attachments.size();
+            wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
+            wire_attachments.push_back(wa);
+        }
+        else {
+            new_attach = existing_attach;
+        }
 
         if (current_attach != (unsigned)-1) {
             wire_segment s;
@@ -1089,7 +1127,7 @@ struct add_wiring_tool : tool
             attach_topo_unite(current_attach, new_attach);
         }
 
-        if (hit_entity && current_attach != (unsigned)-1) {
+        if ((hit_entity || existing_attach != (unsigned)-1) && current_attach != (unsigned)-1) {
             /* finishing a run */
             current_attach = (unsigned)-1;
         }
