@@ -6,7 +6,7 @@ hw_mesh *attachment_hw;
 sw_mesh *attachment_sw;
 
 std::vector<wire_attachment> wire_attachments;
-std::vector<wire> wires;
+std::vector<wire_segment> wire_segments;
 
 bool segment_finished(wire_segment* segment) {
     if (!segment) {

@@ -14,11 +14,6 @@ struct wire_segment {
     unsigned second = -1;
 };
 
-struct wire {
-    std::vector<wire_segment> segments;
-};
-
-
 bool
 segment_finished(wire_segment* segment);
 

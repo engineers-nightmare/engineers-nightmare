@@ -136,7 +136,7 @@ extern hw_mesh *attachment_hw;
 extern sw_mesh *attachment_sw;
 
 extern std::vector<wire_attachment> wire_attachments;
-extern std::vector<wire> wires;
+extern std::vector<wire_segment> wire_segments;
 
 sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
@@ -371,35 +371,29 @@ calc_segment_matrices(const wire_attachment &start, const wire_attachment &end) 
 void
 draw_segments(frame_data *frame)
 {
-    if (wires.size() <= 0) {
-        return;
-    }
+    auto count = wire_segments.size();
+    for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
+        auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
+        auto segment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
 
-    for (auto h = 0u; h < wires.size(); ++h) {
-        auto count = wires[h].segments.size();
-        for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
-            auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
-            auto segment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
+        auto added = 0u;
+        for (auto j = 0u; j < batch_size; j++) {
+            auto segment = wire_segments[i + j];
+            if (!segment_finished(&segment))
+                continue;
 
-            auto added = 0u;
-            for (auto j = 0u; j < batch_size; j++) {
-                auto segment = wires[h].segments[i + j];
-                if (!segment_finished(&segment))
-                    continue;
+            auto a1 = wire_attachments[segment.first];
+            auto a2 = wire_attachments[segment.second];
 
-                auto a1 = wire_attachments[segment.first];
-                auto a2 = wire_attachments[segment.second];
+            auto mat = calc_segment_matrices(a1, a2);
 
-                auto mat = calc_segment_matrices(a1, a2);
+            segment_matrices.ptr[added] = mat;
+            ++added;
+        }
 
-                segment_matrices.ptr[added] = mat;
-                ++added;
-            }
-
-            if (added) {
-                segment_matrices.bind(1, frame);
-                draw_mesh_instanced(wire_hw, added);
-            }
+        if (added) {
+            segment_matrices.bind(1, frame);
+            draw_mesh_instanced(wire_hw, added);
         }
     }
 }
@@ -1031,8 +1025,7 @@ struct remove_surface_entity_tool : tool
 
 struct add_wiring_tool : tool
 {
-    wire *active_wire = nullptr;
-    wire_segment *current_segment = nullptr;
+    unsigned current_attach = -1;
 
     bool get_attach_point(bool & is_entity, glm::vec3 & pt, glm::vec3 & normal) {
         auto end = pl.eye + pl.dir * 5.0f;
@@ -1075,9 +1068,6 @@ struct add_wiring_tool : tool
     void preview(raycast_info *rc) override {
         /* do a real, generic raycast */
 
-        /* TODO: handle hitting ents -- we want to connect to the ent. */
-        /* TODO: ignore the player properly. this involves fixing the phys
-         * raycast code slightly */
         /* TODO: handle some weird cases in negative space. current impl is
          * not quite correct */
 
@@ -1090,7 +1080,7 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
-        if (!hit_entity && (!active_wire || !active_wire->segments.size()))
+        if (!hit_entity && current_attach == (unsigned)-1)
             return;
 
         per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
@@ -1100,18 +1090,10 @@ struct add_wiring_tool : tool
         draw_mesh(attachment_hw);
         glUseProgram(simple_shader);
 
-        if (!active_wire || !current_segment)
+        if (current_attach == (unsigned)-1)
             return;
 
-        if (current_segment->first == ~0u)
-            return;
-
-        wire_attachment a1;
-        if (current_segment->second == ~0u)
-            a1 = wire_attachments[current_segment->first];
-        else
-            a1 = wire_attachments[current_segment->second];
-
+        auto & a1 = wire_attachments[current_attach];
         wire_attachment a2 = { mat_position(pt) };
 
         auto mat = calc_segment_matrices(a1, a2);
@@ -1132,36 +1114,26 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
-        if (!hit_entity && (!active_wire || !active_wire->segments.size()))
+        if (!hit_entity && current_attach == (unsigned)-1)
             return;
 
-        if (!active_wire && hit_entity) {
-            wire w;
-            wires.push_back(w);
-            active_wire = &wires[wires.size() - 1];
-        }
-
-        if (!current_segment || segment_finished(current_segment)) {
-            active_wire->segments.push_back(wire_segment());
-            current_segment = &active_wire->segments[active_wire->segments.size() - 1];
-            if (active_wire->segments.size() > 1) {
-                current_segment->first =
-                    active_wire->segments[active_wire->segments.size() - 2].second;
-            }
-        }
-
-        wire_attachment wa;
-        wa.transform = mat_rotate_mesh(pt, normal);
+        unsigned new_attach = wire_attachments.size();
+        wire_attachment wa = { mat_rotate_mesh(pt, normal) };
         wire_attachments.push_back(wa);
 
-        if (current_segment->first == ~0u) {
-            current_segment->first = wire_attachments.size() - 1;
+        if (current_attach != (unsigned)-1) {
+            wire_segment s;
+            s.first = current_attach;
+            s.second = new_attach;
+            wire_segments.push_back(s);
+        }
+
+        if (hit_entity && current_attach != (unsigned)-1) {
+            /* finishing a run */
+            current_attach = (unsigned)-1;
         }
         else {
-            current_segment->second = wire_attachments.size() - 1;
-
-            if (hit_entity)
-                active_wire = nullptr;
+            current_attach = new_attach;
         }
     }
 
