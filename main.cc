@@ -44,6 +44,8 @@
 #define MOUSE_Y_LIMIT      1.54f
 #define MAX_AXIS_PER_EVENT 128
 
+#define INITIAL_MAX_COMPONENTS 20
+
 bool exit_requested = false;
 
 bool draw_hud = true;
@@ -231,30 +233,36 @@ mark_lightfield_update(int x, int y, int z);
 struct entity
 {
     /* TODO: replace this completely, it's silly. */
-    int x, y, z;
-    entity_type *type;
-    btRigidBody *phys_body;
-    int face;
     c_entity ce;
 
-    entity(int x, int y, int z, entity_type *type, int face)
-        : x(x), y(y), z(z), type(type), phys_body(nullptr), face(face) {
+    entity(int x, int y, int z, unsigned type, int face) {
         auto mat = mat_block_face(x, y, z, face);
 
-        build_static_physics_rb_mat(&mat, type->phys_shape, &phys_body);
+        auto et = &entity_types[type];
 
+        type_man.assign_entity(ce);
+        type_man.type(ce) = type;
+
+        physics_man.assign_entity(ce);
+        build_static_physics_rb_mat(&mat, et->phys_shape, &physics_man.rigid(ce));
         /* so that we can get back to the entity from a phys raycast */
-        phys_body->setUserPointer(this);
+        physics_man.rigid(ce)->setUserPointer(this);
+        physics_man.mesh(ce) = et->phys_mesh;
+        physics_man.collision(ce) = et->phys_shape;
+
+        surface_man.assign_entity(ce);
+        surface_man.block(ce) = glm::ivec3(x, y, z);
+        surface_man.face(ce) = face;
 
         pos_man.assign_entity(ce);
         pos_man.position(ce) = glm::vec3(x, y, z);
         pos_man.mat(ce) = mat;
 
         render_man.assign_entity(ce);
-        render_man.mesh(ce) = *type->hw;
+        render_man.mesh(ce) = *et->hw;
 
         // frobnicator
-        if (type == &entity_types[0]) {
+        if (type == 0) {
             power_man.assign_entity(ce);
             //default to powered state for now
             power_man.powered(ce) = true;
@@ -267,7 +275,7 @@ struct entity
             gas_man.max_pressure(ce) = 1.0f;
         }
         // display panel
-        else if (type == &entity_types[1]) {
+        else if (type == 1) {
             power_man.assign_entity(ce);
             //default to powered state for now
             power_man.powered(ce) = true;
@@ -276,7 +284,7 @@ struct entity
             light_man.intensity(ce) = 0.15f;
         }
         // light
-        else if (type == &entity_types[2]) {
+        else if (type == 2) {
             power_man.assign_entity(ce);
             //default to powered state for now
             power_man.powered(ce) = true;
@@ -288,21 +296,22 @@ struct entity
             light_man.intensity(ce) = 1.f;
         }
         // switch
-        else if (type == &entity_types[3]) {
+        else if (type == 3) {
             switch_man.assign_entity(ce);
         }
     }
 
     ~entity() {
-        teardown_static_physics_setup(nullptr, nullptr, &phys_body);
     }
 
     void use() {
         /* used by the player */
-        printf("player using the %s at %d %d %d\n",
-               type->name, x, y, z);
-
         assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
+
+        auto pos = pos_man.position(ce);
+        auto type = &entity_types[type_man.type(ce)];
+        printf("player using the %s at %f %f %f\n",
+            type->name, pos.x, pos.y, pos.z);
 
         // hacks abound until we get wiring in
         if (switchable_man.exists(ce)) {
@@ -315,7 +324,6 @@ struct entity
         if (switch_man.exists(ce)) {
             // switch toggles directly
             // finds any switchable in the 6 adjacent blocks and toggles
-            auto pos = pos_man.position(ce);
 
             for (auto i = 0u; i < pos_man.buffer.num; ++i) {
                 auto pos2 = pos_man.instance_pool.position[i];
@@ -328,7 +336,9 @@ struct entity
                     pos == glm::vec3(pos2.x, pos2.y, pos2.z - 1)) {
                     if (light_man.exists(entity) && switchable_man.exists(entity)) {
                         switchable_man.enabled(entity) ^= true;
-                        mark_lightfield_update(x, y, z);
+
+                        auto block_pos = get_coord_containing(pos);
+                        mark_lightfield_update(block_pos.x, block_pos.y, block_pos.z);
                     }
                 }
             }
@@ -560,13 +570,16 @@ prepare_chunks()
 void
 init()
 {
-    gas_man.create_component_instance_data(20);
-    light_man.create_component_instance_data(20);
-    pos_man.create_component_instance_data(20);
-    power_man.create_component_instance_data(20);
-    render_man.create_component_instance_data(20);
-    switch_man.create_component_instance_data(20);
-    switchable_man.create_component_instance_data(20);
+    gas_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    light_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    physics_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    pos_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    power_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    render_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    surface_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    switch_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    switchable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    type_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
     proj_man.create_projectile_data(1000);
 
@@ -764,40 +777,37 @@ remove_ents_from_surface(int x, int y, int z, int face)
     chunk *ch = ship->get_chunk_containing(x, y, z);
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
         entity *e = *it;
-        if (e->x == x && e->y == y && e->z == z && e->face == face) {
-            if (pos_man.exists(e->ce)) {
-                pos_man.destroy_entity_instance(e->ce);
-            }
 
-            if (render_man.exists(e->ce)) {
-                render_man.destroy_entity_instance(e->ce);
-            }
+        const auto & p = surface_man.block(e->ce);
+        const auto & f = surface_man.face(e->ce);
 
-            if (power_man.exists(e->ce)) {
-                power_man.destroy_entity_instance(e->ce);
-            }
+        if (p.x == x && p.y == y && p.z == z && f == face) {
+            pos_man.destroy_entity_instance(e->ce);
 
-            if (gas_man.exists(e->ce)) {
-                gas_man.destroy_entity_instance(e->ce);
-            }
+            render_man.destroy_entity_instance(e->ce);
 
-            if (light_man.exists(e->ce)) {
-                light_man.destroy_entity_instance(e->ce);
-            }
+            teardown_static_physics_setup(nullptr, nullptr, &physics_man.rigid(e->ce));
+            physics_man.destroy_entity_instance(e->ce);
 
-            if (switch_man.exists(e->ce)) {
-                switch_man.destroy_entity_instance(e->ce);
-            }
+            power_man.destroy_entity_instance(e->ce);
 
-            if (switchable_man.exists(e->ce)) {
-                switchable_man.destroy_entity_instance(e->ce);
-            }
+            gas_man.destroy_entity_instance(e->ce);
+
+            light_man.destroy_entity_instance(e->ce);
+
+            surface_man.destroy_entity_instance(e->ce);
+
+            switch_man.destroy_entity_instance(e->ce);
+
+            switchable_man.destroy_entity_instance(e->ce);
+
+            type_man.destroy_entity_instance(e->ce);
 
             delete e;
             it = ch->entities.erase(it);
         }
         else {
-            it++;
+            ++it;
         }
     }
 
@@ -818,9 +828,9 @@ remove_ents_from_surface(int x, int y, int z, int face)
 
 struct add_block_entity_tool : tool
 {
-    entity_type *type;
+    unsigned type;
 
-    explicit add_block_entity_tool(entity_type *type) : type(type) {}
+    explicit add_block_entity_tool(unsigned type) : type(type) {}
 
     bool can_use(raycast_info *rc) {
         if (!rc->hit || rc->inside)
@@ -872,7 +882,8 @@ struct add_block_entity_tool : tool
         per_object->val.world_matrix = mat_position((float)rc->px, (float)rc->py, (float)rc->pz);
         per_object->upload();
 
-        draw_mesh(type->hw);
+        auto t = &entity_types[type];
+        draw_mesh(t->hw);
 
         /* draw a block overlay as well around the frobnicator */
         glUseProgram(add_overlay_shader);
@@ -881,16 +892,17 @@ struct add_block_entity_tool : tool
     }
 
     void get_description(char *str) override {
-        sprintf(str, "Place %s", type->name);
+        auto t = &entity_types[type];
+        sprintf(str, "Place %s", t->name);
     }
 };
 
 
 struct add_surface_entity_tool : tool
 {
-    entity_type *type;
+    unsigned type;
 
-    add_surface_entity_tool(entity_type *type) : type(type) {}
+    add_surface_entity_tool(unsigned type) : type(type) {}
 
     bool can_use(raycast_info *rc) {
         if (!rc->hit)
@@ -950,7 +962,8 @@ struct add_surface_entity_tool : tool
         per_object->val.world_matrix = mat_block_face(rc->px, rc->py, rc->pz, index ^ 1);
         per_object->upload();
 
-        draw_mesh(type->hw);
+        auto t = &entity_types[type];
+        draw_mesh(t->hw);
 
         /* draw a surface overlay here too */
         /* TODO: sub-block placement granularity -- will need a different overlay */
@@ -967,7 +980,8 @@ struct add_surface_entity_tool : tool
     }
 
     void get_description(char *str) override {
-        sprintf(str, "Place %s on surface", type->name);
+        auto t = &entity_types[type];
+        sprintf(str, "Place %s on surface", t->name);
     }
 };
 
@@ -1165,11 +1179,11 @@ tool *tools[] = {
     tool::create_add_surface_tool(surface_grate),
     tool::create_add_surface_tool(surface_glass),
     tool::create_remove_surface_tool(),
-    new add_block_entity_tool(&entity_types[0]),
-    new add_surface_entity_tool(&entity_types[1]),
-    new add_surface_entity_tool(&entity_types[2]),
-    new add_surface_entity_tool(&entity_types[3]),
-    new add_block_entity_tool(&entity_types[4]),
+    new add_block_entity_tool(0),
+    new add_surface_entity_tool(1),
+    new add_surface_entity_tool(2),
+    new add_surface_entity_tool(3),
+    new add_block_entity_tool(4),
     new remove_surface_entity_tool(),
     new add_wiring_tool(),
 };
@@ -1421,7 +1435,8 @@ struct play_state : game_state {
         bind = game_settings.bindings.bindings.find(action_use);
         key = lookup_key((*bind).second.binds.inputs[0]);
         if (use_entity) {
-            sprintf(buf2, "%s Use the %s", key, use_entity->type->name);
+            auto type = &entity_types[type_man.type(use_entity->ce)];
+            sprintf(buf2, "%s Use the %s", key, type->name);
             w = 0; h = 0;
             text->measure(buf2, &w, &h);
             add_text_with_outline(buf2, -w/2, -200);
