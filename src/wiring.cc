@@ -85,3 +85,66 @@ draw_segments(frame_data *frame)
         draw_mesh_instanced(wire_hw, batch_size);
     }
 }
+
+
+unsigned
+attach_topo_find(unsigned p)
+{
+    /* compress paths as we go */
+    if (wire_attachments[p].parent != p) {
+        wire_attachments[p].parent = attach_topo_find(wire_attachments[p].parent);
+    }
+
+    return wire_attachments[p].parent;
+}
+
+
+unsigned
+attach_topo_unite(unsigned from, unsigned to)
+{
+    /* merge together trees containing two attaches */
+    from = attach_topo_find(from);
+    to = attach_topo_find(to);
+
+    /* already in same subtree? */
+    if (from == to) {
+        return from;
+    }
+
+    if (wire_attachments[from].rank < wire_attachments[to].rank) {
+        wire_attachments[from].parent = to;
+        return to;
+    }
+    else if (wire_attachments[from].rank > wire_attachments[to].rank) {
+        wire_attachments[to].parent = from;
+        return from;
+    }
+    else {
+        /* two rank-n trees merge to form a rank-n+1 tree. the choice of
+         * root is arbitrary
+         */
+        wire_attachments[to].parent = from;
+        wire_attachments[from].rank++;
+        return from;
+    }
+}
+
+
+/* not currently used, but we'll need it once there is deletion of attaches
+ * or segments.
+ */
+void
+rebuild_wiring_topo(void)
+{
+    /* 1. everything points to itself, with rank 0 */
+    auto count = wire_attachments.size();
+    for (auto i = 0u; i < count; i++) {
+        wire_attachments[i].parent = i;
+        wire_attachments[i].rank = 0;
+    }
+
+    /* 2. walk all the segments, unifying */
+    for (auto & seg : wire_segments) {
+        attach_topo_unite(seg.first, seg.second);
+    }
+}

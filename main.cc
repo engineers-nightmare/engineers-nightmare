@@ -1076,7 +1076,7 @@ struct add_wiring_tool : tool
             return;
 
         unsigned new_attach = wire_attachments.size();
-        wire_attachment wa = { mat_rotate_mesh(pt, normal) };
+        wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
         wire_attachments.push_back(wa);
 
         if (current_attach != (unsigned)-1) {
@@ -1084,6 +1084,9 @@ struct add_wiring_tool : tool
             s.first = current_attach;
             s.second = new_attach;
             wire_segments.push_back(s);
+
+            /* merge! */
+            attach_topo_unite(current_attach, new_attach);
         }
 
         if (hit_entity && current_attach != (unsigned)-1) {

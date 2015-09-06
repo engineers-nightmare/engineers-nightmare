@@ -8,6 +8,7 @@
 struct wire_attachment {
     glm::mat4 transform;
     unsigned parent;
+    unsigned rank;
 };
 
 struct wire_segment {
@@ -23,3 +24,7 @@ draw_segments(frame_data *frame);
 
 glm::mat4
 calc_segment_matrix(const wire_attachment &start, const wire_attachment &end);
+
+
+unsigned
+attach_topo_unite(unsigned from, unsigned to);
