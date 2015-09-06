@@ -4,6 +4,8 @@
 
 sw_mesh *attachment_sw;
 hw_mesh *attachment_hw;
+sw_mesh *no_placement_sw;
+hw_mesh *no_placement_hw;
 sw_mesh *wire_sw;
 hw_mesh *wire_hw;
 
