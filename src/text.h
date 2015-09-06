@@ -47,10 +47,8 @@ struct texture_atlas
     void bind(int texunit);
 };
 
-#define USE_TEXT 0
 struct text_renderer
 {
-#if USE_TEXT
     text_renderer(char const *font, int size);
 
     metrics ms[256];
@@ -69,28 +67,6 @@ struct text_renderer
     void upload();
     void reset();
     void draw();
-
-#else
-
-    text_renderer(char const *font, int size) {}
-
-    metrics ms[256];
-
-    GLuint bo;
-    GLuint bo_vertex_count;
-    GLuint bo_capacity;
-    GLuint vao;
-
-    std::vector<text_vertex> verts;
-
-    texture_atlas *atlas;
-
-    void add(char const *str, float x, float y, float r, float g, float b) {}
-    void measure(char const *str, float *x, float *y) {}
-    void upload() {}
-    void reset() {}
-    void draw() {}
-#endif
 };
 
 struct sprite_renderer
