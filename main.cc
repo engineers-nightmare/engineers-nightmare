@@ -133,6 +133,9 @@ extern sw_mesh *projectile_sw;
 extern hw_mesh *attachment_hw;
 extern sw_mesh *attachment_sw;
 
+extern hw_mesh *no_placement_hw;
+extern sw_mesh *no_placement_sw;
+
 extern hw_mesh *wire_hw;
 extern sw_mesh *wire_sw;
 
@@ -566,8 +569,12 @@ init()
     set_mesh_material(attachment_sw, 10);
     attachment_hw = upload_mesh(attachment_sw);
 
+    no_placement_sw = load_mesh("mesh/no_place.obj");
+    set_mesh_material(no_placement_sw, 11);
+    no_placement_hw = upload_mesh(no_placement_sw);
+
     wire_sw = load_mesh("mesh/wire.obj");
-    set_mesh_material(wire_sw, 11);
+    set_mesh_material(wire_sw, 12);
     wire_hw = upload_mesh(wire_sw);
 
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
@@ -644,7 +651,8 @@ init()
     world_textures->load(8, "textures/light.png");
     world_textures->load(9, "textures/switch.png");
     world_textures->load(10, "textures/attach.png");
-    world_textures->load(11, "textures/wire.png");
+    world_textures->load(11, "textures/no_place.png");
+    world_textures->load(12, "textures/wire.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
@@ -1049,13 +1057,20 @@ struct add_wiring_tool : tool
         glm::vec3 pt;
         glm::vec3 normal;
 
-        if (!get_attach_point(hit_entity, pt, normal))
+        if (!get_attach_point(hit_entity, pt, normal)) {
             return;
+        }
 
         unsigned existing_attach = get_existing_attach_near(pt);
 
         if (!hit_entity && current_attach == (unsigned)-1 &&
-            existing_attach == (unsigned)-1) {
+                existing_attach == (unsigned)-1) {
+            per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
+            per_object->upload();
+
+            glUseProgram(unlit_shader);
+            draw_mesh(no_placement_hw);
+            glUseProgram(simple_shader);
             return;
         }
 
@@ -1080,6 +1095,17 @@ struct add_wiring_tool : tool
         }
         else {
             a2 = { mat_position(pt) };
+        }
+
+        if (existing_attach != (unsigned)-1 && a2.parent == a1.parent) {
+            per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
+            per_object->upload();
+
+            glUseProgram(unlit_shader);
+            draw_mesh(no_placement_hw);
+            glUseProgram(simple_shader);
+
+            return;
         }
 
         auto mat = calc_segment_matrix(a1, a2);
@@ -1114,6 +1140,11 @@ struct add_wiring_tool : tool
             wire_attachments.push_back(wa);
         }
         else {
+            auto & a1 = wire_attachments[current_attach];
+            auto & a2 = wire_attachments[existing_attach];
+            if (current_attach != (unsigned)-1 && a2.parent == a1.parent) {
+                return;
+            }
             new_attach = existing_attach;
         }
 
