@@ -840,6 +840,8 @@ struct add_block_entity_tool : tool
 
     void alt_use(raycast_info *rc) override {}
 
+    void long_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
@@ -920,6 +922,8 @@ struct add_surface_entity_tool : tool
 
     void alt_use(raycast_info *rc) override {}
 
+    void long_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
@@ -969,6 +973,8 @@ struct remove_surface_entity_tool : tool
     }
 
     void alt_use(raycast_info *rc) override {}
+
+    void long_use(raycast_info *rc) override {}
 
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
@@ -1235,6 +1241,8 @@ struct add_wiring_tool : tool
             attach_topo_rebuild();
         }
     }
+
+    void long_use(raycast_info *rc) override {}
 
     void get_description(char *str) override {
         strcpy(str, "Place wiring");
@@ -1577,6 +1585,10 @@ struct play_state : game_state {
             t->alt_use(&rc);
         }
 
+        if (pl.long_use_tool && t) {
+            t->long_use(&rc);
+        }
+
         /* interact with ents */
         entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
                                        phy->ghostObj, phy->dynamicsWorld);
@@ -1638,10 +1650,14 @@ struct play_state : game_state {
         auto slot9      = get_input(action_slot9)->just_active;
         auto slot0      = get_input(action_slot0)->just_active;
         auto gravity    = get_input(action_gravity)->just_active;
-        auto use_tool   = get_input(action_use_tool)->just_pressed;
-        auto alt_use_tool = get_input(action_alt_use_tool)->just_pressed;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;
+
+        auto input_use_tool     = get_input(action_use_tool);
+        auto use_tool           = input_use_tool->just_pressed;
+        auto long_use_tool      = input_use_tool->held;
+        auto input_alt_use_tool = get_input(action_alt_use_tool);
+        auto alt_use_tool       = input_alt_use_tool->just_pressed;
 
         /* persistent */
 
@@ -1657,14 +1673,15 @@ struct play_state : game_state {
 
         pl.move = glm::vec2((float) moveX, (float) moveY);
 
-        pl.jump       = jump;
-        pl.crouch     = crouch;
-        pl.reset      = reset;
-        pl.crouch_end = crouch_end;
-        pl.use        = use;
-        pl.gravity    = gravity;
-        pl.use_tool   = use_tool;
-        pl.alt_use_tool = alt_use_tool;
+        pl.jump          = jump;
+        pl.crouch        = crouch;
+        pl.reset         = reset;
+        pl.crouch_end    = crouch_end;
+        pl.use           = use;
+        pl.gravity       = gravity;
+        pl.use_tool      = use_tool;
+        pl.alt_use_tool  = alt_use_tool;
+        pl.long_use_tool = long_use_tool;
 
         // blech. Tool gets used below, then fire projectile gets hit here
         if (pl.fire_projectile) {

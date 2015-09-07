@@ -26,8 +26,8 @@ struct player {
     bool gravity;
 
     bool use_tool;
-
-    bool alt_use_tool;
+    bool alt_use_tool;    
+    bool long_use_tool;
 
     bool ui_dirty;
 
