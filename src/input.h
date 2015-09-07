@@ -528,7 +528,8 @@ struct action {
     bool active = false;            /* is action currently active */
     bool just_active = false;       /* did action go active this frame */
     bool just_inactive = false;     /* did action go inactive this frame */
-    bool just_pressed = false; /* did action just go inactive under momentary_input_duration since going active */
+    bool just_pressed = false;      /* did action just go inactive under pressed_input_duration since going active */
+    bool held = false;              /* action active longer than pressed_input_duration */
     Uint32 last_active = 0;         /* time of last activation */
     Uint32 current_active = 0;      /* duration of current activation (milliseconds) */
 
