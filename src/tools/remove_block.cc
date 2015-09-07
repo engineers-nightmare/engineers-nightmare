@@ -88,6 +88,8 @@ struct remove_block_tool : tool
         mark_lightfield_update(rc->x, rc->y, rc->z);
     }
 
+    void alt_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override
     {
         if (!can_use(rc))

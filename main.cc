@@ -838,6 +838,8 @@ struct add_block_entity_tool : tool
             bl->surf_space[face] = ~0;
     }
 
+    void alt_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
@@ -916,6 +918,8 @@ struct add_surface_entity_tool : tool
         mark_lightfield_update(rc->px, rc->py, rc->pz);
     }
 
+    void alt_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
@@ -963,6 +967,8 @@ struct remove_surface_entity_tool : tool
         remove_ents_from_surface(rc->px, rc->py, rc->pz, index^1);
         mark_lightfield_update(rc->px, rc->py, rc->pz);
     }
+
+    void alt_use(raycast_info *rc) override {}
 
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
@@ -1166,6 +1172,8 @@ struct add_wiring_tool : tool
             current_attach = new_attach;
         }
     }
+
+    void alt_use(raycast_info *rc) override {}
 
     void get_description(char *str) override {
         strcpy(str, "Place wiring");

@@ -11,6 +11,7 @@ struct tool
     virtual ~tool() {}
 
     virtual void use(raycast_info *rc) = 0;
+    virtual void alt_use(raycast_info *rc) = 0;
     virtual void preview(raycast_info *rc) = 0;
     virtual void get_description(char *str) = 0;
 

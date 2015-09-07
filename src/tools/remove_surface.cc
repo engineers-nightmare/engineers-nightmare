@@ -70,6 +70,8 @@ struct remove_surface_tool : tool
         ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rc->px, rc->py, rc->pz);
     }
 
+    void alt_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override
     {
         if (!can_use(rc))

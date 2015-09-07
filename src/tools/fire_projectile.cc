@@ -18,6 +18,8 @@ struct fire_projectile_tool : tool
         pl->fire_projectile = true;
     }
 
+    void alt_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override
     {
     }
