@@ -1006,16 +1006,21 @@ struct remove_surface_entity_tool : tool
 
 struct add_wiring_tool : tool
 {
-    unsigned const invalid_attach = -1;
+    static unsigned const invalid_attach = -1;
     unsigned current_attach = invalid_attach;
+    bool moving_existing = false;
+    wire_attachment old_attach;
 
-    unsigned get_existing_attach_near(glm::vec3 const & pt) {
+    unsigned get_existing_attach_near(glm::vec3 const & pt, unsigned ignore = invalid_attach) {
         /* Some spatial index might be useful here. */
         for (auto i = 0u; i < wire_attachments.size(); i++) {
             auto d = glm::vec3(wire_attachments[i].transform[3][0],
                 wire_attachments[i].transform[3][1],
                 wire_attachments[i].transform[3][2]) - pt;
             if (glm::dot(d, d) <= 0.05f * 0.05f) {
+                if (i == ignore) {
+                    continue;
+                }
                 return i;
             }
         }
@@ -1041,23 +1046,6 @@ struct add_wiring_tool : tool
         pt = hit.hitCoord + hit.hitNormal * 0.05f;
         normal = hit.hitNormal;
 
-        if (!is_entity) {
-            auto frac = pt - glm::floor(pt);
-            auto diff = glm::abs(glm::vec3(0.5f) - frac);
-
-            /* snap the two components closest to the edge, to the edge */
-            if (diff.x > diff.y || diff.x > diff.z) {
-                frac.x = frac.x < 0.5f ? 0.1f : 0.9f;
-            }
-            if (diff.y >= diff.x || diff.y > diff.z) {
-                frac.y = frac.y < 0.5f ? 0.1f : 0.9f;
-            }
-            if (diff.z >= diff.x || diff.z >= diff.y) {
-                frac.z = frac.z < 0.5f ? 0.1f : 0.9f;
-            }
-
-            pt = frac + glm::floor(pt);
-        }
         return true;
     }
 
@@ -1074,8 +1062,14 @@ struct add_wiring_tool : tool
             return;
         }
 
-        unsigned existing_attach = get_existing_attach_near(pt);
+        if (current_attach != invalid_attach) {
+            current_attach = current_attach;
+        }
 
+        unsigned existing_attach = get_existing_attach_near(pt);
+        unsigned existing_attach_ignore = get_existing_attach_near(pt, current_attach);
+
+        // on entity and haven't started attaching yet
         if (!hit_entity && current_attach == invalid_attach &&
                 existing_attach == invalid_attach) {
             per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
@@ -1087,15 +1081,35 @@ struct add_wiring_tool : tool
             return;
         }
 
+        // not pointing at existing
         if (existing_attach == invalid_attach) {
-
             per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
             per_object->upload();
 
             glUseProgram(unlit_shader);
             draw_mesh(attachment_hw);
             glUseProgram(simple_shader);
+        }
 
+        wire_attachment a1;
+        wire_attachment a2;
+
+        if (current_attach != invalid_attach) {
+            a1 = wire_attachments[current_attach];
+        }
+
+        if (moving_existing) {
+            glm::mat4 mat;
+            if (existing_attach_ignore != invalid_attach) {
+                mat = wire_attachments[existing_attach_ignore].transform;
+            }
+            else {
+                mat = mat_rotate_mesh(pt, normal);
+            }
+
+            wire_attachments[current_attach].transform = mat;
+
+            return;
         }
 
         if (current_attach == invalid_attach)
@@ -1105,7 +1119,6 @@ struct add_wiring_tool : tool
             a1.transform = mat_position(pt);
         }
 
-        wire_attachment a2;
         if (existing_attach != invalid_attach) {
             a2 = wire_attachments[existing_attach];
         }
@@ -1142,10 +1155,62 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
-        unsigned existing_attach = get_existing_attach_near(pt);
+        unsigned existing_attach = get_existing_attach_near(pt, current_attach);
 
         if (!hit_entity && current_attach == invalid_attach &&
-            existing_attach == invalid_attach) {
+            existing_attach == invalid_attach && !moving_existing) {
+            return;
+        }
+
+        if (moving_existing) {
+            auto a1 = wire_attachments[current_attach];
+
+            /* moved to existing. need to merge 
+             * We can only move to existing attach if the two
+             * attaches are on different runs (attach.parent)
+             */
+            if (existing_attach != invalid_attach) {
+                auto a2 = wire_attachments[existing_attach];
+
+                if (a1.parent == a2.parent) {
+                    return;
+                }
+
+                /* all segments with first or second as current need
+                 * to change first or second to be existing
+                */
+                for (auto& segment : wire_segments) {
+                    if (segment.first == current_attach) {
+                        segment.first = existing_attach;
+                    }
+
+                    if (segment.second == current_attach) {
+                        segment.second = existing_attach;
+                    }
+                }
+
+                auto back_attach = wire_attachments.size() - 1;
+                /* no segments */
+                if (back_attach == invalid_attach) {
+                    return;
+                }
+
+                wire_attachments[current_attach] = wire_attachments[back_attach];
+                wire_attachments.pop_back();
+
+                for (auto& segment : wire_segments) {
+                    if (segment.first == back_attach) {
+                        segment.first = current_attach;
+                    }
+
+                    if (segment.second == back_attach) {
+                        segment.second = current_attach;
+                    }
+                }
+            }
+
+            moving_existing = false;
+            current_attach = invalid_attach;
             return;
         }
 
@@ -1187,6 +1252,14 @@ struct add_wiring_tool : tool
     }
 
     void alt_use(raycast_info *rc) override {
+        /* reset to old spot if moving. "cancel" */
+        if (moving_existing) {
+            wire_attachments[current_attach] = old_attach;
+            moving_existing = false;
+            current_attach = invalid_attach;
+            return;
+        }
+
         /* terminate the current run */
         if (current_attach != invalid_attach) {
             current_attach = invalid_attach;
@@ -1263,6 +1336,9 @@ struct add_wiring_tool : tool
             }
 
             current_attach = existing_attach;
+
+            moving_existing = true;
+            old_attach = wire_attachments[current_attach];
         }
     }
 
