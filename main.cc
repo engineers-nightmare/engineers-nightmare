@@ -1173,7 +1173,10 @@ struct add_wiring_tool : tool
         }
     }
 
-    void alt_use(raycast_info *rc) override {}
+    void alt_use(raycast_info *rc) override {
+        /* terminate the current run */
+        current_attach = (unsigned)-1;
+    }
 
     void get_description(char *str) override {
         strcpy(str, "Place wiring");
