@@ -1207,6 +1207,8 @@ struct add_wiring_tool : tool
                         segment.second = current_attach;
                     }
                 }
+
+                attach_topo_rebuild();
             }
 
             moving_existing = false;
