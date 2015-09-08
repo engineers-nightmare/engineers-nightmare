@@ -840,6 +840,8 @@ struct add_block_entity_tool : tool
 
     void alt_use(raycast_info *rc) override {}
 
+    void long_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
@@ -920,6 +922,8 @@ struct add_surface_entity_tool : tool
 
     void alt_use(raycast_info *rc) override {}
 
+    void long_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
@@ -970,6 +974,8 @@ struct remove_surface_entity_tool : tool
 
     void alt_use(raycast_info *rc) override {}
 
+    void long_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
@@ -1000,20 +1006,26 @@ struct remove_surface_entity_tool : tool
 
 struct add_wiring_tool : tool
 {
-    unsigned current_attach = -1;
+    static unsigned const invalid_attach = -1;
+    unsigned current_attach = invalid_attach;
+    bool moving_existing = false;
+    wire_attachment old_attach;
 
-    unsigned get_existing_attach_near(glm::vec3 const & pt) {
+    unsigned get_existing_attach_near(glm::vec3 const & pt, unsigned ignore = invalid_attach) {
         /* Some spatial index might be useful here. */
         for (auto i = 0u; i < wire_attachments.size(); i++) {
             auto d = glm::vec3(wire_attachments[i].transform[3][0],
                 wire_attachments[i].transform[3][1],
                 wire_attachments[i].transform[3][2]) - pt;
             if (glm::dot(d, d) <= 0.05f * 0.05f) {
+                if (i == ignore) {
+                    continue;
+                }
                 return i;
             }
         }
 
-        return -1;
+        return invalid_attach;
     }
 
     bool get_attach_point(bool & is_entity, glm::vec3 & pt, glm::vec3 & normal) {
@@ -1034,23 +1046,6 @@ struct add_wiring_tool : tool
         pt = hit.hitCoord + hit.hitNormal * 0.05f;
         normal = hit.hitNormal;
 
-        if (!is_entity) {
-            auto frac = pt - glm::floor(pt);
-            auto diff = glm::abs(glm::vec3(0.5f) - frac);
-
-            /* snap the two components closest to the edge, to the edge */
-            if (diff.x > diff.y || diff.x > diff.z) {
-                frac.x = frac.x < 0.5f ? 0.1f : 0.9f;
-            }
-            if (diff.y >= diff.x || diff.y > diff.z) {
-                frac.y = frac.y < 0.5f ? 0.1f : 0.9f;
-            }
-            if (diff.z >= diff.x || diff.z >= diff.y) {
-                frac.z = frac.z < 0.5f ? 0.1f : 0.9f;
-            }
-
-            pt = frac + glm::floor(pt);
-        }
         return true;
     }
 
@@ -1067,10 +1062,16 @@ struct add_wiring_tool : tool
             return;
         }
 
-        unsigned existing_attach = get_existing_attach_near(pt);
+        if (current_attach != invalid_attach) {
+            current_attach = current_attach;
+        }
 
-        if (!hit_entity && current_attach == (unsigned)-1 &&
-                existing_attach == (unsigned)-1) {
+        unsigned existing_attach = get_existing_attach_near(pt);
+        unsigned existing_attach_ignore = get_existing_attach_near(pt, current_attach);
+
+        // on entity and haven't started attaching yet
+        if (!hit_entity && current_attach == invalid_attach &&
+                existing_attach == invalid_attach) {
             per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
             per_object->upload();
 
@@ -1080,30 +1081,52 @@ struct add_wiring_tool : tool
             return;
         }
 
-        if (existing_attach == (unsigned)-1) {
-
+        // not pointing at existing
+        if (existing_attach == invalid_attach) {
             per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
             per_object->upload();
 
             glUseProgram(unlit_shader);
             draw_mesh(attachment_hw);
             glUseProgram(simple_shader);
-
         }
 
-        if (current_attach == (unsigned)-1)
+        wire_attachment a1;
+        wire_attachment a2;
+
+        if (current_attach != invalid_attach) {
+            a1 = wire_attachments[current_attach];
+        }
+
+        if (moving_existing) {
+            glm::mat4 mat;
+            if (existing_attach_ignore != invalid_attach) {
+                mat = wire_attachments[existing_attach_ignore].transform;
+            }
+            else {
+                mat = mat_rotate_mesh(pt, normal);
+            }
+
+            wire_attachments[current_attach].transform = mat;
+
+            return;
+        }
+
+        if (current_attach == invalid_attach)
             return;
 
-        auto & a1 = wire_attachments[current_attach];
-        wire_attachment a2;
-        if (existing_attach != (unsigned)-1) {
+        if (current_attach == existing_attach) {
+            a1.transform = mat_position(pt);
+        }
+
+        if (existing_attach != invalid_attach) {
             a2 = wire_attachments[existing_attach];
         }
         else {
             a2 = { mat_position(pt) };
         }
 
-        if (existing_attach != (unsigned)-1 && a2.parent == a1.parent) {
+        if (existing_attach != invalid_attach && a2.parent == a1.parent) {
             per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
             per_object->upload();
 
@@ -1132,15 +1155,69 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
-        unsigned existing_attach = get_existing_attach_near(pt);
+        unsigned existing_attach = get_existing_attach_near(pt, current_attach);
 
-        if (!hit_entity && current_attach == (unsigned)-1 &&
-            existing_attach == (unsigned)-1) {
+        if (!hit_entity && current_attach == invalid_attach &&
+            existing_attach == invalid_attach && !moving_existing) {
+            return;
+        }
+
+        if (moving_existing) {
+            auto a1 = wire_attachments[current_attach];
+
+            /* moved to existing. need to merge 
+             * We can only move to existing attach if the two
+             * attaches are on different runs (attach.parent)
+             */
+            if (existing_attach != invalid_attach) {
+                auto a2 = wire_attachments[existing_attach];
+
+                if (a1.parent == a2.parent) {
+                    return;
+                }
+
+                /* all segments with first or second as current need
+                 * to change first or second to be existing
+                */
+                for (auto& segment : wire_segments) {
+                    if (segment.first == current_attach) {
+                        segment.first = existing_attach;
+                    }
+
+                    if (segment.second == current_attach) {
+                        segment.second = existing_attach;
+                    }
+                }
+
+                auto back_attach = wire_attachments.size() - 1;
+                /* no segments */
+                if (back_attach == invalid_attach) {
+                    return;
+                }
+
+                wire_attachments[current_attach] = wire_attachments[back_attach];
+                wire_attachments.pop_back();
+
+                for (auto& segment : wire_segments) {
+                    if (segment.first == back_attach) {
+                        segment.first = current_attach;
+                    }
+
+                    if (segment.second == back_attach) {
+                        segment.second = current_attach;
+                    }
+                }
+
+                attach_topo_rebuild();
+            }
+
+            moving_existing = false;
+            current_attach = invalid_attach;
             return;
         }
 
         unsigned new_attach;
-        if (existing_attach == (unsigned)-1) {
+        if (existing_attach == invalid_attach) {
             new_attach = wire_attachments.size();
             wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
             wire_attachments.push_back(wa);
@@ -1150,14 +1227,14 @@ struct add_wiring_tool : tool
             auto & a2 = wire_attachments[existing_attach];
 
             /* don't attach if these two attachment points are already in the same wire */
-            if (current_attach != (unsigned)-1 &&
+            if (current_attach != invalid_attach &&
                 attach_topo_find(current_attach) == attach_topo_find(existing_attach)) {
                 return;
             }
             new_attach = existing_attach;
         }
 
-        if (current_attach != (unsigned)-1) {
+        if (current_attach != invalid_attach) {
             wire_segment s;
             s.first = current_attach;
             s.second = new_attach;
@@ -1167,9 +1244,9 @@ struct add_wiring_tool : tool
             attach_topo_unite(current_attach, new_attach);
         }
 
-        if ((hit_entity || existing_attach != (unsigned)-1) && current_attach != (unsigned)-1) {
+        if ((hit_entity || existing_attach != invalid_attach) && current_attach != invalid_attach) {
             /* finishing a run */
-            current_attach = (unsigned)-1;
+            current_attach = invalid_attach;
         }
         else {
             current_attach = new_attach;
@@ -1177,9 +1254,17 @@ struct add_wiring_tool : tool
     }
 
     void alt_use(raycast_info *rc) override {
+        /* reset to old spot if moving. "cancel" */
+        if (moving_existing) {
+            wire_attachments[current_attach] = old_attach;
+            moving_existing = false;
+            current_attach = invalid_attach;
+            return;
+        }
+
         /* terminate the current run */
-        if (current_attach != (unsigned)-1) {
-            current_attach = (unsigned)-1;
+        if (current_attach != invalid_attach) {
+            current_attach = invalid_attach;
             return;
         }
 
@@ -1193,7 +1278,7 @@ struct add_wiring_tool : tool
         }
 
         unsigned existing_attach = get_existing_attach_near(pt);
-        if (existing_attach == (unsigned)-1) {
+        if (existing_attach == invalid_attach) {
             /* not pointing at an attach */
             return;
         }
@@ -1233,6 +1318,29 @@ struct add_wiring_tool : tool
         /* if we changed anything, rebuild the topology */
         if (changed) {
             attach_topo_rebuild();
+        }
+    }
+
+    void long_use(raycast_info *rc) override {
+        bool hit_entity;
+        glm::vec3 pt;
+        glm::vec3 normal;
+        unsigned existing_attach;
+
+        if (current_attach == invalid_attach) {
+            if (!get_attach_point(hit_entity, pt, normal))
+                return;
+
+            existing_attach = get_existing_attach_near(pt);
+
+            if (existing_attach == invalid_attach) {
+                return;
+            }
+
+            current_attach = existing_attach;
+
+            moving_existing = true;
+            old_attach = wire_attachments[current_attach];
         }
     }
 
@@ -1577,6 +1685,10 @@ struct play_state : game_state {
             t->alt_use(&rc);
         }
 
+        if (pl.long_use_tool && t) {
+            t->long_use(&rc);
+        }
+
         /* interact with ents */
         entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
                                        phy->ghostObj, phy->dynamicsWorld);
@@ -1638,10 +1750,14 @@ struct play_state : game_state {
         auto slot9      = get_input(action_slot9)->just_active;
         auto slot0      = get_input(action_slot0)->just_active;
         auto gravity    = get_input(action_gravity)->just_active;
-        auto use_tool   = get_input(action_use_tool)->just_pressed;
-        auto alt_use_tool = get_input(action_alt_use_tool)->just_pressed;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;
+
+        auto input_use_tool     = get_input(action_use_tool);
+        auto use_tool           = input_use_tool->just_pressed;
+        auto long_use_tool      = input_use_tool->held;
+        auto input_alt_use_tool = get_input(action_alt_use_tool);
+        auto alt_use_tool       = input_alt_use_tool->just_pressed;
 
         /* persistent */
 
@@ -1657,14 +1773,15 @@ struct play_state : game_state {
 
         pl.move = glm::vec2((float) moveX, (float) moveY);
 
-        pl.jump       = jump;
-        pl.crouch     = crouch;
-        pl.reset      = reset;
-        pl.crouch_end = crouch_end;
-        pl.use        = use;
-        pl.gravity    = gravity;
-        pl.use_tool   = use_tool;
-        pl.alt_use_tool = alt_use_tool;
+        pl.jump          = jump;
+        pl.crouch        = crouch;
+        pl.reset         = reset;
+        pl.crouch_end    = crouch_end;
+        pl.use           = use;
+        pl.gravity       = gravity;
+        pl.use_tool      = use_tool;
+        pl.alt_use_tool  = alt_use_tool;
+        pl.long_use_tool = long_use_tool;
 
         // blech. Tool gets used below, then fire projectile gets hit here
         if (pl.fire_projectile) {

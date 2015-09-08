@@ -72,6 +72,8 @@ struct remove_surface_tool : tool
 
     void alt_use(raycast_info *rc) override {}
 
+    void long_use(raycast_info *rc) override {}
+
     void preview(raycast_info *rc) override
     {
         if (!can_use(rc))
