@@ -1216,12 +1216,15 @@ add_text_with_outline(char const *s, float x, float y, float r = 1, float g = 1,
 struct time_accumulator
 {
     float period;
+    float max_period;
     float accum;
 
-    time_accumulator(float period) :
-        period(period), accum(0.0f) {}
+    time_accumulator(float period, float max_period) :
+        period(period), max_period(max_period), accum(0.0f) {}
 
-    void add(float dt) { accum += dt; }
+    void add(float dt) {
+        accum = std::min(accum + dt, max_period);
+    }
 
     bool tick()
     {
@@ -1235,8 +1238,8 @@ struct time_accumulator
 };
 
 
-time_accumulator main_tick_accum(1/15.0f);  /* 15Hz tick for game logic */
-time_accumulator fast_tick_accum(1/60.0f);  /* 60Hz tick for motion */
+time_accumulator main_tick_accum(1/15.0f, 1.f);  /* 15Hz tick for game logic */
+time_accumulator fast_tick_accum(1/60.0f, 1.f);  /* 60Hz tick for motion */
 
 void
 update()
