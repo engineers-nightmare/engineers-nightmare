@@ -1,5 +1,8 @@
 #include "input.h"
 
+// ms duration under which a momentary input is registered
+constexpr unsigned int pressed_input_duration = 200;
+
 enum input_type {
     input_type_invalid,
     input_type_keyboard,
@@ -132,8 +135,12 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
                 action->active = true;
                 action->just_active = false;
                 action->just_inactive = false;
+                action->just_pressed = false;
                 action->last_active = action->last_active;
                 action->current_active = now - action->last_active;
+                if (action->current_active > pressed_input_duration) {
+                    action->held = true;
+                }
             }
             /* just deactivated */
             else {
@@ -141,7 +148,11 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
                 action->active = false;
                 action->just_active = false;
                 action->just_inactive = true;
+                action->held = false;
                 action->last_active = action->last_active;
+                if (action->current_active <= pressed_input_duration) {
+                    action->just_pressed = true;
+                }
                 action->current_active = 0;
             }
         }
@@ -153,6 +164,8 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
                 action->active = true;
                 action->just_active = true;
                 action->just_inactive = false;
+                action->just_pressed = false;
+                action->held = false;
                 action->last_active = now;
                 action->current_active = 0;
             }
@@ -162,6 +175,8 @@ std::unordered_map<en_action, action, std::hash<int>> &actions) {
                 action->active = false;
                 action->just_active = false;
                 action->just_inactive = false;
+                action->just_pressed = false;
+                action->held = false;
                 action->last_active = action->last_active;
                 action->current_active = 0;
             }

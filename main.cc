@@ -1638,8 +1638,8 @@ struct play_state : game_state {
         auto slot9      = get_input(action_slot9)->just_active;
         auto slot0      = get_input(action_slot0)->just_active;
         auto gravity    = get_input(action_gravity)->just_active;
-        auto use_tool   = get_input(action_use_tool)->just_active;
-        auto alt_use_tool = get_input(action_alt_use_tool)->just_active;
+        auto use_tool   = get_input(action_use_tool)->just_pressed;
+        auto alt_use_tool = get_input(action_alt_use_tool)->just_pressed;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;
 
