@@ -1148,7 +1148,10 @@ struct add_wiring_tool : tool
         else {
             auto & a1 = wire_attachments[current_attach];
             auto & a2 = wire_attachments[existing_attach];
-            if (current_attach != (unsigned)-1 && a2.parent == a1.parent) {
+
+            /* don't attach if these two attachment points are already in the same wire */
+            if (current_attach != (unsigned)-1 &&
+                attach_topo_find(current_attach) == attach_topo_find(existing_attach)) {
                 return;
             }
             new_attach = existing_attach;
