@@ -1148,7 +1148,10 @@ struct add_wiring_tool : tool
         else {
             auto & a1 = wire_attachments[current_attach];
             auto & a2 = wire_attachments[existing_attach];
-            if (current_attach != (unsigned)-1 && a2.parent == a1.parent) {
+
+            /* don't attach if these two attachment points are already in the same wire */
+            if (current_attach != (unsigned)-1 &&
+                attach_topo_find(current_attach) == attach_topo_find(existing_attach)) {
                 return;
             }
             new_attach = existing_attach;
@@ -1175,7 +1178,62 @@ struct add_wiring_tool : tool
 
     void alt_use(raycast_info *rc) override {
         /* terminate the current run */
-        current_attach = (unsigned)-1;
+        if (current_attach != (unsigned)-1) {
+            current_attach = (unsigned)-1;
+            return;
+        }
+
+        /* remove existing attach, and dependent segments */
+        bool hit_entity;
+        glm::vec3 pt;
+        glm::vec3 normal;
+
+        if (!get_attach_point(hit_entity, pt, normal)) {
+            return;
+        }
+
+        unsigned existing_attach = get_existing_attach_near(pt);
+        if (existing_attach == (unsigned)-1) {
+            /* not pointing at an attach */
+            return;
+        }
+
+        /* two things interleaved:
+         * - if a segment uses existing_attach, remove it
+         * - otherwise, if a segment uses the /last/ attach, renumber it
+         *   to use this one.
+
+         * if we changed any segments, note that we need to rebuild the topology.
+         */
+        bool changed = false;
+        unsigned attach_moving_for_delete = wire_attachments.size() - 1;
+
+        for (auto it = wire_segments.begin(); it != wire_segments.end(); ) {
+            if (it->first == existing_attach || it->second == existing_attach) {
+                it = wire_segments.erase(it);
+                changed = true;
+            }
+            else {
+                if (it->first == attach_moving_for_delete) {
+                    it->first = existing_attach;
+                    changed = true;
+                }
+                if (it->second == attach_moving_for_delete) {
+                    it->second = existing_attach;
+                    changed = true;
+                }
+                it++;
+            }
+        }
+
+        /* move attach_moving_for_delete to existing_attach, and trim off the last one. */
+        wire_attachments[existing_attach] = wire_attachments[attach_moving_for_delete];
+        wire_attachments.pop_back();
+
+        /* if we changed anything, rebuild the topology */
+        if (changed) {
+            attach_topo_rebuild();
+        }
     }
 
     void get_description(char *str) override {

@@ -136,7 +136,7 @@ attach_topo_unite(unsigned from, unsigned to)
  * or segments.
  */
 void
-rebuild_wiring_topo(void)
+attach_topo_rebuild(void)
 {
     /* 1. everything points to itself, with rank 0 */
     auto count = wire_attachments.size();

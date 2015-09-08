@@ -25,6 +25,11 @@ draw_segments(frame_data *frame);
 glm::mat4
 calc_segment_matrix(const wire_attachment &start, const wire_attachment &end);
 
+unsigned
+attach_topo_find(unsigned p);
 
 unsigned
 attach_topo_unite(unsigned from, unsigned to);
+
+void
+attach_topo_rebuild(void);
