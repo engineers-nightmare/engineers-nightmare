@@ -113,7 +113,7 @@ reduce_segments() {
             auto s2f = seg2.first;
             auto s2s = seg2.second;
 
-            if (s1f == s2f && s1s == s2s || s1f == s2s && s1s == s2f) {
+            if ((s1f == s2f && s1s == s2s) || (s1f == s2s && s1s == s2f)) {
                 remove = true;
                 break;
             }
