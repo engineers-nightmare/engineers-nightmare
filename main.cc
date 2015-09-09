@@ -1028,8 +1028,6 @@ struct add_wiring_tool : tool
     bool get_attach_point(bool & is_entity, glm::vec3 & pt, glm::vec3 & normal) {
         auto end = pl.eye + pl.dir * 5.0f;
 
-        // don't clamp to edges if we're looking at entity
-
         is_entity = nullptr != phys_raycast(pl.eye, end,
                                                   phy->ghostObj, phy->dynamicsWorld);
 
@@ -1059,25 +1057,9 @@ struct add_wiring_tool : tool
             return;
         }
 
-        if (current_attach != invalid_attach) {
-            current_attach = current_attach;
-        }
-
         unsigned existing_attach = get_existing_attach_near(pt);
         unsigned existing_attach_ignore = get_existing_attach_near(pt, current_attach);
-
-        // on entity and haven't started attaching yet
-        if (!hit_entity && current_attach == invalid_attach &&
-                existing_attach == invalid_attach) {
-            per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
-            per_object->upload();
-
-            glUseProgram(unlit_shader);
-            draw_mesh(no_placement_hw);
-            glUseProgram(simple_shader);
-            return;
-        }
-
+        
         // not pointing at existing
         if (existing_attach == invalid_attach) {
             per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
@@ -1123,17 +1105,6 @@ struct add_wiring_tool : tool
             a2 = { mat_position(pt) };
         }
 
-        if (existing_attach != invalid_attach && a2.parent == a1.parent) {
-            per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
-            per_object->upload();
-
-            glUseProgram(unlit_shader);
-            draw_mesh(no_placement_hw);
-            glUseProgram(simple_shader);
-
-            return;
-        }
-
         auto mat = calc_segment_matrix(a1, a2);
 
         per_object->val.world_matrix = mat;
@@ -1154,28 +1125,17 @@ struct add_wiring_tool : tool
 
         unsigned existing_attach = get_existing_attach_near(pt, current_attach);
 
-        if (!hit_entity && current_attach == invalid_attach &&
-            existing_attach == invalid_attach && !moving_existing) {
-            return;
-        }
-
         if (moving_existing) {
             auto a1 = ship->wire_attachments[current_attach];
 
-            /* moved to existing. need to merge 
-             * We can only move to existing attach if the two
-             * attaches are on different runs (attach.parent)
+            /* moved to existing. need to merge
              */
             if (existing_attach != invalid_attach) {
                 auto a2 = ship->wire_attachments[existing_attach];
 
-                if (a1.parent == a2.parent) {
-                    return;
-                }
-
                 /* all segments with first or second as current need
                  * to change first or second to be existing
-                */
+                 */
                 for (auto& segment : ship->wire_segments) {
                     if (segment.first == current_attach) {
                         segment.first = existing_attach;
@@ -1188,66 +1148,57 @@ struct add_wiring_tool : tool
 
                 auto back_attach = ship->wire_attachments.size() - 1;
                 /* no segments */
-                if (back_attach == invalid_attach) {
-                    return;
-                }
+                if (back_attach != invalid_attach) {
+                    ship->wire_attachments[current_attach] = ship->wire_attachments[back_attach];
+                    ship->wire_attachments.pop_back();
 
-                ship->wire_attachments[current_attach] = ship->wire_attachments[back_attach];
-                ship->wire_attachments.pop_back();
+                    for (auto& segment : ship->wire_segments) {
+                        if (segment.first == back_attach) {
+                            segment.first = current_attach;
+                        }
 
-                for (auto& segment : ship->wire_segments) {
-                    if (segment.first == back_attach) {
-                        segment.first = current_attach;
+                        if (segment.second == back_attach) {
+                            segment.second = current_attach;
+                        }
                     }
 
-                    if (segment.second == back_attach) {
-                        segment.second = current_attach;
-                    }
+                    attach_topo_rebuild(ship);
                 }
-
-                attach_topo_rebuild(ship);
             }
 
             moving_existing = false;
             current_attach = invalid_attach;
-            return;
-        }
-
-        unsigned new_attach;
-        if (existing_attach == invalid_attach) {
-            new_attach = ship->wire_attachments.size();
-            wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
-            ship->wire_attachments.push_back(wa);
         }
         else {
-            auto & a1 = ship->wire_attachments[current_attach];
-            auto & a2 = ship->wire_attachments[existing_attach];
-
-            /* don't attach if these two attachment points are already in the same wire */
-            if (current_attach != invalid_attach &&
-                attach_topo_find(ship, current_attach) == attach_topo_find(ship, existing_attach)) {
-                return;
+            unsigned new_attach;
+            if (existing_attach == invalid_attach) {
+                new_attach = ship->wire_attachments.size();
+                wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
+                ship->wire_attachments.push_back(wa);
             }
-            new_attach = existing_attach;
-        }
+            else {
+                new_attach = existing_attach;
+            }
 
-        if (current_attach != invalid_attach) {
-            wire_segment s;
-            s.first = current_attach;
-            s.second = new_attach;
-            ship->wire_segments.push_back(s);
+            if (current_attach != invalid_attach) {
+                wire_segment s;
+                s.first = current_attach;
+                s.second = new_attach;
+                ship->wire_segments.push_back(s);
 
-            /* merge! */
-            attach_topo_unite(ship, current_attach, new_attach);
-        }
+                /* merge! */
+                attach_topo_unite(ship, current_attach, new_attach);
+            }
 
-        if ((hit_entity || existing_attach != invalid_attach) && current_attach != invalid_attach) {
-            /* finishing a run */
-            current_attach = invalid_attach;
+            if (existing_attach != invalid_attach && current_attach != invalid_attach) {
+                /* finishing a run */
+                current_attach = invalid_attach;
+            }
+            else {
+                current_attach = new_attach;
+            }
         }
-        else {
-            current_attach = new_attach;
-        }
+        reduce_segments();
     }
 
     void alt_use(raycast_info *rc) override {

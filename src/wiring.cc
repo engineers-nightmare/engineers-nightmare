@@ -85,6 +85,46 @@ draw_segments(ship_space *ship, frame_data *frame)
 }
 
 
+void
+reduce_segments() {
+    if (wire_segments.size() < 2) {
+        if (wire_segments.size() == 1) {
+            auto & seg1 = wire_segments[0];
+            auto s1f = seg1.first;
+            auto s1s = seg1.second;
+
+            if (s1f == s1s) {
+                wire_segments.erase(wire_segments.begin());
+            }
+            return;
+        }
+    }
+
+    /* walk backwards so we can remove
+     * stop at 1 as we are comparing each against all lower indices
+     */
+    for (auto index1 = wire_segments.size(); index1-- > 1;) {
+        auto & seg1 = wire_segments[index1];
+        auto s1f = seg1.first;
+        auto s1s = seg1.second;
+        auto remove = false;
+        for (auto index2 = index1; index2-- > 0;) {
+            auto const & seg2 = wire_segments[index2];
+            auto s2f = seg2.first;
+            auto s2s = seg2.second;
+
+            if (s1f == s2f && s1s == s2s || s1f == s2s && s1s == s2f) {
+                remove = true;
+                break;
+            }
+        }
+        if (remove) {
+            wire_segments.erase(wire_segments.begin() + index1);
+        }
+    }
+}
+
+
 unsigned
 attach_topo_find(ship_space *ship, unsigned p)
 {
