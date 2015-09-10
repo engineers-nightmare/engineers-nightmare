@@ -85,6 +85,42 @@ draw_segments(ship_space *ship, frame_data *frame)
 }
 
 
+void
+reduce_segments(ship_space *ship) {
+    for (size_t i1 = 0; i1 < ship->wire_segments.size(); ++i1) {
+        auto remove = false;
+
+        auto const & seg1 = ship->wire_segments[i1];
+        auto s1f = seg1.first;
+        auto s1s = seg1.second;
+
+        /* segment is attached to only one attach */
+        if (s1f == s1s) {
+            remove = true;
+        }
+
+        if (!remove) {
+            for (size_t i2 = i1 + 1; i2 < ship->wire_segments.size(); ++i2) {
+                auto const & seg2 = ship->wire_segments[i2];
+                auto s2f = seg2.first;
+                auto s2s = seg2.second;
+
+                /* segments share attaches on both sides */
+                if ((s1f == s2f && s1s == s2s) || (s1f == s2s && s1s == s2f)) {
+                    remove = true;
+                    break;
+                }
+            }
+        }
+
+        if (remove) {
+            ship->wire_segments[i1] = ship->wire_segments.back();
+            ship->wire_segments.pop_back();
+        }
+    }
+}
+
+
 unsigned
 attach_topo_find(ship_space *ship, unsigned p)
 {
