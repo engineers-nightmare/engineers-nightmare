@@ -24,7 +24,7 @@ void
 draw_segments(ship_space *ship, frame_data *frame);
 
 void
-reduce_segments();
+reduce_segments(ship_space *ship);
 
 glm::mat4
 calc_segment_matrix(const wire_attachment &start, const wire_attachment &end);

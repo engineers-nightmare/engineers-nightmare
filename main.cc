@@ -1198,7 +1198,7 @@ struct add_wiring_tool : tool
                 current_attach = new_attach;
             }
         }
-        reduce_segments();
+        reduce_segments(ship);
     }
 
     void alt_use(raycast_info *rc) override {

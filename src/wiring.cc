@@ -86,11 +86,11 @@ draw_segments(ship_space *ship, frame_data *frame)
 
 
 void
-reduce_segments() {
-    for (size_t i1 = 0; i1 < wire_segments.size(); ++i1) {
+reduce_segments(ship_space *ship) {
+    for (size_t i1 = 0; i1 < ship->wire_segments.size(); ++i1) {
         auto remove = false;
 
-        auto const & seg1 = wire_segments[i1];
+        auto const & seg1 = ship->wire_segments[i1];
         auto s1f = seg1.first;
         auto s1s = seg1.second;
 
@@ -100,8 +100,8 @@ reduce_segments() {
         }
 
         if (!remove) {
-            for (size_t i2 = i1 + 1; i2 < wire_segments.size(); ++i2) {
-                auto const & seg2 = wire_segments[i2];
+            for (size_t i2 = i1 + 1; i2 < ship->wire_segments.size(); ++i2) {
+                auto const & seg2 = ship->wire_segments[i2];
                 auto s2f = seg2.first;
                 auto s2s = seg2.second;
 
@@ -114,8 +114,8 @@ reduce_segments() {
         }
 
         if (remove) {
-            wire_segments[i1] = wire_segments.back();
-            wire_segments.pop_back();
+            ship->wire_segments[i1] = ship->wire_segments.back();
+            ship->wire_segments.pop_back();
         }
     }
 }
