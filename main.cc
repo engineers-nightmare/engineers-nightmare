@@ -1123,10 +1123,9 @@ struct add_wiring_tool : tool
         if (!get_attach_point(hit_entity, pt, normal))
             return;
 
-        unsigned existing_attach = get_existing_attach_near(pt, current_attach);
-
         if (moving_existing) {
             auto a1 = ship->wire_attachments[current_attach];
+            unsigned existing_attach = get_existing_attach_near(pt, current_attach);
 
             /* moved to existing. need to merge
              */
@@ -1170,6 +1169,7 @@ struct add_wiring_tool : tool
             current_attach = invalid_attach;
         }
         else {
+            unsigned existing_attach = get_existing_attach_near(pt);
             unsigned new_attach;
             if (existing_attach == invalid_attach) {
                 new_attach = ship->wire_attachments.size();
