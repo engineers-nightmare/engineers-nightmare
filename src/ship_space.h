@@ -2,6 +2,7 @@
 
 #include "block.h"
 #include "chunk.h"
+#include "wiring.h"
 
 #include <glm/glm.hpp> /* ivec3 */
 #include <unordered_map>
@@ -48,6 +49,9 @@ struct ship_space {
 
     std::unordered_map<glm::ivec3, chunk*, ivec3_hash> chunks;
     std::unordered_map<topo_info *, zone_info *> zones;
+
+    std::vector<wire_attachment> wire_attachments;
+    std::vector<wire_segment> wire_segments;
 
     /* create an empty ship_space */
     ship_space();
