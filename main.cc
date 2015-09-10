@@ -1124,13 +1124,11 @@ struct add_wiring_tool : tool
             return;
 
         if (moving_existing) {
-            auto a1 = ship->wire_attachments[current_attach];
             unsigned existing_attach = get_existing_attach_near(pt, current_attach);
 
             /* moved to existing. need to merge
              */
             if (existing_attach != invalid_attach) {
-                auto a2 = ship->wire_attachments[existing_attach];
 
                 /* all segments with first or second as current need
                  * to change first or second to be existing
