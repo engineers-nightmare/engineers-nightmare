@@ -247,6 +247,7 @@ struct entity
         type_man.type(ce) = type;
 
         physics_man.assign_entity(ce);
+        physics_man.rigid(ce) = nullptr;
         build_static_physics_rb_mat(&mat, et->phys_shape, &physics_man.rigid(ce));
         /* so that we can get back to the entity from a phys raycast */
         physics_man.rigid(ce)->setUserPointer(this);
