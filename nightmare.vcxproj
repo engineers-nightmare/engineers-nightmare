@@ -5,9 +5,17 @@
       <Configuration>ReleaseWithDebug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseWithDebug|x64">
+      <Configuration>ReleaseWithDebug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -22,7 +30,21 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
@@ -35,17 +57,32 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype6\include;windows-dependencies\freetype6\include\freetype2;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;windows-dependencies\glm;windows-dependencies\getopt</IncludePath>
-    <LibraryPath>windows-dependencies\assimp\lib32;windows-dependencies\bullet\lib;windows-dependencies\bullet\bin;windows-dependencies\epoxy\lib;windows-dependencies\freetype6\lib;windows-dependencies\libconfig\lib;windows-dependencies\mman-win32\lib;windows-dependencies\sdl2\lib;windows-dependencies\sdl2_image\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;windows-dependencies\glm;windows-dependencies\getopt</IncludePath>
+    <LibraryPath>windows-dependencies\assimp\lib32;windows-dependencies\bullet\lib32;windows-dependencies\epoxy\lib32;windows-dependencies\freetype\lib32;windows-dependencies\libconfig\lib32;windows-dependencies\mman-win32\lib32;windows-dependencies\sdl2\lib\x86;windows-dependencies\sdl2_image\lib\x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;windows-dependencies\glm;windows-dependencies\getopt</IncludePath>
+    <LibraryPath>windows-dependencies\assimp\lib64;windows-dependencies\bullet\lib64;windows-dependencies\epoxy\lib64;windows-dependencies\freetype\lib64;windows-dependencies\libconfig\lib64;windows-dependencies\mman-win32\lib64;windows-dependencies\sdl2\lib\x64;windows-dependencies\sdl2_image\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype6\include;windows-dependencies\freetype6\include\freetype2;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;windows-dependencies\glm;windows-dependencies\getopt</IncludePath>
-    <LibraryPath>windows-dependencies\assimp\lib32;windows-dependencies\bullet\lib;windows-dependencies\bullet\bin;windows-dependencies\epoxy\lib;windows-dependencies\freetype6\lib;windows-dependencies\libconfig\lib;windows-dependencies\mman-win32\lib;windows-dependencies\sdl2\lib;windows-dependencies\sdl2_image\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;windows-dependencies\glm;windows-dependencies\getopt</IncludePath>
+    <LibraryPath>windows-dependencies\assimp\lib32;windows-dependencies\bullet\lib32;windows-dependencies\epoxy\lib32;windows-dependencies\freetype\lib32;windows-dependencies\libconfig\lib32;windows-dependencies\mman-win32\lib32;windows-dependencies\sdl2\lib\x86;windows-dependencies\sdl2_image\lib\x86;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;windows-dependencies\glm;windows-dependencies\getopt</IncludePath>
+    <LibraryPath>windows-dependencies\assimp\lib64;windows-dependencies\bullet\lib64;windows-dependencies\epoxy\lib64;windows-dependencies\freetype\lib64;windows-dependencies\libconfig\lib64;windows-dependencies\mman-win32\lib64;windows-dependencies\sdl2\lib\x64;windows-dependencies\sdl2_image\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -63,18 +100,51 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Bullet2FileLoader.lib;Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;Bullet3OpenCL_clew.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;epoxy.lib;freetype.lib;libfreetype.dll.a;assimp.lib;libconfig.lib;mman.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Bullet2FileLoader.lib;Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;epoxy.lib;assimp.lib;libconfig.lib;mman.lib;freetype235.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
       <Command>
         copy /y "$(SolutionDir)windows-dependencies\assimp\bin32\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\mman-win32\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\epoxy\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\freetype6\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\libconfig\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\sdl2\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\sdl2_image\bin\x86\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\epoxy\bin32\*.dll" "$(OutputPath)"
+        rem copy /y "$(SolutionDir)windows-depenencies\freetype6\bin32\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\libconfig\bin32\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\mman-win32\bin32\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\sdl2\lib\x86\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\sdl2_image\lib\x86\*.dll" "$(OutputPath)"
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy release dlls into bin</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Bullet2FileLoader.lib;Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;epoxy.lib;assimp.lib;libconfig.lib;mman.lib;freetype235.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+        copy /y "$(SolutionDir)windows-dependencies\assimp\bin64\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\mman-win32\bin64\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\epoxy\bin64\*.dll" "$(OutputPath)"
+        rem copy /y "$(SolutionDir)windows-dependencies\freetype\bin64\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\libconfig\bin64\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\sdl2\lib\x64\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\sdl2_image\lib\x64\*.dll" "$(OutputPath)"
       </Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -97,18 +167,52 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;BulletCollision.lib;BulletDynamics.lib;LinearMath.lib;epoxy.lib;freetype.lib;libfreetype.dll.a;assimp.lib;libconfig.lib;mman.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Bullet2FileLoader.lib;Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;epoxy.lib;assimp.lib;libconfig.lib;mman.lib;freetype235.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
       <Command>
         copy /y "$(SolutionDir)windows-dependencies\assimp\bin32\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\mman-win32\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\epoxy\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\freetype6\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\libconfig\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\sdl2\bin\*.dll" "$(OutputPath)"
-        copy /y "$(SolutionDir)windows-dependencies\sdl2_image\bin\x86\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\epoxy\bin32\*.dll" "$(OutputPath)"
+        rem copy /y "$(SolutionDir)windows-depenencies\freetype6\bin32\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\libconfig\bin32\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\mman-win32\bin32\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\sdl2\lib\x86\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\sdl2_image\lib\x86\*.dll" "$(OutputPath)"
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy release dlls into bin</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Bullet2FileLoader.lib;Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;epoxy.lib;assimp.lib;libconfig.lib;mman.lib;freetype235.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+        copy /y "$(SolutionDir)windows-dependencies\assimp\bin64\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\mman-win32\bin64\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\epoxy\bin64\*.dll" "$(OutputPath)"
+        rem copy /y "$(SolutionDir)windows-dependencies\freetype\bin64\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\libconfig\bin64\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\sdl2\lib\x64\*.dll" "$(OutputPath)"
+        copy /y "$(SolutionDir)windows-dependencies\sdl2_image\lib\x64\*.dll" "$(OutputPath)"
       </Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -173,6 +277,7 @@
     <ClInclude Include="src\fixed_cube.h" />
     <ClInclude Include="src\fixed_grid.h" />
     <ClInclude Include="src\input.h" />
+    <ClInclude Include="src\libconfig_shim.h" />
     <ClInclude Include="src\light_field.h" />
     <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\mesh.h" />

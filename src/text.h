@@ -47,7 +47,6 @@ struct texture_atlas
     void bind(int texunit);
 };
 
-
 struct text_renderer
 {
     text_renderer(char const *font, int size);

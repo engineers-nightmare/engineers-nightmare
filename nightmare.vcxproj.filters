@@ -254,5 +254,8 @@
     <ClInclude Include="src\component\relative_position_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
+    <ClInclude Include="src\libconfig_shim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
