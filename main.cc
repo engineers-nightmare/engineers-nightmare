@@ -1246,13 +1246,7 @@ struct add_wiring_tool : tool
                 attach_topo_unite(ship, current_attach, new_attach);
             }
 
-            if (existing_attach != invalid_attach && current_attach != invalid_attach) {
-                /* finishing a run */
-                current_attach = invalid_attach;
-            }
-            else {
-                current_attach = new_attach;
-            }
+            current_attach = new_attach;
 
             if (hit_entity && current_attach != invalid_attach) {
                 ship->entity_to_attach_lookup[hit_entity->ce.id].insert(current_attach);
