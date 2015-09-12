@@ -1193,9 +1193,10 @@ struct add_wiring_tool : tool
             return;
 
         if (moving_existing) {
+            /* did we just move to an already existing attach */
             unsigned existing_attach = get_existing_attach_near(pt, current_attach);
 
-            /* moved to existing. need to merge
+            /* we did move to an existing. need to merge
              */
             if (existing_attach != invalid_attach) {
                 relocate_segments_and_entity_attaches(ship, existing_attach, current_attach);
@@ -1210,10 +1211,14 @@ struct add_wiring_tool : tool
 
                     attach_topo_rebuild(ship);
                 }
+
+                /* update current */
+                current_attach = existing_attach;
             }
 
-            if (hit_entity && existing_attach != invalid_attach) {
-                ship->entity_to_attach_lookup[hit_entity->ce.id].insert(existing_attach);
+            /* did we move to be on an entity */
+            if (hit_entity && current_attach != invalid_attach) {
+                ship->entity_to_attach_lookup[hit_entity->ce.id].insert(current_attach);
             }
 
             moving_existing = false;
