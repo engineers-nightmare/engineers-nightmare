@@ -1008,6 +1008,7 @@ struct add_wiring_tool : tool
     unsigned current_attach = invalid_attach;
     bool moving_existing = false;
     wire_attachment old_attach;
+    entity *old_entity = nullptr;
 
     unsigned get_existing_attach_near(glm::vec3 const & pt, unsigned ignore = invalid_attach) {
         /* Some spatial index might be useful here. */
@@ -1026,11 +1027,11 @@ struct add_wiring_tool : tool
         return invalid_attach;
     }
 
-    bool get_attach_point(bool & is_entity, glm::vec3 & pt, glm::vec3 & normal) {
+    bool get_attach_point(entity ** hit_entity, glm::vec3 & pt, glm::vec3 & normal) {
         auto end = pl.eye + pl.dir * 5.0f;
 
-        is_entity = nullptr != phys_raycast(pl.eye, end,
-                                                  phy->ghostObj, phy->dynamicsWorld);
+        *hit_entity = phys_raycast(pl.eye, end,
+                                    phy->ghostObj, phy->dynamicsWorld);
 
         auto hit = phys_raycast_generic(pl.eye, end,
                                         phy->ghostObj, phy->dynamicsWorld);
@@ -1050,11 +1051,11 @@ struct add_wiring_tool : tool
 
         /* TODO: Move the assignment logic into the wiring system */
 
-        bool hit_entity;
+        entity *hit_entity = nullptr;
         glm::vec3 pt;
         glm::vec3 normal;
 
-        if (!get_attach_point(hit_entity, pt, normal)) {
+        if (!get_attach_point(&hit_entity, pt, normal)) {
             return;
         }
 
@@ -1117,11 +1118,11 @@ struct add_wiring_tool : tool
     }
 
     void use(raycast_info *rc) override {
-        bool hit_entity;
+        entity *hit_entity = nullptr;
         glm::vec3 pt;
         glm::vec3 normal;
 
-        if (!get_attach_point(hit_entity, pt, normal))
+        if (!get_attach_point(&hit_entity, pt, normal))
             return;
 
         if (moving_existing) {
@@ -1216,11 +1217,11 @@ struct add_wiring_tool : tool
         }
 
         /* remove existing attach, and dependent segments */
-        bool hit_entity;
+        entity *hit_entity = nullptr;
         glm::vec3 pt;
         glm::vec3 normal;
 
-        if (!get_attach_point(hit_entity, pt, normal)) {
+        if (!get_attach_point(&hit_entity, pt, normal)) {
             return;
         }
 
@@ -1269,13 +1270,13 @@ struct add_wiring_tool : tool
     }
 
     void long_use(raycast_info *rc) override {
-        bool hit_entity;
+        entity *hit_entity = nullptr;
         glm::vec3 pt;
         glm::vec3 normal;
         unsigned existing_attach;
 
         if (current_attach == invalid_attach) {
-            if (!get_attach_point(hit_entity, pt, normal))
+            if (!get_attach_point(&hit_entity, pt, normal))
                 return;
 
             existing_attach = get_existing_attach_near(pt);
