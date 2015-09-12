@@ -798,7 +798,7 @@ remove_ents_from_surface(int x, int y, int z, int face)
                     if (swap_index > rem) {
                         ship->wire_attachments[rem] = from_attach;
                         ship->wire_attachments.pop_back();
-                        fixup_attaches_removed[rem] = swap_index;
+                        fixup_attaches_removed[rem] = (unsigned)swap_index;
                         --swap_index;
                         ++s;
                     }
@@ -1200,7 +1200,7 @@ struct add_wiring_tool : tool
             if (existing_attach != invalid_attach) {
                 relocate_segments_and_entity_attaches(ship, existing_attach, current_attach);
 
-                auto back_attach = ship->wire_attachments.size() - 1;
+                auto back_attach = (unsigned)ship->wire_attachments.size() - 1;
                 /* no segments */
                 if (back_attach != invalid_attach) {
                     ship->wire_attachments[current_attach] = ship->wire_attachments[back_attach];
