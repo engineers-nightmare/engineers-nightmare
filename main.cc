@@ -1131,19 +1131,7 @@ struct add_wiring_tool : tool
             /* moved to existing. need to merge
              */
             if (existing_attach != invalid_attach) {
-
-                /* all segments with first or second as current need
-                 * to change first or second to be existing
-                 */
-                for (auto& segment : ship->wire_segments) {
-                    if (segment.first == current_attach) {
-                        segment.first = existing_attach;
-                    }
-
-                    if (segment.second == current_attach) {
-                        segment.second = existing_attach;
-                    }
-                }
+                relocate_segments_and_entity_attaches(ship, existing_attach, current_attach);
 
                 auto back_attach = ship->wire_attachments.size() - 1;
                 /* no segments */
@@ -1151,15 +1139,7 @@ struct add_wiring_tool : tool
                     ship->wire_attachments[current_attach] = ship->wire_attachments[back_attach];
                     ship->wire_attachments.pop_back();
 
-                    for (auto& segment : ship->wire_segments) {
-                        if (segment.first == back_attach) {
-                            segment.first = current_attach;
-                        }
-
-                        if (segment.second == back_attach) {
-                            segment.second = current_attach;
-                        }
-                    }
+                    relocate_segments_and_entity_attaches(ship, current_attach, back_attach);
 
                     attach_topo_rebuild(ship);
                 }
@@ -1231,33 +1211,11 @@ struct add_wiring_tool : tool
             return;
         }
 
-        /* two things interleaved:
-         * - if a segment uses existing_attach, remove it
-         * - otherwise, if a segment uses the /last/ attach, renumber it
-         *   to use this one.
-
-         * if we changed any segments, note that we need to rebuild the topology.
-         */
-        bool changed = false;
         unsigned attach_moving_for_delete = (unsigned)ship->wire_attachments.size() - 1;
 
-        for (auto it = ship->wire_segments.begin(); it != ship->wire_segments.end(); ) {
-            if (it->first == existing_attach || it->second == existing_attach) {
-                it = ship->wire_segments.erase(it);
-                changed = true;
-            }
-            else {
-                if (it->first == attach_moving_for_delete) {
-                    it->first = existing_attach;
-                    changed = true;
-                }
-                if (it->second == attach_moving_for_delete) {
-                    it->second = existing_attach;
-                    changed = true;
-                }
-                it++;
-            }
-        }
+        auto changed = remove_segments_containing(ship, existing_attach);
+        changed |= relocate_segments_and_entity_attaches(
+            ship, existing_attach, attach_moving_for_delete);
 
         /* move attach_moving_for_delete to existing_attach, and trim off the last one. */
         ship->wire_attachments[existing_attach] = ship->wire_attachments[attach_moving_for_delete];
