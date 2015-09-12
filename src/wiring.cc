@@ -121,6 +121,14 @@ relocate_segments_and_entity_attaches(
         }
     }
 
+    /* fixup entity attaches that were relocated */
+    for (auto& sea : ship->entity_to_attach_lookup) {
+        auto & sea_attaches = sea.second;
+        if (sea_attaches.erase(moved_from)) {
+            sea_attaches.insert(relocated_to);
+        }
+    }
+
     return changed;
 }
 

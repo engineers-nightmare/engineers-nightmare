@@ -1145,6 +1145,10 @@ struct add_wiring_tool : tool
                 }
             }
 
+            if (hit_entity && existing_attach != invalid_attach) {
+                ship->entity_to_attach_lookup[hit_entity->ce.id].insert(existing_attach);
+            }
+
             moving_existing = false;
             current_attach = invalid_attach;
         }
@@ -1177,7 +1181,12 @@ struct add_wiring_tool : tool
             else {
                 current_attach = new_attach;
             }
+
+            if (hit_entity && current_attach != invalid_attach) {
+                ship->entity_to_attach_lookup[hit_entity->ce.id].insert(current_attach);
+            }
         }
+
         reduce_segments(ship);
     }
 
@@ -1185,6 +1194,12 @@ struct add_wiring_tool : tool
         /* reset to old spot if moving. "cancel" */
         if (moving_existing) {
             ship->wire_attachments[current_attach] = old_attach;
+
+            if (old_entity) {
+                ship->entity_to_attach_lookup[old_entity->ce.id].insert(current_attach);
+                old_entity = nullptr;
+            }
+
             moving_existing = false;
             current_attach = invalid_attach;
             return;
@@ -1245,8 +1260,17 @@ struct add_wiring_tool : tool
 
             current_attach = existing_attach;
 
+            /* remove this attach from entity attaches
+             * will get added back if needed in use()/alt_use()
+             */
+            auto & lookup = ship->entity_to_attach_lookup;
+            if (hit_entity && lookup.find(hit_entity->ce.id) != lookup.end()) {
+                lookup[hit_entity->ce.id].erase(current_attach);
+            }
+
             moving_existing = true;
             old_attach = ship->wire_attachments[current_attach];
+            old_entity = hit_entity;
         }
     }
 
