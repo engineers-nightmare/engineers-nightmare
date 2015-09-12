@@ -16,7 +16,7 @@ load_stage(GLenum stage, char const *filename)
     blob content(filename);
     GLuint shader = glCreateShader(stage);
     glObjectLabel(GL_SHADER, shader, -1, filename);
-    GLint len = content.len;
+    GLint len = (GLint)content.len;
     glShaderSource(shader, 1, (GLchar const **) &content.data, &len);
     glCompileShader(shader);
     return shader;

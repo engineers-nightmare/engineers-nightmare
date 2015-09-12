@@ -140,12 +140,12 @@ text_renderer::upload()
     /* Exact-fit is pretty lousy as a growth strategy, but oh well */
     if (verts.size() > bo_capacity) {
         glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(text_vertex), &verts[0], GL_STREAM_DRAW);
-        bo_capacity = verts.size();
-        bo_vertex_count = verts.size();
+        bo_capacity = (GLuint)verts.size();
+        bo_vertex_count = (GLuint)verts.size();
     }
     else {
         glBufferSubData(GL_ARRAY_BUFFER, 0, verts.size() * sizeof(text_vertex), &verts[0]);
-        bo_vertex_count = verts.size();
+        bo_vertex_count = (GLuint)verts.size();
     }
 }
 

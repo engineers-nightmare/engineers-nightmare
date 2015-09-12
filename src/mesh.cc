@@ -51,7 +51,7 @@ load_mesh(char const *filename) {
 
         // when we have many submeshes we need to rebase the indices.
         // NOTE: we assume that all mesh origins coincide, so we're not applying transforms here
-        int submesh_base = verts.size();
+        auto submesh_base = (unsigned)verts.size();
 
         for (unsigned int j = 0; j < m->mNumVertices; j++)
             verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z,
@@ -67,13 +67,13 @@ load_mesh(char const *filename) {
         }
     }
 
-    printf("\tAfter processing: %lu verts, %lu indices\n", verts.size(), indices.size());
+    printf("\tAfter processing: %zu verts, %zu indices\n", verts.size(), indices.size());
 
     aiReleaseImport(scene);
 
     sw_mesh *ret = new sw_mesh;
-    ret->num_vertices = verts.size();
-    ret->num_indices = indices.size();
+    ret->num_vertices = (unsigned)verts.size();
+    ret->num_indices = (unsigned)indices.size();
     ret->verts = new vertex[verts.size()];
     memcpy(ret->verts, &verts[0], sizeof(vertex) * verts.size());
     ret->indices = new unsigned int[indices.size()];
