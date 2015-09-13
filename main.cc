@@ -777,7 +777,7 @@ remove_ents_from_surface(int x, int y, int z, int face)
                  * and assumed that what was at index 0 is no longer valid in referencers
                  */
                 std::unordered_map<unsigned, unsigned> fixup_attaches_removed;
-                auto entity_attaches = entity_to_attach_lookup.find(e->ce.id);
+                auto entity_attaches = entity_to_attach_lookup.find(e->ce);
                 if (entity_attaches != entity_to_attach_lookup.end()) {
                     auto set = entity_attaches->second;
                     auto attaches = std::vector<unsigned>(set.begin(), set.end());
@@ -825,7 +825,7 @@ remove_ents_from_surface(int x, int y, int z, int face)
                     }
 
                     /* remove attaches assigned to entity from ship lookup */
-                    entity_to_attach_lookup.erase(e->ce.id);
+                    entity_to_attach_lookup.erase(e->ce);
 
                     for (auto lookup : fixup_attaches_removed) {
                         /* we moved m to position r */
@@ -1238,7 +1238,7 @@ struct add_wiring_tool : tool
 
             /* did we move to be on an entity */
             if (hit_entity && current_attach != invalid_attach) {
-                entity_to_attach_lookup[hit_entity->ce.id].insert(current_attach);
+                entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
             }
 
             moving_existing = false;
@@ -1269,7 +1269,7 @@ struct add_wiring_tool : tool
             current_attach = new_attach;
 
             if (hit_entity && current_attach != invalid_attach) {
-                entity_to_attach_lookup[hit_entity->ce.id].insert(current_attach);
+                entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
             }
         }
 
@@ -1287,7 +1287,7 @@ struct add_wiring_tool : tool
             wire_attachments[current_attach] = old_attach;
 
             if (old_entity) {
-                entity_to_attach_lookup[old_entity->ce.id].insert(current_attach);
+                entity_to_attach_lookup[old_entity->ce].insert(current_attach);
                 old_entity = nullptr;
             }
 
@@ -1361,8 +1361,8 @@ struct add_wiring_tool : tool
              * will get added back if needed in use()/alt_use()
              */
             auto & lookup = entity_to_attach_lookup;
-            if (hit_entity && lookup.find(hit_entity->ce.id) != lookup.end()) {
-                lookup[hit_entity->ce.id].erase(current_attach);
+            if (hit_entity && lookup.find(hit_entity->ce) != lookup.end()) {
+                lookup[hit_entity->ce].erase(current_attach);
             }
 
             moving_existing = true;
