@@ -23,6 +23,13 @@ draw_attachments(ship_space *ship, frame_data *frame);
 void
 draw_segments(ship_space *ship, frame_data *frame);
 
+bool
+remove_segments_containing(ship_space *ship, unsigned attach);
+
+bool
+relocate_segments_and_entity_attaches(
+    ship_space *ship, unsigned relocated_to, unsigned moved_from);
+
 void
 reduce_segments(ship_space *ship);
 

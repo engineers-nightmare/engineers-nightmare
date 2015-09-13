@@ -85,6 +85,54 @@ draw_segments(ship_space *ship, frame_data *frame)
 }
 
 
+bool
+remove_segments_containing(ship_space *ship, unsigned attach) {
+    /* remove all segments that contain attach */
+    auto changed = false;
+
+    for (auto si = ship->wire_segments.begin(); si != ship->wire_segments.end(); ) {
+        if (si->first == attach || si->second == attach) {
+            si = ship->wire_segments.erase(si);
+            changed = true;
+        }
+        else {
+            ++si;
+        }
+    }
+    return changed;
+}
+
+
+bool
+relocate_segments_and_entity_attaches(
+    ship_space *ship, unsigned relocated_to, unsigned moved_from) {
+    /* fixup segments with attaches that were relocated */
+    auto changed = false;
+
+    for (auto si = ship->wire_segments.begin(); si != ship->wire_segments.end(); ++si) {
+        if (si->first == moved_from) {
+            si->first = relocated_to;
+            changed = true;
+        }
+
+        if (si->second == moved_from) {
+            si->second = relocated_to;
+            changed = true;
+        }
+    }
+
+    /* fixup entity attaches that were relocated */
+    for (auto& sea : ship->entity_to_attach_lookup) {
+        auto & sea_attaches = sea.second;
+        if (sea_attaches.erase(moved_from)) {
+            sea_attaches.insert(relocated_to);
+        }
+    }
+
+    return changed;
+}
+
+
 void
 reduce_segments(ship_space *ship) {
     for (size_t i1 = 0; i1 < ship->wire_segments.size(); ++i1) {

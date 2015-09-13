@@ -1,11 +1,13 @@
 #pragma once
 
+#include <glm/glm.hpp> /* ivec3 */
+#include <set>
+#include <unordered_map>
+
 #include "block.h"
+#include "component/component_manager.h"
 #include "chunk.h"
 #include "wiring.h"
-
-#include <glm/glm.hpp> /* ivec3 */
-#include <unordered_map>
 
 struct ivec3_hash {
   size_t operator()(const glm::ivec3 &v) const {
@@ -52,6 +54,8 @@ struct ship_space {
 
     std::vector<wire_attachment> wire_attachments;
     std::vector<wire_segment> wire_segments;
+
+    std::unordered_map<unsigned, std::set<unsigned>> entity_to_attach_lookup;
 
     /* create an empty ship_space */
     ship_space();
