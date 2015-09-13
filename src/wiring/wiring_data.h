@@ -11,9 +11,9 @@ extern std::vector<wire_type> wire_types;
 
 
 struct power_wiring_data {
-    unsigned total_power;
-    unsigned total_draw;
-    unsigned num_consumers;
+    unsigned total_power = 0;
+    unsigned total_draw = 0;
+    unsigned num_consumers = 0;
 };
 
 

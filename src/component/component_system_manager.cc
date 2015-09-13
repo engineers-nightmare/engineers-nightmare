@@ -5,6 +5,7 @@ light_component_manager light_man;
 physics_component_manager physics_man;
 relative_position_component_manager pos_man;
 power_component_manager power_man;
+//power_provider_component_manager power_provider_man;
 renderable_component_manager render_man;
 surface_attachment_component_manager surface_man;
 switch_component_manager switch_man;

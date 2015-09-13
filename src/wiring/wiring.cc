@@ -1,6 +1,7 @@
 #include "wiring.h"
 #include "../mesh.h"
 #include "../ship_space.h"
+#include "../component/component_system_manager.h"
 
 sw_mesh *attachment_sw;
 hw_mesh *attachment_hw;
@@ -227,6 +228,9 @@ void
 attach_topo_rebuild(ship_space *ship, wire_type type) {
     auto &wire_attachments = ship->wire_attachments[type];
     auto &wire_segments = ship->wire_segments[type];
+
+    ship->power_wires.clear();
+
     /* 1. everything points to itself, with rank 0 */
     auto count = wire_attachments.size();
     for (auto i = 0u; i < count; i++) {
@@ -240,5 +244,63 @@ attach_topo_rebuild(ship_space *ship, wire_type type) {
     }
 }
 
+
+/* calculates power data for each power run
+ * assumes a rebuilt attach topo
+ */
+void
+calculate_power(ship_space *ship) {
+    /* get all wires
+     * for each wire
+     * go through all entities
+     * add power data to corresponding wire
+     */
+    ship->power_wires.clear();
+    const auto type = wire_type_power;
+    for (auto const & attach : ship->power_attachments) {
+        auto wire = attach_topo_find(ship, type, attach.parent);
+        if (ship->power_wires.find(wire) == ship->power_wires.end()) {
+            continue;
+        }
+        ship->power_wires[wire] = power_wiring_data();
+    }
+
+    /* only visit each wire once.
+     * They should all be flat with attach_topo_find()
+     */
+    std::set<size_t> visited_wires;
+    std::set<c_entity> visited_entities;
+    for (auto const & attach : ship->power_attachments) {
+        auto wire = attach_topo_find(ship, type, attach.parent);
+        if (visited_wires.find(wire) != visited_wires.end()) {
+            continue;
+        }
+
+        visited_wires.insert(wire);
+        visited_entities.clear();
+
+        for (auto const & entity_lookup : ship->entity_to_attach_lookups[type]) {
+            auto const & entity = entity_lookup.first;
+            if (visited_entities.find(entity) != visited_entities.end()) {
+                continue;
+            }
+
+            visited_entities.insert(entity_lookup.first);
+            for (auto const & ea_index : entity_lookup.second) {
+                auto const & ea = ship->wire_attachments[type][ea_index];
+                if (attach_topo_find(ship, type, ea.parent) == wire) {
+                    auto & power_data = ship->power_wires[wire];
+                    /* add to power_data on wire */
+                    if (power_man.exists(entity)) {
+                        power_data.num_consumers++;
+                        power_data.total_draw += power_man.required_power(entity);
+                    }
+                    //if (power_provider_man.exists(entity)) {
+                    //    power_data.total_power += power_provider_man.provided(entity);
+                    //}
+                    break;
+                }
+            }
+        }
     }
 }

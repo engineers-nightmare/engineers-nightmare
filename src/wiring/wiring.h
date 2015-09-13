@@ -46,3 +46,6 @@ attach_topo_unite(ship_space *ship, wire_type type, unsigned from, unsigned to);
 
 void
 attach_topo_rebuild(ship_space *ship, wire_type type);
+
+void
+calculate_power(ship_space *ship);

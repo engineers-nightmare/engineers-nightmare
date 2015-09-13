@@ -270,6 +270,7 @@ struct entity
             power_man.assign_entity(ce);
             //default to powered state for now
             power_man.powered(ce) = true;
+            power_man.required_power(ce) = 12;
 
             switchable_man.assign_entity(ce);
             switchable_man.enabled(ce) = false;
@@ -283,6 +284,7 @@ struct entity
             power_man.assign_entity(ce);
             //default to powered state for now
             power_man.powered(ce) = true;
+            power_man.required_power(ce) = 4;
 
             light_man.assign_entity(ce);
             light_man.intensity(ce) = 0.15f;
@@ -292,6 +294,7 @@ struct entity
             power_man.assign_entity(ce);
             //default to powered state for now
             power_man.powered(ce) = true;
+            power_man.required_power(ce) = 6;
 
             switchable_man.assign_entity(ce);
             switchable_man.enabled(ce) = true;
@@ -1473,6 +1476,7 @@ update()
 
     /* this absolutely must run every frame */
     state->update(dt);
+    calculate_power(ship);
 
     /* things that can run at a pretty slow rate */
     while (main_tick_accum.tick()) {
