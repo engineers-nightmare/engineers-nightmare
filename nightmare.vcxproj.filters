@@ -138,7 +138,7 @@
     <ClCompile Include="src\wiring\wiring.cc">
       <Filter>Source Files\wiring</Filter>
     </ClCompile>
-    <ClCompile Include="src\wiring\wiring-data.cc">
+    <ClCompile Include="src\wiring\wiring_data.cc">
       <Filter>Source Files\wiring</Filter>
     </ClCompile>
   </ItemGroup>
