@@ -138,6 +138,9 @@
     <ClCompile Include="src\wiring\wiring.cc">
       <Filter>Source Files\wiring</Filter>
     </ClCompile>
+    <ClCompile Include="src\wiring\wiring-data.cc">
+      <Filter>Source Files\wiring</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -261,6 +264,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\wiring\wiring.h">
+      <Filter>Header Files\wiring</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wiring\wiring_data.h">
       <Filter>Header Files\wiring</Filter>
     </ClInclude>
   </ItemGroup>
