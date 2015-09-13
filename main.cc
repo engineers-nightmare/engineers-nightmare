@@ -699,7 +699,7 @@ init()
     unlit_ui_slot_sprite = ui_sprites->load("textures/ui-slot.png");
     lit_ui_slot_sprite = ui_sprites->load("textures/ui-slot-lit.png");
 
-    printf("World vertex size: %lu bytes\n", sizeof(vertex));
+    printf("World vertex size: %zu bytes\n", sizeof(vertex));
 
     light = new light_field();
     light->bind(1);
@@ -1171,7 +1171,7 @@ struct add_wiring_tool : tool
             unsigned existing_attach = get_existing_attach_near(pt);
             unsigned new_attach;
             if (existing_attach == invalid_attach) {
-                new_attach = ship->wire_attachments.size();
+                new_attach = (unsigned)ship->wire_attachments.size();
                 wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
                 ship->wire_attachments.push_back(wa);
             }
@@ -1238,7 +1238,7 @@ struct add_wiring_tool : tool
          * if we changed any segments, note that we need to rebuild the topology.
          */
         bool changed = false;
-        unsigned attach_moving_for_delete = ship->wire_attachments.size() - 1;
+        unsigned attach_moving_for_delete = (unsigned)ship->wire_attachments.size() - 1;
 
         for (auto it = ship->wire_segments.begin(); it != ship->wire_segments.end(); ) {
             if (it->first == existing_attach || it->second == existing_attach) {
@@ -1661,7 +1661,7 @@ struct play_state : game_state {
     }
 
     void cycle_slot(int d) {
-        auto num_tools = sizeof(tools) / sizeof(tools[0]);
+        unsigned num_tools = sizeof(tools) / sizeof(tools[0]);
         unsigned int cur_slot = pl.selected_slot;
         cur_slot = (cur_slot + num_tools + d) % num_tools;
 
@@ -1771,7 +1771,7 @@ struct menu_state : game_state
 {
     typedef std::pair<char const *, std::function<void()>> menu_item;
     std::vector<menu_item> items;
-    int selected = 0;
+    unsigned selected = 0;
 
     menu_state() : items() {
         items.push_back(menu_item("Resume Game", []{ set_game_state(create_play_state()); }));
@@ -1785,7 +1785,7 @@ struct menu_state : game_state
         }
     }
 
-    void put_item_text(char *dest, char const *src, int index) {
+    void put_item_text(char *dest, char const *src, unsigned index) {
         if (index == selected)
             sprintf(dest, "> %s <", src);
         else
@@ -1807,7 +1807,7 @@ struct menu_state : game_state
         for (auto it = items.begin(); it != items.end(); it++) {
             w = 0;
             h = 0;
-            put_item_text(buf, it->first, it - items.begin());
+            put_item_text(buf, it->first, (unsigned)(it - items.begin()));
             text->measure(buf, &w, &h);
             add_text_with_outline(buf, -w/2, y);
             y += dy;
@@ -1825,7 +1825,7 @@ struct menu_state : game_state
         }
 
         if (get_input(action_menu_up)->just_active) {
-            selected = (selected + items.size() - 1) % items.size();
+            selected = (unsigned)(selected + items.size() - 1) % items.size();
             pl.ui_dirty = true;
         }
 
@@ -1850,7 +1850,7 @@ struct menu_settings_state : game_state
     Uint32 mouse_invert_mi = 0;
 
     menu_settings_state() {
-        mouse_invert_mi = items.size();
+        mouse_invert_mi = (unsigned)items.size();
         items.push_back(menu_item(invert_mouse_text, "",
             []{ toggle_mouse_invert(); }));
             // ^^ Not real keen on requiring these to be static
@@ -1902,7 +1902,7 @@ struct menu_settings_state : game_state
             w = 0;
             h = 0;
             sprintf(buf2, "%s%s", std::get<0>(*it), std::get<1>(*it));
-            put_item_text(buf, buf2, it - items.begin());
+            put_item_text(buf, buf2, (unsigned)(it - items.begin()));
             text->measure(buf, &w, &h);
             add_text_with_outline(buf, -w / 2, y);
             y += dy;
@@ -1922,7 +1922,7 @@ struct menu_settings_state : game_state
         }
 
         if (get_input(action_menu_up)->just_active) {
-            selected = (selected + items.size() - 1) % items.size();
+            selected = (unsigned)(selected + items.size() - 1) % items.size();
             pl.ui_dirty = true;
         }
 

@@ -17,7 +17,7 @@ static void
 stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
                 sw_mesh *src, glm::vec3 offset, int mat)
 {
-    unsigned index_base = verts->size();
+    unsigned index_base = (unsigned)verts->size();
 
     for (unsigned int i = 0; i < src->num_vertices; i++) {
         vertex v = src->verts[i];
@@ -184,8 +184,8 @@ chunk::prepare_render(int x, int y, int z)
     sw_mesh m;
     m.verts = &verts[0];
     m.indices = &indices[0];
-    m.num_vertices = verts.size();
-    m.num_indices = indices.size();
+    m.num_vertices = (unsigned)verts.size();
+    m.num_indices = (unsigned)indices.size();
 
     // TODO: try to reuse memory
     if (this->render_chunk.mesh) {
