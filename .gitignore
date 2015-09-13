@@ -233,3 +233,6 @@ configs/user/
 
 # ctags file
 .tags
+
+# vim swap file
+*.swp

@@ -4,6 +4,7 @@
 #include "../ship_space.h"
 #include "../mesh.h"
 #include "tools.h"
+#include "../network.h"
 
 
 extern GLuint add_overlay_shader;
@@ -12,7 +13,7 @@ extern GLuint simple_shader;
 extern ship_space *ship;
 
 extern hw_mesh *frame_hw;
-
+extern ENetPeer *peer;
 
 struct add_block_tool : tool
 {
@@ -32,7 +33,7 @@ struct add_block_tool : tool
 
         /* can only build on the side of an existing frame */
         if (bl && rc->block->type == block_frame) {
-            bl->type = block_frame;
+            set_block_type(peer, rc->px, rc->py, rc->pz, block_frame);
             /* dirty the chunk */
             ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
             ship->get_chunk_containing(rc->p)->phys_chunk.valid = false;

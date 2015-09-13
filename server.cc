@@ -21,7 +21,7 @@
          MIN_CLIENT_PATCH))
 
 static ENetPeer *peers[MAX_SLOTS];
-static ship_space *ship;
+ship_space *ship;
 
 struct peer_info {
     unsigned vsn_str;
@@ -112,6 +112,37 @@ handle_ship_message(ENetEvent *event, uint8_t *data)
     }
 }
 
+/* handle the submessage of a UPDATE_MSG */
+void
+handle_update_message(ENetEvent *event, uint8_t *data)
+{
+    int px, py, pz;
+    block *bl;
+
+    switch(*data) {
+        case SET_BLOCK_TYPE:
+            printf("set block type!\n");
+            px = pack_int(data, 1);
+            py = pack_int(data, 5);
+            pz = pack_int(data, 9);
+            printf("setting block at %d,%d,%d to %d\n", px, py, pz, data[13]);
+            bl = ship->get_block(px, py, pz);
+            if(bl) {
+                bl->type = (enum block_type)data[13];
+                for(int i = 0; i < MAX_SLOTS; i++) {
+                    if(peers[i])
+                        send_data(peers[i], data - 1, 15);
+                }
+            } else {
+                printf("attempt to set non-existent block(%d, %d, %d)!\n",
+                        px, py, pz);
+            }
+            break;
+        default:
+            printf("unknown message(0x%02X)\n", *data);
+    }
+}
+
 /*  handle any incoming messages */
 void
 handle_message(ENetEvent *event)
@@ -129,6 +160,10 @@ handle_message(ENetEvent *event)
             printf("ship message(0x%02x): ", *(data + 1));
             handle_ship_message(event, data + 1);
             break;
+        case UPDATE_MSG:
+            printf("update message(0x%02x): ", *(data + 1));
+            handle_update_message(event, data + 1);
+            break;
         default:
             printf("unknown message(0x%02x)\n", *data);
     }
@@ -140,7 +175,7 @@ handle_disconnect(ENetEvent *event)
 {
     int i;
 
-    printf("%x:%u disconnected\n", event->peer->address.host,
+    printf("[%x:%u] disconnected\n", event->peer->address.host,
             event->peer->address.port);
     if(event->peer->data){
         for(i = 0; i < MAX_SLOTS; i++) {
