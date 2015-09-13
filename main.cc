@@ -30,7 +30,7 @@
 #include "src/text.h"
 #include "src/textureset.h"
 #include "src/tools.h"
-#include "src/wiring.h"
+#include "src/wiring/wiring.h"
 
 
 #define APP_NAME        "Engineer's Nightmare"

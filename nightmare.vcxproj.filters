@@ -28,6 +28,12 @@
     <Filter Include="Header Files\projectile">
       <UniqueIdentifier>{f0db0e48-0c3a-4dcb-b7e5-570dfad8baf2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\wiring">
+      <UniqueIdentifier>{a3ecb8a3-8417-4bde-8f5a-299453d3c17e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\wiring">
+      <UniqueIdentifier>{5d9ecba1-88bc-4ce1-969d-0d1d1472cac1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\blob.cc">
@@ -114,9 +120,6 @@
     <ClCompile Include="src\component\switchable_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
-    <ClCompile Include="src\wiring.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\component\component_system_manager.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
@@ -131,6 +134,9 @@
     </ClCompile>
     <ClCompile Include="src\component\relative_position_component.cc">
       <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wiring\wiring.cc">
+      <Filter>Source Files\wiring</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -242,9 +248,6 @@
     <ClInclude Include="src\component\physics_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
-    <ClInclude Include="src\wiring.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\component\type_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
@@ -256,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="src\libconfig_shim.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wiring\wiring.h">
+      <Filter>Header Files\wiring</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

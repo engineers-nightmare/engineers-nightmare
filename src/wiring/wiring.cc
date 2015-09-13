@@ -1,6 +1,6 @@
 #include "wiring.h"
-#include "mesh.h"
-#include "ship_space.h"
+#include "../mesh.h"
+#include "../ship_space.h"
 
 sw_mesh *attachment_sw;
 hw_mesh *attachment_hw;

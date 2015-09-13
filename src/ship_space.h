@@ -7,7 +7,7 @@
 #include "block.h"
 #include "component/component_manager.h"
 #include "chunk.h"
-#include "wiring.h"
+#include "wiring/wiring.h"
 
 struct ivec3_hash {
   size_t operator()(const glm::ivec3 &v) const {
