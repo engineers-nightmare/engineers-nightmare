@@ -764,71 +764,76 @@ remove_ents_from_surface(int x, int y, int z, int face)
 
             type_man.destroy_entity_instance(e->ce);
 
-            /* left side is the index of attach on entity that we're removing
-             * right side is the index we moved from the end into left side
-             * 0, 2 would be read as "attach at index 2 moved to index 0
-             * and assumed that what was at index 0 is no longer valid in referencers
-             */
-            std::unordered_map<unsigned, unsigned> fixup_attaches_removed;
-            auto entity_attaches = ship->entity_to_attach_lookup.find(e->ce.id);
-            if (entity_attaches != ship->entity_to_attach_lookup.end()) {
-                auto set = entity_attaches->second;
-                auto attaches = std::vector<unsigned>(set.begin(), set.end());
-                std::sort(attaches.begin(), attaches.end());
+            for (auto type : wire_types) {
+                auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
+                auto & wire_attachments = ship->wire_attachments[type];
 
-                auto att_size = attaches.size();
-                for (size_t i = 0; i < att_size; ++i) {
-                    auto attach = attaches[i];
-
-                    // fill left side of fixup map
-                    fixup_attaches_removed[attach] = 0;
-                }
-
-                /* Remove relevant attaches from wire_attachments
-                 * relevant is an attach that isn't occupying a position
-                 * will get popped off as a result of moving before removing
+                /* left side is the index of attach on entity that we're removing
+                 * right side is the index we moved from the end into left side
+                 * 0, 2 would be read as "attach at index 2 moved to index 0
+                 * and assumed that what was at index 0 is no longer valid in referencers
                  */
-                auto att_index = attaches.size() - 1;
-                auto swap_index = ship->wire_attachments.size() - 1;
-                for (auto s = ship->wire_attachments.rbegin();
-                    s != ship->wire_attachments.rend() && att_index != -1;) {
+                std::unordered_map<unsigned, unsigned> fixup_attaches_removed;
+                auto entity_attaches = entity_to_attach_lookup.find(e->ce.id);
+                if (entity_attaches != entity_to_attach_lookup.end()) {
+                    auto set = entity_attaches->second;
+                    auto attaches = std::vector<unsigned>(set.begin(), set.end());
+                    std::sort(attaches.begin(), attaches.end());
 
-                    auto from_attach = ship->wire_attachments[swap_index];
-                    auto rem = attaches[att_index];
-                    if (swap_index > rem) {
-                        ship->wire_attachments[rem] = from_attach;
-                        ship->wire_attachments.pop_back();
-                        fixup_attaches_removed[rem] = (unsigned)swap_index;
-                        --swap_index;
-                        ++s;
-                    }
-                    else if (s != ship->wire_attachments.rend() && swap_index == rem) {
-                        ship->wire_attachments.pop_back();
-                        fixup_attaches_removed.erase(rem);
-                        --swap_index;
-                        ++s;
+                    auto att_size = attaches.size();
+                    for (size_t i = 0; i < att_size; ++i) {
+                        auto attach = attaches[i];
+
+                        // fill left side of fixup map
+                        fixup_attaches_removed[attach] = 0;
                     }
 
-                    --att_index;
+                    /* Remove relevant attaches from wire_attachments
+                     * relevant is an attach that isn't occupying a position
+                     * will get popped off as a result of moving before removing
+                     */
+                    auto att_index = attaches.size() - 1;
+                    auto swap_index = wire_attachments.size() - 1;
+                    for (auto s = wire_attachments.rbegin();
+                    s != wire_attachments.rend() && att_index != -1;) {
+
+                        auto from_attach = wire_attachments[swap_index];
+                        auto rem = attaches[att_index];
+                        if (swap_index > rem) {
+                            wire_attachments[rem] = from_attach;
+                            wire_attachments.pop_back();
+                            fixup_attaches_removed[rem] = (unsigned)swap_index;
+                            --swap_index;
+                            ++s;
+                        }
+                        else if (s != wire_attachments.rend() && swap_index == rem) {
+                            wire_attachments.pop_back();
+                            fixup_attaches_removed.erase(rem);
+                            --swap_index;
+                            ++s;
+                        }
+
+                        --att_index;
+                    }
+
+                    /* remove all segments that contain an attach on entity */
+                    for (auto remove_attach : attaches) {
+                        remove_segments_containing(ship, type, remove_attach);
+                    }
+
+                    /* remove attaches assigned to entity from ship lookup */
+                    entity_to_attach_lookup.erase(e->ce.id);
+
+                    for (auto lookup : fixup_attaches_removed) {
+                        /* we moved m to position r */
+                        auto r = lookup.first;
+                        auto m = lookup.second;
+
+                        relocate_segments_and_entity_attaches(ship, type, r, m);
+                    }
+
+                    attach_topo_rebuild(ship, type);
                 }
-
-                /* remove all segments that contain an attach on entity */
-                for (auto remove_attach : attaches) {
-                    remove_segments_containing(ship, remove_attach);
-                }
-
-                /* remove attaches assigned to entity from ship lookup */
-                ship->entity_to_attach_lookup.erase(e->ce.id);
-
-                for (auto lookup : fixup_attaches_removed) {
-                    /* we moved m to position r */
-                    auto r = lookup.first;
-                    auto m = lookup.second;
-
-                    relocate_segments_and_entity_attaches(ship, r, m);
-                }
-
-                attach_topo_rebuild(ship);
             }
 
             delete e;
@@ -1079,15 +1084,17 @@ struct add_wiring_tool : tool
 
     unsigned get_existing_attach_near(glm::vec3 const & pt, unsigned ignore = invalid_attach) {
         /* Some spatial index might be useful here. */
-        for (auto i = 0u; i < ship->wire_attachments.size(); i++) {
-            auto d = glm::vec3(ship->wire_attachments[i].transform[3][0],
-                ship->wire_attachments[i].transform[3][1],
-                ship->wire_attachments[i].transform[3][2]) - pt;
-            if (glm::dot(d, d) <= 0.05f * 0.05f) {
-                if (i == ignore) {
-                    continue;
+        for (auto & wire_attachments : ship->wire_attachments) {
+            for (auto i = 0u; i < wire_attachments.size(); i++) {
+                auto d = glm::vec3(wire_attachments[i].transform[3][0],
+                    wire_attachments[i].transform[3][1],
+                    wire_attachments[i].transform[3][2]) - pt;
+                if (glm::dot(d, d) <= 0.05f * 0.05f) {
+                    if (i == ignore) {
+                        continue;
+                    }
+                    return i;
                 }
-                return i;
             }
         }
 
@@ -1126,6 +1133,10 @@ struct add_wiring_tool : tool
             return;
         }
 
+        /* TODO: fix add wiring tool to support more wire types */
+        auto type = wire_type_power;
+        auto & wire_attachments = ship->wire_attachments[type];
+
         unsigned existing_attach = get_existing_attach_near(pt);
         unsigned existing_attach_ignore = get_existing_attach_near(pt, current_attach);
         
@@ -1143,19 +1154,19 @@ struct add_wiring_tool : tool
         wire_attachment a2;
 
         if (current_attach != invalid_attach) {
-            a1 = ship->wire_attachments[current_attach];
+            a1 = wire_attachments[current_attach];
         }
 
         if (moving_existing) {
             glm::mat4 mat;
             if (existing_attach_ignore != invalid_attach) {
-                mat = ship->wire_attachments[existing_attach_ignore].transform;
+                mat = wire_attachments[existing_attach_ignore].transform;
             }
             else {
                 mat = mat_rotate_mesh(pt, normal);
             }
 
-            ship->wire_attachments[current_attach].transform = mat;
+            wire_attachments[current_attach].transform = mat;
 
             return;
         }
@@ -1168,7 +1179,7 @@ struct add_wiring_tool : tool
         }
 
         if (existing_attach != invalid_attach) {
-            a2 = ship->wire_attachments[existing_attach];
+            a2 = wire_attachments[existing_attach];
         }
         else {
             a2 = { mat_position(pt) };
@@ -1192,6 +1203,12 @@ struct add_wiring_tool : tool
         if (!get_attach_point(&hit_entity, pt, normal))
             return;
 
+        /* TODO: fix add wiring tool to support more wire types */
+        auto type = wire_type_power;
+        auto & wire_attachments = ship->wire_attachments[type];
+        auto & wire_segments = ship->wire_segments[type];
+        auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
+
         if (moving_existing) {
             /* did we just move to an already existing attach */
             unsigned existing_attach = get_existing_attach_near(pt, current_attach);
@@ -1199,17 +1216,17 @@ struct add_wiring_tool : tool
             /* we did move to an existing. need to merge
              */
             if (existing_attach != invalid_attach) {
-                relocate_segments_and_entity_attaches(ship, existing_attach, current_attach);
+                relocate_segments_and_entity_attaches(ship, type, existing_attach, current_attach);
 
-                auto back_attach = (unsigned)ship->wire_attachments.size() - 1;
+                auto back_attach = (unsigned)wire_attachments.size() - 1;
                 /* no segments */
                 if (back_attach != invalid_attach) {
-                    ship->wire_attachments[current_attach] = ship->wire_attachments[back_attach];
-                    ship->wire_attachments.pop_back();
+                    wire_attachments[current_attach] = wire_attachments[back_attach];
+                    wire_attachments.pop_back();
 
-                    relocate_segments_and_entity_attaches(ship, current_attach, back_attach);
+                    relocate_segments_and_entity_attaches(ship, type, current_attach, back_attach);
 
-                    attach_topo_rebuild(ship);
+                    attach_topo_rebuild(ship, type);
                 }
 
                 /* update current */
@@ -1218,7 +1235,7 @@ struct add_wiring_tool : tool
 
             /* did we move to be on an entity */
             if (hit_entity && current_attach != invalid_attach) {
-                ship->entity_to_attach_lookup[hit_entity->ce.id].insert(current_attach);
+                entity_to_attach_lookup[hit_entity->ce.id].insert(current_attach);
             }
 
             moving_existing = false;
@@ -1228,9 +1245,9 @@ struct add_wiring_tool : tool
             unsigned existing_attach = get_existing_attach_near(pt);
             unsigned new_attach;
             if (existing_attach == invalid_attach) {
-                new_attach = (unsigned)ship->wire_attachments.size();
+                new_attach = (unsigned)wire_attachments.size();
                 wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
-                ship->wire_attachments.push_back(wa);
+                wire_attachments.push_back(wa);
             }
             else {
                 new_attach = existing_attach;
@@ -1240,29 +1257,34 @@ struct add_wiring_tool : tool
                 wire_segment s;
                 s.first = current_attach;
                 s.second = new_attach;
-                ship->wire_segments.push_back(s);
+                wire_segments.push_back(s);
 
                 /* merge! */
-                attach_topo_unite(ship, current_attach, new_attach);
+                attach_topo_unite(ship, type, current_attach, new_attach);
             }
 
             current_attach = new_attach;
 
             if (hit_entity && current_attach != invalid_attach) {
-                ship->entity_to_attach_lookup[hit_entity->ce.id].insert(current_attach);
+                entity_to_attach_lookup[hit_entity->ce.id].insert(current_attach);
             }
         }
 
-        reduce_segments(ship);
+        reduce_segments(ship, type);
     }
 
     void alt_use(raycast_info *rc) override {
+        /* TODO: fix add wiring tool to support more wire types */
+        auto type = wire_type_power;
+        auto & wire_attachments = ship->wire_attachments[type];
+        auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
+
         /* reset to old spot if moving. "cancel" */
         if (moving_existing) {
-            ship->wire_attachments[current_attach] = old_attach;
+            wire_attachments[current_attach] = old_attach;
 
             if (old_entity) {
-                ship->entity_to_attach_lookup[old_entity->ce.id].insert(current_attach);
+                entity_to_attach_lookup[old_entity->ce.id].insert(current_attach);
                 old_entity = nullptr;
             }
 
@@ -1292,19 +1314,20 @@ struct add_wiring_tool : tool
             return;
         }
 
-        unsigned attach_moving_for_delete = (unsigned)ship->wire_attachments.size() - 1;
+        unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
 
-        auto changed = remove_segments_containing(ship, existing_attach);
-        changed |= relocate_segments_and_entity_attaches(
-            ship, existing_attach, attach_moving_for_delete);
+        auto changed = remove_segments_containing(ship, type, existing_attach);
+        changed |= relocate_segments_and_entity_attaches(ship, type,
+            existing_attach, attach_moving_for_delete);
 
         /* move attach_moving_for_delete to existing_attach, and trim off the last one. */
-        ship->wire_attachments[existing_attach] = ship->wire_attachments[attach_moving_for_delete];
-        ship->wire_attachments.pop_back();
+        wire_attachments[existing_attach] = wire_attachments[attach_moving_for_delete];
+        wire_attachments.pop_back();
 
         /* if we changed anything, rebuild the topology */
         if (changed) {
-            attach_topo_rebuild(ship);
+            /* TODO: fix add wiring tool to support more wire types */
+            attach_topo_rebuild(ship, wire_type_power);
         }
     }
 
@@ -1313,6 +1336,11 @@ struct add_wiring_tool : tool
         glm::vec3 pt;
         glm::vec3 normal;
         unsigned existing_attach;
+
+        /* TODO: fix add wiring tool to support more wire types */
+        auto type = wire_type_power;
+        auto & wire_attachments = ship->wire_attachments[type];
+        auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
 
         if (current_attach == invalid_attach) {
             if (!get_attach_point(&hit_entity, pt, normal))
@@ -1329,13 +1357,13 @@ struct add_wiring_tool : tool
             /* remove this attach from entity attaches
              * will get added back if needed in use()/alt_use()
              */
-            auto & lookup = ship->entity_to_attach_lookup;
+            auto & lookup = entity_to_attach_lookup;
             if (hit_entity && lookup.find(hit_entity->ce.id) != lookup.end()) {
                 lookup[hit_entity->ce.id].erase(current_attach);
             }
 
             moving_existing = true;
-            old_attach = ship->wire_attachments[current_attach];
+            old_attach = wire_attachments[current_attach];
             old_entity = hit_entity;
         }
     }

@@ -1,8 +1,10 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <vector>
 
 #include "../render_data.h"
+#include "wiring_data.h"
 
 struct ship_space;
 
@@ -24,23 +26,23 @@ void
 draw_segments(ship_space *ship, frame_data *frame);
 
 bool
-remove_segments_containing(ship_space *ship, unsigned attach);
+remove_segments_containing(ship_space *ship, wire_type type, unsigned attach);
 
 bool
-relocate_segments_and_entity_attaches(
-    ship_space *ship, unsigned relocated_to, unsigned moved_from);
+relocate_segments_and_entity_attaches(ship_space *ship, wire_type type,
+    unsigned relocated_to, unsigned moved_from);
 
 void
-reduce_segments(ship_space *ship);
+reduce_segments(ship_space *ship, wire_type type);
 
 glm::mat4
 calc_segment_matrix(const wire_attachment &start, const wire_attachment &end);
 
 unsigned
-attach_topo_find(ship_space *ship, unsigned p);
+attach_topo_find(ship_space *ship, wire_type type, unsigned p);
 
 unsigned
-attach_topo_unite(ship_space *ship, unsigned from, unsigned to);
+attach_topo_unite(ship_space *ship, wire_type type, unsigned from, unsigned to);
 
 void
-attach_topo_rebuild(ship_space *ship);
+attach_topo_rebuild(ship_space *ship, wire_type type);

@@ -23,17 +23,19 @@ mat_rotate_mesh(glm::vec3 pt, glm::vec3 dir);
 void
 draw_attachments(ship_space *ship, frame_data *frame)
 {
-    auto count = ship->wire_attachments.size();
-    for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
-        auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
-        auto attachment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
+    for (auto const & wire_attachments : ship->wire_attachments) {
+        auto count = wire_attachments.size();
+        for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
+            auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
+            auto attachment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
 
-        for (auto j = 0u; j < batch_size; j++) {
-            attachment_matrices.ptr[j] = ship->wire_attachments[i + j].transform;
+            for (auto j = 0u; j < batch_size; j++) {
+                attachment_matrices.ptr[j] = wire_attachments[i + j].transform;
+            }
+
+            attachment_matrices.bind(1, frame);
+            draw_mesh_instanced(attachment_hw, batch_size);
         }
-
-        attachment_matrices.bind(1, frame);
-        draw_mesh_instanced(attachment_hw, batch_size);
     }
 }
 
@@ -61,38 +63,43 @@ calc_segment_matrix(const wire_attachment &start, const wire_attachment &end) {
 
 
 void
-draw_segments(ship_space *ship, frame_data *frame)
-{
-    auto count = ship->wire_segments.size();
-    for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
-        auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
-        auto segment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
+draw_segments(ship_space *ship, frame_data *frame) {
+    auto const num_wires = sizeof(ship->wire_attachments) / sizeof(ship->wire_attachments[0]);
+    for (auto index = 0u; index < num_wires; ++index) {
+        auto const & wire_attachments = ship->wire_attachments[index];
+        auto const & wire_segments = ship->wire_segments[index];
 
-        for (auto j = 0u; j < batch_size; j++) {
-            auto segment = ship->wire_segments[i + j];
+        auto count = wire_segments.size();
+        for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
+            auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
+            auto segment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
 
-            auto a1 = ship->wire_attachments[segment.first];
-            auto a2 = ship->wire_attachments[segment.second];
+            for (auto j = 0u; j < batch_size; j++) {
+                auto segment = wire_segments[i + j];
 
-            auto mat = calc_segment_matrix(a1, a2);
+                auto a1 = wire_attachments[segment.first];
+                auto a2 = wire_attachments[segment.second];
 
-            segment_matrices.ptr[j] = mat;
+                auto mat = calc_segment_matrix(a1, a2);
+
+                segment_matrices.ptr[j] = mat;
+            }
+
+            segment_matrices.bind(1, frame);
+            draw_mesh_instanced(wire_hw, batch_size);
         }
-
-        segment_matrices.bind(1, frame);
-        draw_mesh_instanced(wire_hw, batch_size);
     }
 }
 
 
 bool
-remove_segments_containing(ship_space *ship, unsigned attach) {
+remove_segments_containing(ship_space *ship, wire_type type, unsigned attach) {
     /* remove all segments that contain attach */
     auto changed = false;
-
-    for (auto si = ship->wire_segments.begin(); si != ship->wire_segments.end(); ) {
+    auto & wire_segments = ship->wire_segments[type];
+    for (auto si = wire_segments.begin(); si != wire_segments.end(); ) {
         if (si->first == attach || si->second == attach) {
-            si = ship->wire_segments.erase(si);
+            si = wire_segments.erase(si);
             changed = true;
         }
         else {
@@ -104,12 +111,13 @@ remove_segments_containing(ship_space *ship, unsigned attach) {
 
 
 bool
-relocate_segments_and_entity_attaches(
-    ship_space *ship, unsigned relocated_to, unsigned moved_from) {
+relocate_segments_and_entity_attaches(ship_space *ship, wire_type type,
+    unsigned relocated_to, unsigned moved_from) {
     /* fixup segments with attaches that were relocated */
+    auto & wire_segments = ship->wire_segments[type];
     auto changed = false;
 
-    for (auto si = ship->wire_segments.begin(); si != ship->wire_segments.end(); ++si) {
+    for (auto si = wire_segments.begin(); si != wire_segments.end(); ++si) {
         if (si->first == moved_from) {
             si->first = relocated_to;
             changed = true;
@@ -122,7 +130,7 @@ relocate_segments_and_entity_attaches(
     }
 
     /* fixup entity attaches that were relocated */
-    for (auto& sea : ship->entity_to_attach_lookup) {
+    for (auto& sea : ship->entity_to_attach_lookups[type]) {
         auto & sea_attaches = sea.second;
         if (sea_attaches.erase(moved_from)) {
             sea_attaches.insert(relocated_to);
@@ -134,11 +142,12 @@ relocate_segments_and_entity_attaches(
 
 
 void
-reduce_segments(ship_space *ship) {
-    for (size_t i1 = 0; i1 < ship->wire_segments.size(); ++i1) {
+reduce_segments(ship_space *ship, wire_type type) {
+    auto & wire_segments = ship->wire_segments[type];
+    for (size_t i1 = 0; i1 < wire_segments.size(); ++i1) {
         auto remove = false;
 
-        auto const & seg1 = ship->wire_segments[i1];
+        auto const & seg1 = wire_segments[i1];
         auto s1f = seg1.first;
         auto s1s = seg1.second;
 
@@ -148,8 +157,8 @@ reduce_segments(ship_space *ship) {
         }
 
         if (!remove) {
-            for (size_t i2 = i1 + 1; i2 < ship->wire_segments.size(); ++i2) {
-                auto const & seg2 = ship->wire_segments[i2];
+            for (auto i2 = i1 + 1; i2 < wire_segments.size(); ++i2) {
+                auto const & seg2 = wire_segments[i2];
                 auto s2f = seg2.first;
                 auto s2s = seg2.second;
 
@@ -162,71 +171,74 @@ reduce_segments(ship_space *ship) {
         }
 
         if (remove) {
-            ship->wire_segments[i1] = ship->wire_segments.back();
-            ship->wire_segments.pop_back();
+            wire_segments[i1] = wire_segments.back();
+            wire_segments.pop_back();
         }
     }
 }
 
 
 unsigned
-attach_topo_find(ship_space *ship, unsigned p)
-{
+attach_topo_find(ship_space *ship, wire_type type, unsigned p) {
+    auto & wire_attachments = ship->wire_attachments[type];
+
     /* compress paths as we go */
-    if (ship->wire_attachments[p].parent != p) {
-        ship->wire_attachments[p].parent = attach_topo_find(ship, ship->wire_attachments[p].parent);
+    if (wire_attachments[p].parent != p) {
+        wire_attachments[p].parent = attach_topo_find(ship, type, wire_attachments[p].parent);
     }
 
-    return ship->wire_attachments[p].parent;
+    return wire_attachments[p].parent;
 }
 
 
 unsigned
-attach_topo_unite(ship_space *ship, unsigned from, unsigned to)
-{
+attach_topo_unite(ship_space *ship, wire_type type, unsigned from, unsigned to) {
+    auto & wire_attachments = ship->wire_attachments[type];
+
     /* merge together trees containing two attaches */
-    from = attach_topo_find(ship, from);
-    to = attach_topo_find(ship, to);
+    from = attach_topo_find(ship, type, from);
+    to = attach_topo_find(ship, type, to);
 
     /* already in same subtree? */
     if (from == to) {
         return from;
     }
 
-    if (ship->wire_attachments[from].rank < ship->wire_attachments[to].rank) {
-        ship->wire_attachments[from].parent = to;
+    if (wire_attachments[from].rank < wire_attachments[to].rank) {
+        wire_attachments[from].parent = to;
         return to;
     }
-    else if (ship->wire_attachments[from].rank > ship->wire_attachments[to].rank) {
-        ship->wire_attachments[to].parent = from;
+    else if (wire_attachments[from].rank > wire_attachments[to].rank) {
+        wire_attachments[to].parent = from;
         return from;
     }
     else {
         /* two rank-n trees merge to form a rank-n+1 tree. the choice of
          * root is arbitrary
          */
-        ship->wire_attachments[to].parent = from;
-        ship->wire_attachments[from].rank++;
+        wire_attachments[to].parent = from;
+        wire_attachments[from].rank++;
         return from;
     }
 }
 
 
-/* not currently used, but we'll need it once there is deletion of attaches
- * or segments.
- */
 void
-attach_topo_rebuild(ship_space *ship)
-{
+attach_topo_rebuild(ship_space *ship, wire_type type) {
+    auto &wire_attachments = ship->wire_attachments[type];
+    auto &wire_segments = ship->wire_segments[type];
     /* 1. everything points to itself, with rank 0 */
-    auto count = ship->wire_attachments.size();
+    auto count = wire_attachments.size();
     for (auto i = 0u; i < count; i++) {
-        ship->wire_attachments[i].parent = i;
-        ship->wire_attachments[i].rank = 0;
+        wire_attachments[i].parent = i;
+        wire_attachments[i].rank = 0;
     }
 
     /* 2. walk all the segments, unifying */
-    for (auto & seg : ship->wire_segments) {
-        attach_topo_unite(ship, seg.first, seg.second);
+    for (auto const & seg : wire_segments) {
+        attach_topo_unite(ship, type, seg.first, seg.second);
+    }
+}
+
     }
 }
