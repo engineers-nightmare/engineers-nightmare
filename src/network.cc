@@ -1,6 +1,9 @@
 #include <cassert>
 #include "network.h"
 #include <stdio.h>
+#include "ship_space.h"
+
+extern ship_space *ship;
 
 static bool send_packet(ENetPeer *peer, ENetPacket *packet)
 {
@@ -154,3 +157,29 @@ bool reply_whole_ship(ENetPeer *peer, ship_space *space) {
     return send_packet(peer, packet);
 }
 
+bool
+set_block_type(ENetPeer *peer, int px, int py, int pz, enum block_type type)
+{
+    ENetPacket *packet;
+
+    assert(peer);
+
+    ship->get_block(px, py, pz)->type = type;
+    printf("set chunk at %d,%d,%d to %d\n", px, py, pz, type);
+    uint8_t data[15] = {UPDATE_MSG, SET_BLOCK_TYPE,
+        unpack_static_int(px),
+        unpack_static_int(py),
+        unpack_static_int(pz),
+        type
+    };
+    packet = enet_packet_create(data, sizeof(data), ENET_PACKET_FLAG_RELIABLE);
+    return send_packet(peer, packet);
+}
+
+bool
+send_data(ENetPeer *peer, uint8_t *data, size_t size)
+{
+    assert(peer && data);
+    return send_packet(peer, enet_packet_create(data, size,
+                    ENET_PACKET_FLAG_RELIABLE));
+}

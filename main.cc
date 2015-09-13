@@ -671,7 +671,7 @@ init()
     skybox->load(4, "textures/sky_front5.png");
     skybox->load(5, "textures/sky_back6.png");
 
-    ship = new ship_space::ship_space();
+    ship = new ship_space();
     if( ! ship )
         errx(1, "Ship_space::ship_space failed\n");
 
@@ -1961,6 +1961,87 @@ handle_input()
     }
 }
 
+void
+handle_ship_message(ENetEvent *event, uint8_t *data)
+{ }
+
+void
+handle_update_message(ENetEvent *event, uint8_t *data)
+{
+    int px, py, pz;
+    block *bl;
+
+    switch(*data) {
+        case SET_BLOCK_TYPE:
+            printf("set block type!\n");
+            px = pack_int(data, 1);
+            py = pack_int(data, 5);
+            pz = pack_int(data, 9);
+            printf("setting block at %d,%d,%d to %d\n", px, py, pz, data[13]);
+            bl = ship->get_block(px, py, pz);
+            if(bl) {
+                bl->type = (enum block_type)data[13];
+                ship->get_chunk_containing(px, py, pz)
+                    ->render_chunk.valid = false;
+                mark_lightfield_update(px, py, pz);
+            } else {
+                printf("attempt to set non-existent block(%d, %d, %d)!\n",
+                        px, py, pz);
+            }
+            break;
+        default:
+            printf("unknown message(0x%02X)\n", *data);
+    }
+}
+
+void
+handle_run_message(ENetEvent *event)
+{
+    uint8_t *data;
+
+    printf("[%x:%u] ", event->peer->address.host, event->peer->address.port);
+    data = event->packet->data;
+    switch(*data) {
+        case SERVER_MSG:
+            printf("unexpected server message(0x%02x), ignored\n",
+                    *(data + 1));
+            break;
+        case SHIP_MSG:
+            printf("ship message(0x%02x): ", *(data + 1));
+            handle_ship_message(event, data + 1);
+            break;
+        case UPDATE_MSG:
+            printf ("update message(0x%02x): ", *(data + 1));
+            handle_update_message(event, data + 1);
+            break;
+        default:
+            printf("unknown message(0x%02x)\n", *data);
+    }
+}
+
+void
+handle_network(void)
+{
+    ENetEvent event;
+
+    enet_host_flush(client);
+    while(enet_host_service(client, &event, 5) > 0) {
+        switch(event.type) {
+            case ENET_EVENT_TYPE_RECEIVE:
+                handle_run_message(&event);
+                enet_packet_destroy(event.packet);
+                break;
+            case ENET_EVENT_TYPE_DISCONNECT:
+                fprintf(stderr, "forcefully disconnected from server!\n");
+                exit(1);
+                break;
+            /* these two should never happen on the client */
+            case ENET_EVENT_TYPE_CONNECT:
+            case ENET_EVENT_TYPE_NONE:
+                break;
+        }
+    }
+}
 
 void
 run()
@@ -2029,6 +2110,7 @@ run()
 
         /* SDL_PollEvent above has already pumped the input, so current key state is available */
         handle_input();
+        handle_network();
 
         update();
 
@@ -2092,7 +2174,7 @@ connect_server(char *host, int port)
     enet_address_set_host(&addr, host);
     addr.port = port;
     /* connect to the remote host */
-    peer =enet_host_connect(client, &addr, 2, 0);
+    peer = enet_host_connect(client, &addr, 2, 0);
     if(!peer)
         return false;
 

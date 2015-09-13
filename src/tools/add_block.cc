@@ -4,6 +4,7 @@
 #include "../ship_space.h"
 #include "../shader_params.h"
 #include "../mesh.h"
+#include "../network.h"
 
 
 extern GLuint add_overlay_shader;
@@ -18,7 +19,7 @@ extern glm::mat4
 mat_position(float x, float y, float z);
 
 extern hw_mesh *scaffold_hw;
-
+extern ENetPeer *peer;
 
 struct add_block_tool : tool
 {
@@ -38,7 +39,7 @@ struct add_block_tool : tool
 
         /* can only build on the side of an existing scaffold */
         if (bl && rc->block->type == block_support) {
-            bl->type = block_support;
+            set_block_type(peer, rc->px, rc->py, rc->pz, block_support);
             /* dirty the chunk */
             ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
             mark_lightfield_update(rc->px, rc->py, rc->pz);

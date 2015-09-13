@@ -11,6 +11,7 @@
 ENetPeer *peer;
 ENetHost *client;
 static bool disconnected;
+ship_space *ship;
 
 void disconnect_peer(ENetPeer *peer)
 {
