@@ -117,7 +117,6 @@
       <Command>
         xcopy /C/Y "$(SolutionDir)windows-dependencies\assimp\bin32\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\epoxy\bin32\*.dll" "$(OutputPath)"
-        rem xcopy /C/Y "$(SolutionDir)windows-depenencies\freetype6\bin32\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\libconfig\bin32\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\mman-win32\bin32\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\sdl2\lib\x86\*.dll" "$(OutputPath)"
@@ -143,7 +142,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies);Bullet2FileLoader.lib;Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;enet64.lib;epoxy.lib;assimp.lib;libconfig.lib;mman.lib;freetype235.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies);Bullet2FileLoader.lib;Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;enet.lib;epoxy.lib;assimp.lib;libconfig.lib;mman.lib;freetype235.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
@@ -151,7 +150,6 @@
         xcopy /C/Y "$(SolutionDir)windows-dependencies\assimp\bin64\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\mman-win32\bin64\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\epoxy\bin64\*.dll" "$(OutputPath)"
-        rem xcopy /C/Y "$(SolutionDir)windows-dependencies\freetype\bin64\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\libconfig\bin64\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\sdl2\lib\x64\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\sdl2_image\lib\x64\*.dll" "$(OutputPath)"
@@ -184,7 +182,6 @@
       <Command>
         xcopy /C/Y "$(SolutionDir)windows-dependencies\assimp\bin32\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\epoxy\bin32\*.dll" "$(OutputPath)"
-        rem xcopy /C/Y "$(SolutionDir)windows-depenencies\freetype6\bin32\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\libconfig\bin32\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\mman-win32\bin32\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\sdl2\lib\x86\*.dll" "$(OutputPath)"
@@ -211,7 +208,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies);Bullet2FileLoader.lib;Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;enet64.lib;epoxy.lib;assimp.lib;libconfig.lib;mman.lib;freetype235.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies);Bullet2FileLoader.lib;Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;enet.lib;epoxy.lib;assimp.lib;libconfig.lib;mman.lib;freetype235.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
@@ -219,7 +216,6 @@
         xcopy /C/Y "$(SolutionDir)windows-dependencies\assimp\bin64\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\mman-win32\bin64\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\epoxy\bin64\*.dll" "$(OutputPath)"
-        rem xcopy /C/Y "$(SolutionDir)windows-dependencies\freetype\bin64\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\libconfig\bin64\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\sdl2\lib\x64\*.dll" "$(OutputPath)"
         xcopy /C/Y "$(SolutionDir)windows-dependencies\sdl2_image\lib\x64\*.dll" "$(OutputPath)"
