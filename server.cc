@@ -116,8 +116,8 @@ handle_ship_message(ENetEvent *event, uint8_t *data)
 void
 handle_update_message(ENetEvent *event, uint8_t *data)
 {
-    int px, py, pz;
-    block *bl;
+    int x, y, z, px, py, pz;
+    block *bl, *os;
 
     switch(*data) {
         case SET_BLOCK_TYPE:
@@ -130,12 +130,44 @@ handle_update_message(ENetEvent *event, uint8_t *data)
             if(bl) {
                 bl->type = (enum block_type)data[13];
                 for(int i = 0; i < MAX_SLOTS; i++) {
-                    if(peers[i])
+                    if(peers[i] &&
+                            peers[i]->connectID != event->peer->connectID)
                         send_data(peers[i], data - 1, 15);
                 }
             } else {
                 printf("attempt to set non-existent block(%d, %d, %d)!\n",
                         px, py, pz);
+            }
+            break;
+        case SET_TEXTURE_TYPE:
+            printf("set texture type!\n");
+            x = pack_int(data, 1);
+            y = pack_int(data, 5);
+            z = pack_int(data, 9);
+            px = pack_int(data, 13);
+            py = pack_int(data, 17);
+            pz = pack_int(data, 21);
+            printf("setting texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
+                    x, y, z, px, py, pz, data[26], data[25]);
+            bl = ship->get_block(x, y, z);
+            os = ship->get_block(px, py, pz);
+            if(bl && os) {
+                ship->ensure_block(x, y, z);
+                ship->ensure_block(px, py, pz);
+                bl->surfs[data[25]] = (enum surface_type)data[26];
+                os->surfs[data[25] ^ 1] = (enum surface_type)data[26];
+                for(int i = 0; i < MAX_SLOTS; i++) {
+                    if(peers[i] &&
+                            peers[i]->connectID != event->peer->connectID)
+                        send_data(peers[i], data - 1, 28);
+                }
+            } else {
+                if(!bl)
+                    printf("attempt to set non-existent block(%d, %d, %d)!\n",
+                            x, y, z);
+                if(!os)
+                    printf("attempt to set non-existent block(%d, %d, %d)!\n",
+                            px, py, pz);
             }
             break;
         default:

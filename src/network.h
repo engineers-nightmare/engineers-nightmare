@@ -28,6 +28,7 @@
 
 /* UPDATE_MSG subtype */
 #define SET_BLOCK_TYPE      0x00
+#define SET_TEXTURE_TYPE    0x01
 
 /* assumes 4 byte int, obviously not always true */
 /* FIXME: negotiate int size with server */
@@ -66,7 +67,10 @@ bool send_ship_chunk(ENetPeer *peer, ship_space *space, int chunk_x,
 bool reply_whole_ship(ENetPeer *peer, ship_space *space);
 
 /* update messages */
-bool set_block_type(ENetPeer *peer, int px, int py, int pz, enum block_type type);
+bool set_block_type(ENetPeer *peer, int px, int py, int pz,
+        enum block_type type);
+bool set_block_surface(ENetPeer *peer, int x, int y, int z, int px, int py,
+        int pz, uint8_t idx, uint8_t st);
 
 /* raw messages */
 bool send_data(ENetPeer *peer, uint8_t *data, size_t size);

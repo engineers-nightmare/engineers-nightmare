@@ -1,10 +1,12 @@
 #include "../tools.h"
 
+#include <enet/enet.h>
 #include <epoxy/gl.h>
 #include "../ship_space.h"
 #include "../shader_params.h"
 #include "../mesh.h"
 #include "../block.h"
+#include "../network.h"
 
 
 extern GLuint add_overlay_shader;
@@ -20,6 +22,8 @@ extern glm::mat4
 mat_position(float x, float y, float z);
 
 extern hw_mesh *surfs_hw[6];
+
+extern ENetPeer *peer;
 
 extern void
 remove_ents_from_surface(int x, int y, int z, int face);
@@ -50,18 +54,18 @@ struct add_surface_tool : tool
 
             if (!bl) {
                 ship->ensure_block(rc->x, rc->y, rc->z);
-                bl = ship->get_block(rc->x, rc->y, rc->z);
+                // bl = ship->get_block(rc->x, rc->y, rc->z);
             }
 
             if (!other_side) {
                 ship->ensure_block(rc->px, rc->py, rc->pz);
-                other_side = ship->get_block(rc->px, rc->py, rc->pz);
+                // other_side = ship->get_block(rc->px, rc->py, rc->pz);
             }
 
-            bl->surfs[index] = this->st;
-            ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
+            set_block_surface(peer, rc->x, rc->y, rc->z, rc->px, rc->py,
+                    rc->pz, index, this->st);
 
-            other_side->surfs[index ^ 1] = this->st;
+            ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
             ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
 
             mark_lightfield_update(rc->x, rc->y, rc->z);

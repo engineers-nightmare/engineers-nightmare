@@ -177,6 +177,32 @@ set_block_type(ENetPeer *peer, int px, int py, int pz, enum block_type type)
 }
 
 bool
+set_block_surface(ENetPeer *peer, int x, int y, int z, int px, int py, int pz,
+        uint8_t idx, uint8_t st)
+{
+    ENetPacket *packet;
+
+    assert(peer);
+
+    ship->get_block(x, y, z)->surfs[idx] = (enum surface_type)st;
+    ship->get_block(px, py, pz)->surfs[idx ^ 1] = (enum surface_type)st;
+
+    printf("set texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
+            x, y, z, px, py, pz, st, idx);
+    uint8_t data[28] = {UPDATE_MSG, SET_TEXTURE_TYPE,
+        unpack_static_int(x),
+        unpack_static_int(y),
+        unpack_static_int(z),
+        unpack_static_int(px),
+        unpack_static_int(py),
+        unpack_static_int(pz),
+        idx, st
+    };
+    packet = enet_packet_create(data, sizeof(data), ENET_PACKET_FLAG_RELIABLE);
+    return send_packet(peer, packet);
+}
+
+bool
 send_data(ENetPeer *peer, uint8_t *data, size_t size)
 {
     assert(peer && data);
