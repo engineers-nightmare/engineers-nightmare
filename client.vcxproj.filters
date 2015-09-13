@@ -162,6 +162,9 @@
     <ClCompile Include="src\component\proximity_sensor_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
+    <ClCompile Include="src\network.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -300,6 +303,9 @@
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\component\c_entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\component\proximity_sensor_component.h">

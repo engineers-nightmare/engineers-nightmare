@@ -4,6 +4,8 @@
 #include "src/winerr.h"
 #endif
 
+/* enet first as it include win header that need to come first */
+#include <enet/enet.h>
 #include <algorithm>
 #include <epoxy/gl.h>
 #include <functional>
@@ -11,8 +13,6 @@
 #include <stdio.h>
 #include <SDL.h>
 #include <unordered_map>
-
-#include <enet/enet.h>
 
 #include "src/common.h"
 #include "src/component/component_system_manager.h"
