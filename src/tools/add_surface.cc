@@ -1,10 +1,10 @@
 #include <epoxy/gl.h>
-
 #include "../common.h"
 #include "../ship_space.h"
 #include "../mesh.h"
 #include "../block.h"
 #include "tools.h"
+#include "../network.h"
 
 
 extern GLuint add_overlay_shader;
@@ -14,6 +14,8 @@ extern GLuint simple_shader;
 extern ship_space *ship;
 
 extern hw_mesh *surfs_hw[6];
+
+extern ENetPeer *peer;
 
 extern void
 remove_ents_from_surface(glm::ivec3 p, int face);
