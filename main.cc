@@ -224,7 +224,7 @@ struct entity_type
 };
 
 
-entity_type entity_types[5];
+entity_type entity_types[6];
 
 /* fwd for temp spawn logic just below */
 void
@@ -305,6 +305,12 @@ struct entity
         // switch
         else if (type == 3) {
             switch_man.assign_entity(ce);
+        }
+        // plaidnicator
+        else if (type == 5) {
+            power_provider_man.assign_entity(ce);
+            power_provider_man.max_provided(ce) = 12;
+            power_provider_man.provided(ce) = 12;
         }
     }
 
@@ -621,6 +627,12 @@ init()
     entity_types[4].name = "Door";
     build_static_physics_mesh(entity_types[4].sw, &entity_types[4].phys_mesh, &entity_types[4].phys_shape);
 
+    entity_types[5].sw = load_mesh("mesh/frobnicator.obj");
+    set_mesh_material(entity_types[5].sw, 13);
+    entity_types[5].hw = upload_mesh(entity_types[5].sw);
+    entity_types[5].name = "Plaidnicator";
+    build_static_physics_mesh(entity_types[5].sw, &entity_types[5].phys_mesh, &entity_types[5].phys_shape);
+
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
     unlit_instanced_shader = load_shader("shaders/simple_instanced.vert", "shaders/unlit.frag");
@@ -655,6 +667,7 @@ init()
     world_textures->load(10, "textures/attach.png");
     world_textures->load(11, "textures/no_place.png");
     world_textures->load(12, "textures/wire.png");
+    world_textures->load(13, "textures/plaidnicator.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
@@ -1393,6 +1406,7 @@ tool *tools[] = {
     new add_surface_entity_tool(2),
     new add_surface_entity_tool(3),
     new add_block_entity_tool(4),
+    new add_block_entity_tool(5),
     new remove_surface_entity_tool(),
     new add_wiring_tool(),
 };
