@@ -538,6 +538,7 @@ init()
     switch_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     switchable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     type_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    updateable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
     proj_man.create_projectile_data(1000);
 
@@ -782,6 +783,8 @@ remove_ents_from_surface(int x, int y, int z, int face)
             switchable_man.destroy_entity_instance(e->ce);
 
             type_man.destroy_entity_instance(e->ce);
+
+            updateable_man.destroy_entity_instance(e->ce);
 
             for (auto type : wire_types) {
                 auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
