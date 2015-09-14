@@ -1,3 +1,5 @@
+#include <unordered_set>
+
 #include "wiring.h"
 #include "../mesh.h"
 #include "../ship_space.h"
@@ -285,6 +287,15 @@ calculate_power(ship_space *ship) {
                 continue;
             }
 
+            std::unordered_set<unsigned> attached_wires;
+            for (auto const & ea_index : entity_lookup.second) {
+                if (attached_wires.find(ea_index) != attached_wires.end()) {
+                    continue;
+                }
+                attached_wires.insert(ea_index);
+            }
+            auto num_attached_wires = attached_wires.size();
+
             visited_entities.insert(entity_lookup.first);
             for (auto const & ea_index : entity_lookup.second) {
                 auto const & ea = ship->wire_attachments[type][ea_index];
@@ -307,8 +318,10 @@ calculate_power(ship_space *ship) {
                         power_data.peak_draw += draw;                        
                     }
                     if (power_provider_man.exists(entity)) {
+                        auto provided = power_provider_man.provided(entity);
+                        provided = num_attached_wires == 0u ? 0 : provided / num_attached_wires;
                         power_data.num_providers++;
-                        power_data.total_power += power_provider_man.provided(entity);
+                        power_data.total_power += provided;
                     }
                     break;
                 }
