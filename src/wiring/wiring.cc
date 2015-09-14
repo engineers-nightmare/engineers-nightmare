@@ -295,9 +295,10 @@ calculate_power(ship_space *ship) {
                         power_data.num_consumers++;
                         power_data.total_draw += power_man.required_power(entity);
                     }
-                    //if (power_provider_man.exists(entity)) {
-                    //    power_data.total_power += power_provider_man.provided(entity);
-                    //}
+                    if (power_provider_man.exists(entity)) {
+                        power_data.num_providers++;
+                        power_data.total_power += power_provider_man.provided(entity);
+                    }
                     break;
                 }
             }

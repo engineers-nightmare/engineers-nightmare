@@ -14,6 +14,7 @@ struct power_wiring_data {
     unsigned total_power = 0;
     unsigned total_draw = 0;
     unsigned num_consumers = 0;
+    unsigned num_providers = 0;
 };
 
 
