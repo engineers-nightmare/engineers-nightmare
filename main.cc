@@ -1337,7 +1337,9 @@ struct add_wiring_tool : tool
         }
 
         /* remove attach from entity lookup */
-        entity_to_attach_lookup[hit_entity->ce].erase(existing_attach);
+        if (hit_entity) {
+            entity_to_attach_lookup[hit_entity->ce].erase(existing_attach);
+        }
 
         unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
 
