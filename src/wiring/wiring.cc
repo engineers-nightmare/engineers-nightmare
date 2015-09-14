@@ -270,8 +270,8 @@ calculate_power(ship_space *ship) {
     /* only visit each wire once.
      * They should all be flat with attach_topo_find()
      */
-    std::set<size_t> visited_wires;
-    std::set<c_entity> visited_entities;
+    std::unordered_set<size_t> visited_wires;
+    std::unordered_set<c_entity> visited_entities;
     for (auto const & attach : ship->power_attachments) {
         auto wire = attach_topo_find(ship, type, attach.parent);
         if (visited_wires.find(wire) != visited_wires.end()) {

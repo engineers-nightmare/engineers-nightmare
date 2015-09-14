@@ -9,6 +9,7 @@
 #include "chunk.h"
 #include "wiring/wiring.h"
 #include "wiring/wiring_data.h"
+#include <unordered_set>
 
 struct ivec3_hash {
   size_t operator()(const glm::ivec3 &v) const {
@@ -59,8 +60,8 @@ struct ship_space {
     std::vector<wire_attachment> &power_attachments = wire_attachments[wire_type_power];
     std::vector<wire_segment> &power_segments = wire_segments[wire_type_power];
 
-    std::unordered_map<c_entity, std::set<unsigned>> entity_to_attach_lookups[num_wire_types];
-    std::unordered_map<c_entity, std::set<unsigned>> &entity_to_power_attach_lookup =
+    std::unordered_map<c_entity, std::unordered_set<unsigned>> entity_to_attach_lookups[num_wire_types];
+    std::unordered_map<c_entity, std::unordered_set<unsigned>> &entity_to_power_attach_lookup =
         entity_to_attach_lookups[wire_type_power];
 
     std::unordered_map<unsigned, power_wiring_data> power_wires;

@@ -63,7 +63,7 @@ tick_power_consumers(ship_space * ship) {
             continue;
         }
 
-        std::set<unsigned> visited_wires;
+        std::unordered_set<unsigned> visited_wires;
         auto const & attaches = ship->entity_to_power_attach_lookup[ce];
         for (auto const & sea : attaches) {
             auto const & attach = ship->power_attachments[sea];

@@ -798,7 +798,7 @@ remove_ents_from_surface(int x, int y, int z, int face)
                 std::unordered_map<unsigned, unsigned> fixup_attaches_removed;
                 auto entity_attaches = entity_to_attach_lookup.find(e->ce);
                 if (entity_attaches != entity_to_attach_lookup.end()) {
-                    auto set = entity_attaches->second;
+                    auto const & set = entity_attaches->second;
                     auto attaches = std::vector<unsigned>(set.begin(), set.end());
                     std::sort(attaches.begin(), attaches.end());
 
