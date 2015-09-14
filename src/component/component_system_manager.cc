@@ -59,14 +59,15 @@ tick_power_consumers(ship_space * ship) {
         auto old_powered = powered;
         powered = false;
 
-        if (ship->entity_to_power_attach_lookup.find(ce) == ship->entity_to_power_attach_lookup.end()) {
+        auto & power_attaches = ship->entity_to_attach_lookups[wire_type_power];
+        if (power_attaches.find(ce) == power_attaches.end()) {
             continue;
         }
 
         std::unordered_set<unsigned> visited_wires;
-        auto const & attaches = ship->entity_to_power_attach_lookup[ce];
+        auto const & attaches = power_attaches[ce];
         for (auto const & sea : attaches) {
-            auto const & attach = ship->power_attachments[sea];
+            auto const & attach = ship->wire_attachments[wire_type_power][sea];
             auto wire_index = attach_topo_find(ship, wire_type_power, attach.parent);
             if (visited_wires.find(wire_index) != visited_wires.end()) {
                 continue;

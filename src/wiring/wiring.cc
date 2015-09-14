@@ -259,7 +259,7 @@ calculate_power(ship_space *ship) {
      */
     ship->power_wires.clear();
     const auto type = wire_type_power;
-    for (auto const & attach : ship->power_attachments) {
+    for (auto const & attach : ship->wire_attachments[wire_type_power]) {
         auto wire = attach_topo_find(ship, type, attach.parent);
         if (ship->power_wires.find(wire) == ship->power_wires.end()) {
             continue;
@@ -272,7 +272,7 @@ calculate_power(ship_space *ship) {
      */
     std::unordered_set<size_t> visited_wires;
     std::unordered_set<c_entity> visited_entities;
-    for (auto const & attach : ship->power_attachments) {
+    for (auto const & attach : ship->wire_attachments[wire_type_power]) {
         auto wire = attach_topo_find(ship, type, attach.parent);
         if (visited_wires.find(wire) != visited_wires.end()) {
             continue;
@@ -319,7 +319,7 @@ calculate_power(ship_space *ship) {
                     }
                     if (power_provider_man.exists(entity)) {
                         auto provided = power_provider_man.provided(entity);
-                        provided = num_attached_wires == 0u ? 0 : provided / num_attached_wires;
+                        provided = num_attached_wires == 0u ? 0 : provided / (unsigned)num_attached_wires;
                         power_data.num_providers++;
                         power_data.total_power += provided;
                     }
