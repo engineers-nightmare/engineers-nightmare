@@ -271,8 +271,7 @@ struct entity
         // frobnicator
         if (type == 0) {
             power_man.assign_entity(ce);
-            //default to powered state for now
-            power_man.powered(ce) = true;
+            power_man.powered(ce) = false;
             power_man.required_power(ce) = 12;
 
             switchable_man.assign_entity(ce);
@@ -285,8 +284,7 @@ struct entity
         // display panel
         else if (type == 1) {
             power_man.assign_entity(ce);
-            //default to powered state for now
-            power_man.powered(ce) = true;
+            power_man.powered(ce) = false;
             power_man.required_power(ce) = 4;
 
             light_man.assign_entity(ce);
@@ -295,8 +293,7 @@ struct entity
         // light
         else if (type == 2) {
             power_man.assign_entity(ce);
-            //default to powered state for now
-            power_man.powered(ce) = true;
+            power_man.powered(ce) = false;
             power_man.required_power(ce) = 6;
 
             switchable_man.assign_entity(ce);

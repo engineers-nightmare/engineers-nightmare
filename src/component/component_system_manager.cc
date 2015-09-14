@@ -55,7 +55,9 @@ tick_power_consumers(ship_space * ship) {
     for (auto i = 0u; i < power_man.buffer.num; i++) {
         auto ce = power_man.instance_pool.entity[i];
 
-        auto & powered = power_man.powered(ce) = false;
+        auto & powered = power_man.powered(ce);
+        auto old_powered = powered;
+        powered = false;
 
         if (ship->entity_to_power_attach_lookup.find(ce) == ship->entity_to_power_attach_lookup.end()) {
             continue;
@@ -76,6 +78,13 @@ tick_power_consumers(ship_space * ship) {
             /* todo: this needs to somehow handle multiple wires */
             powered |= wire.total_power >= wire.total_draw;
         }
+
+        if (powered != old_powered) {
+            assert(updateable_man.exists(ce) || !"updateable should always exist");
+            updateable_man.updated(ce) = true;
+        }
+    }
+}
 
 
 void
