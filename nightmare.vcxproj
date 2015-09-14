@@ -229,6 +229,7 @@
     <ClCompile Include="src\component\light_component.cc" />
     <ClCompile Include="src\component\physics_component.cc" />
     <ClCompile Include="src\component\power_component.cc" />
+    <ClCompile Include="src\component\power_provider_component.cc" />
     <ClCompile Include="src\component\relative_position_component.cc" />
     <ClCompile Include="src\component\renderable_component.cc" />
     <ClCompile Include="src\component\surface_attachment_component.cc" />
@@ -268,6 +269,7 @@
     <ClInclude Include="src\component\light_component.h" />
     <ClInclude Include="src\component\physics_component.h" />
     <ClInclude Include="src\component\power_component.h" />
+    <ClInclude Include="src\component\power_provider_component.h" />
     <ClInclude Include="src\component\relative_position_component.h" />
     <ClInclude Include="src\component\renderable_component.h" />
     <ClInclude Include="src\component\surface_attachment_component.h" />
