@@ -293,7 +293,18 @@ calculate_power(ship_space *ship) {
                     /* add to power_data on wire */
                     if (power_man.exists(entity)) {
                         power_data.num_consumers++;
-                        power_data.total_draw += power_man.required_power(entity);
+                        auto draw = power_man.required_power(entity);
+
+                        if (switchable_man.exists(entity)) {
+                            if (switchable_man.enabled(entity)) {
+                                power_data.total_draw += draw;
+                            }
+                        }
+                        else {
+                            power_data.total_draw += draw;
+                        }
+
+                        power_data.peak_draw += draw;                        
                     }
                     if (power_provider_man.exists(entity)) {
                         power_data.num_providers++;
