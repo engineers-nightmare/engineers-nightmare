@@ -526,6 +526,7 @@ init()
     physics_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     pos_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     power_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    power_provider_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     render_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     surface_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     switch_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
@@ -754,6 +755,8 @@ remove_ents_from_surface(int x, int y, int z, int face)
             physics_man.destroy_entity_instance(e->ce);
 
             power_man.destroy_entity_instance(e->ce);
+            
+            power_provider_man.destroy_entity_instance(e->ce);
 
             gas_man.destroy_entity_instance(e->ce);
 

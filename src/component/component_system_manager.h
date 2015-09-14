@@ -9,6 +9,7 @@
 #include "light_component.h"
 #include "physics_component.h"
 #include "power_component.h"
+#include "power_provider_component.h"
 #include "relative_position_component.h"
 #include "renderable_component.h"
 #include "surface_attachment_component.h"
@@ -21,6 +22,7 @@ extern light_component_manager light_man;
 extern physics_component_manager physics_man;
 extern relative_position_component_manager pos_man;
 extern power_component_manager power_man;
+extern power_provider_component_manager power_provider_man;
 extern renderable_component_manager render_man;
 extern surface_attachment_component_manager surface_man;
 extern switch_component_manager switch_man;
