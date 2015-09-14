@@ -38,4 +38,7 @@ void
 tick_power_consumers(ship_space * ship);
 
 void
+tick_updateables(ship_space * ship);
+
+void
 draw_renderables(frame_data *frame);

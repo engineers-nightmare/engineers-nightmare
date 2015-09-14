@@ -265,6 +265,9 @@ struct entity
         render_man.assign_entity(ce);
         render_man.mesh(ce) = *et->hw;
 
+        updateable_man.assign_entity(ce);
+        updateable_man.updated(ce) = true;
+
         // frobnicator
         if (type == 0) {
             power_man.assign_entity(ce);
@@ -1520,6 +1523,7 @@ update()
         /* allow the entities to tick */
         tick_gas_producers(ship);
         tick_power_consumers(ship);
+        tick_updateables(ship);
 
         /* HACK: dirty this every frame for now while debugging atmo */
         if (1 || pl.ui_dirty) {

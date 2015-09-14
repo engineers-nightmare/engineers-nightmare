@@ -14,6 +14,9 @@ type_component_manager type_man;
 updateable_component_manager updateable_man;
 
 
+extern void mark_lightfield_update(int x, int y, int z);
+
+
 void
 tick_gas_producers(ship_space * ship)
 {
@@ -73,6 +76,25 @@ tick_power_consumers(ship_space * ship) {
             /* todo: this needs to somehow handle multiple wires */
             powered |= wire.total_power >= wire.total_draw;
         }
+
+
+void
+tick_updateables(ship_space * ship) {
+    for (auto i = 0u; i < updateable_man.buffer.num; i++) {
+        auto const & entity = updateable_man.instance_pool.entity[i];
+
+        /* _something_ updated last frame */
+        if (updateable_man.instance_pool.updated[i]) {
+            /* was it lights? */
+            if (light_man.exists(entity)) {
+                /* could have been. mark it */
+                auto pos = pos_man.position(entity);
+                auto block_pos = get_coord_containing(pos);
+                mark_lightfield_update(block_pos.x, block_pos.y, block_pos.z);
+            }
+        }
+
+        updateable_man.instance_pool.updated[i] = false;
     }
 }
 
