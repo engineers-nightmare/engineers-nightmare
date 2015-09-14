@@ -1513,6 +1513,7 @@ update()
 
         /* allow the entities to tick */
         tick_gas_producers(ship);
+        tick_power_consumers(ship);
 
         /* HACK: dirty this every frame for now while debugging atmo */
         if (1 || pl.ui_dirty) {

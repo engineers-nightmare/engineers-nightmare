@@ -12,6 +12,7 @@ switch_component_manager switch_man;
 switchable_component_manager switchable_man;
 type_component_manager type_man;
 
+
 void
 tick_gas_producers(ship_space * ship)
 {
@@ -43,6 +44,37 @@ tick_gas_producers(ship_space * ship)
         }
     }
 }
+
+
+void
+tick_power_consumers(ship_space * ship) {
+    for (auto i = 0u; i < power_man.buffer.num; i++) {
+        auto ce = power_man.instance_pool.entity[i];
+
+        auto & powered = power_man.powered(ce) = false;
+
+        if (ship->entity_to_power_attach_lookup.find(ce) == ship->entity_to_power_attach_lookup.end()) {
+            continue;
+        }
+
+        std::set<unsigned> visited_wires;
+        auto const & attaches = ship->entity_to_power_attach_lookup[ce];
+        for (auto const & sea : attaches) {
+            auto const & attach = ship->power_attachments[sea];
+            auto wire_index = attach_topo_find(ship, wire_type_power, attach.parent);
+            if (visited_wires.find(wire_index) != visited_wires.end()) {
+                continue;
+            }
+
+            auto const & wire = ship->power_wires[wire_index];
+
+            visited_wires.insert(wire_index);
+            /* todo: this needs to somehow handle multiple wires */
+            powered |= wire.total_power >= wire.total_draw;
+        }
+    }
+}
+
 
 void
 draw_renderables(frame_data *frame)
