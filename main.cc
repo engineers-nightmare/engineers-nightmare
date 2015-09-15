@@ -2571,7 +2571,7 @@ handle_update_message(ENetEvent *event, uint8_t *data)
                         px, py, pz);
             }
             break;
-        case SET_TEXTURE_TYPE:
+        case SET_SURFACE_TYPE:
             printf("set texture type!\n");
             x = pack_int(data, 1);
             y = pack_int(data, 5);

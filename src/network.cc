@@ -158,18 +158,18 @@ bool reply_whole_ship(ENetPeer *peer, ship_space *space) {
 }
 
 bool
-set_block_type(ENetPeer *peer, int px, int py, int pz, enum block_type type)
+set_block_type(ENetPeer *peer, glm::vec3 b, enum block_type type)
 {
     ENetPacket *packet;
 
     assert(peer);
 
-    ship->get_block(px, py, pz)->type = type;
-    printf("set chunk at %d,%d,%d to %d\n", px, py, pz, type);
+    ship->get_block(b.x, b.y, b.z)->type = type;
+    printf("set chunk at %.2f,%.2f,%.2f to %d\n", b.x, b.y, b.z, type);
     uint8_t data[15] = {UPDATE_MSG, SET_BLOCK_TYPE,
-        unpack_static_int(px),
-        unpack_static_int(py),
-        unpack_static_int(pz),
+        unpack_static_int(b.x),
+        unpack_static_int(b.y),
+        unpack_static_int(b.z),
         type
     };
     packet = enet_packet_create(data, sizeof(data), ENET_PACKET_FLAG_RELIABLE);
@@ -177,25 +177,25 @@ set_block_type(ENetPeer *peer, int px, int py, int pz, enum block_type type)
 }
 
 bool
-set_block_surface(ENetPeer *peer, int x, int y, int z, int px, int py, int pz,
-        uint8_t idx, uint8_t st)
+set_block_surface(ENetPeer *peer, glm::vec3 b, glm::vec3 os, uint8_t idx,
+        uint8_t st)
 {
     ENetPacket *packet;
 
     assert(peer);
 
-    ship->get_block(x, y, z)->surfs[idx] = (enum surface_type)st;
-    ship->get_block(px, py, pz)->surfs[idx ^ 1] = (enum surface_type)st;
+    ship->get_block(b.x, b.y, b.z)->surfs[idx] = (enum surface_type)st;
+    ship->get_block(os.x, os.y, os.z)->surfs[idx ^ 1] = (enum surface_type)st;
 
-    printf("set texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
-            x, y, z, px, py, pz, st, idx);
-    uint8_t data[28] = {UPDATE_MSG, SET_TEXTURE_TYPE,
-        unpack_static_int(x),
-        unpack_static_int(y),
-        unpack_static_int(z),
-        unpack_static_int(px),
-        unpack_static_int(py),
-        unpack_static_int(pz),
+    printf("set texture at %.2f,%.2f,%.2f|%.2f,%.2f,%.2f to %d on %d\n",
+            b.x, b.y, b.z, os.x, os.y, os.z, st, idx);
+    uint8_t data[28] = {UPDATE_MSG, SET_SURFACE_TYPE,
+        unpack_static_int(b.x),
+        unpack_static_int(b.y),
+        unpack_static_int(b.z),
+        unpack_static_int(os.x),
+        unpack_static_int(os.y),
+        unpack_static_int(os.z),
         idx, st
     };
     packet = enet_packet_create(data, sizeof(data), ENET_PACKET_FLAG_RELIABLE);

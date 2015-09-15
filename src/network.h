@@ -2,6 +2,7 @@
 
 #include <enet/enet.h>
 #include <stdint.h>
+#include <glm/glm.hpp>
 
 #include "ship_space.h"
 #include "block.h"
@@ -28,15 +29,15 @@
 
 /* UPDATE_MSG subtype */
 #define SET_BLOCK_TYPE      0x00
-#define SET_TEXTURE_TYPE    0x01
+#define SET_SURFACE_TYPE    0x01
 
 /* assumes 4 byte int, obviously not always true */
-/* FIXME: negotiate int size with server */
+/* FIXME: need a 4 byte integer vector */
 #define unpack_static_int(x)            \
-    (uint8_t)((x & 0xFF000000) >> 6),   \
-    (uint8_t)((x & 0x00FF0000) >> 4),   \
-    (uint8_t)((x & 0x0000FF00) >> 2),   \
-    (uint8_t)(x & 0x000000FF)
+    (uint8_t)(((int)x & 0xFF000000) >> 6),   \
+    (uint8_t)(((int)x & 0x00FF0000) >> 4),   \
+    (uint8_t)(((int)x & 0x0000FF00) >> 2),   \
+    (uint8_t)((int)x & 0x000000FF)
 
 #define pack_int(arr, idx)      \
     ((((int)arr[idx]  ) << 6) | \
@@ -67,10 +68,10 @@ bool send_ship_chunk(ENetPeer *peer, ship_space *space, int chunk_x,
 bool reply_whole_ship(ENetPeer *peer, ship_space *space);
 
 /* update messages */
-bool set_block_type(ENetPeer *peer, int px, int py, int pz,
+bool set_block_type(ENetPeer *peer, glm::vec3 other_side,
         enum block_type type);
-bool set_block_surface(ENetPeer *peer, int x, int y, int z, int px, int py,
-        int pz, uint8_t idx, uint8_t st);
+bool set_block_surface(ENetPeer *peer, glm::vec3 block, glm::vec3 other_side,
+        uint8_t idx, uint8_t st);
 
 /* raw messages */
 bool send_data(ENetPeer *peer, uint8_t *data, size_t size);
