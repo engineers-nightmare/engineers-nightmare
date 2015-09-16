@@ -1834,6 +1834,10 @@ struct play_state : game_state {
             t->long_use(&rc);
         }
 
+        if (pl.cycle_mode && t) {
+            t->cycle_mode();
+        }
+
         /* interact with ents */
         entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
                                        phy->ghostObj, phy->dynamicsWorld);
@@ -1884,6 +1888,7 @@ struct play_state : game_state {
         auto jump       = get_input(action_jump)->just_active;
         auto reset      = get_input(action_reset)->just_active;
         auto use        = get_input(action_use)->just_active;
+        auto cycle_mode = get_input(action_cycle_mode)->just_active;
         auto slot1      = get_input(action_slot1)->just_active;
         auto slot2      = get_input(action_slot2)->just_active;
         auto slot3      = get_input(action_slot3)->just_active;
@@ -1923,6 +1928,7 @@ struct play_state : game_state {
         pl.reset         = reset;
         pl.crouch_end    = crouch_end;
         pl.use           = use;
+        pl.cycle_mode    = cycle_mode;
         pl.gravity       = gravity;
         pl.use_tool      = use_tool;
         pl.alt_use_tool  = alt_use_tool;
