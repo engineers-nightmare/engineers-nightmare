@@ -1106,20 +1106,23 @@ struct add_wiring_tool : tool
     bool moving_existing = false;
     wire_attachment old_attach;
     entity *old_entity = nullptr;
+    wire_type type;
+
+    add_wiring_tool(wire_type type) : type(type) {}
 
     unsigned get_existing_attach_near(glm::vec3 const & pt, unsigned ignore = invalid_attach) {
         /* Some spatial index might be useful here. */
-        for (auto & wire_attachments : ship->wire_attachments) {
-            for (auto i = 0u; i < wire_attachments.size(); i++) {
-                auto d = glm::vec3(wire_attachments[i].transform[3][0],
-                    wire_attachments[i].transform[3][1],
-                    wire_attachments[i].transform[3][2]) - pt;
-                if (glm::dot(d, d) <= 0.05f * 0.05f) {
-                    if (i == ignore) {
-                        continue;
-                    }
-                    return i;
+        auto & wire_attachments = ship->wire_attachments[type];
+
+        for (auto i = 0u; i < wire_attachments.size(); i++) {
+            auto d = glm::vec3(wire_attachments[i].transform[3][0],
+                wire_attachments[i].transform[3][1],
+                wire_attachments[i].transform[3][2]) - pt;
+            if (glm::dot(d, d) <= 0.05f * 0.05f) {
+                if (i == ignore) {
+                    continue;
                 }
+                return i;
             }
         }
 
@@ -1145,7 +1148,7 @@ struct add_wiring_tool : tool
         return true;
     }
 
-    bool can_place(ship_space *ship, wire_type type,
+    bool can_place(ship_space *ship,
         unsigned current_attach, unsigned existing_attach,
         entity* hit_entity) {
 
@@ -1194,15 +1197,13 @@ struct add_wiring_tool : tool
             return;
         }
 
-        /* TODO: fix add wiring tool to support more wire types */
-        auto type = wire_type_power;
         auto & wire_attachments = ship->wire_attachments[type];
         auto & ent_att_lookup = ship->entity_to_attach_lookups[type];
 
         unsigned existing_attach = get_existing_attach_near(pt);
         unsigned existing_attach_ignore = get_existing_attach_near(pt, current_attach);
 
-        auto allow_placement = can_place(ship, type, current_attach,
+        auto allow_placement = can_place(ship, current_attach,
             existing_attach, hit_entity);
 
         wire_attachment a1;
@@ -1280,8 +1281,6 @@ struct add_wiring_tool : tool
         if (!get_attach_point(&hit_entity, pl.eye, pl.dir, pt, normal))
             return;
 
-        /* TODO: fix add wiring tool to support more wire types */
-        auto type = wire_type_power;
         auto & wire_attachments = ship->wire_attachments[type];
         auto & wire_segments = ship->wire_segments[type];
         auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
@@ -1313,7 +1312,7 @@ struct add_wiring_tool : tool
             /* did we move to be on an entity */
             if (hit_entity && current_attach != invalid_attach) {
                 if (current_attach != existing_attach &&
-                    !can_place(ship, type, current_attach, existing_attach,
+                    !can_place(ship, current_attach, existing_attach,
                     hit_entity)) {
 
                     return;
@@ -1328,7 +1327,7 @@ struct add_wiring_tool : tool
         else {
             unsigned existing_attach = get_existing_attach_near(pt);
 
-            if (!can_place(ship, type, current_attach, existing_attach,
+            if (!can_place(ship, current_attach, existing_attach,
                 hit_entity)) {
 
                 return;
@@ -1365,8 +1364,6 @@ struct add_wiring_tool : tool
     }
 
     void alt_use(raycast_info *rc) override {
-        /* TODO: fix add wiring tool to support more wire types */
-        auto type = wire_type_power;
         auto & wire_attachments = ship->wire_attachments[type];
         auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
 
@@ -1423,7 +1420,7 @@ struct add_wiring_tool : tool
         /* if we changed anything, rebuild the topology */
         if (changed) {
             /* TODO: fix add wiring tool to support more wire types */
-            attach_topo_rebuild(ship, wire_type_power);
+            attach_topo_rebuild(ship, type);
         }
     }
 
@@ -1433,8 +1430,6 @@ struct add_wiring_tool : tool
         glm::vec3 normal;
         unsigned existing_attach;
 
-        /* TODO: fix add wiring tool to support more wire types */
-        auto type = wire_type_power;
         auto & wire_attachments = ship->wire_attachments[type];
         auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
 
@@ -1474,7 +1469,7 @@ struct add_wiring_tool : tool
     }
 
     void get_description(char *str) override {
-        strcpy(str, "Place wiring");
+        sprintf(str, "Place wiring type %u", type);
     }
 };
 
@@ -1494,7 +1489,8 @@ tool *tools[] = {
     new add_block_entity_tool(4),
     new add_block_entity_tool(5),
     new remove_surface_entity_tool(),
-    new add_wiring_tool(),
+    new add_wiring_tool(wire_type_power),
+    new add_wiring_tool(wire_type_comms),
 };
 
 
