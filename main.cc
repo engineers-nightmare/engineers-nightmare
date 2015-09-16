@@ -1142,6 +1142,42 @@ struct add_wiring_tool : tool
         return true;
     }
 
+    bool can_place(ship_space *ship, wire_type type,
+        unsigned current_attach, unsigned existing_attach,
+        entity* hit_entity) {
+
+        auto allow_placement = true;
+
+        auto & ent_att_lookup = ship->entity_to_attach_lookups[type];
+        auto const & a1 = ship->wire_attachments[type][current_attach];
+        auto const & a2 = ship->wire_attachments[type][existing_attach];
+
+        // not pointing at existing
+
+        if (existing_attach != invalid_attach && moving_existing) {
+            auto w1 = attach_topo_find(ship, type, a1.parent);
+            auto w2 = attach_topo_find(ship, type, a2.parent);
+
+            if (w1 != w2) {
+                allow_placement = false;
+            }
+        }
+
+        if (allow_placement &&
+            (existing_attach == invalid_attach || moving_existing)) {
+
+            /* don't allow placement on entity with existing power attach */
+            if (hit_entity &&
+                ent_att_lookup.find(hit_entity->ce) != ent_att_lookup.end()) {
+                auto const & atts = ent_att_lookup[hit_entity->ce];
+                if (atts.size() > 0) {
+                    allow_placement = false;
+                }
+            }
+        }
+        return allow_placement;
+    }
+
     void preview(raycast_info *rc) override {
         /* do a real, generic raycast */
 
@@ -1158,19 +1194,13 @@ struct add_wiring_tool : tool
         /* TODO: fix add wiring tool to support more wire types */
         auto type = wire_type_power;
         auto & wire_attachments = ship->wire_attachments[type];
+        auto & ent_att_lookup = ship->entity_to_attach_lookups[type];
 
         unsigned existing_attach = get_existing_attach_near(pt);
         unsigned existing_attach_ignore = get_existing_attach_near(pt, current_attach);
-        
-        // not pointing at existing
-        if (existing_attach == invalid_attach) {
-            per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
-            per_object->upload();
 
-            glUseProgram(unlit_shader);
-            draw_mesh(attachment_hw);
-            glUseProgram(simple_shader);
-        }
+        auto allow_placement = can_place(ship, type, current_attach,
+            existing_attach, hit_entity);
 
         wire_attachment a1;
         wire_attachment a2;
@@ -1189,12 +1219,7 @@ struct add_wiring_tool : tool
             }
 
             wire_attachments[current_attach].transform = mat;
-
-            return;
         }
-
-        if (current_attach == invalid_attach)
-            return;
 
         if (current_attach == existing_attach) {
             a1.transform = mat_position(pt);
@@ -1202,19 +1227,46 @@ struct add_wiring_tool : tool
 
         if (existing_attach != invalid_attach) {
             a2 = wire_attachments[existing_attach];
+            pt = glm::vec3(a2.transform[3]);
         }
         else {
             a2 = { mat_position(pt) };
         }
 
-        auto mat = calc_segment_matrix(a1, a2);
-
-        per_object->val.world_matrix = mat;
-        per_object->upload();
+        /* if existing, place preview mesh as existing
+         * otherwise use raycast info
+         */
+        if (existing_attach != invalid_attach) {
+            per_object->val.world_matrix = a2.transform;
+            per_object->upload();
+        }
+        else {
+            per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
+            per_object->upload();
+        }
 
         glUseProgram(unlit_shader);
-        draw_mesh(wire_hw);
+        if (allow_placement) {
+            draw_mesh(attachment_hw);
+        }
+        else {
+            draw_mesh(no_placement_hw);
+        }
         glUseProgram(simple_shader);
+
+        if (current_attach == invalid_attach)
+            return;
+
+        if (allow_placement && current_attach != existing_attach) {
+            auto mat = calc_segment_matrix(a1, a2);
+
+            per_object->val.world_matrix = mat;
+            per_object->upload();
+
+            glUseProgram(unlit_shader);
+            draw_mesh(wire_hw);
+            glUseProgram(simple_shader);
+        }
     }
 
     void use(raycast_info *rc) override {
@@ -1257,6 +1309,13 @@ struct add_wiring_tool : tool
 
             /* did we move to be on an entity */
             if (hit_entity && current_attach != invalid_attach) {
+                if (current_attach != existing_attach &&
+                    !can_place(ship, type, current_attach, existing_attach,
+                    hit_entity)) {
+
+                    return;
+                }
+
                 entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
             }
 
@@ -1265,6 +1324,13 @@ struct add_wiring_tool : tool
         }
         else {
             unsigned existing_attach = get_existing_attach_near(pt);
+
+            if (!can_place(ship, type, current_attach, existing_attach,
+                hit_entity)) {
+
+                return;
+            }
+
             unsigned new_attach;
             if (existing_attach == invalid_attach) {
                 new_attach = (unsigned)wire_attachments.size();
@@ -1378,6 +1444,15 @@ struct add_wiring_tool : tool
             if (existing_attach == invalid_attach) {
                 return;
             }
+
+            /* cast ray backwards from attach
+             * should find us the entity attach is on
+             */
+            auto att_mat = wire_attachments[existing_attach].transform;
+            auto att_rot = glm::vec3(att_mat[2][0], att_mat[2][1], att_mat[2][2]);
+            auto att_pos = glm::vec3(att_mat[3]);
+            att_rot *= -1.f;
+            get_attach_point(&hit_entity, att_pos, att_rot, pt, normal);
 
             current_attach = existing_attach;
 
