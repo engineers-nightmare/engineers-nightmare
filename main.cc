@@ -1760,7 +1760,8 @@ struct play_state : game_state {
             add_text_with_outline(buf2, -w/2, -200);
         }
 
-        {
+        /* debug text */
+        if (0) {
             /* Atmo status */
             glm::ivec3 eye_block = get_coord_containing(pl.eye);
 
