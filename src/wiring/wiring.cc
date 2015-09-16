@@ -9,9 +9,8 @@ sw_mesh *attachment_sw;
 hw_mesh *attachment_hw;
 sw_mesh *no_placement_sw;
 hw_mesh *no_placement_hw;
-sw_mesh *wire_sw;
-hw_mesh *wire_hw;
 
+hw_mesh *wire_hw_meshes[num_wire_types];
 
 extern glm::mat4
 mat_scale(glm::vec3 scale);
@@ -67,10 +66,9 @@ calc_segment_matrix(const wire_attachment &start, const wire_attachment &end) {
 
 void
 draw_segments(ship_space *ship, frame_data *frame) {
-    auto const num_wires = sizeof(ship->wire_attachments) / sizeof(ship->wire_attachments[0]);
-    for (auto index = 0u; index < num_wires; ++index) {
-        auto const & wire_attachments = ship->wire_attachments[index];
-        auto const & wire_segments = ship->wire_segments[index];
+    for (auto wire_type = 0u; wire_type < num_wire_types; ++wire_type) {
+        auto const & wire_attachments = ship->wire_attachments[wire_type];
+        auto const & wire_segments = ship->wire_segments[wire_type];
 
         auto count = wire_segments.size();
         for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
@@ -89,7 +87,7 @@ draw_segments(ship_space *ship, frame_data *frame) {
             }
 
             segment_matrices.bind(1, frame);
-            draw_mesh_instanced(wire_hw, batch_size);
+            draw_mesh_instanced(wire_hw_meshes[wire_type], batch_size);
         }
     }
 }

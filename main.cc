@@ -136,8 +136,7 @@ extern sw_mesh *attachment_sw;
 extern hw_mesh *no_placement_hw;
 extern sw_mesh *no_placement_sw;
 
-extern hw_mesh *wire_hw;
-extern sw_mesh *wire_sw;
+extern hw_mesh *wire_hw_meshes[num_wire_types];
 
 sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
@@ -582,9 +581,9 @@ init()
     set_mesh_material(no_placement_sw, 11);
     no_placement_hw = upload_mesh(no_placement_sw);
 
-    wire_sw = load_mesh("mesh/wire.obj");
+    auto wire_sw = load_mesh("mesh/wire.obj");
     set_mesh_material(wire_sw, 12);
-    wire_hw = upload_mesh(wire_sw);
+    wire_hw_meshes[wire_type_power] = upload_mesh(wire_sw);
 
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
 
@@ -1265,7 +1264,7 @@ struct add_wiring_tool : tool
             per_object->upload();
 
             glUseProgram(unlit_shader);
-            draw_mesh(wire_hw);
+            draw_mesh(wire_hw_meshes[type]);
             glUseProgram(simple_shader);
         }
     }
