@@ -584,6 +584,8 @@ init()
     auto wire_sw = load_mesh("mesh/wire.obj");
     set_mesh_material(wire_sw, 12);
     wire_hw_meshes[wire_type_power] = upload_mesh(wire_sw);
+    set_mesh_material(wire_sw, 14);
+    wire_hw_meshes[wire_type_comms] = upload_mesh(wire_sw);
 
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
 
@@ -668,6 +670,7 @@ init()
     world_textures->load(11, "textures/no_place.png");
     world_textures->load(12, "textures/wire.png");
     world_textures->load(13, "textures/plaidnicator.png");
+    world_textures->load(14, "textures/comms_wire.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
