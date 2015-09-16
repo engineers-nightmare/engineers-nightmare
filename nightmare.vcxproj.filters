@@ -152,9 +152,6 @@
     <ClInclude Include="src\fixed_cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixed_grid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
