@@ -1121,7 +1121,9 @@ struct add_wiring_tool : tool
     entity *old_entity = nullptr;
     wire_type type;
 
-    add_wiring_tool(wire_type type) : type(type) {}
+    add_wiring_tool() {
+        type = (wire_type)0;
+    }
 
     unsigned get_existing_attach_near(glm::vec3 const & pt, unsigned ignore = invalid_attach) {
         /* Some spatial index might be useful here. */
@@ -1481,7 +1483,13 @@ struct add_wiring_tool : tool
         }
     }
 
-    void cycle_mode() override {}
+    void cycle_mode() override {
+        if (moving_existing || current_attach != invalid_attach) {
+            return;
+        }
+
+        type = (wire_type)(((unsigned)type + (unsigned)num_wire_types + 1) % (unsigned)num_wire_types);
+    }
 
     void get_description(char *str) override {
         sprintf(str, "Place wiring type %u", type);
@@ -1504,8 +1512,7 @@ tool *tools[] = {
     new add_block_entity_tool(4),
     new add_block_entity_tool(5),
     new remove_surface_entity_tool(),
-    new add_wiring_tool(wire_type_power),
-    new add_wiring_tool(wire_type_comms),
+    new add_wiring_tool()
 };
 
 

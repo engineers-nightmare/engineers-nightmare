@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 
 enum wire_type {
     wire_type_power = 0,
