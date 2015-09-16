@@ -11,7 +11,7 @@
 // float
 
 struct gas_production_component_manager : component_manager {
-    struct gas_production_instance_data {
+    struct instance_data {
         c_entity *entity;
         unsigned *gas_type;
         float *flow_rate;

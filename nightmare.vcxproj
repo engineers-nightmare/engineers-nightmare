@@ -280,7 +280,6 @@
     <ClInclude Include="src\component\updateable_component.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\fixed_cube.h" />
-    <ClInclude Include="src\fixed_grid.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\libconfig_shim.h" />
     <ClInclude Include="src\light_field.h" />

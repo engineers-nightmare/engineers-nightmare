@@ -9,7 +9,7 @@ void renderable_component_manager::create_component_instance_data(unsigned count
         return;
 
     component_buffer new_buffer;
-    renderable_instance_data new_pool;
+    instance_data new_pool;
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(hw_mesh) * count + align_size<hw_mesh>(size);

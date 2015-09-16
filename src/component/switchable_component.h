@@ -7,7 +7,7 @@
 // bool
 
 struct switchable_component_manager : component_manager {
-    struct switchable_instance_data {
+    struct instance_data {
         c_entity *entity;
         bool *enabled;
     } instance_pool;

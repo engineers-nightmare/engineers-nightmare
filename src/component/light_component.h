@@ -7,7 +7,7 @@
 // glm::vec3
 
 struct light_component_manager : component_manager {
-    struct light_instance_data {
+    struct instance_data {
         c_entity *entity;
         float *intensity;
     } instance_pool;

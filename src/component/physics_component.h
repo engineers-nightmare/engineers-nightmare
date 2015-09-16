@@ -13,7 +13,7 @@
 // btCollisionShape *
 
 struct physics_component_manager : component_manager {
-    struct power_instance_data {
+    struct instance_data {
         c_entity *entity;
         btRigidBody **rigid;
         btTriangleMesh **mesh;

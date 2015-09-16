@@ -8,7 +8,7 @@
 // hw_mesh
 
 struct renderable_component_manager : component_manager {
-    struct renderable_instance_data {
+    struct instance_data {
         c_entity *entity;
         hw_mesh *mesh;
     } instance_pool;
