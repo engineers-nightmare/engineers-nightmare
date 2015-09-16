@@ -3,11 +3,17 @@
 #include <math.h>
 #include <algorithm>
 
+
+#define MAX_WIRE_INSTANCES 64 * 1024
+
+
 /* create an empty ship_space */
 ship_space::ship_space(void)
     : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0),
       num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0), num_false_splits(0)
 {
+    /* start rather large */
+    power_wires.reserve(MAX_WIRE_INSTANCES);
 }
 
 

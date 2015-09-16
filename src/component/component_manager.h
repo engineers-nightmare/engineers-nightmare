@@ -11,6 +11,10 @@ struct c_entity {
         return this->id == other.id;
     }
 
+    bool operator<(c_entity const &other) const {
+        return this->id < other.id;
+    }
+
     static c_entity spawn() {
         c_entity e = { entities_id_ref++ };
         return e;

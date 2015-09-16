@@ -229,12 +229,14 @@
     <ClCompile Include="src\component\light_component.cc" />
     <ClCompile Include="src\component\physics_component.cc" />
     <ClCompile Include="src\component\power_component.cc" />
+    <ClCompile Include="src\component\power_provider_component.cc" />
     <ClCompile Include="src\component\relative_position_component.cc" />
     <ClCompile Include="src\component\renderable_component.cc" />
     <ClCompile Include="src\component\surface_attachment_component.cc" />
     <ClCompile Include="src\component\switchable_component.cc" />
     <ClCompile Include="src\component\switch_component.cc" />
     <ClCompile Include="src\component\type_component.cc" />
+    <ClCompile Include="src\component\updateable_component.cc" />
     <ClCompile Include="src\config.cc" />
     <ClCompile Include="src\input.cc" />
     <ClCompile Include="src\mesh.cc" />
@@ -253,7 +255,8 @@
     <ClCompile Include="src\tools\fire_projectile.cc" />
     <ClCompile Include="src\tools\remove_block.cc" />
     <ClCompile Include="src\tools\remove_surface.cc" />
-    <ClCompile Include="src\wiring.cc" />
+    <ClCompile Include="src\wiring\wiring_data.cc" />
+    <ClCompile Include="src\wiring\wiring.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h" />
@@ -267,12 +270,14 @@
     <ClInclude Include="src\component\light_component.h" />
     <ClInclude Include="src\component\physics_component.h" />
     <ClInclude Include="src\component\power_component.h" />
+    <ClInclude Include="src\component\power_provider_component.h" />
     <ClInclude Include="src\component\relative_position_component.h" />
     <ClInclude Include="src\component\renderable_component.h" />
     <ClInclude Include="src\component\surface_attachment_component.h" />
     <ClInclude Include="src\component\switchable_component.h" />
     <ClInclude Include="src\component\switch_component.h" />
     <ClInclude Include="src\component\type_component.h" />
+    <ClInclude Include="src\component\updateable_component.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\fixed_cube.h" />
     <ClInclude Include="src\fixed_grid.h" />
@@ -295,7 +300,8 @@
     <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\tools.h" />
     <ClInclude Include="src\winunistd.h" />
-    <ClInclude Include="src\wiring.h" />
+    <ClInclude Include="src\wiring\wiring.h" />
+    <ClInclude Include="src\wiring\wiring_data.h" />
     <ClInclude Include="winerr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

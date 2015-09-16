@@ -7,7 +7,9 @@
 #include "block.h"
 #include "component/component_manager.h"
 #include "chunk.h"
-#include "wiring.h"
+#include "wiring/wiring.h"
+#include "wiring/wiring_data.h"
+#include <unordered_set>
 
 struct ivec3_hash {
   size_t operator()(const glm::ivec3 &v) const {
@@ -52,10 +54,12 @@ struct ship_space {
     std::unordered_map<glm::ivec3, chunk*, ivec3_hash> chunks;
     std::unordered_map<topo_info *, zone_info *> zones;
 
-    std::vector<wire_attachment> wire_attachments;
-    std::vector<wire_segment> wire_segments;
+    std::vector<wire_attachment> wire_attachments[num_wire_types];
+    std::vector<wire_segment> wire_segments[num_wire_types];
 
-    std::unordered_map<unsigned, std::set<unsigned>> entity_to_attach_lookup;
+    std::unordered_map<c_entity, std::unordered_set<unsigned>> entity_to_attach_lookups[num_wire_types];
+
+    std::unordered_map<unsigned, power_wiring_data> power_wires;
 
     /* create an empty ship_space */
     ship_space();

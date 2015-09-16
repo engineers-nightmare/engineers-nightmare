@@ -5,11 +5,17 @@ light_component_manager light_man;
 physics_component_manager physics_man;
 relative_position_component_manager pos_man;
 power_component_manager power_man;
+power_provider_component_manager power_provider_man;
 renderable_component_manager render_man;
 surface_attachment_component_manager surface_man;
 switch_component_manager switch_man;
 switchable_component_manager switchable_man;
 type_component_manager type_man;
+updateable_component_manager updateable_man;
+
+
+extern void mark_lightfield_update(int x, int y, int z);
+
 
 void
 tick_gas_producers(ship_space * ship)
@@ -42,6 +48,66 @@ tick_gas_producers(ship_space * ship)
         }
     }
 }
+
+
+void
+tick_power_consumers(ship_space * ship) {
+    for (auto i = 0u; i < power_man.buffer.num; i++) {
+        auto ce = power_man.instance_pool.entity[i];
+
+        auto & powered = power_man.powered(ce);
+        auto old_powered = powered;
+        powered = false;
+
+        auto & power_attaches = ship->entity_to_attach_lookups[wire_type_power];
+        if (power_attaches.find(ce) == power_attaches.end()) {
+            continue;
+        }
+
+        std::unordered_set<unsigned> visited_wires;
+        auto const & attaches = power_attaches[ce];
+        for (auto const & sea : attaches) {
+            auto const & attach = ship->wire_attachments[wire_type_power][sea];
+            auto wire_index = attach_topo_find(ship, wire_type_power, attach.parent);
+            if (visited_wires.find(wire_index) != visited_wires.end()) {
+                continue;
+            }
+
+            auto const & wire = ship->power_wires[wire_index];
+
+            visited_wires.insert(wire_index);
+            /* todo: this needs to somehow handle multiple wires */
+            powered |= wire.total_power >= wire.total_draw;
+        }
+
+        if (powered != old_powered) {
+            assert(updateable_man.exists(ce) || !"updateable should always exist");
+            updateable_man.updated(ce) = true;
+        }
+    }
+}
+
+
+void
+tick_updateables(ship_space * ship) {
+    for (auto i = 0u; i < updateable_man.buffer.num; i++) {
+        auto const & entity = updateable_man.instance_pool.entity[i];
+
+        /* _something_ updated last frame */
+        if (updateable_man.instance_pool.updated[i]) {
+            /* was it lights? */
+            if (light_man.exists(entity)) {
+                /* could have been. mark it */
+                auto pos = pos_man.position(entity);
+                auto block_pos = get_coord_containing(pos);
+                mark_lightfield_update(block_pos.x, block_pos.y, block_pos.z);
+            }
+        }
+
+        updateable_man.instance_pool.updated[i] = false;
+    }
+}
+
 
 void
 draw_renderables(frame_data *frame)
