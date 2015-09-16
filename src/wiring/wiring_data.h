@@ -3,6 +3,7 @@
 
 enum wire_type {
     wire_type_power = 0,
+    wire_type_comms = 1,
 
     num_wire_types
 };
