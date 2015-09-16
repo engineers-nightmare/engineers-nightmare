@@ -7,7 +7,7 @@
 // bool
 
 struct power_component_manager : component_manager {
-    struct power_instance_data {
+    struct instance_data {
         c_entity *entity;
         bool *powered;
     } instance_pool;

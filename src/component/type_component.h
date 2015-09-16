@@ -7,7 +7,7 @@
 // unsigned
 
 struct type_component_manager : component_manager {
-    struct switchable_instance_data {
+    struct instance_data {
         c_entity *entity;
         unsigned *type;
     } instance_pool;

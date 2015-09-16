@@ -10,7 +10,7 @@
 // int
 
 struct surface_attachment_component_manager : component_manager {
-    struct power_instance_data {
+    struct instance_data {
         c_entity *entity;
         glm::ivec3 *block;
         int *face;

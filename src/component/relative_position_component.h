@@ -11,7 +11,7 @@
 // glm::mat4
 
 struct relative_position_component_manager : component_manager {
-    struct relative_position_instance_data {
+    struct instance_data {
         c_entity *entity;
         glm::vec3 *position;
         glm::mat4 *mat;

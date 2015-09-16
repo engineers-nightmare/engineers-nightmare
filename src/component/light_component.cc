@@ -9,7 +9,7 @@ light_component_manager::create_component_instance_data(unsigned count) {
         return;
 
     component_buffer new_buffer;
-    light_instance_data new_pool;
+    instance_data new_pool;
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(float) * count + align_size<float>(size);

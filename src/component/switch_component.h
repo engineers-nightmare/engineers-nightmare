@@ -6,7 +6,7 @@
 // no data
 
 struct switch_component_manager : component_manager {
-    struct switch_instance_data {
+    struct instance_data {
         c_entity *entity;
     } instance_pool;
 

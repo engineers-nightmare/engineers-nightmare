@@ -8,7 +8,7 @@ surface_attachment_component_manager::create_component_instance_data(unsigned co
         return;
 
     component_buffer new_buffer;
-    power_instance_data new_pool;
+    instance_data new_pool;
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(glm::ivec3) * count + align_size<glm::ivec3>(size);
