@@ -1123,13 +1123,13 @@ struct add_wiring_tool : tool
         return invalid_attach;
     }
 
-    bool get_attach_point(entity ** hit_entity, glm::vec3 & pt, glm::vec3 & normal) {
-        auto end = pl.eye + pl.dir * 5.0f;
+    bool get_attach_point(entity ** hit_entity, glm::vec3 start, glm::vec3 dir, glm::vec3 & pt, glm::vec3 & normal) {
+        auto end = start + dir * 5.0f;
 
-        *hit_entity = phys_raycast(pl.eye, end,
+        *hit_entity = phys_raycast(start, end,
                                     phy->ghostObj, phy->dynamicsWorld);
 
-        auto hit = phys_raycast_generic(pl.eye, end,
+        auto hit = phys_raycast_generic(start, end,
                                         phy->ghostObj, phy->dynamicsWorld);
 
         if (!hit.hit)
@@ -1151,7 +1151,7 @@ struct add_wiring_tool : tool
         glm::vec3 pt;
         glm::vec3 normal;
 
-        if (!get_attach_point(&hit_entity, pt, normal)) {
+        if (!get_attach_point(&hit_entity, pl.eye, pl.dir, pt, normal)) {
             return;
         }
 
@@ -1222,7 +1222,7 @@ struct add_wiring_tool : tool
         glm::vec3 pt;
         glm::vec3 normal;
 
-        if (!get_attach_point(&hit_entity, pt, normal))
+        if (!get_attach_point(&hit_entity, pl.eye, pl.dir, pt, normal))
             return;
 
         /* TODO: fix add wiring tool to support more wire types */
@@ -1326,7 +1326,7 @@ struct add_wiring_tool : tool
         glm::vec3 pt;
         glm::vec3 normal;
 
-        if (!get_attach_point(&hit_entity, pt, normal)) {
+        if (!get_attach_point(&hit_entity, pl.eye, pl.dir, pt, normal)) {
             return;
         }
 
@@ -1370,7 +1370,7 @@ struct add_wiring_tool : tool
         auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
 
         if (current_attach == invalid_attach) {
-            if (!get_attach_point(&hit_entity, pt, normal))
+            if (!get_attach_point(&hit_entity, pl.eye, pl.dir, pt, normal))
                 return;
 
             existing_attach = get_existing_attach_near(pt);
