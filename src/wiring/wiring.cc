@@ -282,13 +282,13 @@ calculate_power(ship_space *ship) {
         visited_entities.clear();
 
         for (auto const & entity_lookup : ship->entity_to_attach_lookups[type]) {
-            auto const & entity = entity_lookup.first;
+            auto entity = entity_lookup.first;
             if (visited_entities.find(entity) != visited_entities.end()) {
                 continue;
             }
 
             std::unordered_set<unsigned> attached_wires;
-            for (auto const & ea_index : entity_lookup.second) {
+            for (auto ea_index : entity_lookup.second) {
                 if (attached_wires.find(ea_index) != attached_wires.end()) {
                     continue;
                 }
@@ -297,7 +297,7 @@ calculate_power(ship_space *ship) {
             auto num_attached_wires = attached_wires.size();
 
             visited_entities.insert(entity_lookup.first);
-            for (auto const & ea_index : entity_lookup.second) {
+            for (auto ea_index : entity_lookup.second) {
                 auto const & ea = ship->wire_attachments[type][ea_index];
                 if (attach_topo_find(ship, type, ea.parent) == wire) {
                     auto & power_data = ship->power_wires[wire];
