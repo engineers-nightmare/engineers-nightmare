@@ -786,7 +786,8 @@ remove_ents_from_surface(int x, int y, int z, int face)
 
             updateable_man.destroy_entity_instance(e->ce);
 
-            for (auto type : wire_types) {
+            for (auto _type = 0; _type < num_wire_types; _type++) {
+                auto type = (wire_type)_type;
                 auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
                 auto & wire_attachments = ship->wire_attachments[type];
 

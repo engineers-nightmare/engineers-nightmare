@@ -7,8 +7,6 @@ enum wire_type {
     num_wire_types
 };
 
-extern std::vector<wire_type> wire_types;
-
 
 struct power_wiring_data {
     unsigned total_power = 0;
