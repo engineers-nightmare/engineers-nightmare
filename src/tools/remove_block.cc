@@ -11,7 +11,7 @@ extern GLuint remove_overlay_shader;
 extern GLuint simple_shader;
 
 extern void
-mark_lightfield_update(int x, int y, int z);
+mark_lightfield_update(glm::ivec3 p);
 
 extern ship_space *ship;
 
@@ -21,7 +21,7 @@ mat_position(float x, float y, float z);
 extern hw_mesh *scaffold_hw;
 
 extern void
-remove_ents_from_surface(int x, int y, int z, int face);
+remove_ents_from_surface(glm::ivec3 p, int face);
 
 
 struct remove_block_tool : tool
@@ -40,7 +40,7 @@ struct remove_block_tool : tool
         /* if there was a block entity here, find and remove it. block
          * ents are "attached" to the zm surface */
         if (bl->type == block_entity) {
-            remove_ents_from_surface(rc->x, rc->y, rc->z, surface_zm);
+            remove_ents_from_surface(glm::ivec3(rc->x, rc->y, rc->z), surface_zm);
 
             for (int face = 0; face < face_count; face++) {
                 bl->surf_space[face] = 0;   /* we've just thrown away the block ent */
@@ -57,10 +57,8 @@ struct remove_block_tool : tool
                 int sx, sy, sz;
                 surface_index_to_normal(index, &sx, &sy, &sz);
 
-                int rx = rc->x + sx;
-                int ry = rc->y + sy;
-                int rz = rc->z + sz;
-                block *other_side = ship->get_block(rx, ry, rz);
+                auto r = glm::ivec3(rc->x + sx, rc->y + sy, rc->z + sz);
+                block *other_side = ship->get_block(r);
 
                 if (!other_side) {
                     /* expand: but this should always exist. */
@@ -70,22 +68,22 @@ struct remove_block_tool : tool
                      * surface pair -- remove it */
                     bl->surfs[index] = surface_none;
                     other_side->surfs[index ^ 1] = surface_none;
-                    ship->get_chunk_containing(rx, ry, rz)->render_chunk.valid = false;
+                    ship->get_chunk_containing(r)->render_chunk.valid = false;
 
                     /* pop any dependent ents */
-                    remove_ents_from_surface(rc->x, rc->y, rc->z, index);
-                    remove_ents_from_surface(rx, ry, rz, index ^ 1);
+                    remove_ents_from_surface(glm::ivec3(rc->x, rc->y, rc->z), index);
+                    remove_ents_from_surface(r, index ^ 1);
 
-                    mark_lightfield_update(rx, ry, rz);
+                    mark_lightfield_update(r);
 
-                    ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rx, ry, rz);
+                    ship->update_topology_for_remove_surface(glm::ivec3(rc->x, rc->y, rc->z), r);
                 }
             }
         }
 
         /* dirty the chunk */
-        ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
-        mark_lightfield_update(rc->x, rc->y, rc->z);
+        ship->get_chunk_containing(glm::ivec3(rc->x, rc->y, rc->z))->render_chunk.valid = false;
+        mark_lightfield_update(glm::ivec3(rc->x, rc->y, rc->z));
     }
 
     void alt_use(raycast_info *rc) override {}

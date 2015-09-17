@@ -52,17 +52,17 @@ split_coord(int p, int *out_block, int *out_chunk)
  * will move across chunks
  */
 block *
-ship_space::get_block(int block_x, int block_y, int block_z)
+ship_space::get_block(glm::ivec3 block)
 {
     /* Within Block coordinates */
     int wb_x, wb_y, wb_z;
-    int chunk_x, chunk_y, chunk_z;
+    glm::ivec3 ch;
 
-    split_coord(block_x, &wb_x, &chunk_x);
-    split_coord(block_y, &wb_y, &chunk_y);
-    split_coord(block_z, &wb_z, &chunk_z);
+    split_coord(block.x, &wb_x, &ch.x);
+    split_coord(block.y, &wb_y, &ch.y);
+    split_coord(block.z, &wb_z, &ch.z);
 
-    chunk *c = this->get_chunk(chunk_x, chunk_y, chunk_z);
+    chunk *c = this->get_chunk(ch);
 
     if( ! c ){
         return 0;
@@ -77,17 +77,17 @@ ship_space::get_block(int block_x, int block_y, int block_z)
  * will move across chunks
  */
 topo_info *
-ship_space::get_topo_info(int block_x, int block_y, int block_z)
+ship_space::get_topo_info(glm::ivec3 block)
 {
     /* Within Block coordinates */
     int wb_x, wb_y, wb_z;
-    int chunk_x, chunk_y, chunk_z;
+    glm::ivec3 ch;
 
-    split_coord(block_x, &wb_x, &chunk_x);
-    split_coord(block_y, &wb_y, &chunk_y);
-    split_coord(block_z, &wb_z, &chunk_z);
+    split_coord(block.x, &wb_x, &ch.x);
+    split_coord(block.y, &wb_y, &ch.y);
+    split_coord(block.z, &wb_z, &ch.z);
 
-    chunk *c = this->get_chunk(chunk_x, chunk_y, chunk_z);
+    chunk *c = this->get_chunk(ch);
 
     if (!c) {
         return &this->outside_topo_info;
@@ -110,26 +110,24 @@ ship_space::get_zone_info(topo_info *t)
  * or null
  */
 chunk *
-ship_space::get_chunk_containing(int block_x, int block_y, int block_z)
+ship_space::get_chunk_containing(glm::ivec3 block)
 {
     int chunk_x, chunk_y, chunk_z;
 
-    split_coord(block_x, nullptr, &chunk_x);
-    split_coord(block_y, nullptr, &chunk_y);
-    split_coord(block_z, nullptr, &chunk_z);
+    split_coord(block.x, nullptr, &chunk_x);
+    split_coord(block.y, nullptr, &chunk_y);
+    split_coord(block.z, nullptr, &chunk_z);
 
-    return this->get_chunk(chunk_x, chunk_y, chunk_z);
+    return this->get_chunk(glm::ivec3(chunk_x, chunk_y, chunk_z));
 }
 
 /* returns the chunk corresponding to the chunk coordinates (x, y, z)
  * note this is NOT using block coordinates
  */
 chunk *
-ship_space::get_chunk(int chunk_x, int chunk_y, int chunk_z)
+ship_space::get_chunk(glm::ivec3 ch)
 {
-    glm::ivec3 v(chunk_x, chunk_y, chunk_z);
-
-    auto it = this->chunks.find(v);
+    auto it = this->chunks.find(ch);
     if( it != this->chunks.end() ){
         return it->second;
     }
@@ -181,7 +179,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
 
     block *bl = nullptr;
 
-    bl = this->get_block(x,y,z);
+    bl = this->get_block(glm::ivec3(x,y,z));
     rc->inside = bl ? bl->type != block_empty : 0;
 
     int stepX = d.x > 0 ? 1 : -1;
@@ -230,7 +228,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
             }
         }
 
-        bl = this->get_block(x, y, z);
+        bl = this->get_block(glm::ivec3(x, y, z));
         if (!bl && !rc->inside){
             /* if there is no block then we are outside the grid
              * we still want to keep stepping until we either
@@ -264,18 +262,18 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
  * this will not instantiate or modify any other chunks
  */
 block *
-ship_space::ensure_block(int block_x, int block_y, int block_z)
+ship_space::ensure_block(glm::ivec3 block)
 {
-    int chunk_x, chunk_y, chunk_z;
+    glm::ivec3 ch;
 
-    split_coord(block_x, nullptr, &chunk_x);
-    split_coord(block_y, nullptr, &chunk_y);
-    split_coord(block_z, nullptr, &chunk_z);
+    split_coord(block.x, nullptr, &ch.x);
+    split_coord(block.y, nullptr, &ch.y);
+    split_coord(block.z, nullptr, &ch.z);
 
     /* guarantee we have the size we need */
-    this->ensure_chunk(chunk_x, chunk_y, chunk_z);
+    this->ensure_chunk(ch);
 
-    return get_block(block_x, block_y, block_z);
+    return get_block(block);
 }
 
 /* ensure that the specified chunk exists
@@ -285,14 +283,13 @@ ship_space::ensure_block(int block_x, int block_y, int block_z)
  * this will not instantiate or modify any other chunks
  */
 chunk *
-ship_space::ensure_chunk(int chunk_x, int chunk_y, int chunk_z)
+ship_space::ensure_chunk(glm::ivec3 v)
 {
-    glm::ivec3 v(chunk_x, chunk_y, chunk_z);
     /* automatically creates the entry if not present */
     auto &ch = this->chunks[v];
     if (!ch) {
         ch = new chunk();
-        this->_maintain_bounds(chunk_x, chunk_y, chunk_z);
+        this->_maintain_bounds(v);
 
         /* All the topo nodes in the new chunk should be attached
          * to the outside node.
@@ -319,15 +316,15 @@ ship_space::ensure_chunk(int chunk_x, int chunk_y, int chunk_z)
  * if the {x,y,z}_seen values are lower/higher
  */
 void
-ship_space::_maintain_bounds(int x_seen, int y_seen, int z_seen)
+ship_space::_maintain_bounds(glm::ivec3 seen)
 {
-    this->min_x = std::min(min_x, x_seen);
-    this->min_y = std::min(min_y, y_seen);
-    this->min_z = std::min(min_z, z_seen);
+    this->min_x = std::min(min_x, seen.x);
+    this->min_y = std::min(min_y, seen.y);
+    this->min_z = std::min(min_z, seen.z);
 
-    this->max_x = std::max(max_x, x_seen);
-    this->max_y = std::max(max_y, y_seen);
-    this->max_z = std::max(max_z, z_seen);
+    this->max_x = std::max(max_x, seen.x);
+    this->max_y = std::max(max_y, seen.y);
+    this->max_z = std::max(max_z, seen.z);
 }
 
 topo_info *
@@ -389,10 +386,10 @@ ship_space::insert_zone(topo_info *t, zone_info *z)
 }
 
 void
-ship_space::update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz)
+ship_space::update_topology_for_remove_surface(glm::ivec3 a, glm::ivec3 b)
 {
-    topo_info *t = topo_find(get_topo_info(x, y, z));
-    topo_info *u = topo_find(get_topo_info(px, py, pz));
+    topo_info *t = topo_find(get_topo_info(a));
+    topo_info *u = topo_find(get_topo_info(b));
 
     num_fast_unifys++;
 
@@ -423,33 +420,33 @@ exists_alt_path(int x, int y, int z, block *a, block *b, ship_space *ship, int f
     block *c;
 
     if (face != surface_xp) {
-        c = ship->get_block(x+1, y, z);
+        c = ship->get_block(glm::ivec3(x+1, y, z));
         if (air_permeable(a->surfs[surface_xp]) && air_permeable(b->surfs[surface_xp]) &&
                 (!c || air_permeable(c->surfs[face])))
             return true;
-        c = ship->get_block(x-1, y, z);
+        c = ship->get_block(glm::ivec3(x-1, y, z));
         if (air_permeable(a->surfs[surface_xm]) && air_permeable(b->surfs[surface_xm]) &&
                 (!c || air_permeable(c->surfs[face])))
             return true;
     }
 
     if (face != surface_yp) {
-        c = ship->get_block(x, y+1, z);
+        c = ship->get_block(glm::ivec3(x, y+1, z));
         if (air_permeable(a->surfs[surface_yp]) && air_permeable(b->surfs[surface_yp]) &&
                 (!c || air_permeable(c->surfs[face])))
             return true;
-        c = ship->get_block(x, y-1, z);
+        c = ship->get_block(glm::ivec3(x, y-1, z));
         if (air_permeable(a->surfs[surface_ym]) && air_permeable(b->surfs[surface_ym]) &&
                 (!c || air_permeable(c->surfs[face])))
             return true;
     }
 
     if (face != surface_zp) {
-        c = ship->get_block(x, y, z+1);
+        c = ship->get_block(glm::ivec3(x, y, z+1));
         if (air_permeable(a->surfs[surface_zp]) && air_permeable(b->surfs[surface_zp]) &&
                 (!c || air_permeable(c->surfs[face])))
             return true;
-        c = ship->get_block(x, y, z-1);
+        c = ship->get_block(glm::ivec3(x, y, z-1));
         if (air_permeable(a->surfs[surface_zm]) && air_permeable(b->surfs[surface_zm]) &&
                 (!c || air_permeable(c->surfs[face])))
             return true;
@@ -459,36 +456,34 @@ exists_alt_path(int x, int y, int z, block *a, block *b, ship_space *ship, int f
 }
 
 void
-ship_space::update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face)
+ship_space::update_topology_for_add_surface(glm::ivec3 a, glm::ivec3 b, int face)
 {
     /* can this surface even split (does it block atmo?) */
-    if (air_permeable(get_block(x, y, z)->surfs[face]))
+    if (air_permeable(get_block(a)->surfs[face]))
         return;
 
     /* collapse an obvious symmetry */
     if (face & 1) {
         /* symmetry */
-        std::swap(x, px);
-        std::swap(y, py);
-        std::swap(z, pz);
+        std::swap(a, b);
         face ^= 1;
     }
 
     /* try to quickly prove that we don't divide space */
-    if (exists_alt_path(x, y, z, get_block(x, y, z), get_block(px, py, pz), this, face)) {
+    if (exists_alt_path(a.x, a.y, a.z, get_block(a), get_block(b), this, face)) {
         num_fast_nosplits++;
         return;
     }
 
     /* grab our air amount data before rebuild_topology invalidates the existing zones */
-    zone_info *zone = get_zone_info(topo_find(get_topo_info(x, y, z)));
+    zone_info *zone = get_zone_info(topo_find(get_topo_info(a)));
     float air_amount = zone ? zone->air_amount : 0.0f;
 
     /* we do need to split */
     rebuild_topology();
 
-    topo_info *t1 = topo_find(get_topo_info(x, y, z));
-    topo_info *t2 = topo_find(get_topo_info(px, py, pz));
+    topo_info *t1 = topo_find(get_topo_info(a));
+    topo_info *t2 = topo_find(get_topo_info(b));
     if (t1 == t2) {
         /* we blew it. we didn't actually split the space, but we did
          * all the work anyway. this is mostly interesting if you're
@@ -579,9 +574,7 @@ ship_space::rebuild_topology()
                     if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
-                              get_topo_info(CHUNK_SIZE * it->first.x + 0 + offset.x,
-                                            CHUNK_SIZE * it->first.y + y + offset.y,
-                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                            get_topo_info(CHUNK_SIZE * it->first + glm::ivec3(0, y, z) + offset));
                     }
                 }
 
@@ -592,9 +585,7 @@ ship_space::rebuild_topology()
                     if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
-                              get_topo_info(CHUNK_SIZE * it->first.x + CHUNK_SIZE - 1 + offset.x,
-                                            CHUNK_SIZE * it->first.y + y + offset.y,
-                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                            get_topo_info(CHUNK_SIZE * it->first.x + glm::ivec3(CHUNK_SIZE - 1, y, z) + offset));
                     }
                 }
 
@@ -605,9 +596,7 @@ ship_space::rebuild_topology()
                     if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
-                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
-                                            CHUNK_SIZE * it->first.y + 0 + offset.y,
-                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                            get_topo_info(CHUNK_SIZE * it->first + glm::ivec3(y, 0, z) + offset));
                     }
                 }
 
@@ -618,9 +607,7 @@ ship_space::rebuild_topology()
                     if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
-                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
-                                            CHUNK_SIZE * it->first.y + CHUNK_SIZE - 1 + offset.y,
-                                            CHUNK_SIZE * it->first.z + z + offset.z));
+                            get_topo_info(CHUNK_SIZE * it->first + glm::ivec3(y, CHUNK_SIZE - 1, z) + offset));
                     }
                 }
 
@@ -631,9 +618,7 @@ ship_space::rebuild_topology()
                     if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
-                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
-                                            CHUNK_SIZE * it->first.y + z + offset.y,
-                                            CHUNK_SIZE * it->first.z + 0 + offset.z));
+                            get_topo_info(CHUNK_SIZE * it->first + glm::ivec3(y, z, 0) + offset));
                     }
                 }
 
@@ -644,9 +629,7 @@ ship_space::rebuild_topology()
                     if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
-                              get_topo_info(CHUNK_SIZE * it->first.x + y + offset.x,
-                                            CHUNK_SIZE * it->first.y + z + offset.y,
-                                            CHUNK_SIZE * it->first.z + CHUNK_SIZE - 1 + offset.z));
+                            get_topo_info(CHUNK_SIZE * it->first + glm::ivec3(y, z, CHUNK_SIZE - 1) + offset));
                     }
                 }
             }
@@ -685,10 +668,8 @@ ship_space::validate()
                     block *bl = ch.second->blocks.get(x, y, z);
                     for (int face = 0; face < 6; face++) {
                         glm::ivec3 offset = dirs[face];
-                        glm::ivec3 other_coord(CHUNK_SIZE * ch.first.x + x + offset.x,
-                                               CHUNK_SIZE * ch.first.y + y + offset.y,
-                                               CHUNK_SIZE * ch.first.z + z + offset.z);
-                        block *other = get_block(other_coord.x, other_coord.y, other_coord.z);
+                        glm::ivec3 other_coord = CHUNK_SIZE * ch.first + glm::ivec3(x, y, z) + offset;
+                        block *other = get_block(other_coord);
 
                         if (bl->surfs[face]) {
                             /* 1/ every surface must be consistent with its far side. this implies that the

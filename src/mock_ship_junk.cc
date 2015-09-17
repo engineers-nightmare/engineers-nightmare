@@ -64,11 +64,11 @@ find_neighbor(int fx, int fy, int fz, enum surface_index si, int *tx, int *ty, i
  * will call ensure_block if needed
  */
 static block *
-ensure_and_get_block(ship_space *ss, int block_x, int block_y, int block_z) {
+ensure_and_get_block(ship_space *ss, glm::ivec3 bl) {
     block *b = 0;
 
-    ss->ensure_block(block_x, block_y, block_z);
-    b = ss->get_block(block_x, block_y, block_z);
+    ss->ensure_block(bl);
+    b = ss->get_block(bl);
 
     if( ! b ){
         errx(1, "ship_space::ensure_and_get_block: call to get_block failed");
@@ -84,10 +84,10 @@ ensure_and_get_block(ship_space *ss, int block_x, int block_y, int block_z) {
  * will call ensure_block if needed
  */
 static block *
-ship_get_block_neighbor(ship_space * ss, int block_x, int block_y, int block_z, enum surface_index si){
-    int tx, ty, tz;
-    find_neighbor(block_x, block_y, block_z, si, &tx, &ty, &tz);
-    return ensure_and_get_block(ss, tx, ty, tz);
+ship_get_block_neighbor(ship_space * ss, glm::ivec3 block, enum surface_index si){
+    glm::ivec3 t;
+    find_neighbor(block.x, block.y, block.z, si, &t.x, &t.y, &t.z);
+    return ensure_and_get_block(ss, t);
 }
 
 /* I am lazy
@@ -96,9 +96,9 @@ ship_get_block_neighbor(ship_space * ss, int block_x, int block_y, int block_z, 
  * Set Neighbour for block N
  */
 #define sn1(si, type) (ship_get_block_neighbor(ss, \
-            x + block_offsets[i][0],               \
+            glm::ivec3(x + block_offsets[i][0],               \
             y + block_offsets[i][1],               \
-            z, si)->surfs[si ^ 1] = type)
+            z), si)->surfs[si ^ 1] = type)
 
 static int block_offsets[4][2] = { { 0, 0 }, { 0, 8 }, { 8, 0 }, { 8, 8 } };
 
@@ -119,7 +119,7 @@ ship_space::mock_ship_space(void)
     for (unsigned x = 0; x < 2; x++) {
         for (unsigned y = 0; y < 2; y++) {
             for (unsigned z = 0; z < 1; z++) {
-                ss->ensure_chunk(x, y, z);
+                ss->ensure_chunk(glm::ivec3(x, y, z));
             }
         }
     }
@@ -131,7 +131,7 @@ ship_space::mock_ship_space(void)
         for (unsigned y=0; y < 8; ++y) {
             for (unsigned x=0; x < 8; ++x) {
                 for (int i = 0; i < 4; i++) {
-                    block *b = ss->get_block(x + block_offsets[i][0], y + block_offsets[i][1], z);
+                    block *b = ss->get_block(glm::ivec3(x + block_offsets[i][0], y + block_offsets[i][1], z));
 
                     if( z == 0 ){
                         /* the floor */

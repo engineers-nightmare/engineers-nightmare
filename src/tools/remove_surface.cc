@@ -12,7 +12,7 @@ extern GLuint remove_overlay_shader;
 extern GLuint simple_shader;
 
 extern void
-mark_lightfield_update(int x, int y, int z);
+mark_lightfield_update(glm::ivec3 p);
 
 extern ship_space *ship;
 
@@ -22,7 +22,7 @@ mat_position(float x, float y, float z);
 extern hw_mesh *surfs_hw[6];
 
 extern void
-remove_ents_from_surface(int x, int y, int z, int face);
+remove_ents_from_surface(glm::ivec3 p, int face);
 
 
 struct remove_surface_tool : tool
@@ -47,27 +47,27 @@ struct remove_surface_tool : tool
         int index = normal_to_surface_index(rc);
 
         bl->surfs[index] = surface_none;
-        ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
+        ship->get_chunk_containing(glm::ivec3(rc->x, rc->y, rc->z))->render_chunk.valid = false;
 
         /* cause the other side to exist */
-        block *other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
+        block *other_side = ship->get_block(rc->p);
 
         if (!other_side) {
             /* expand: note: we shouldn't ever actually have to do this... */
         }
         else {
             other_side->surfs[index ^ 1] = surface_none;
-            ship->get_chunk_containing(rc->p.x, rc->p.y, rc->p.z)->render_chunk.valid = false;
+            ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
         }
 
         /* remove any ents using the surface */
-        remove_ents_from_surface(rc->p.x, rc->p.y, rc->p.z, index ^ 1);
-        remove_ents_from_surface(rc->x, rc->y, rc->z, index);
+        remove_ents_from_surface(rc->p, index ^ 1);
+        remove_ents_from_surface(glm::ivec3(rc->x, rc->y, rc->z), index);
 
-        mark_lightfield_update(rc->x, rc->y, rc->z);
-        mark_lightfield_update(rc->p.x, rc->p.y, rc->p.z);
+        mark_lightfield_update(glm::ivec3(rc->x, rc->y, rc->z));
+        mark_lightfield_update(rc->p);
 
-        ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rc->p.x, rc->p.y, rc->p.z);
+        ship->update_topology_for_remove_surface(glm::ivec3(rc->x, rc->y, rc->z), rc->p);
     }
 
     void alt_use(raycast_info *rc) override {}

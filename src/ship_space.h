@@ -49,7 +49,7 @@ struct ship_space {
     /* internal method which updated {min,max}_{x,y,z}
      * if the {x,y,z}_seen values are lower/higher
      */
-    void _maintain_bounds(int x_seen, int y_seen, int z_seen);
+    void _maintain_bounds(glm::ivec3 seen);
 
     std::unordered_map<glm::ivec3, chunk*, ivec3_hash> chunks;
     std::unordered_map<topo_info *, zone_info *> zones;
@@ -69,19 +69,19 @@ struct ship_space {
      * the whole ship_space
      * will move across chunks
      */
-    block * get_block(int block_x, int block_y, int block_z);
+    block * get_block(glm::ivec3 block);
 
-    topo_info * get_topo_info(int block_x, int block_y, int block_z);
+    topo_info * get_topo_info(glm::ivec3 block);
 
     /* returns the chunk containing the block denotated by (x, y, z)
      * or null
      */
-    chunk * get_chunk_containing(int block_x, int block_y, int block_z);
+    chunk * get_chunk_containing(glm::ivec3 block);
 
     /* returns the chunk corresponding to the chunk coordinates (x, y, z)
      * note this is NOT using block coordinates
      */
-    chunk * get_chunk(int chunk_x, int chunk_y, int chunk_z);
+    chunk * get_chunk(glm::ivec3 chunk);
 
     /* returns a pointer to a new ship space
      * this ship space will have 2 x 2 rooms and will be 1 room tall
@@ -102,7 +102,7 @@ struct ship_space {
      *
      * this will not instantiate or modify any other chunks
      */
-    block * ensure_block(int block_x, int block_y, int block_z);
+    block * ensure_block(glm::ivec3 block);
 
     /* ensure that the specified chunk exists
      *
@@ -110,7 +110,7 @@ struct ship_space {
      *
      * this will not instantiate or modify any other chunks
      */
-    chunk * ensure_chunk(int chunk_x, int chunk_y, int chunk_z);
+    chunk * ensure_chunk(glm::ivec3 chunk);
 
     zone_info *get_zone_info(topo_info *t);
     void insert_zone(topo_info *t, zone_info *z);
@@ -118,8 +118,8 @@ struct ship_space {
     /* topo info for open vacuum, so we know what pressure to force to zero */
     topo_info outside_topo_info;
     void rebuild_topology();
-    void update_topology_for_remove_surface(int x, int y, int z, int px, int py, int pz);
-    void update_topology_for_add_surface(int x, int y, int z, int px, int py, int pz, int face);
+    void update_topology_for_remove_surface(glm::ivec3 a, glm::ivec3 b);
+    void update_topology_for_add_surface(glm::ivec3 a, glm::ivec3 b, int face);
 
     int num_full_rebuilds;      /* number of full rebuilds (pretty slow) performed */
     int num_fast_unifys;        /* number of incremental unify operations performed */

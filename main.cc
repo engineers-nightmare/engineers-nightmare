@@ -228,7 +228,7 @@ entity_type entity_types[6];
 
 /* fwd for temp spawn logic just below */
 void
-mark_lightfield_update(int x, int y, int z);
+mark_lightfield_update(glm::ivec3 p);
 
 
 struct entity
@@ -354,7 +354,7 @@ void use_action_on_entity(c_entity ce) {
                     switchable_man.enabled(entity) ^= true;
 
                     auto block_pos = get_coord_containing(pos);
-                    mark_lightfield_update(block_pos.x, block_pos.y, block_pos.z);
+                    mark_lightfield_update(block_pos);
                 }
             }
         }
@@ -397,9 +397,8 @@ glm::ivec3 lightfield_update_maxs;
 
 
 void
-mark_lightfield_update(int x, int y, int z)
+mark_lightfield_update(glm::ivec3 center)
 {
-    glm::ivec3 center = glm::ivec3(x, y, z);
     glm::ivec3 half_extent = glm::ivec3(max_light_prop, max_light_prop, max_light_prop);
     if (need_lightfield_update) {
         lightfield_update_mins = center - half_extent;
@@ -452,7 +451,7 @@ update_lightfield()
                 for (int i = lightfield_update_mins.x; i <= lightfield_update_maxs.x; i++) {
                     int level = get_light_level(i, j, k);
 
-                    block *b = ship->get_block(i, j, k);
+                    block *b = ship->get_block(glm::ivec3(i, j, k));
                     if (!b)
                         continue;
 
@@ -515,7 +514,7 @@ prepare_chunks()
     for (int k = ship->min_z; k <= ship->max_z; k++) {
         for (int j = ship->min_y; j <= ship->max_y; j++) {
             for (int i = ship->min_x; i <= ship->max_x; i++) {
-                chunk *ch = ship->get_chunk(i, j, k);
+                chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
                 if (ch) {
                     ch->prepare_render(i, j, k);
                 }
@@ -858,9 +857,9 @@ destroy_entity(entity *e)
 
 
 void
-remove_ents_from_surface(int x, int y, int z, int face)
+remove_ents_from_surface(glm::ivec3 b, int face)
 {
-    chunk *ch = ship->get_chunk_containing(x, y, z);
+    chunk *ch = ship->get_chunk_containing(b);
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
         entity *e = *it;
 
@@ -875,7 +874,7 @@ remove_ents_from_surface(int x, int y, int z, int face)
         const auto & p = surface_man.block(e->ce);
         const auto & f = surface_man.face(e->ce);
 
-        if (p.x == x && p.y == y && p.z == z && f == face) {
+        if (p == b && f == face) {
             destroy_entity(e);
             it = ch->entities.erase(it);
         }
@@ -884,7 +883,7 @@ remove_ents_from_surface(int x, int y, int z, int face)
         }
     }
 
-    block *bl = ship->get_block(x, y, z);
+    block *bl = ship->get_block(b);
     assert(bl);
 
     bl->surf_space[face] = 0;   /* we've popped *everything* off, it must be empty now */
@@ -912,7 +911,7 @@ struct add_block_entity_tool : tool
             rc->p == get_coord_containing(pl.pos))
             return false;
 
-        block *bl = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
+        block *bl = ship->get_block(rc->p);
 
         if (bl) {
             /* check for surface ents that would conflict */
@@ -931,13 +930,13 @@ struct add_block_entity_tool : tool
 
         /* dirty the chunk -- TODO: do we really have to do this when changing a cell from
          * empty -> entity? */
-        chunk *ch = ship->get_chunk_containing(rc->p.x, rc->p.y, rc->p.z);
+        chunk *ch = ship->get_chunk_containing(rc->p);
         ch->render_chunk.valid = false;
         ch->entities.push_back(
             new entity(rc->p.x, rc->p.y, rc->p.z, type, surface_zm)
             );
 
-        block *bl = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
+        block *bl = ship->get_block(rc->p);
         bl->type = block_entity;
 
         /* consume ALL the space on the surfaces */
@@ -998,7 +997,7 @@ struct add_surface_entity_tool : tool
         if (bl->surfs[index] == surface_none)
             return false;
 
-        block *other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
+        block *other_side = ship->get_block(rc->p);
         unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
 
         if (other_side->surf_space[index ^ 1] & required_space) {
@@ -1015,10 +1014,10 @@ struct add_surface_entity_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        block *other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
+        block *other_side = ship->get_block(rc->p);
         unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
 
-        chunk *ch = ship->get_chunk_containing(rc->p.x, rc->p.y, rc->p.z);
+        chunk *ch = ship->get_chunk_containing(rc->p);
         /* the chunk we're placing into is guaranteed to exist, because there's
          * a surface facing into it */
         assert(ch);
@@ -1030,7 +1029,7 @@ struct add_surface_entity_tool : tool
         other_side->surf_space[index ^ 1] |= required_space;
 
         /* mark lighting for rebuild around this point */
-        mark_lightfield_update(rc->p.x, rc->p.y, rc->p.z);
+        mark_lightfield_update(rc->p);
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -1085,8 +1084,8 @@ struct remove_surface_entity_tool : tool
             return;
 
         int index = normal_to_surface_index(rc);
-        remove_ents_from_surface(rc->p.x, rc->p.y, rc->p.z, index^1);
-        mark_lightfield_update(rc->p.x, rc->p.y, rc->p.z);
+        remove_ents_from_surface(rc->p, index^1);
+        mark_lightfield_update(rc->p);
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -1100,7 +1099,7 @@ struct remove_surface_entity_tool : tool
             return;
 
         int index = normal_to_surface_index(rc);
-        block *other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
+        block *other_side = ship->get_block(rc->p);
 
         if (!other_side || !other_side->surf_space[index ^ 1]) {
             return;
@@ -1669,7 +1668,7 @@ update()
         for (int j = ship->min_y; j <= ship->max_y; j++) {
             for (int i = ship->min_x; i <= ship->max_x; i++) {
                 /* TODO: prepare all the matrices first, and do ONE upload */
-                chunk *ch = ship->get_chunk(i, j, k);
+                chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
                 if (ch) {
                     auto chunk_matrix = frame->alloc_aligned<glm::mat4>(1);
                     *chunk_matrix.ptr = mat_position(
@@ -1782,7 +1781,7 @@ struct play_state : game_state {
             /* Atmo status */
             glm::ivec3 eye_block = get_coord_containing(pl.eye);
 
-            topo_info *t = topo_find(ship->get_topo_info(eye_block.x, eye_block.y, eye_block.z));
+            topo_info *t = topo_find(ship->get_topo_info(eye_block));
             topo_info *outside = topo_find(&ship->outside_topo_info);
             zone_info *z = ship->get_zone_info(t);
             float pressure = z ? (z->air_amount / t->size) : 0.0f;

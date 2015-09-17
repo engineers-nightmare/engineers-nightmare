@@ -10,7 +10,7 @@ extern GLuint add_overlay_shader;
 extern GLuint simple_shader;
 
 extern void
-mark_lightfield_update(int x, int y, int z);
+mark_lightfield_update(glm::ivec3 center);
 
 extern ship_space *ship;
 
@@ -32,16 +32,16 @@ struct add_block_tool : tool
             return; /* n/a */
 
         /* ensure we can access this x,y,z */
-        ship->ensure_block(rc->p.x, rc->p.y, rc->p.z);
+        ship->ensure_block(rc->p);
 
-        block *bl = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
+        block *bl = ship->get_block(rc->p);
 
         /* can only build on the side of an existing scaffold */
         if (bl && rc->block->type == block_support) {
             bl->type = block_support;
             /* dirty the chunk */
-            ship->get_chunk_containing(rc->p.x, rc->p.y, rc->p.z)->render_chunk.valid = false;
-            mark_lightfield_update(rc->p.x, rc->p.y, rc->p.z);
+            ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
+            mark_lightfield_update(rc->p);
         }
     }
 
@@ -56,7 +56,7 @@ struct add_block_tool : tool
         if (!can_use(rc))
             return; /* n/a */
 
-        block *bl = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
+        block *bl = ship->get_block(rc->p);
 
         /* can only build on the side of an existing scaffold */
         if ((!bl || bl->type == block_empty) && rc->block->type == block_support) {

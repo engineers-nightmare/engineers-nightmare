@@ -14,7 +14,7 @@ type_component_manager type_man;
 updateable_component_manager updateable_man;
 
 
-extern void mark_lightfield_update(int x, int y, int z);
+extern void mark_lightfield_update(glm::ivec3 center);
 
 
 void
@@ -34,7 +34,7 @@ tick_gas_producers(ship_space * ship)
         auto pos = get_coord_containing(pos_man.position(ce));
 
         /* topo node containing the entity */
-        topo_info *t = topo_find(ship->get_topo_info(pos.x, pos.y, pos.z));
+        topo_info *t = topo_find(ship->get_topo_info(pos));
         zone_info *z = ship->get_zone_info(t);
         if (!z) {
             /* if there wasn't a zone, make one */
@@ -100,7 +100,7 @@ tick_updateables(ship_space * ship) {
                 /* could have been. mark it */
                 auto pos = pos_man.position(entity);
                 auto block_pos = get_coord_containing(pos);
-                mark_lightfield_update(block_pos.x, block_pos.y, block_pos.z);
+                mark_lightfield_update(block_pos);
             }
         }
 
