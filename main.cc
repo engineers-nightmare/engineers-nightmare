@@ -1499,37 +1499,8 @@ update()
     frame_info.tick();
     auto dt = frame_info.dt;
 
-    frame = &frames[frame_index++];
-    if (frame_index >= NUM_INFLIGHT_FRAMES) {
-        frame_index = 0;
-    }
-
-    frame->begin();
-
     float depthClearValue = 1.0f;
     glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
-
-    pl.dir = glm::vec3(
-            cosf(pl.angle) * cosf(pl.elev),
-            sinf(pl.angle) * cosf(pl.elev),
-            sinf(pl.elev)
-            );
-
-    /* pl.pos is center of capsule */
-    pl.eye = pl.pos + glm::vec3(0, 0, pl.height / 2 - EYE_OFFSET_Z);
-
-    auto vfov = hfov * (float)wnd.height / wnd.width;
-
-    glm::mat4 proj = glm::perspective(vfov, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
-    glm::mat4 view = glm::lookAt(pl.eye, pl.eye + pl.dir, glm::vec3(0, 0, 1));
-    glm::mat4 centered_view = glm::lookAt(glm::vec3(0), pl.dir, glm::vec3(0, 0, 1));
-
-    auto camera_params = frame->alloc_aligned<per_camera_params>(1);
-
-    camera_params.ptr->view_proj_matrix = proj * view;
-    camera_params.ptr->inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
-    camera_params.ptr->aspect = (float)wnd.width / wnd.height;
-    camera_params.bind(0, frame);
 
     main_tick_accum.add(dt);
     fast_tick_accum.add(dt);
@@ -1601,9 +1572,38 @@ update()
 
     }
 
-    world_textures->bind(0);
-
     prepare_chunks();
+
+    frame = &frames[frame_index++];
+    if (frame_index >= NUM_INFLIGHT_FRAMES) {
+        frame_index = 0;
+    }
+
+    frame->begin();
+
+    pl.dir = glm::vec3(
+        cosf(pl.angle) * cosf(pl.elev),
+        sinf(pl.angle) * cosf(pl.elev),
+        sinf(pl.elev)
+        );
+
+    /* pl.pos is center of capsule */
+    pl.eye = pl.pos + glm::vec3(0, 0, pl.height / 2 - EYE_OFFSET_Z);
+
+    auto vfov = hfov * (float)wnd.height / wnd.width;
+
+    glm::mat4 proj = glm::perspective(vfov, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
+    glm::mat4 view = glm::lookAt(pl.eye, pl.eye + pl.dir, glm::vec3(0, 0, 1));
+    glm::mat4 centered_view = glm::lookAt(glm::vec3(0), pl.dir, glm::vec3(0, 0, 1));
+
+    auto camera_params = frame->alloc_aligned<per_camera_params>(1);
+
+    camera_params.ptr->view_proj_matrix = proj * view;
+    camera_params.ptr->inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
+    camera_params.ptr->aspect = (float)wnd.width / wnd.height;
+    camera_params.bind(0, frame);
+
+    world_textures->bind(0);
 
     for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
         for (int j = ship->mins.y; j <= ship->maxs.y; j++) {
