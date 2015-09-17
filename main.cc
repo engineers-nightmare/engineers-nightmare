@@ -142,21 +142,32 @@ sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 projectile_linear_manager proj_man;
 
 glm::mat4
-mat_block_face(int x, int y, int z, int face)
+mat_block_face(glm::ivec3 p, int face)
 {
+    static glm::vec3 offsets[] = {
+        glm::vec3(1, 0, 0),
+        glm::vec3(0, 0, 1),
+        glm::vec3(0, 1, 0),
+        glm::vec3(0, 0, 1),
+        glm::vec3(0, 1, 1),
+        glm::vec3(0, 0, 0)
+    };
+
+    auto tr = glm::translate(glm::mat4(1), (glm::vec3)p + offsets[face]);
+
     switch (face) {
     case surface_zp:
-        return glm::rotate(glm::translate(glm::mat4(1), glm::vec3(x, y + 1, z + 1)), (float)M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+        return glm::rotate(tr, (float)M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
     case surface_zm:
-        return glm::translate(glm::mat4(1), glm::vec3(x, y, z));
+        return tr;
     case surface_xp:
-        return glm::rotate(glm::translate(glm::mat4(1), glm::vec3(x + 1, y, z)), -(float)M_PI/2, glm::vec3(0.0f, 1.0f, 0.0f));
+        return glm::rotate(tr, -(float)M_PI/2, glm::vec3(0.0f, 1.0f, 0.0f));
     case surface_xm:
-        return glm::rotate(glm::translate(glm::mat4(1), glm::vec3(x, y, z + 1)), (float)M_PI/2, glm::vec3(0.0f, 1.0f, 0.0f));
+        return glm::rotate(tr, (float)M_PI/2, glm::vec3(0.0f, 1.0f, 0.0f));
     case surface_yp:
-        return glm::rotate(glm::translate(glm::mat4(1), glm::vec3(x, y + 1, z)), (float)M_PI/2, glm::vec3(1.0f, 0.0f, 0.0f));
+        return glm::rotate(tr, (float)M_PI/2, glm::vec3(1.0f, 0.0f, 0.0f));
     case surface_ym:
-        return glm::rotate(glm::translate(glm::mat4(1), glm::vec3(x, y, z + 1)), -(float)M_PI/2, glm::vec3(1.0f, 0.0f, 0.0f));
+        return glm::rotate(tr, -(float)M_PI/2, glm::vec3(1.0f, 0.0f, 0.0f));
 
     default:
         return glm::mat4(1);    /* unreachable */
@@ -190,7 +201,7 @@ struct entity
     entity(glm::ivec3 p, unsigned type, int face) {
         ce = c_entity::spawn();
 
-        auto mat = mat_block_face(p.x, p.y, p.z, face);
+        auto mat = mat_block_face(p, face);
 
         auto et = &entity_types[type];
 
@@ -996,7 +1007,7 @@ struct add_surface_entity_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        per_object->val.world_matrix = mat_block_face(rc->p.x, rc->p.y, rc->p.z, index ^ 1);
+        per_object->val.world_matrix = mat_block_face(rc->p, index ^ 1);
         per_object->upload();
 
         auto t = &entity_types[type];
