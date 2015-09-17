@@ -52,8 +52,7 @@ struct remove_block_tool : tool
         for (int index = 0; index < 6; index++) {
             if (bl->surfs[index]) {
 
-                glm::ivec3 s;
-                surface_index_to_normal(index, &s.x, &s.y, &s.z);
+                auto s = surface_index_to_normal(index);
 
                 auto r = rc->bl + s;
                 block *other_side = ship->get_block(r);
