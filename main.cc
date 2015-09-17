@@ -804,7 +804,7 @@ destroy_entity(entity *e)
             auto att_index = attaches.size() - 1;
             auto swap_index = wire_attachments.size() - 1;
             for (auto s = wire_attachments.rbegin();
-            s != wire_attachments.rend() && att_index != -1;) {
+            s != wire_attachments.rend() && att_index != (unsigned)-1;) {
 
                 auto from_attach = wire_attachments[swap_index];
                 auto rem = attaches[att_index];
@@ -1213,7 +1213,6 @@ struct add_wiring_tool : tool
         }
 
         auto & wire_attachments = ship->wire_attachments[type];
-        auto & ent_att_lookup = ship->entity_to_attach_lookups[type];
 
         unsigned existing_attach = get_existing_attach_near(pt);
         unsigned existing_attach_ignore = get_existing_attach_near(pt, current_attach);
