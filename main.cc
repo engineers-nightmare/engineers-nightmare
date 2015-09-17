@@ -220,6 +220,7 @@ struct entity_type
     char const *name;
     btTriangleMesh *phys_mesh;
     btCollisionShape *phys_shape;
+    bool placed_on_surface;
 };
 
 
@@ -603,36 +604,42 @@ init()
     set_mesh_material(entity_types[0].sw, 3);
     entity_types[0].hw = upload_mesh(entity_types[0].sw);
     entity_types[0].name = "Frobnicator";
+    entity_types[0].placed_on_surface = false;
     build_static_physics_mesh(entity_types[0].sw, &entity_types[0].phys_mesh, &entity_types[0].phys_shape);
 
     entity_types[1].sw = load_mesh("mesh/panel_4x4.obj");
     set_mesh_material(entity_types[1].sw, 7);
     entity_types[1].hw = upload_mesh(entity_types[1].sw);
     entity_types[1].name = "Display Panel (4x4)";
+    entity_types[1].placed_on_surface = true;
     build_static_physics_mesh(entity_types[1].sw, &entity_types[1].phys_mesh, &entity_types[1].phys_shape);
 
     entity_types[2].sw = load_mesh("mesh/panel_4x4.obj");
     set_mesh_material(entity_types[2].sw, 8);
     entity_types[2].hw = upload_mesh(entity_types[2].sw);
     entity_types[2].name = "Light (4x4)";
+    entity_types[2].placed_on_surface = true;
     build_static_physics_mesh(entity_types[2].sw, &entity_types[2].phys_mesh, &entity_types[2].phys_shape);
 
     entity_types[3].sw = load_mesh("mesh/panel_1x1.obj");
     set_mesh_material(entity_types[3].sw, 9);
     entity_types[3].hw = upload_mesh(entity_types[3].sw);
     entity_types[3].name = "Switch";
+    entity_types[3].placed_on_surface = true;
     build_static_physics_mesh(entity_types[3].sw, &entity_types[3].phys_mesh, &entity_types[3].phys_shape);
 
     entity_types[4].sw = load_mesh("mesh/single_door_frame.obj");
     set_mesh_material(entity_types[4].sw, 2);
     entity_types[4].hw = upload_mesh(entity_types[4].sw);
     entity_types[4].name = "Door";
+    entity_types[4].placed_on_surface = false;
     build_static_physics_mesh(entity_types[4].sw, &entity_types[4].phys_mesh, &entity_types[4].phys_shape);
 
     entity_types[5].sw = load_mesh("mesh/frobnicator.obj");
     set_mesh_material(entity_types[5].sw, 13);
     entity_types[5].hw = upload_mesh(entity_types[5].sw);
     entity_types[5].name = "Plaidnicator";
+    entity_types[5].placed_on_surface = false;
     build_static_physics_mesh(entity_types[5].sw, &entity_types[5].phys_mesh, &entity_types[5].phys_shape);
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
