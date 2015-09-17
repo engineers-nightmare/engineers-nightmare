@@ -980,9 +980,9 @@ struct add_block_entity_tool : tool
 
 struct add_surface_entity_tool : tool
 {
-    unsigned type;
-
-    add_surface_entity_tool(unsigned type) : type(type) {}
+    unsigned type = 1;  /* bit of a hack -- this is the first with placed_on_surface set. */
+                        /* note that we can't cycle_mode() in our ctor as that runs too early,
+                           before the entity types are even set up. */
 
     bool can_use(raycast_info *rc) {
         if (!rc->hit)
@@ -1037,7 +1037,11 @@ struct add_surface_entity_tool : tool
 
     void long_use(raycast_info *rc) override {}
 
-    void cycle_mode() override {}
+    void cycle_mode() override {
+        do {
+            type = (type + 1) % (sizeof(entity_types) / sizeof(*entity_types));
+        } while (!entity_types[type].placed_on_surface);
+    }
 
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
@@ -1512,9 +1516,7 @@ tool *tools[] = {
     new add_surface_tool(),
     tool::create_remove_surface_tool(),
     new add_block_entity_tool(),
-    new add_surface_entity_tool(1),
-    new add_surface_entity_tool(2),
-    new add_surface_entity_tool(3),
+    new add_surface_entity_tool(),
     new remove_surface_entity_tool(),
     new add_wiring_tool()
 };
