@@ -908,12 +908,11 @@ struct add_block_entity_tool : tool
             return false;
 
         /* don't allow placements that would cause the player to end up inside the ent and get stuck */
-        glm::ivec3 pos(rc->px, rc->py, rc->pz);
-        if (pos == get_coord_containing(pl.eye) ||
-            pos == get_coord_containing(pl.pos))
+        if (rc->p == get_coord_containing(pl.eye) ||
+            rc->p == get_coord_containing(pl.pos))
             return false;
 
-        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
+        block *bl = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
 
         if (bl) {
             /* check for surface ents that would conflict */
@@ -932,13 +931,13 @@ struct add_block_entity_tool : tool
 
         /* dirty the chunk -- TODO: do we really have to do this when changing a cell from
          * empty -> entity? */
-        chunk *ch = ship->get_chunk_containing(rc->px, rc->py, rc->pz);
+        chunk *ch = ship->get_chunk_containing(rc->p.x, rc->p.y, rc->p.z);
         ch->render_chunk.valid = false;
         ch->entities.push_back(
-            new entity(rc->px, rc->py, rc->pz, type, surface_zm)
+            new entity(rc->p.x, rc->p.y, rc->p.z, type, surface_zm)
             );
 
-        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
+        block *bl = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
         bl->type = block_entity;
 
         /* consume ALL the space on the surfaces */
@@ -960,7 +959,7 @@ struct add_block_entity_tool : tool
         if (!can_use(rc))
             return;
 
-        per_object->val.world_matrix = mat_position((float)rc->px, (float)rc->py, (float)rc->pz);
+        per_object->val.world_matrix = mat_position((float)rc->p.x, (float)rc->p.y, (float)rc->p.z);
         per_object->upload();
 
         auto t = &entity_types[type];
@@ -999,7 +998,7 @@ struct add_surface_entity_tool : tool
         if (bl->surfs[index] == surface_none)
             return false;
 
-        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
+        block *other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
         unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
 
         if (other_side->surf_space[index ^ 1] & required_space) {
@@ -1016,22 +1015,22 @@ struct add_surface_entity_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
+        block *other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
         unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
 
-        chunk *ch = ship->get_chunk_containing(rc->px, rc->py, rc->pz);
+        chunk *ch = ship->get_chunk_containing(rc->p.x, rc->p.y, rc->p.z);
         /* the chunk we're placing into is guaranteed to exist, because there's
          * a surface facing into it */
         assert(ch);
         ch->entities.push_back(
-            new entity(rc->px, rc->py, rc->pz, type, index ^ 1)
+            new entity(rc->p.x, rc->p.y, rc->p.z, type, index ^ 1)
             );
 
         /* take the space. */
         other_side->surf_space[index ^ 1] |= required_space;
 
         /* mark lighting for rebuild around this point */
-        mark_lightfield_update(rc->px, rc->py, rc->pz);
+        mark_lightfield_update(rc->p.x, rc->p.y, rc->p.z);
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -1050,7 +1049,7 @@ struct add_surface_entity_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        per_object->val.world_matrix = mat_block_face(rc->px, rc->py, rc->pz, index ^ 1);
+        per_object->val.world_matrix = mat_block_face(rc->p.x, rc->p.y, rc->p.z, index ^ 1);
         per_object->upload();
 
         auto t = &entity_types[type];
@@ -1086,8 +1085,8 @@ struct remove_surface_entity_tool : tool
             return;
 
         int index = normal_to_surface_index(rc);
-        remove_ents_from_surface(rc->px, rc->py, rc->pz, index^1);
-        mark_lightfield_update(rc->px, rc->py, rc->pz);
+        remove_ents_from_surface(rc->p.x, rc->p.y, rc->p.z, index^1);
+        mark_lightfield_update(rc->p.x, rc->p.y, rc->p.z);
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -1101,7 +1100,7 @@ struct remove_surface_entity_tool : tool
             return;
 
         int index = normal_to_surface_index(rc);
-        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
+        block *other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
 
         if (!other_side || !other_side->surf_space[index ^ 1]) {
             return;

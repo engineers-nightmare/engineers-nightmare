@@ -249,9 +249,9 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
             rc->nx = nx;
             rc->ny = ny;
             rc->nz = nz;
-            rc->px = x + nx;
-            rc->py = y + ny;
-            rc->pz = z + nz;
+            rc->p.x = x + nx;
+            rc->p.y = y + ny;
+            rc->p.z = z + nz;
             return;
         }
     }

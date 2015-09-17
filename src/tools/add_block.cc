@@ -32,16 +32,16 @@ struct add_block_tool : tool
             return; /* n/a */
 
         /* ensure we can access this x,y,z */
-        ship->ensure_block(rc->px, rc->py, rc->pz);
+        ship->ensure_block(rc->p.x, rc->p.y, rc->p.z);
 
-        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
+        block *bl = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
 
         /* can only build on the side of an existing scaffold */
         if (bl && rc->block->type == block_support) {
             bl->type = block_support;
             /* dirty the chunk */
-            ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
-            mark_lightfield_update(rc->px, rc->py, rc->pz);
+            ship->get_chunk_containing(rc->p.x, rc->p.y, rc->p.z)->render_chunk.valid = false;
+            mark_lightfield_update(rc->p.x, rc->p.y, rc->p.z);
         }
     }
 
@@ -56,11 +56,11 @@ struct add_block_tool : tool
         if (!can_use(rc))
             return; /* n/a */
 
-        block *bl = ship->get_block(rc->px, rc->py, rc->pz);
+        block *bl = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
 
         /* can only build on the side of an existing scaffold */
         if ((!bl || bl->type == block_empty) && rc->block->type == block_support) {
-            per_object->val.world_matrix = mat_position((float)rc->px, (float)rc->py, (float)rc->pz);
+            per_object->val.world_matrix = mat_position((float)rc->p.x, (float)rc->p.y, (float)rc->p.z);
             per_object->upload();
 
             glUseProgram(add_overlay_shader);

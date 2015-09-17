@@ -38,7 +38,7 @@ add_surface_tool::use(raycast_info *rc) {
     block *bl = rc->block;
 
     int index = normal_to_surface_index(rc);
-    block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
+    block *other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
 
     if (can_use(bl, other_side, index)) {
 
@@ -48,20 +48,20 @@ add_surface_tool::use(raycast_info *rc) {
         }
 
         if (!other_side) {
-            ship->ensure_block(rc->px, rc->py, rc->pz);
-            other_side = ship->get_block(rc->px, rc->py, rc->pz);
+            ship->ensure_block(rc->p.x, rc->p.y, rc->p.z);
+            other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
         }
 
         bl->surfs[index] = this->st;
         ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
 
         other_side->surfs[index ^ 1] = this->st;
-        ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
+        ship->get_chunk_containing(rc->p.x, rc->p.y, rc->p.z)->render_chunk.valid = false;
 
         mark_lightfield_update(rc->x, rc->y, rc->z);
-        mark_lightfield_update(rc->px, rc->py, rc->pz);
+        mark_lightfield_update(rc->p.x, rc->p.y, rc->p.z);
 
-        ship->update_topology_for_add_surface(rc->x, rc->y, rc->z, rc->px, rc->py, rc->pz, index);
+        ship->update_topology_for_add_surface(rc->x, rc->y, rc->z, rc->p.x, rc->p.y, rc->p.z, index);
 
     }
 }
@@ -101,7 +101,7 @@ add_surface_tool::preview(raycast_info *rc) {
 
     block *bl = ship->get_block(rc->x, rc->y, rc->z);
     int index = normal_to_surface_index(rc);
-    block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
+    block *other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
 
     if (can_use(bl, other_side, index)) {
         per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);

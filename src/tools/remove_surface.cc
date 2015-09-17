@@ -50,24 +50,24 @@ struct remove_surface_tool : tool
         ship->get_chunk_containing(rc->x, rc->y, rc->z)->render_chunk.valid = false;
 
         /* cause the other side to exist */
-        block *other_side = ship->get_block(rc->px, rc->py, rc->pz);
+        block *other_side = ship->get_block(rc->p.x, rc->p.y, rc->p.z);
 
         if (!other_side) {
             /* expand: note: we shouldn't ever actually have to do this... */
         }
         else {
             other_side->surfs[index ^ 1] = surface_none;
-            ship->get_chunk_containing(rc->px, rc->py, rc->pz)->render_chunk.valid = false;
+            ship->get_chunk_containing(rc->p.x, rc->p.y, rc->p.z)->render_chunk.valid = false;
         }
 
         /* remove any ents using the surface */
-        remove_ents_from_surface(rc->px, rc->py, rc->pz, index ^ 1);
+        remove_ents_from_surface(rc->p.x, rc->p.y, rc->p.z, index ^ 1);
         remove_ents_from_surface(rc->x, rc->y, rc->z, index);
 
         mark_lightfield_update(rc->x, rc->y, rc->z);
-        mark_lightfield_update(rc->px, rc->py, rc->pz);
+        mark_lightfield_update(rc->p.x, rc->p.y, rc->p.z);
 
-        ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rc->px, rc->py, rc->pz);
+        ship->update_topology_for_remove_surface(rc->x, rc->y, rc->z, rc->p.x, rc->p.y, rc->p.z);
     }
 
     void alt_use(raycast_info *rc) override {}

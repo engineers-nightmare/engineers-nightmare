@@ -26,7 +26,7 @@ struct raycast_info {
     bool inside;
     int x, y, z;            /* the block we hit */
     int nx, ny, nz;         /* the face normal we hit */
-    int px, py, pz;         /* the block along the normal */
+    glm::ivec3 p;           /* the block along the normal */
     struct block *block;
 };
 
