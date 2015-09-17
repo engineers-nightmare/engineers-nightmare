@@ -141,9 +141,6 @@
     <ClCompile Include="src\wiring\wiring.cc">
       <Filter>Source Files\wiring</Filter>
     </ClCompile>
-    <ClCompile Include="src\wiring\wiring_data.cc">
-      <Filter>Source Files\wiring</Filter>
-    </ClCompile>
     <ClCompile Include="src\component\power_provider_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>

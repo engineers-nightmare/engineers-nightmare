@@ -16,12 +16,19 @@ struct power_wiring_data {
     unsigned num_providers = 0;
 };
 
+struct comms_msg {
+    c_entity originator;
+    char const *desc;           /* non-owned: expected to point to memory outliving the comms_data */
 
-/* todo: the rest of this */
-//struct comms_wiring_data {
-//    std::vector<comms_data> msg_buffer;
-//    unsigned num_connected;
-//};
+    /* todo: other data types */
+    float data;
+};
+
+
+struct comms_wiring_data {
+    std::vector<comms_msg> msg_buffer;
+    unsigned num_connected;
+};
 
 
 /* todo: the rest of this */

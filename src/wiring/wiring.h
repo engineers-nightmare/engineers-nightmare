@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "../render_data.h"
+#include "../component/component_manager.h"
 #include "wiring_data.h"
 
 struct ship_space;
