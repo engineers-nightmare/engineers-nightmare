@@ -8,7 +8,6 @@
 #include <epoxy/gl.h>
 #include <functional>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <stdio.h>
 #include <SDL.h>
 #include <unordered_map>
@@ -140,49 +139,7 @@ extern hw_mesh *wire_hw_meshes[num_wire_types];
 
 sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
-template<typename T>
-T
-clamp(T t, T lower, T upper) {
-    if (t < lower) return lower;
-    if (t > upper) return upper;
-    return t;
-}
-
 projectile_linear_manager proj_man;
-
-glm::mat4
-mat_rotate_mesh(glm::vec3 pt, glm::vec3 dir) {
-    auto abs_normal = glm::abs(dir);
-    glm::vec3 temp_up(1, 0, 0);
-    if (abs_normal.x > abs_normal.y && abs_normal.x > abs_normal.z) {
-        /* avoid degeneracy at the `poles` */
-        temp_up = glm::vec3(0, 1, 0);
-    }
-    glm::mat4 m = glm::transpose(glm::lookAt(dir, glm::vec3(0, 0, 0), temp_up));
-    m[3][0] = pt.x;
-    m[3][1] = pt.y;
-    m[3][2] = pt.z;
-    m[0][3] = 0;
-    m[1][3] = 0;
-    m[2][3] = 0;
-    return m;
-}
-
-glm::mat4
-mat_position(glm::vec3 pos)
-{
-    return glm::translate(glm::mat4(1), pos);
-}
-
-glm::mat4
-mat_scale(glm::vec3 scale) {
-    return glm::scale(glm::mat4(1), scale);
-}
-
-glm::mat4
-mat_scale(float x, float y, float z) {
-    return mat_scale(glm::vec3(x, y, z));
-}
 
 glm::mat4
 mat_block_face(int x, int y, int z, int face)

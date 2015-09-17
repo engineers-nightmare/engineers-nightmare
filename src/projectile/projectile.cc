@@ -1,15 +1,13 @@
 #include <algorithm>
 #include <assert.h>
 
+#include "../common.h"
 #include "projectile.h"
 #include "../memory.h"
 #include "../mesh.h"
 #include "../physics.h"
 
 extern physics *phy;
-
-extern glm::mat4
-mat_position(glm::vec3);
 
 hw_mesh *projectile_hw;
 sw_mesh *projectile_sw;

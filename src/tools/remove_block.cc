@@ -1,5 +1,6 @@
 #include <epoxy/gl.h>
 
+#include "../common.h"
 #include "../ship_space.h"
 #include "../shader_params.h"
 #include "../mesh.h"
@@ -14,9 +15,6 @@ extern void
 mark_lightfield_update(glm::ivec3 p);
 
 extern ship_space *ship;
-
-extern glm::mat4
-mat_position(glm::vec3 p);
 
 extern hw_mesh *scaffold_hw;
 

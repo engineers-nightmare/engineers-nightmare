@@ -1,5 +1,6 @@
 #include <unordered_set>
 
+#include "../common.h"
 #include "wiring.h"
 #include "../mesh.h"
 #include "../ship_space.h"
@@ -11,15 +12,6 @@ sw_mesh *no_placement_sw;
 hw_mesh *no_placement_hw;
 
 hw_mesh *wire_hw_meshes[num_wire_types];
-
-extern glm::mat4
-mat_scale(glm::vec3 scale);
-
-extern glm::mat4
-mat_scale(float x, float y, float z);
-
-extern glm::mat4
-mat_rotate_mesh(glm::vec3 pt, glm::vec3 dir);
 
 
 void
