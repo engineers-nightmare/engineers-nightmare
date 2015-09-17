@@ -12,8 +12,6 @@ physics_component_manager::create_component_instance_data(unsigned count) {
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(btRigidBody *) * count + align_size<btRigidBody *>(size);
-    size = sizeof(btTriangleMesh *) * count + align_size<btTriangleMesh *>(size);
-    size = sizeof(btCollisionShape *) * count + align_size<btCollisionShape *>(size);
     size += alignof(c_entity);  // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -23,13 +21,9 @@ physics_component_manager::create_component_instance_data(unsigned count) {
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.rigid = align_ptr((btRigidBody **)(new_pool.entity + count));
-    new_pool.mesh = align_ptr((btTriangleMesh **)(new_pool.rigid + count));
-    new_pool.collision = align_ptr((btCollisionShape **)(new_pool.mesh + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.rigid, instance_pool.rigid, buffer.num * sizeof(btRigidBody *));
-    memcpy(new_pool.mesh, instance_pool.mesh, buffer.num * sizeof(btTriangleMesh *));
-    memcpy(new_pool.collision, instance_pool.collision, buffer.num * sizeof(btCollisionShape *));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -45,8 +39,6 @@ physics_component_manager::destroy_instance(instance i) {
 
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
     instance_pool.rigid[i.index] = instance_pool.rigid[last_index];
-    instance_pool.mesh[i.index] = instance_pool.mesh[last_index];
-    instance_pool.collision[i.index] = instance_pool.collision[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
