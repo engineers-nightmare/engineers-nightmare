@@ -213,8 +213,6 @@ struct entity
         build_static_physics_rb_mat(&mat, et->phys_shape, &physics_man.rigid(ce));
         /* so that we can get back to the entity from a phys raycast */
         physics_man.rigid(ce)->setUserPointer(this);
-        physics_man.mesh(ce) = et->phys_mesh;
-        physics_man.collision(ce) = et->phys_shape;
 
         surface_man.assign_entity(ce);
         surface_man.block(ce) = p;
