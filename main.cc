@@ -187,10 +187,10 @@ struct entity
     /* TODO: replace this completely, it's silly. */
     c_entity ce;
 
-    entity(int x, int y, int z, unsigned type, int face) {
+    entity(glm::ivec3 p, unsigned type, int face) {
         ce = c_entity::spawn();
 
-        auto mat = mat_block_face(x, y, z, face);
+        auto mat = mat_block_face(p.x, p.y, p.z, face);
 
         auto et = &entity_types[type];
 
@@ -206,11 +206,11 @@ struct entity
         physics_man.collision(ce) = et->phys_shape;
 
         surface_man.assign_entity(ce);
-        surface_man.block(ce) = glm::ivec3(x, y, z);
+        surface_man.block(ce) = p;
         surface_man.face(ce) = face;
 
         pos_man.assign_entity(ce);
-        pos_man.position(ce) = glm::vec3(x, y, z);
+        pos_man.position(ce) = p;
         pos_man.mat(ce) = mat;
 
         render_man.assign_entity(ce);
@@ -881,7 +881,7 @@ struct add_block_entity_tool : tool
         chunk *ch = ship->get_chunk_containing(rc->p);
         ch->render_chunk.valid = false;
         ch->entities.push_back(
-            new entity(rc->p.x, rc->p.y, rc->p.z, type, surface_zm)
+            new entity(rc->p, type, surface_zm)
             );
 
         block *bl = ship->get_block(rc->p);
@@ -970,7 +970,7 @@ struct add_surface_entity_tool : tool
          * a surface facing into it */
         assert(ch);
         ch->entities.push_back(
-            new entity(rc->p.x, rc->p.y, rc->p.z, type, index ^ 1)
+            new entity(rc->p, type, index ^ 1)
             );
 
         /* take the space. */
