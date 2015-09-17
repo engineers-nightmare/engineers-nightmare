@@ -900,9 +900,7 @@ remove_ents_from_surface(int x, int y, int z, int face)
 
 struct add_block_entity_tool : tool
 {
-    unsigned type;
-
-    explicit add_block_entity_tool(unsigned type) : type(type) {}
+    unsigned type = 0;
 
     bool can_use(raycast_info *rc) {
         if (!rc->hit || rc->inside)
@@ -951,7 +949,11 @@ struct add_block_entity_tool : tool
 
     void long_use(raycast_info *rc) override {}
 
-    void cycle_mode() override {}
+    void cycle_mode() override {
+        do {
+            type = (type + 1) % (sizeof(entity_types) / sizeof(*entity_types));
+        } while (entity_types[type].placed_on_surface);
+    }
 
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
@@ -963,7 +965,7 @@ struct add_block_entity_tool : tool
         auto t = &entity_types[type];
         draw_mesh(t->hw);
 
-        /* draw a block overlay as well around the frobnicator */
+        /* draw a block overlay as well around the block */
         glUseProgram(add_overlay_shader);
         draw_mesh(scaffold_hw);
         glUseProgram(simple_shader);
@@ -1509,12 +1511,10 @@ tool *tools[] = {
     tool::create_remove_block_tool(),
     new add_surface_tool(),
     tool::create_remove_surface_tool(),
-    new add_block_entity_tool(0),
+    new add_block_entity_tool(),
     new add_surface_entity_tool(1),
     new add_surface_entity_tool(2),
     new add_surface_entity_tool(3),
-    new add_block_entity_tool(4),
-    new add_block_entity_tool(5),
     new remove_surface_entity_tool(),
     new add_wiring_tool()
 };
