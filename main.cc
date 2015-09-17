@@ -29,7 +29,7 @@
 #include "src/ship_space.h"
 #include "src/text.h"
 #include "src/textureset.h"
-#include "src/tools.h"
+#include "src/tools/tools.h"
 #include "src/wiring/wiring.h"
 
 
@@ -804,7 +804,7 @@ destroy_entity(entity *e)
             auto att_index = attaches.size() - 1;
             auto swap_index = wire_attachments.size() - 1;
             for (auto s = wire_attachments.rbegin();
-            s != wire_attachments.rend() && att_index != -1;) {
+            s != wire_attachments.rend() && att_index != (unsigned)-1;) {
 
                 auto from_attach = wire_attachments[swap_index];
                 auto rem = attaches[att_index];
@@ -944,6 +944,8 @@ struct add_block_entity_tool : tool
 
     void long_use(raycast_info *rc) override {}
 
+    void cycle_mode() override {}
+
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
@@ -1026,6 +1028,8 @@ struct add_surface_entity_tool : tool
 
     void long_use(raycast_info *rc) override {}
 
+    void cycle_mode() override {}
+
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
@@ -1078,6 +1082,8 @@ struct remove_surface_entity_tool : tool
 
     void long_use(raycast_info *rc) override {}
 
+    void cycle_mode() override {}
+
     void preview(raycast_info *rc) override {
         if (!can_use(rc))
             return;
@@ -1115,7 +1121,9 @@ struct add_wiring_tool : tool
     entity *old_entity = nullptr;
     wire_type type;
 
-    add_wiring_tool(wire_type type) : type(type) {}
+    add_wiring_tool() {
+        type = (wire_type)0;
+    }
 
     unsigned get_existing_attach_near(glm::vec3 const & pt, unsigned ignore = invalid_attach) {
         /* Some spatial index might be useful here. */
@@ -1205,7 +1213,6 @@ struct add_wiring_tool : tool
         }
 
         auto & wire_attachments = ship->wire_attachments[type];
-        auto & ent_att_lookup = ship->entity_to_attach_lookups[type];
 
         unsigned existing_attach = get_existing_attach_near(pt);
         unsigned existing_attach_ignore = get_existing_attach_near(pt, current_attach);
@@ -1475,6 +1482,14 @@ struct add_wiring_tool : tool
         }
     }
 
+    void cycle_mode() override {
+        if (moving_existing || current_attach != invalid_attach) {
+            return;
+        }
+
+        type = (wire_type)(((unsigned)type + (unsigned)num_wire_types + 1) % (unsigned)num_wire_types);
+    }
+
     void get_description(char *str) override {
         sprintf(str, "Place wiring type %u", type);
     }
@@ -1485,9 +1500,7 @@ tool *tools[] = {
     tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
     tool::create_remove_block_tool(),
-    tool::create_add_surface_tool(surface_wall),
-    tool::create_add_surface_tool(surface_grate),
-    tool::create_add_surface_tool(surface_glass),
+    new add_surface_tool(),
     tool::create_remove_surface_tool(),
     new add_block_entity_tool(0),
     new add_surface_entity_tool(1),
@@ -1496,8 +1509,7 @@ tool *tools[] = {
     new add_block_entity_tool(4),
     new add_block_entity_tool(5),
     new remove_surface_entity_tool(),
-    new add_wiring_tool(wire_type_power),
-    new add_wiring_tool(wire_type_comms),
+    new add_wiring_tool()
 };
 
 
@@ -1760,7 +1772,8 @@ struct play_state : game_state {
             add_text_with_outline(buf2, -w/2, -200);
         }
 
-        {
+        /* debug text */
+        if (0) {
             /* Atmo status */
             glm::ivec3 eye_block = get_coord_containing(pl.eye);
 
@@ -1825,6 +1838,10 @@ struct play_state : game_state {
             t->long_use(&rc);
         }
 
+        if (pl.cycle_mode && t) {
+            t->cycle_mode();
+        }
+
         /* interact with ents */
         entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
                                        phy->ghostObj, phy->dynamicsWorld);
@@ -1875,6 +1892,7 @@ struct play_state : game_state {
         auto jump       = get_input(action_jump)->just_active;
         auto reset      = get_input(action_reset)->just_active;
         auto use        = get_input(action_use)->just_active;
+        auto cycle_mode = get_input(action_cycle_mode)->just_active;
         auto slot1      = get_input(action_slot1)->just_active;
         auto slot2      = get_input(action_slot2)->just_active;
         auto slot3      = get_input(action_slot3)->just_active;
@@ -1914,6 +1932,7 @@ struct play_state : game_state {
         pl.reset         = reset;
         pl.crouch_end    = crouch_end;
         pl.use           = use;
+        pl.cycle_mode    = cycle_mode;
         pl.gravity       = gravity;
         pl.use_tool      = use_tool;
         pl.alt_use_tool  = alt_use_tool;

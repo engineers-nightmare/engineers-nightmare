@@ -1,8 +1,7 @@
-#include "../tools.h"
+#include <string.h>
 
 #include "../player.h"
-
-#include <string.h>
+#include "tools.h"
 
 
 struct fire_projectile_tool : tool
@@ -22,9 +21,9 @@ struct fire_projectile_tool : tool
 
     void long_use(raycast_info *rc) override {}
 
-    void preview(raycast_info *rc) override
-    {
-    }
+    void cycle_mode() override {}
+
+    void preview(raycast_info *rc) override {}
 
     void get_description(char *str) override
     {

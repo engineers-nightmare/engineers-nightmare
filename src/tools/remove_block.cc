@@ -1,9 +1,9 @@
-#include "../tools.h"
-
 #include <epoxy/gl.h>
+
 #include "../ship_space.h"
 #include "../shader_params.h"
 #include "../mesh.h"
+#include "tools.h"
 
 
 extern GLuint add_overlay_shader;
@@ -91,6 +91,8 @@ struct remove_block_tool : tool
     void alt_use(raycast_info *rc) override {}
 
     void long_use(raycast_info *rc) override {}
+
+    void cycle_mode() override {}
 
     void preview(raycast_info *rc) override
     {

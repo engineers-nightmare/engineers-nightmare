@@ -18,6 +18,8 @@ struct player {
 
     bool use;
 
+    bool cycle_mode;
+
     bool reset;
 
     bool crouch;
