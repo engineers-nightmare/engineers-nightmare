@@ -9,7 +9,7 @@
 // unsigned
 
 struct power_provider_component_manager : component_manager {
-    struct power_instance_data {
+    struct instance_data {
         c_entity *entity;
         unsigned *max_provided;
         unsigned *provided;
