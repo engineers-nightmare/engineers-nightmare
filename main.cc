@@ -562,6 +562,7 @@ init()
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);         /* pointers given by other libs may not be aligned */
     glEnable(GL_DEPTH_TEST);
+    glPolygonOffset(-0.1f, -0.1f);
 
     mesher_init();
 
@@ -1062,9 +1063,7 @@ struct add_surface_entity_tool : tool
 
         glUseProgram(add_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-0.1f, -0.1f);
         draw_mesh(surfs_hw[index]);
-        glPolygonOffset(0.0f, 0.0f);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }
@@ -1113,9 +1112,7 @@ struct remove_surface_entity_tool : tool
 
         glUseProgram(remove_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-0.1f, -0.1f);
         draw_mesh(surfs_hw[index]);
-        glPolygonOffset(0.0f, 0.0f);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }

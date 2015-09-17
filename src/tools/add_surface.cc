@@ -109,9 +109,7 @@ add_surface_tool::preview(raycast_info *rc) {
 
         glUseProgram(add_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-0.1f, -0.1f);
         draw_mesh(surfs_hw[index]);
-        glPolygonOffset(0.0f, 0.0f);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }
