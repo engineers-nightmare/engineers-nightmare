@@ -264,9 +264,6 @@ struct entity
             power_provider_man.provided(ce) = 12;
         }
     }
-
-    ~entity() {
-    }
 };
 
 
