@@ -29,7 +29,7 @@
 #include "src/ship_space.h"
 #include "src/text.h"
 #include "src/textureset.h"
-#include "src/tools.h"
+#include "src/tools/tools.h"
 #include "src/wiring/wiring.h"
 
 
@@ -1501,9 +1501,7 @@ tool *tools[] = {
     tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
     tool::create_remove_block_tool(),
-    tool::create_add_surface_tool(surface_wall),
-    tool::create_add_surface_tool(surface_grate),
-    tool::create_add_surface_tool(surface_glass),
+    new add_surface_tool(),
     tool::create_remove_surface_tool(),
     new add_block_entity_tool(0),
     new add_surface_entity_tool(1),

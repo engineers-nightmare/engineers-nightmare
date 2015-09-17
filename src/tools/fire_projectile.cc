@@ -1,8 +1,7 @@
-#include "../tools.h"
+#include <string.h>
 
 #include "../player.h"
-
-#include <string.h>
+#include "tools.h"
 
 
 struct fire_projectile_tool : tool

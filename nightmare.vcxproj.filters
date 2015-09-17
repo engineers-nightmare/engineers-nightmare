@@ -34,6 +34,9 @@
     <Filter Include="Source Files\wiring">
       <UniqueIdentifier>{5d9ecba1-88bc-4ce1-969d-0d1d1472cac1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\tools">
+      <UniqueIdentifier>{b604ea93-9d24-4477-9bb4-5d14c8b98071}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\blob.cc">
@@ -203,9 +206,6 @@
     <ClInclude Include="src\settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\tools.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\scopetimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -277,6 +277,9 @@
     </ClInclude>
     <ClInclude Include="src\component\updateable_component.h">
       <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tools\tools.h">
+      <Filter>Header Files\tools</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

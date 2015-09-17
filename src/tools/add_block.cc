@@ -1,9 +1,9 @@
-#include "../tools.h"
-
 #include <epoxy/gl.h>
+
 #include "../ship_space.h"
 #include "../shader_params.h"
 #include "../mesh.h"
+#include "tools.h"
 
 
 extern GLuint add_overlay_shader;

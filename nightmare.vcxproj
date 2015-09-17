@@ -297,7 +297,7 @@
     <ClInclude Include="src\text.h" />
     <ClInclude Include="src\textureset.h" />
     <ClInclude Include="src\timer.h" />
-    <ClInclude Include="src\tools.h" />
+    <ClInclude Include="src\tools\tools.h" />
     <ClInclude Include="src\winunistd.h" />
     <ClInclude Include="src\wiring\wiring.h" />
     <ClInclude Include="src\wiring\wiring_data.h" />

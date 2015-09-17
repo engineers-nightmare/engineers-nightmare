@@ -1,6 +1,6 @@
 #pragma once
 
-#include "block.h"
+#include "../block.h"
 
 struct player;
 struct raycast_info;
@@ -21,7 +21,26 @@ struct tool
 
     static tool *create_add_block_tool();
     static tool *create_remove_block_tool();
-    static tool *create_add_surface_tool(surface_type s);
     static tool *create_remove_surface_tool();
     static tool *create_fire_projectile_tool(player *pl);
+};
+
+struct add_surface_tool : tool
+{
+    surface_type st;
+    add_surface_tool() : st(surface_wall) {}
+
+    bool can_use(block *bl, block *other, int index);
+
+    void use(raycast_info *rc) override;
+
+    void alt_use(raycast_info *rc) override;
+
+    void long_use(raycast_info *rc) override;
+
+    void cycle_mode() override;
+
+    void preview(raycast_info *rc) override;
+
+    void get_description(char *str) override;
 };
