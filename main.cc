@@ -1490,90 +1490,7 @@ struct time_accumulator
 };
 
 
-time_accumulator main_tick_accum(1/15.0f, 1.f);  /* 15Hz tick for game logic */
-time_accumulator fast_tick_accum(1/60.0f, 1.f);  /* 60Hz tick for motion */
-
-void
-update()
-{
-    frame_info.tick();
-    auto dt = frame_info.dt;
-
-    float depthClearValue = 1.0f;
-    glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
-
-    main_tick_accum.add(dt);
-    fast_tick_accum.add(dt);
-
-    /* this absolutely must run every frame */
-    state->update(dt, frame);
-
-    /* things that can run at a pretty slow rate */
-    while (main_tick_accum.tick()) {
-
-        /* rebuild lighting if needed */
-        update_lightfield();
-
-        /* remove any air that someone managed to get into the outside */
-        {
-            topo_info *t = topo_find(&ship->outside_topo_info);
-            zone_info *z = ship->get_zone_info(t);
-            if (z) {
-                /* try as hard as you like, you cannot fill space with your air system */
-                z->air_amount = 0;
-            }
-        }
-
-        /* allow the entities to tick */
-        tick_gas_producers(ship);
-        tick_power_consumers(ship);
-        tick_light_components(ship);
-        tick_pressure_sensors(ship);
-
-        calculate_power_wires(ship);
-        propagate_comms_wires(ship);
-
-        /* HACK: dirty this every frame for now while debugging atmo */
-        if (1 || pl.ui_dirty) {
-            text->reset();
-            ui_sprites->reset();
-            state->rebuild_ui();
-
-            char buf[3][256];
-            float w[3] = { 0, 0, 0 }, h = 0;
-
-            sprintf(buf[0], "%.2f", frame_info.dt * 1000);
-            sprintf(buf[1], "%.2f", 1.f / frame_info.dt);
-            sprintf(buf[2], "%.2f", frame_info.fps);
-
-            text->measure(buf[0], &w[0], &h);
-            text->measure(buf[1], &w[1], &h);
-            text->measure(buf[2], &w[2], &h);
-
-            add_text_with_outline(buf[0], -DEFAULT_WIDTH / 2 + (100 - w[0]), DEFAULT_HEIGHT / 2 + 100);
-            add_text_with_outline(buf[1], -DEFAULT_WIDTH / 2 + (100 - w[1]), DEFAULT_HEIGHT / 2 + 82);
-            add_text_with_outline(buf[2], -DEFAULT_WIDTH / 2 + (100 - w[2]), DEFAULT_HEIGHT / 2 + 64);
-
-            text->upload();
-            ui_sprites->upload();
-            pl.ui_dirty = false;
-        }
-    }
-
-    /* character controller tick: we'd LIKE to run this off the fast_tick_accum, but it has all kinds of
-     * every-frame assumptions baked in (player impulse state, etc) */
-    phy->tick_controller(dt);
-
-    while (fast_tick_accum.tick()) {
-
-        proj_man.simulate(fast_tick_accum.period);
-
-        phy->tick(fast_tick_accum.period);
-
-    }
-
-    prepare_chunks();
-
+void render() {
     frame = &frames[frame_index++];
     if (frame_index >= NUM_INFLIGHT_FRAMES) {
         frame_index = 0;
@@ -1660,6 +1577,95 @@ update()
 
     frame->end();
 }
+
+
+time_accumulator main_tick_accum(1/15.0f, 1.f);  /* 15Hz tick for game logic */
+time_accumulator fast_tick_accum(1/60.0f, 1.f);  /* 60Hz tick for motion */
+
+void
+update()
+{
+    frame_info.tick();
+    auto dt = frame_info.dt;
+
+    float depthClearValue = 1.0f;
+    glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
+
+    main_tick_accum.add(dt);
+    fast_tick_accum.add(dt);
+
+    /* this absolutely must run every frame */
+    state->update(dt, frame);
+
+    /* things that can run at a pretty slow rate */
+    while (main_tick_accum.tick()) {
+
+        /* rebuild lighting if needed */
+        update_lightfield();
+
+        /* remove any air that someone managed to get into the outside */
+        {
+            topo_info *t = topo_find(&ship->outside_topo_info);
+            zone_info *z = ship->get_zone_info(t);
+            if (z) {
+                /* try as hard as you like, you cannot fill space with your air system */
+                z->air_amount = 0;
+            }
+        }
+
+        /* allow the entities to tick */
+        tick_gas_producers(ship);
+        tick_power_consumers(ship);
+        tick_light_components(ship);
+        tick_pressure_sensors(ship);
+
+        calculate_power_wires(ship);
+        propagate_comms_wires(ship);
+
+        /* HACK: dirty this every frame for now while debugging atmo */
+        if (1 || pl.ui_dirty) {
+            text->reset();
+            ui_sprites->reset();
+            state->rebuild_ui();
+
+            char buf[3][256];
+            float w[3] = { 0, 0, 0 }, h = 0;
+
+            sprintf(buf[0], "%.2f", frame_info.dt * 1000);
+            sprintf(buf[1], "%.2f", 1.f / frame_info.dt);
+            sprintf(buf[2], "%.2f", frame_info.fps);
+
+            text->measure(buf[0], &w[0], &h);
+            text->measure(buf[1], &w[1], &h);
+            text->measure(buf[2], &w[2], &h);
+
+            add_text_with_outline(buf[0], -DEFAULT_WIDTH / 2 + (100 - w[0]), DEFAULT_HEIGHT / 2 + 100);
+            add_text_with_outline(buf[1], -DEFAULT_WIDTH / 2 + (100 - w[1]), DEFAULT_HEIGHT / 2 + 82);
+            add_text_with_outline(buf[2], -DEFAULT_WIDTH / 2 + (100 - w[2]), DEFAULT_HEIGHT / 2 + 64);
+
+            text->upload();
+            ui_sprites->upload();
+            pl.ui_dirty = false;
+        }
+    }
+
+    /* character controller tick: we'd LIKE to run this off the fast_tick_accum, but it has all kinds of
+     * every-frame assumptions baked in (player impulse state, etc) */
+    phy->tick_controller(dt);
+
+    while (fast_tick_accum.tick()) {
+
+        proj_man.simulate(fast_tick_accum.period);
+
+        phy->tick(fast_tick_accum.period);
+
+    }
+
+    prepare_chunks();
+
+    render();
+}
+
 
 
 action const* get_input(en_action a) {
