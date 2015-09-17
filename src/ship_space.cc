@@ -9,7 +9,7 @@
 
 /* create an empty ship_space */
 ship_space::ship_space(void)
-    : min_x(0), min_y(0), min_z(0), max_x(0), max_y(0), max_z(0),
+    : mins(), maxs(),
       num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0), num_false_splits(0)
 {
     /* start rather large */
@@ -289,7 +289,8 @@ ship_space::ensure_chunk(glm::ivec3 v)
     auto &ch = this->chunks[v];
     if (!ch) {
         ch = new chunk();
-        this->_maintain_bounds(v);
+        this->mins = glm::min(this->mins, v);
+        this->maxs = glm::max(this->maxs, v);
 
         /* All the topo nodes in the new chunk should be attached
          * to the outside node.
@@ -310,21 +311,6 @@ ship_space::ensure_chunk(glm::ivec3 v)
     }
 
     return ch;
-}
-
-/* internal method which updated {min,max}_{x,y,z}
- * if the {x,y,z}_seen values are lower/higher
- */
-void
-ship_space::_maintain_bounds(glm::ivec3 seen)
-{
-    this->min_x = std::min(min_x, seen.x);
-    this->min_y = std::min(min_y, seen.y);
-    this->min_z = std::min(min_z, seen.z);
-
-    this->max_x = std::max(max_x, seen.x);
-    this->max_y = std::max(max_y, seen.y);
-    this->max_z = std::max(max_z, seen.z);
 }
 
 topo_info *

@@ -43,13 +43,8 @@ struct ship_space {
      * ship_space is sparse so even within this range
      * chunks may still be null
      */
-    int min_x, min_y, min_z;
-    int max_x, max_y, max_z;
-
-    /* internal method which updated {min,max}_{x,y,z}
-     * if the {x,y,z}_seen values are lower/higher
-     */
-    void _maintain_bounds(glm::ivec3 seen);
+    glm::ivec3 mins;
+    glm::ivec3 maxs;
 
     std::unordered_map<glm::ivec3, chunk*, ivec3_hash> chunks;
     std::unordered_map<topo_info *, zone_info *> zones;

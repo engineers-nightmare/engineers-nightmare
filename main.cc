@@ -511,9 +511,9 @@ void
 prepare_chunks()
 {
     /* walk all the chunks -- TODO: only walk chunks that might contribute to the view */
-    for (int k = ship->min_z; k <= ship->max_z; k++) {
-        for (int j = ship->min_y; j <= ship->max_y; j++) {
-            for (int i = ship->min_x; i <= ship->max_x; i++) {
+    for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
+        for (int j = ship->mins.y; j <= ship->maxs.y; j++) {
+            for (int i = ship->mins.x; i <= ship->maxs.x; i++) {
                 chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
                 if (ch) {
                     ch->prepare_render(i, j, k);
@@ -695,9 +695,9 @@ init()
 
     printf("Ship is %u chunks, %d..%d %d..%d %d..%d\n",
             (unsigned) ship->chunks.size(),
-            ship->min_x, ship->max_x,
-            ship->min_y, ship->max_y,
-            ship->min_z, ship->max_z);
+            ship->mins.x, ship->maxs.x,
+            ship->mins.y, ship->maxs.y,
+            ship->mins.z, ship->maxs.z);
 
     ship->validate();
 
@@ -1664,9 +1664,9 @@ update()
 
     prepare_chunks();
 
-    for (int k = ship->min_z; k <= ship->max_z; k++) {
-        for (int j = ship->min_y; j <= ship->max_y; j++) {
-            for (int i = ship->min_x; i <= ship->max_x; i++) {
+    for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
+        for (int j = ship->mins.y; j <= ship->maxs.y; j++) {
+            for (int i = ship->mins.x; i <= ship->maxs.x; i++) {
                 /* TODO: prepare all the matrices first, and do ONE upload */
                 chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
                 if (ch) {
