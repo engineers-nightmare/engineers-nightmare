@@ -25,7 +25,7 @@ struct raycast_info {
     bool hit;
     bool inside;
     int x, y, z;            /* the block we hit */
-    int nx, ny, nz;         /* the face normal we hit */
+    glm::ivec3 n;           /* the face normal we hit */
     glm::ivec3 p;           /* the block along the normal */
     struct block *block;
 };
@@ -137,12 +137,12 @@ topo_find(topo_info *p);
 static inline int
 normal_to_surface_index(raycast_info const *rc)
 {
-    if (rc->nx == 1) return 0;
-    if (rc->nx == -1) return 1;
-    if (rc->ny == 1) return 2;
-    if (rc->ny == -1) return 3;
-    if (rc->nz == 1) return 4;
-    if (rc->nz == -1) return 5;
+    if (rc->n.x == 1) return 0;
+    if (rc->n.x == -1) return 1;
+    if (rc->n.y == 1) return 2;
+    if (rc->n.y == -1) return 3;
+    if (rc->n.z == 1) return 4;
+    if (rc->n.z == -1) return 5;
 
     return 0;   /* unreachable */
 }

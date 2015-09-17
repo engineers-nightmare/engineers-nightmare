@@ -244,9 +244,9 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
             rc->y = y;
             rc->z = z;
             rc->block = bl;
-            rc->nx = nx;
-            rc->ny = ny;
-            rc->nz = nz;
+            rc->n.x = nx;
+            rc->n.y = ny;
+            rc->n.z = nz;
             rc->p.x = x + nx;
             rc->p.y = y + ny;
             rc->p.z = z + nz;
