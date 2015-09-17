@@ -17,7 +17,7 @@ mark_lightfield_update(glm::ivec3 p);
 extern ship_space *ship;
 
 extern glm::mat4
-mat_position(float x, float y, float z);
+mat_position(glm::vec3 p);
 
 extern hw_mesh *surfs_hw[6];
 
@@ -47,7 +47,7 @@ struct remove_surface_tool : tool
         int index = normal_to_surface_index(rc);
 
         bl->surfs[index] = surface_none;
-        ship->get_chunk_containing(glm::ivec3(rc->x, rc->y, rc->z))->render_chunk.valid = false;
+        ship->get_chunk_containing(rc->bl)->render_chunk.valid = false;
 
         /* cause the other side to exist */
         block *other_side = ship->get_block(rc->p);
@@ -62,12 +62,12 @@ struct remove_surface_tool : tool
 
         /* remove any ents using the surface */
         remove_ents_from_surface(rc->p, index ^ 1);
-        remove_ents_from_surface(glm::ivec3(rc->x, rc->y, rc->z), index);
+        remove_ents_from_surface(rc->bl, index);
 
-        mark_lightfield_update(glm::ivec3(rc->x, rc->y, rc->z));
+        mark_lightfield_update(rc->bl);
         mark_lightfield_update(rc->p);
 
-        ship->update_topology_for_remove_surface(glm::ivec3(rc->x, rc->y, rc->z), rc->p);
+        ship->update_topology_for_remove_surface(rc->bl, rc->p);
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -82,7 +82,7 @@ struct remove_surface_tool : tool
             return;
 
         int index = normal_to_surface_index(rc);
-        per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);
+        per_object->val.world_matrix = mat_position(rc->bl);
         per_object->upload();
 
         glUseProgram(remove_overlay_shader);

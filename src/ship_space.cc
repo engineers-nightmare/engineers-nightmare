@@ -240,9 +240,9 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
 
         if (rc->inside ^ (bl && bl->type != block_empty)) {
             rc->hit = true;
-            rc->x = x;
-            rc->y = y;
-            rc->z = z;
+            rc->bl.x = x;
+            rc->bl.y = y;
+            rc->bl.z = z;
             rc->block = bl;
             rc->n.x = nx;
             rc->n.y = ny;

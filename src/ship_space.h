@@ -24,7 +24,7 @@ struct ivec3_hash {
 struct raycast_info {
     bool hit;
     bool inside;
-    int x, y, z;            /* the block we hit */
+    glm::ivec3 bl;          /* the block we hit */
     glm::ivec3 n;           /* the face normal we hit */
     glm::ivec3 p;           /* the block along the normal */
     struct block *block;

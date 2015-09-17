@@ -15,7 +15,7 @@ mark_lightfield_update(glm::ivec3 center);
 extern ship_space *ship;
 
 extern glm::mat4
-mat_position(float x, float y, float z);
+mat_position(glm::vec3 p);
 
 extern hw_mesh *scaffold_hw;
 
@@ -60,7 +60,7 @@ struct add_block_tool : tool
 
         /* can only build on the side of an existing scaffold */
         if ((!bl || bl->type == block_empty) && rc->block->type == block_support) {
-            per_object->val.world_matrix = mat_position((float)rc->p.x, (float)rc->p.y, (float)rc->p.z);
+            per_object->val.world_matrix = mat_position(rc->p);
             per_object->upload();
 
             glUseProgram(add_overlay_shader);

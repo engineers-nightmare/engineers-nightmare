@@ -16,7 +16,7 @@ mark_lightfield_update(glm::ivec3 p);
 extern ship_space *ship;
 
 extern glm::mat4
-mat_position(float x, float y, float z);
+mat_position(glm::vec3 p);
 
 extern hw_mesh *scaffold_hw;
 
@@ -40,7 +40,7 @@ struct remove_block_tool : tool
         /* if there was a block entity here, find and remove it. block
          * ents are "attached" to the zm surface */
         if (bl->type == block_entity) {
-            remove_ents_from_surface(glm::ivec3(rc->x, rc->y, rc->z), surface_zm);
+            remove_ents_from_surface(rc->bl, surface_zm);
 
             for (int face = 0; face < face_count; face++) {
                 bl->surf_space[face] = 0;   /* we've just thrown away the block ent */
@@ -54,10 +54,10 @@ struct remove_block_tool : tool
         for (int index = 0; index < 6; index++) {
             if (bl->surfs[index]) {
 
-                int sx, sy, sz;
-                surface_index_to_normal(index, &sx, &sy, &sz);
+                glm::ivec3 s;
+                surface_index_to_normal(index, &s.x, &s.y, &s.z);
 
-                auto r = glm::ivec3(rc->x + sx, rc->y + sy, rc->z + sz);
+                auto r = rc->bl + s;
                 block *other_side = ship->get_block(r);
 
                 if (!other_side) {
@@ -71,19 +71,19 @@ struct remove_block_tool : tool
                     ship->get_chunk_containing(r)->render_chunk.valid = false;
 
                     /* pop any dependent ents */
-                    remove_ents_from_surface(glm::ivec3(rc->x, rc->y, rc->z), index);
+                    remove_ents_from_surface(rc->bl, index);
                     remove_ents_from_surface(r, index ^ 1);
 
                     mark_lightfield_update(r);
 
-                    ship->update_topology_for_remove_surface(glm::ivec3(rc->x, rc->y, rc->z), r);
+                    ship->update_topology_for_remove_surface(rc->bl, r);
                 }
             }
         }
 
         /* dirty the chunk */
-        ship->get_chunk_containing(glm::ivec3(rc->x, rc->y, rc->z))->render_chunk.valid = false;
-        mark_lightfield_update(glm::ivec3(rc->x, rc->y, rc->z));
+        ship->get_chunk_containing(rc->bl)->render_chunk.valid = false;
+        mark_lightfield_update(rc->bl);
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -99,7 +99,7 @@ struct remove_block_tool : tool
 
         block *bl = rc->block;
         if (bl->type != block_empty) {
-            per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);
+            per_object->val.world_matrix = mat_position(rc->bl);
             per_object->upload();
 
             glUseProgram(remove_overlay_shader);

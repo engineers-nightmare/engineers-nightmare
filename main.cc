@@ -175,12 +175,6 @@ mat_position(glm::vec3 pos)
 }
 
 glm::mat4
-mat_position(float x, float y, float z)
-{
-    return mat_position(glm::vec3(x, y, z));
-}
-
-glm::mat4
 mat_scale(glm::vec3 scale) {
     return glm::scale(glm::mat4(1), scale);
 }
@@ -958,7 +952,7 @@ struct add_block_entity_tool : tool
         if (!can_use(rc))
             return;
 
-        per_object->val.world_matrix = mat_position((float)rc->p.x, (float)rc->p.y, (float)rc->p.z);
+        per_object->val.world_matrix = mat_position(rc->p);
         per_object->upload();
 
         auto t = &entity_types[type];
@@ -1056,7 +1050,7 @@ struct add_surface_entity_tool : tool
 
         /* draw a surface overlay here too */
         /* TODO: sub-block placement granularity -- will need a different overlay */
-        per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);
+        per_object->val.world_matrix = mat_position(rc->bl);
         per_object->upload();
 
         glUseProgram(add_overlay_shader);
@@ -1105,7 +1099,7 @@ struct remove_surface_entity_tool : tool
             return;
         }
 
-        per_object->val.world_matrix = mat_position((float)rc->x, (float)rc->y, (float)rc->z);
+        per_object->val.world_matrix = mat_position(rc->bl);
         per_object->upload();
 
         glUseProgram(remove_overlay_shader);
@@ -1671,8 +1665,7 @@ update()
                 chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
                 if (ch) {
                     auto chunk_matrix = frame->alloc_aligned<glm::mat4>(1);
-                    *chunk_matrix.ptr = mat_position(
-                                (float)i * CHUNK_SIZE, (float)j * CHUNK_SIZE, (float)k * CHUNK_SIZE);
+                    *chunk_matrix.ptr = mat_position(CHUNK_SIZE * glm::ivec3(i, j, k));
                     chunk_matrix.bind(1, frame);
                     draw_mesh(ch->render_chunk.mesh);
                 }
