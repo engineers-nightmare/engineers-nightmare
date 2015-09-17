@@ -143,17 +143,19 @@ normal_to_surface_index(raycast_info const *rc)
 }
 
 
-static inline void
-surface_index_to_normal(int index, int *nx, int *ny, int *nz)
+static inline glm::ivec3
+surface_index_to_normal(int index)
 {
-    *nx = *ny = *nz = 0;
+    glm::ivec3 n(0, 0, 0);
 
     switch (index) {
-        case 0: *nx = 1; break;
-        case 1: *nx = -1; break;
-        case 2: *ny = 1; break;
-        case 3: *ny = -1; break;
-        case 4: *nz = 1; break;
-        case 5: *nz = -1; break;
+        case 0: n.x = 1; break;
+        case 1: n.x = -1; break;
+        case 2: n.y = 1; break;
+        case 3: n.y = -1; break;
+        case 4: n.z = 1; break;
+        case 5: n.z = -1; break;
     }
+
+    return n;
 }

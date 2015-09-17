@@ -3,60 +3,6 @@
 #include <math.h>
 #include <algorithm>
 
-
-/* given the x, y, z of a block and the surface we are interested in,
- * find the co-ords the correspond to the block along the normal of that surace
- *
- * tx, ty, and tz are out params
- */
-static void
-find_neighbor(int fx, int fy, int fz, enum surface_index si, int *tx, int *ty, int *tz){
-    if( ! tx ||
-        ! ty ||
-        ! tz ){
-        errx(1, "ship_space.c: find_neighbor tx, ty or tz null");
-        return;
-    }
-
-    *tx = fx;
-    *ty = fy;
-    *tz = fz;
-
-    switch( si ){
-        case surface_xp:
-            ++*tx;
-            break;
-
-        case surface_xm:
-            --*tx;
-            break;
-
-        case surface_yp:
-            ++*ty;
-            break;
-
-        case surface_ym:
-            --*ty;
-            break;
-
-        case surface_zp:
-            ++*tz;
-            break;
-
-        case surface_zm:
-            --*tz;
-            break;
-
-        case face_count:
-            errx(1, "ship_space.c: find_neighbor supplied surface_index of type 'face_count'");
-            break;
-
-        default:
-            errx(1, "ship_space.c: find_neighbor supplied surface_index of unknown type");
-            break;
-    }
-}
-
 /* returns a block
  * finds the block at the position (x,y,z) within
  * the whole ship_space
@@ -85,8 +31,7 @@ ensure_and_get_block(ship_space *ss, glm::ivec3 bl) {
  */
 static block *
 ship_get_block_neighbor(ship_space * ss, glm::ivec3 block, enum surface_index si){
-    glm::ivec3 t;
-    find_neighbor(block.x, block.y, block.z, si, &t.x, &t.y, &t.z);
+    glm::ivec3 t = block + surface_index_to_normal(si);
     return ensure_and_get_block(ss, t);
 }
 
