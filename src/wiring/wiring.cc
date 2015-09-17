@@ -250,79 +250,45 @@ attach_topo_rebuild(ship_space *ship, wire_type type) {
  */
 void
 calculate_power(ship_space *ship) {
-    /* get all wires
-     * for each wire
-     * go through all entities
-     * add power data to corresponding wire
-     */
     ship->power_wires.clear();
     const auto type = wire_type_power;
-    for (auto const & attach : ship->wire_attachments[wire_type_power]) {
-        auto wire = attach_topo_find(ship, type, attach.parent);
-        if (ship->power_wires.find(wire) == ship->power_wires.end()) {
-            continue;
+
+    /* note: power_wires operator[] default-constructs the value if not present. */
+
+    /* walk power consumers */
+    /* invariant: at most /one/ power wire is attached. */
+    for (auto i = 0u; i < power_man.buffer.num; i++) {
+        auto ce = power_man.instance_pool.entity[i];
+        auto attaches = ship->entity_to_attach_lookups[type].find(ce);
+        if (attaches != ship->entity_to_attach_lookups[type].end()) {
+            for (auto attach : attaches->second) {
+                auto wire = attach_topo_find(ship, type, attach);
+                auto & power_data = ship->power_wires[wire];
+                
+                auto power_draw_if_enabled = power_man.instance_pool.required_power[i];
+
+                power_data.num_consumers++;
+                power_data.peak_draw += power_draw_if_enabled;
+
+                if (!switchable_man.exists(ce) || switchable_man.enabled(ce)) {
+                    power_data.total_draw += power_draw_if_enabled;
+                }
+            }
         }
-        ship->power_wires[wire] = power_wiring_data();
     }
 
-    /* only visit each wire once.
-     * They should all be flat with attach_topo_find()
-     */
-    std::unordered_set<size_t> visited_wires;
-    std::unordered_set<c_entity> visited_entities;
-    for (auto const & attach : ship->wire_attachments[wire_type_power]) {
-        auto wire = attach_topo_find(ship, type, attach.parent);
-        if (visited_wires.find(wire) != visited_wires.end()) {
-            continue;
-        }
+    /* walk power producers */
+    /* invariant: at most /one/ power wire is attached. */
+    for (auto i = 0u; i < power_provider_man.buffer.num; i++) {
+        auto ce = power_provider_man.instance_pool.entity[i];
+        auto attaches = ship->entity_to_attach_lookups[type].find(ce);
+        if (attaches != ship->entity_to_attach_lookups[type].end()) {
+            for (auto attach : attaches->second) {
+                auto wire = attach_topo_find(ship, type, attach);
+                auto & power_data = ship->power_wires[wire];
 
-        visited_wires.insert(wire);
-        visited_entities.clear();
-
-        for (auto const & entity_lookup : ship->entity_to_attach_lookups[type]) {
-            auto entity = entity_lookup.first;
-            if (visited_entities.find(entity) != visited_entities.end()) {
-                continue;
-            }
-
-            std::unordered_set<unsigned> attached_wires;
-            for (auto ea_index : entity_lookup.second) {
-                if (attached_wires.find(ea_index) != attached_wires.end()) {
-                    continue;
-                }
-                attached_wires.insert(ea_index);
-            }
-            auto num_attached_wires = attached_wires.size();
-
-            visited_entities.insert(entity_lookup.first);
-            for (auto ea_index : entity_lookup.second) {
-                auto const & ea = ship->wire_attachments[type][ea_index];
-                if (attach_topo_find(ship, type, ea.parent) == wire) {
-                    auto & power_data = ship->power_wires[wire];
-                    /* add to power_data on wire */
-                    if (power_man.exists(entity)) {
-                        power_data.num_consumers++;
-                        auto draw = power_man.required_power(entity);
-
-                        if (switchable_man.exists(entity)) {
-                            if (switchable_man.enabled(entity)) {
-                                power_data.total_draw += draw;
-                            }
-                        }
-                        else {
-                            power_data.total_draw += draw;
-                        }
-
-                        power_data.peak_draw += draw;                        
-                    }
-                    if (power_provider_man.exists(entity)) {
-                        auto provided = power_provider_man.provided(entity);
-                        provided = num_attached_wires == 0u ? 0 : provided / (unsigned)num_attached_wires;
-                        power_data.num_providers++;
-                        power_data.total_power += provided;
-                    }
-                    break;
-                }
+                power_data.total_power += power_provider_man.instance_pool.provided[i];
+                power_data.num_providers++;
             }
         }
     }
