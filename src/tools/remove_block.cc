@@ -89,7 +89,7 @@ struct remove_block_tool : tool
 
     void cycle_mode() override {}
 
-    void preview(raycast_info *rc) override
+    void preview(raycast_info *rc, frame_data *frame) override
     {
         if (!can_use(rc))
             return;

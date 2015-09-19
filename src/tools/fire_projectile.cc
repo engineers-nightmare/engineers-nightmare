@@ -23,7 +23,7 @@ struct fire_projectile_tool : tool
 
     void cycle_mode() override {}
 
-    void preview(raycast_info *rc) override {}
+    void preview(raycast_info *rc, frame_data *frame) override {}
 
     void get_description(char *str) override
     {

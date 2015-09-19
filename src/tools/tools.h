@@ -4,6 +4,7 @@
 
 struct player;
 struct raycast_info;
+struct frame_data;
 
 
 struct tool
@@ -16,7 +17,7 @@ struct tool
 
     virtual void cycle_mode() = 0;
 
-    virtual void preview(raycast_info *rc) = 0;
+    virtual void preview(raycast_info *rc, frame_data *frame) = 0;
     virtual void get_description(char *str) = 0;
 
     static tool *create_add_block_tool();
@@ -40,7 +41,7 @@ struct add_surface_tool : tool
 
     void cycle_mode() override;
 
-    void preview(raycast_info *rc) override;
+    void preview(raycast_info *rc, frame_data *frame) override;
 
     void get_description(char *str) override;
 };

@@ -93,7 +93,7 @@ add_surface_tool::cycle_mode() {
 
 
 void
-add_surface_tool::preview(raycast_info *rc) {
+add_surface_tool::preview(raycast_info *rc, frame_data *frame) {
     if (!rc->hit)
         return;
 

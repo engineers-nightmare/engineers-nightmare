@@ -443,7 +443,7 @@ struct game_state {
     virtual ~game_state() {}
 
     virtual void handle_input() = 0;
-    virtual void update(float dt) = 0;
+    virtual void update(float dt, frame_data *frame) = 0;
     virtual void rebuild_ui() = 0;
 
     static game_state *create_play_state();
@@ -905,7 +905,7 @@ struct add_block_entity_tool : tool
         } while (entity_types[type].placed_on_surface);
     }
 
-    void preview(raycast_info *rc) override {
+    void preview(raycast_info *rc, frame_data *frame) override {
         if (!can_use(rc))
             return;
 
@@ -993,7 +993,7 @@ struct add_surface_entity_tool : tool
         } while (!entity_types[type].placed_on_surface);
     }
 
-    void preview(raycast_info *rc) override {
+    void preview(raycast_info *rc, frame_data *frame) override {
         if (!can_use(rc))
             return;
 
@@ -1045,7 +1045,7 @@ struct remove_surface_entity_tool : tool
 
     void cycle_mode() override {}
 
-    void preview(raycast_info *rc) override {
+    void preview(raycast_info *rc, frame_data *frame) override {
         if (!can_use(rc))
             return;
 
@@ -1158,7 +1158,7 @@ struct add_wiring_tool : tool
         return allow_placement;
     }
 
-    void preview(raycast_info *rc) override {
+    void preview(raycast_info *rc, frame_data *frame) override {
         /* do a real, generic raycast */
 
         /* TODO: Move the assignment logic into the wiring system */
@@ -1548,7 +1548,7 @@ update()
     fast_tick_accum.add(dt);
 
     /* this absolutely must run every frame */
-    state->update(dt);
+    state->update(dt, frame);
     calculate_power(ship);
 
     /* things that can run at a pretty slow rate */
@@ -1764,7 +1764,7 @@ struct play_state : game_state {
         }
     }
 
-    void update(float dt) override {
+    void update(float dt, frame_data *frame) override {
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_FALSE) {
             SDL_SetRelativeMouseMode(SDL_TRUE);
         }
@@ -1811,7 +1811,7 @@ struct play_state : game_state {
 
         /* tool preview */
         if (rc.hit && t) {
-            t->preview(&rc);
+            t->preview(&rc, frame);
         }
     }
 
@@ -1941,7 +1941,7 @@ struct menu_state : game_state
         items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
     }
 
-    void update(float dt) override {
+    void update(float dt, frame_data *frame) override {
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
@@ -2031,7 +2031,7 @@ struct menu_settings_state : game_state
         game_settings.input.mouse_invert *= -1;
     }
 
-    void update(float dt) override {
+    void update(float dt, frame_data *frame) override {
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
