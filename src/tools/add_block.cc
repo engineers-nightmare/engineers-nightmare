@@ -2,7 +2,6 @@
 
 #include "../common.h"
 #include "../ship_space.h"
-#include "../shader_params.h"
 #include "../mesh.h"
 #include "tools.h"
 
@@ -58,8 +57,9 @@ struct add_block_tool : tool
 
         /* can only build on the side of an existing scaffold */
         if ((!bl || bl->type == block_empty) && rc->block->type == block_support) {
-            per_object->val.world_matrix = mat_position(rc->p);
-            per_object->upload();
+            auto mat = frame->alloc_aligned<glm::mat4>(1);
+            *mat.ptr = mat_position(rc->p);
+            mat.bind(1, frame);
 
             glUseProgram(add_overlay_shader);
             draw_mesh(scaffold_hw);

@@ -24,7 +24,6 @@
 #include "src/render_data.h"
 #include "src/scopetimer.h"
 #include "src/shader.h"
-#include "src/shader_params.h"
 #include "src/ship_space.h"
 #include "src/text.h"
 #include "src/textureset.h"
@@ -91,6 +90,12 @@ struct {
     }
 } frame_info;
 
+struct per_camera_params {
+    glm::mat4 view_proj_matrix;
+    glm::mat4 inv_centered_view_proj_matrix;
+    float aspect;
+};
+
 void GLAPIENTRY
 gl_debug_callback(GLenum source __unused,
                   GLenum type __unused,
@@ -110,7 +115,6 @@ sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader;
-shader_params<per_object_params> *per_object;
 texture_set *world_textures;
 texture_set *skybox;
 ship_space *ship;
@@ -607,12 +611,6 @@ init()
 
     glUseProgram(simple_shader);
 
-    per_object = new shader_params<per_object_params>;
-
-    per_object->val.world_matrix = glm::mat4(1);    /* identity */
-
-    per_object->bind(1);
-
     world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
     world_textures->load(0, "textures/white.png");
     world_textures->load(1, "textures/scaffold.png");
@@ -909,8 +907,9 @@ struct add_block_entity_tool : tool
         if (!can_use(rc))
             return;
 
-        per_object->val.world_matrix = mat_position(rc->p);
-        per_object->upload();
+        auto mat = frame->alloc_aligned<glm::mat4>(1);
+        *mat.ptr = mat_position(rc->p);
+        mat.bind(1, frame);
 
         auto t = &entity_types[type];
         draw_mesh(t->hw);
@@ -999,16 +998,18 @@ struct add_surface_entity_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        per_object->val.world_matrix = mat_block_face(rc->p, index ^ 1);
-        per_object->upload();
+        auto mat = frame->alloc_aligned<glm::mat4>(1);
+        *mat.ptr = mat_block_face(rc->p, index ^ 1);
+        mat.bind(1, frame);
 
         auto t = &entity_types[type];
         draw_mesh(t->hw);
 
         /* draw a surface overlay here too */
         /* TODO: sub-block placement granularity -- will need a different overlay */
-        per_object->val.world_matrix = mat_position(rc->bl);
-        per_object->upload();
+        mat = frame->alloc_aligned<glm::mat4>(1);
+        *mat.ptr = mat_position(rc->bl);
+        mat.bind(1, frame);
 
         glUseProgram(add_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -1056,8 +1057,9 @@ struct remove_surface_entity_tool : tool
             return;
         }
 
-        per_object->val.world_matrix = mat_position(rc->bl);
-        per_object->upload();
+        auto mat = frame->alloc_aligned<glm::mat4>(1);
+        *mat.ptr = mat_position(rc->bl);
+        mat.bind(1, frame);
 
         glUseProgram(remove_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -1207,38 +1209,27 @@ struct add_wiring_tool : tool
             pt = glm::vec3(a2.transform[3]);
         }
         else {
-            a2 = { mat_position(pt) };
+            a2 = { mat_rotate_mesh(pt, normal) };
         }
 
         /* if existing, place preview mesh as existing
          * otherwise use raycast info
          */
-        if (existing_attach != invalid_attach) {
-            per_object->val.world_matrix = a2.transform;
-            per_object->upload();
-        }
-        else {
-            per_object->val.world_matrix = mat_rotate_mesh(pt, normal);
-            per_object->upload();
-        }
+        auto mat = frame->alloc_aligned<glm::mat4>(1);
+        *mat.ptr = a2.transform;
+        mat.bind(1, frame);
 
         glUseProgram(unlit_shader);
-        if (allow_placement) {
-            draw_mesh(attachment_hw);
-        }
-        else {
-            draw_mesh(no_placement_hw);
-        }
+        draw_mesh(allow_placement ? attachment_hw : no_placement_hw);
         glUseProgram(simple_shader);
 
         if (current_attach == invalid_attach)
             return;
 
         if (allow_placement && current_attach != existing_attach) {
-            auto mat = calc_segment_matrix(a1, a2);
-
-            per_object->val.world_matrix = mat;
-            per_object->upload();
+            mat = frame->alloc_aligned<glm::mat4>(1);
+            *mat.ptr = calc_segment_matrix(a1, a2);
+            mat.bind(1, frame);
 
             glUseProgram(unlit_shader);
             draw_mesh(wire_hw_meshes[type]);
@@ -1638,8 +1629,6 @@ update()
     glUseProgram(lit_instanced_shader);
     draw_attachments(ship, frame);
     draw_segments(ship, frame);
-
-    per_object->bind(1);
 
     /* draw the sky */
     glUseProgram(sky_shader);

@@ -2,7 +2,6 @@
 
 #include "../common.h"
 #include "../ship_space.h"
-#include "../shader_params.h"
 #include "../mesh.h"
 #include "../block.h"
 #include "tools.h"
@@ -102,8 +101,9 @@ add_surface_tool::preview(raycast_info *rc, frame_data *frame) {
     block *other_side = ship->get_block(rc->p);
 
     if (can_use(bl, other_side, index)) {
-        per_object->val.world_matrix = mat_position(rc->bl);
-        per_object->upload();
+        auto mat = frame->alloc_aligned<glm::mat4>(1);
+        *mat.ptr = mat_position(rc->bl);
+        mat.bind(1, frame);
 
         glUseProgram(add_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);

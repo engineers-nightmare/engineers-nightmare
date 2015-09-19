@@ -2,7 +2,6 @@
 
 #include "../common.h"
 #include "../ship_space.h"
-#include "../shader_params.h"
 #include "../mesh.h"
 #include "tools.h"
 
@@ -96,8 +95,9 @@ struct remove_block_tool : tool
 
         block *bl = rc->block;
         if (bl->type != block_empty) {
-            per_object->val.world_matrix = mat_position(rc->bl);
-            per_object->upload();
+            auto mat = frame->alloc_aligned<glm::mat4>(1);
+            *mat.ptr = mat_position(rc->bl);
+            mat.bind(1, frame);
 
             glUseProgram(remove_overlay_shader);
             glEnable(GL_POLYGON_OFFSET_FILL);
