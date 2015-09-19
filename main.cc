@@ -181,16 +181,29 @@ mat_block_face(glm::ivec3 p, int face)
 
 struct entity_type
 {
+    /* static */
+    char const *name;
+    char const *mesh;
+    int material;
+    bool placed_on_surface;
+
+    /* loader loop does these */
     sw_mesh *sw;
     hw_mesh *hw;
-    char const *name;
     btTriangleMesh *phys_mesh;
     btCollisionShape *phys_shape;
-    bool placed_on_surface;
 };
 
 
-entity_type entity_types[6];
+entity_type entity_types[] = {
+    { "Frobnicator", "mesh/frobnicator.obj", 3, false },
+    { "Display Panel (4x4)", "mesh/panel_4x4.obj", 7, true },
+    { "Light (4x4)", "mesh/panel_4x4.obj", 8, true },
+    { "Switch", "mesh/panel_1x1.obj", 9, true },
+    { "Door", "mesh/single_door_frame.obj", 2, false },
+    { "Plaidnicator", "mesh/frobnicator.obj", 13, false },
+};
+
 
 /* fwd for temp spawn logic just below */
 void
@@ -561,38 +574,10 @@ init()
     for (int i = 0; i < 6; i++)
         surfs_hw[i] = upload_mesh(surfs_sw[i]);
 
-    entity_types[0].sw = load_mesh("mesh/frobnicator.obj");
-    set_mesh_material(entity_types[0].sw, 3);
-    entity_types[0].name = "Frobnicator";
-    entity_types[0].placed_on_surface = false;
-
-    entity_types[1].sw = load_mesh("mesh/panel_4x4.obj");
-    set_mesh_material(entity_types[1].sw, 7);
-    entity_types[1].name = "Display Panel (4x4)";
-    entity_types[1].placed_on_surface = true;
-
-    entity_types[2].sw = load_mesh("mesh/panel_4x4.obj");
-    set_mesh_material(entity_types[2].sw, 8);
-    entity_types[2].name = "Light (4x4)";
-    entity_types[2].placed_on_surface = true;
-
-    entity_types[3].sw = load_mesh("mesh/panel_1x1.obj");
-    set_mesh_material(entity_types[3].sw, 9);
-    entity_types[3].name = "Switch";
-    entity_types[3].placed_on_surface = true;
-
-    entity_types[4].sw = load_mesh("mesh/single_door_frame.obj");
-    set_mesh_material(entity_types[4].sw, 2);
-    entity_types[4].name = "Door";
-    entity_types[4].placed_on_surface = false;
-
-    entity_types[5].sw = load_mesh("mesh/frobnicator.obj");
-    set_mesh_material(entity_types[5].sw, 13);
-    entity_types[5].name = "Plaidnicator";
-    entity_types[5].placed_on_surface = false;
-
     for (auto i = 0u; i < sizeof(entity_types) / sizeof(entity_types[0]); i++) {
         auto t = &entity_types[i];
+        t->sw = load_mesh(t->mesh);
+        set_mesh_material(t->sw, t->material);
         t->hw = upload_mesh(t->sw);
         build_static_physics_mesh(t->sw, &t->phys_mesh, &t->phys_shape);
     }
