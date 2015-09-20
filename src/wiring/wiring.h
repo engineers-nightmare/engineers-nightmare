@@ -20,6 +20,8 @@ struct wire_segment {
     unsigned second;
 };
 
+static unsigned const invalid_attach = -1;
+
 void
 draw_attachments(ship_space *ship, frame_data *frame);
 

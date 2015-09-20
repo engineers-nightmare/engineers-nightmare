@@ -771,10 +771,10 @@ destroy_entity(entity *e)
             * relevant is an attach that isn't occupying a position
             * will get popped off as a result of moving before removing
             */
-            auto att_index = attaches.size() - 1;
+            unsigned att_index = attaches.size() - 1;
             auto swap_index = wire_attachments.size() - 1;
             for (auto s = wire_attachments.rbegin();
-            s != wire_attachments.rend() && att_index != (unsigned)-1;) {
+            s != wire_attachments.rend() && att_index != invalid_attach;) {
 
                 auto from_attach = wire_attachments[swap_index];
                 auto rem = attaches[att_index];
@@ -1089,7 +1089,6 @@ struct remove_surface_entity_tool : tool
 
 struct add_wiring_tool : tool
 {
-    static unsigned const invalid_attach = -1;
     unsigned current_attach = invalid_attach;
     bool moving_existing = false;
     wire_attachment old_attach;
