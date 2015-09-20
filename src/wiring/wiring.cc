@@ -239,7 +239,7 @@ attach_topo_rebuild(ship_space *ship, wire_type type) {
  * assumes a rebuilt attach topo
  */
 void
-calculate_power(ship_space *ship) {
+calculate_power_wires(ship_space *ship) {
     ship->power_wires.clear();
     const auto type = wire_type_power;
 
@@ -282,4 +282,19 @@ calculate_power(ship_space *ship) {
             }
         }
     }
+}
+
+void
+calculate_comms_wires(ship_space* ship) {
+
+}
+
+void
+publish_message(ship_space* ship, unsigned wire_id, comms_msg msg) {
+    if (ship->comms_wires.find(wire_id) == ship->comms_wires.end()) {
+        return;
+    }
+
+    auto & wire = ship->comms_wires[wire_id];
+    wire.msg_buffer.push_back(msg);
 }

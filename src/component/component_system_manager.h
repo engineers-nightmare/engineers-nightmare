@@ -31,11 +31,16 @@ extern switchable_component_manager switchable_man;
 extern type_component_manager type_man;
 extern updateable_component_manager updateable_man;
 
+extern const char * comms_msg_type_switch_state;
+
 void
 tick_gas_producers(ship_space * ship);
 
 void
 tick_power_consumers(ship_space * ship);
+
+void
+tick_light_components(ship_space * ship);
 
 void
 tick_updateables(ship_space * ship);

@@ -17,6 +17,10 @@ updateable_component_manager updateable_man;
 extern void mark_lightfield_update(glm::ivec3 center);
 
 
+/* I have no clue how we're going to actually handle these */
+const char * comms_msg_type_switch_state = "switch_state";
+
+
 void
 tick_gas_producers(ship_space * ship)
 {
@@ -87,6 +91,55 @@ tick_power_consumers(ship_space * ship) {
     }
 }
 
+void
+tick_light_components(ship_space* ship) {
+    for (auto i = 0u; i < light_man.buffer.num; i++) {
+        auto ce = light_man.instance_pool.entity[i];
+        auto type = wire_type_comms;
+
+        /* all lights currently require: power, position */
+        assert(switchable_man.exists(ce) || !"lights must be switchable");
+        assert(pos_man.exists(ce) || !"lights must have a position");
+
+        auto & enabled = switchable_man.enabled(ce);
+        auto pos = pos_man.position(ce);
+
+        auto & comms_attaches = ship->entity_to_attach_lookups[type];
+
+        if (comms_attaches.find(ce) == comms_attaches.end()) {
+            continue;
+        }
+
+        std::unordered_set<unsigned> visited_wires;
+        auto const & attaches = comms_attaches[ce];
+        for (auto const & sea : attaches) {
+            auto const & attach = ship->wire_attachments[type][sea];
+            auto wire_index = attach_topo_find(ship, type, attach.parent);
+            if (visited_wires.find(wire_index) != visited_wires.end()) {
+                continue;
+            }
+
+            auto const & wire = ship->comms_wires[wire_index];
+
+            visited_wires.insert(wire_index);
+
+            /* now that we have the wire, see if it has any msgs for us */
+            for (auto msg : wire.msg_buffer) {
+                if (msg.desc == comms_msg_type_switch_state) {
+                    enabled = msg.data > 0;
+
+                    auto block_pos = get_coord_containing(pos);
+                    mark_lightfield_update(block_pos);
+                }
+            }
+        }
+    }
+
+    for (auto & wires : ship->comms_wires) {
+        auto & wire = wires.second;
+        wire.msg_buffer.clear();
+    }
+}
 
 void
 tick_updateables(ship_space * ship) {
