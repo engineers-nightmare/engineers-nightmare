@@ -104,18 +104,14 @@ tick_light_components(ship_space* ship) {
         assert(switchable_man.exists(ce) || !"lights must be switchable");
         assert(pos_man.exists(ce) || !"lights must have a position");
 
-        auto & enabled = switchable_man.enabled(ce);
-        auto pos = pos_man.position(ce);
-
         auto & comms_attaches = ship->entity_to_attach_lookups[type];
-
-        if (comms_attaches.find(ce) == comms_attaches.end()) {
+        auto attaches = comms_attaches.find(ce);
+        if (attaches == comms_attaches.end()) {
             continue;
         }
 
         std::unordered_set<unsigned> visited_wires;
-        auto const & attaches = comms_attaches[ce];
-        for (auto const & sea : attaches) {
+        for (auto const & sea : attaches->second) {
             auto const & attach = ship->wire_attachments[type][sea];
             auto wire_index = attach_topo_find(ship, type, attach.parent);
             if (visited_wires.find(wire_index) != visited_wires.end()) {
@@ -129,8 +125,9 @@ tick_light_components(ship_space* ship) {
             /* now that we have the wire, see if it has any msgs for us */
             for (auto msg : wire.msg_buffer) {
                 if (msg.desc == comms_msg_type_switch_state) {
-                    enabled = msg.data > 0;
+                    switchable_man.enabled(ce) = msg.data > 0;
 
+                    auto pos = pos_man.position(ce);
                     auto block_pos = get_coord_containing(pos);
                     mark_lightfield_update(block_pos);
                 }
