@@ -11,7 +11,6 @@ surface_attachment_component_manager surface_man;
 switch_component_manager switch_man;
 switchable_component_manager switchable_man;
 type_component_manager type_man;
-updateable_component_manager updateable_man;
 
 
 extern void mark_lightfield_update(glm::ivec3 center);
@@ -85,8 +84,12 @@ tick_power_consumers(ship_space * ship) {
         }
 
         if (powered != old_powered) {
-            assert(updateable_man.exists(ce) || !"updateable should always exist");
-            updateable_man.updated(ce) = true;
+            /* if a light changed power state, do the required update now */
+            if (light_man.exists(ce)) {
+                auto pos = pos_man.position(ce);
+                auto block_pos = get_coord_containing(pos);
+                mark_lightfield_update(block_pos);
+            }
         }
     }
 }
@@ -138,26 +141,6 @@ tick_light_components(ship_space* ship) {
     for (auto & wires : ship->comms_wires) {
         auto & wire = wires.second;
         wire.msg_buffer.clear();
-    }
-}
-
-void
-tick_updateables(ship_space * ship) {
-    for (auto i = 0u; i < updateable_man.buffer.num; i++) {
-        auto const & entity = updateable_man.instance_pool.entity[i];
-
-        /* _something_ updated last frame */
-        if (updateable_man.instance_pool.updated[i]) {
-            /* was it lights? */
-            if (light_man.exists(entity)) {
-                /* could have been. mark it */
-                auto pos = pos_man.position(entity);
-                auto block_pos = get_coord_containing(pos);
-                mark_lightfield_update(block_pos);
-            }
-        }
-
-        updateable_man.instance_pool.updated[i] = false;
     }
 }
 

@@ -242,9 +242,6 @@ struct entity
         render_man.assign_entity(ce);
         render_man.mesh(ce) = *et->hw;
 
-        updateable_man.assign_entity(ce);
-        updateable_man.updated(ce) = true;
-
         // frobnicator
         if (type == 0) {
             power_man.assign_entity(ce);
@@ -518,7 +515,6 @@ init()
     switch_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     switchable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     type_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
-    updateable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
     proj_man.create_projectile_data(1000);
 
@@ -717,8 +713,6 @@ destroy_entity(entity *e)
     switchable_man.destroy_entity_instance(e->ce);
 
     type_man.destroy_entity_instance(e->ce);
-
-    updateable_man.destroy_entity_instance(e->ce);
 
     for (auto _type = 0; _type < num_wire_types; _type++) {
         auto type = (wire_type)_type;
@@ -1553,7 +1547,6 @@ update()
         tick_gas_producers(ship);
         tick_power_consumers(ship);
         tick_light_components(ship);
-        tick_updateables(ship);
 
         /* HACK: dirty this every frame for now while debugging atmo */
         if (1 || pl.ui_dirty) {
