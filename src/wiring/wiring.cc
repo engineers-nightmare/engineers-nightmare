@@ -87,16 +87,17 @@ draw_segments(ship_space *ship, frame_data *frame) {
 
 bool
 remove_segments_containing(ship_space *ship, wire_type type, unsigned attach) {
-    /* remove all segments that contain attach */
+    /* remove all segments that contain attach. relocates segments from
+     * the end to avoid having to shuffle everything down. this is safe
+     * without any further fixups -- nobody refers to segments /across/ this call
+     * by index. */
     auto changed = false;
     auto & wire_segments = ship->wire_segments[type];
-    for (auto si = wire_segments.begin(); si != wire_segments.end(); ) {
+    for (auto si = wire_segments.begin(); si != wire_segments.end(); si++) {
         if (si->first == attach || si->second == attach) {
-            si = wire_segments.erase(si);
+            *si = wire_segments.back();
+            wire_segments.pop_back();
             changed = true;
-        }
-        else {
-            ++si;
         }
     }
     return changed;
@@ -254,7 +255,7 @@ calculate_power_wires(ship_space *ship) {
             for (auto attach : attaches->second) {
                 auto wire = attach_topo_find(ship, type, attach);
                 auto & power_data = ship->power_wires[wire];
-                
+
                 auto power_draw_if_enabled = power_man.instance_pool.required_power[i];
 
                 power_data.num_consumers++;
