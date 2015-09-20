@@ -785,7 +785,7 @@ destroy_entity(entity *e)
                     --swap_index;
                     ++s;
                 }
-                else if (s != wire_attachments.rend() && swap_index == rem) {
+                else if (swap_index == rem) {
                     wire_attachments.pop_back();
                     fixup_attaches_removed.erase(rem);
                     --swap_index;
