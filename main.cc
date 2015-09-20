@@ -339,28 +339,6 @@ void use_action_on_entity(ship_space *ship, c_entity ce) {
             msg.data = enabled ? 1.f : 0.f;
             publish_message(ship, wire_index, msg);
         }
-
-        // switch toggles directly
-        // finds any switchable in the 6 adjacent blocks and toggles
-
-        ///* TODO: we can do better than a linear scan over all entities */
-        //for (auto i = 0u; i < pos_man.buffer.num; ++i) {
-        //    auto pos2 = pos_man.instance_pool.position[i];
-        //    auto entity = pos_man.instance_pool.entity[i];
-        //    if (pos == glm::vec3(pos2.x + 1, pos2.y, pos2.z) ||
-        //            pos == glm::vec3(pos2.x - 1, pos2.y, pos2.z) ||
-        //            pos == glm::vec3(pos2.x, pos2.y + 1, pos2.z) ||
-        //            pos == glm::vec3(pos2.x, pos2.y - 1, pos2.z) ||
-        //            pos == glm::vec3(pos2.x, pos2.y, pos2.z + 1) ||
-        //            pos == glm::vec3(pos2.x, pos2.y, pos2.z - 1)) {
-        //        if (light_man.exists(entity) && switchable_man.exists(entity)) {
-        //            switchable_man.enabled(entity) ^= true;
-
-        //            auto block_pos = get_coord_containing(pos);
-        //            mark_lightfield_update(block_pos);
-        //        }
-        //    }
-        //}
     }
 }
 
