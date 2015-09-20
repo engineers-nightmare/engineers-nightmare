@@ -221,8 +221,6 @@ attach_topo_rebuild(ship_space *ship, wire_type type) {
     auto &wire_attachments = ship->wire_attachments[type];
     auto &wire_segments = ship->wire_segments[type];
 
-    ship->power_wires.clear();
-
     /* 1. everything points to itself, with rank 0 */
     auto count = wire_attachments.size();
     for (auto i = 0u; i < count; i++) {
