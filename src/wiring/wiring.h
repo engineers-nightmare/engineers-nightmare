@@ -54,9 +54,6 @@ void
 calculate_power_wires(ship_space *ship);
 
 void
-calculate_comms_wires(ship_space *ship);
-
-void
 propagate_comms_wires(ship_space *ship);
 
 void
