@@ -1529,7 +1529,6 @@ update()
 
     /* this absolutely must run every frame */
     state->update(dt, frame);
-    calculate_power_wires(ship);
 
     /* things that can run at a pretty slow rate */
     while (main_tick_accum.tick()) {
@@ -1552,6 +1551,7 @@ update()
         tick_power_consumers(ship);
         tick_light_components(ship);
 
+        calculate_power_wires(ship);
         propagate_comms_wires(ship);
 
         /* HACK: dirty this every frame for now while debugging atmo */
