@@ -63,15 +63,14 @@ tick_power_consumers(ship_space * ship) {
         powered = false;
 
         auto & power_attaches = ship->entity_to_attach_lookups[wire_type_power];
-        if (power_attaches.find(ce) == power_attaches.end()) {
+        auto attaches = power_attaches.find(ce);
+        if (attaches == power_attaches.end()) {
             continue;
         }
 
         std::unordered_set<unsigned> visited_wires;
-        auto const & attaches = power_attaches[ce];
-        for (auto const & sea : attaches) {
-            auto const & attach = ship->wire_attachments[wire_type_power][sea];
-            auto wire_index = attach_topo_find(ship, wire_type_power, attach.parent);
+        for (auto const & sea : attaches->second) {
+            auto wire_index = attach_topo_find(ship, wire_type_power, sea);
             if (visited_wires.find(wire_index) != visited_wires.end()) {
                 continue;
             }
@@ -112,8 +111,7 @@ tick_light_components(ship_space* ship) {
 
         std::unordered_set<unsigned> visited_wires;
         for (auto const & sea : attaches->second) {
-            auto const & attach = ship->wire_attachments[type][sea];
-            auto wire_index = attach_topo_find(ship, type, attach.parent);
+            auto wire_index = attach_topo_find(ship, type, sea);
             if (visited_wires.find(wire_index) != visited_wires.end()) {
                 continue;
             }
