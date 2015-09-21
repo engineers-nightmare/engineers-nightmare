@@ -141,7 +141,7 @@ relocate_segments_and_entity_attaches(ship_space *ship, wire_type type,
 void
 reduce_segments(ship_space *ship, wire_type type) {
     auto & wire_segments = ship->wire_segments[type];
-    for (size_t i1 = 0; i1 < wire_segments.size(); ++i1) {
+    for (auto i1 = 0u; i1 < wire_segments.size();) {
         auto remove = false;
 
         auto const & seg1 = wire_segments[i1];
@@ -170,6 +170,9 @@ reduce_segments(ship_space *ship, wire_type type) {
         if (remove) {
             wire_segments[i1] = wire_segments.back();
             wire_segments.pop_back();
+        }
+        else {
+            i1++;
         }
     }
 }
