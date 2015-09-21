@@ -1509,7 +1509,8 @@ update()
             sinf(pl.elev)
             );
 
-    pl.eye = pl.pos + glm::vec3(0, 0, EYE_OFFSET_Z);
+    /* pl.pos is center of capsule */
+    pl.eye = pl.pos + glm::vec3(0, 0, pl.height / 2 - EYE_OFFSET_Z);
 
     auto vfov = hfov * (float)wnd.height / wnd.width;
 

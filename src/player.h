@@ -2,7 +2,12 @@
 
 #include <glm/glm.hpp>
 
-#define EYE_OFFSET_Z    0.4
+#define PLAYER_RADIUS          0.23f
+#define PLAYER_STAND_HEIGHT    1.5f
+#define PLAYER_CROUCH_HEIGHT   0.9f
+
+/* eye offset is down from top of player capsule (height) */
+#define EYE_OFFSET_Z    0.1f
 
 struct player {
     float angle;
@@ -11,6 +16,8 @@ struct player {
     glm::vec3 dir;  /* computed */
     glm::vec3 eye;  /* computed */
     glm::vec2 move;
+
+    float height;   /* filled by physics */
 
     unsigned int selected_slot;
 
