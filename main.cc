@@ -747,7 +747,7 @@ destroy_entity(entity *e)
             * relevant is an attach that isn't occupying a position
             * will get popped off as a result of moving before removing
             */
-            unsigned att_index = attaches.size() - 1;
+            unsigned att_index = (unsigned)attaches.size() - 1;
             auto swap_index = wire_attachments.size() - 1;
             for (auto s = wire_attachments.rbegin();
             s != wire_attachments.rend() && att_index != invalid_attach;) {
@@ -1509,7 +1509,8 @@ update()
             sinf(pl.elev)
             );
 
-    pl.eye = pl.pos + glm::vec3(0, 0, EYE_OFFSET_Z);
+    /* pl.pos is center of capsule */
+    pl.eye = pl.pos + glm::vec3(0, 0, pl.height / 2 - EYE_OFFSET_Z);
 
     auto vfov = hfov * (float)wnd.height / wnd.width;
 

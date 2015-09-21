@@ -11,6 +11,7 @@
 #define MOVE_SPEED  0.07f
 #define CROUCH_FACTOR 0.4f
 #define AIR_CONTROL_FACTOR 0.25f
+#include <algorithm>
 
 /* a simple constructor hacked together based on
  * http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World
@@ -54,8 +55,14 @@ physics::physics(player *p)
 
 
     /* setup player rigid body */
-    this->standShape = new btCapsuleShapeZ(0.35f, 0.6f);
-    this->crouchShape = new btCapsuleShapeZ(0.35f, 0.0f);
+    /* player height is 2 * radius + height
+     * therefore, height for capsule is
+     * total height - 2 * radius
+     */
+    auto standHeight = std::max(0.f, PLAYER_STAND_HEIGHT - 2 * PLAYER_RADIUS);
+    this->standShape = new btCapsuleShapeZ(PLAYER_RADIUS, standHeight);
+    auto crouchHeight = std::max(0.f, PLAYER_CROUCH_HEIGHT - 2 * PLAYER_RADIUS);
+    this->crouchShape = new btCapsuleShapeZ(PLAYER_RADIUS, crouchHeight);
     float maxStepHeight = 0.15f;
 
     /* setup the character controller. this gets a bit fiddly. */
@@ -125,6 +132,8 @@ physics::tick_controller(float dt)
         speed *= AIR_CONTROL_FACTOR;
     else if (this->controller->isCrouching())
         speed *= CROUCH_FACTOR;
+
+    pl->height = this->controller->isCrouching() ? PLAYER_CROUCH_HEIGHT : PLAYER_STAND_HEIGHT;
 
     fwd *= this->pl->move.y * speed;
     right *= this->pl->move.x * speed;
