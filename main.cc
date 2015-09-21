@@ -1548,6 +1548,7 @@ update()
         tick_gas_producers(ship);
         tick_power_consumers(ship);
         tick_light_components(ship);
+        tick_pressure_sensors(ship);
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);

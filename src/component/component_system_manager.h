@@ -32,6 +32,8 @@ extern switchable_component_manager switchable_man;
 extern type_component_manager type_man;
 
 extern const char * comms_msg_type_switch_state;
+extern const char * comms_msg_type_pressure_sensor_state;
+
 
 void
 tick_gas_producers(ship_space * ship);
@@ -41,6 +43,9 @@ tick_power_consumers(ship_space * ship);
 
 void
 tick_light_components(ship_space * ship);
+
+void
+tick_pressure_sensors(ship_space * ship);
 
 void
 draw_renderables(frame_data *frame);
