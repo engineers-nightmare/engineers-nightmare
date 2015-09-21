@@ -1796,9 +1796,14 @@ struct play_state : game_state {
         }
     }
 
-    void set_slot(int slot) {
-        pl.selected_slot = slot;
-        pl.ui_dirty = true;
+    void set_slot(unsigned slot) {
+        /* note: all the number keys are bound, but we may not have 10 toolbelt slots.
+         * just drop bogus slot requests on the floor.
+         */
+        if (slot < sizeof(tools) / sizeof(tools[0])) {
+            pl.selected_slot = slot;
+            pl.ui_dirty = true;
+        }
     }
 
     void cycle_slot(int d) {
