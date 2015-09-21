@@ -291,11 +291,6 @@ calculate_power_wires(ship_space *ship) {
     }
 }
 
-void
-calculate_comms_wires(ship_space* ship) {
-
-}
-
 /* Phase boundary: this frame's written messages become the next frame's messages to read.
  * start off the next frame's written messages as empty.
  *
