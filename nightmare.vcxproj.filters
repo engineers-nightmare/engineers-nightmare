@@ -144,6 +144,9 @@
     <ClCompile Include="src\component\power_provider_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\pressure_sensor_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -268,6 +271,9 @@
     </ClInclude>
     <ClInclude Include="src\tools\tools.h">
       <Filter>Header Files\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\pressure_sensor_component.h">
+      <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
