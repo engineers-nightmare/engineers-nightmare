@@ -263,6 +263,9 @@ struct entity
 
             light_man.assign_entity(ce);
             light_man.intensity(ce) = 0.15f;
+
+            switchable_man.assign_entity(ce);
+            switchable_man.enabled(ce) = true;
         }
         // light
         else if (type == 2) {
@@ -279,6 +282,7 @@ struct entity
         // switch
         else if (type == 3) {
             switch_man.assign_entity(ce);
+            switch_man.enabled(ce) = true;
         }
         // plaidnicator
         else if (type == 5) {
