@@ -26,7 +26,7 @@ struct comms_msg {
 
 
 struct comms_wiring_data {
-    std::vector<comms_msg> msg_buffer;
+    std::vector<comms_msg> read_buffer, write_buffer;
     unsigned num_connected;
 };
 

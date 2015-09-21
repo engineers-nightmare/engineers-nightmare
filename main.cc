@@ -1552,6 +1552,8 @@ update()
         tick_power_consumers(ship);
         tick_light_components(ship);
 
+        propagate_comms_wires(ship);
+
         /* HACK: dirty this every frame for now while debugging atmo */
         if (1 || pl.ui_dirty) {
             text->reset();
