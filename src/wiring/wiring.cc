@@ -296,6 +296,20 @@ calculate_comms_wires(ship_space* ship) {
 
 }
 
+/* Phase boundary: this frame's written messages become the next frame's messages to read.
+ * start off the next frame's written messages as empty.
+ *
+ * This allows any tick code to read or write messages however it likes, but never step on each
+ * other or introduce strange order-based inconsistencies.
+ */
+void
+propagate_comms_wires(ship_space *ship) {
+    for (auto & w : ship->comms_wires) {
+        std::swap(w.second.read_buffer, w.second.write_buffer);
+        w.second.write_buffer.clear();
+    }
+}
+
 void
 publish_message(ship_space* ship, unsigned wire_id, comms_msg msg) {
     if (ship->comms_wires.find(wire_id) == ship->comms_wires.end()) {
@@ -303,5 +317,5 @@ publish_message(ship_space* ship, unsigned wire_id, comms_msg msg) {
     }
 
     auto & wire = ship->comms_wires[wire_id];
-    wire.msg_buffer.push_back(msg);
+    wire.write_buffer.push_back(msg);
 }

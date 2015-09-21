@@ -57,4 +57,7 @@ void
 calculate_comms_wires(ship_space *ship);
 
 void
+propagate_comms_wires(ship_space *ship);
+
+void
 publish_message(ship_space *ship, unsigned wire_id, comms_msg msg);

@@ -121,7 +121,7 @@ tick_light_components(ship_space* ship) {
             visited_wires.insert(wire_index);
 
             /* now that we have the wire, see if it has any msgs for us */
-            for (auto msg : wire.msg_buffer) {
+            for (auto msg : wire.read_buffer) {
                 if (msg.desc == comms_msg_type_switch_state) {
                     switchable_man.enabled(ce) = msg.data > 0;
 
@@ -131,11 +131,6 @@ tick_light_components(ship_space* ship) {
                 }
             }
         }
-    }
-
-    for (auto & wires : ship->comms_wires) {
-        auto & wire = wires.second;
-        wire.msg_buffer.clear();
     }
 }
 
