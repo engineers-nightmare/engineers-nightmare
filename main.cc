@@ -242,9 +242,6 @@ struct entity
         render_man.assign_entity(ce);
         render_man.mesh(ce) = *et->hw;
 
-        updateable_man.assign_entity(ce);
-        updateable_man.updated(ce) = true;
-
         // frobnicator
         if (type == 0) {
             power_man.assign_entity(ce);
@@ -266,6 +263,9 @@ struct entity
 
             light_man.assign_entity(ce);
             light_man.intensity(ce) = 0.15f;
+
+            switchable_man.assign_entity(ce);
+            switchable_man.enabled(ce) = true;
         }
         // light
         else if (type == 2) {
@@ -282,6 +282,7 @@ struct entity
         // switch
         else if (type == 3) {
             switch_man.assign_entity(ce);
+            switch_man.enabled(ce) = true;
         }
         // plaidnicator
         else if (type == 5) {
@@ -293,7 +294,7 @@ struct entity
 };
 
 
-void use_action_on_entity(c_entity ce) {
+void use_action_on_entity(ship_space *ship, c_entity ce) {
     /* used by the player */
     assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
 
@@ -311,26 +312,33 @@ void use_action_on_entity(c_entity ce) {
     }
 
     if (switch_man.exists(ce)) {
-        // switch toggles directly
-        // finds any switchable in the 6 adjacent blocks and toggles
+        /* publish new state on all attached comms wires */
+        auto & enabled = switch_man.enabled(ce);
+        enabled ^= true;
 
-        /* TODO: we can do better than a linear scan over all entities */
-        for (auto i = 0u; i < pos_man.buffer.num; ++i) {
-            auto pos2 = pos_man.instance_pool.position[i];
-            auto entity = pos_man.instance_pool.entity[i];
-            if (pos == glm::vec3(pos2.x + 1, pos2.y, pos2.z) ||
-                    pos == glm::vec3(pos2.x - 1, pos2.y, pos2.z) ||
-                    pos == glm::vec3(pos2.x, pos2.y + 1, pos2.z) ||
-                    pos == glm::vec3(pos2.x, pos2.y - 1, pos2.z) ||
-                    pos == glm::vec3(pos2.x, pos2.y, pos2.z + 1) ||
-                    pos == glm::vec3(pos2.x, pos2.y, pos2.z - 1)) {
-                if (light_man.exists(entity) && switchable_man.exists(entity)) {
-                    switchable_man.enabled(entity) ^= true;
+        auto wire_type = wire_type_comms;
+        auto & comms_attaches = ship->entity_to_attach_lookups[wire_type];
 
-                    auto block_pos = get_coord_containing(pos);
-                    mark_lightfield_update(block_pos);
-                }
+        if (comms_attaches.find(ce) == comms_attaches.end()) {
+            return;
+        }
+
+        std::unordered_set<unsigned> visited_wires;
+        auto const & attaches = comms_attaches[ce];
+        for (auto const & sea : attaches) {
+            auto const & attach = ship->wire_attachments[wire_type][sea];
+            auto wire_index = attach_topo_find(ship, wire_type, attach.parent);
+            if (visited_wires.find(wire_index) != visited_wires.end()) {
+                continue;
             }
+
+            visited_wires.insert(wire_index);
+
+            comms_msg msg;
+            msg.originator = ce;
+            msg.desc = comms_msg_type_switch_state;
+            msg.data = enabled ? 1.f : 0.f;
+            publish_message(ship, wire_index, msg);
         }
     }
 }
@@ -511,7 +519,6 @@ init()
     switch_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     switchable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     type_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
-    updateable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
     proj_man.create_projectile_data(1000);
 
@@ -711,8 +718,6 @@ destroy_entity(entity *e)
 
     type_man.destroy_entity_instance(e->ce);
 
-    updateable_man.destroy_entity_instance(e->ce);
-
     for (auto _type = 0; _type < num_wire_types; _type++) {
         auto type = (wire_type)_type;
         auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
@@ -742,10 +747,10 @@ destroy_entity(entity *e)
             * relevant is an attach that isn't occupying a position
             * will get popped off as a result of moving before removing
             */
-            auto att_index = attaches.size() - 1;
+            unsigned att_index = attaches.size() - 1;
             auto swap_index = wire_attachments.size() - 1;
             for (auto s = wire_attachments.rbegin();
-            s != wire_attachments.rend() && att_index != (unsigned)-1;) {
+            s != wire_attachments.rend() && att_index != invalid_attach;) {
 
                 auto from_attach = wire_attachments[swap_index];
                 auto rem = attaches[att_index];
@@ -756,7 +761,7 @@ destroy_entity(entity *e)
                     --swap_index;
                     ++s;
                 }
-                else if (s != wire_attachments.rend() && swap_index == rem) {
+                else if (swap_index == rem) {
                     wire_attachments.pop_back();
                     fixup_attaches_removed.erase(rem);
                     --swap_index;
@@ -1060,7 +1065,6 @@ struct remove_surface_entity_tool : tool
 
 struct add_wiring_tool : tool
 {
-    static unsigned const invalid_attach = -1;
     unsigned current_attach = invalid_attach;
     bool moving_existing = false;
     wire_attachment old_attach;
@@ -1525,7 +1529,7 @@ update()
 
     /* this absolutely must run every frame */
     state->update(dt, frame);
-    calculate_power(ship);
+    calculate_power_wires(ship);
 
     /* things that can run at a pretty slow rate */
     while (main_tick_accum.tick()) {
@@ -1546,7 +1550,7 @@ update()
         /* allow the entities to tick */
         tick_gas_producers(ship);
         tick_power_consumers(ship);
-        tick_updateables(ship);
+        tick_light_components(ship);
 
         /* HACK: dirty this every frame for now while debugging atmo */
         if (1 || pl.ui_dirty) {
@@ -1780,7 +1784,7 @@ struct play_state : game_state {
         }
 
         if (pl.use && hit_ent) {
-            use_action_on_entity(hit_ent->ce);
+            use_action_on_entity(ship, hit_ent->ce);
         }
 
         /* tool preview */

@@ -16,7 +16,6 @@
 #include "switch_component.h"
 #include "switchable_component.h"
 #include "type_component.h"
-#include "updateable_component.h"
 
 extern gas_production_component_manager gas_man;
 extern light_component_manager light_man;
@@ -29,7 +28,8 @@ extern surface_attachment_component_manager surface_man;
 extern switch_component_manager switch_man;
 extern switchable_component_manager switchable_man;
 extern type_component_manager type_man;
-extern updateable_component_manager updateable_man;
+
+extern const char * comms_msg_type_switch_state;
 
 void
 tick_gas_producers(ship_space * ship);
@@ -38,7 +38,7 @@ void
 tick_power_consumers(ship_space * ship);
 
 void
-tick_updateables(ship_space * ship);
+tick_light_components(ship_space * ship);
 
 void
 draw_renderables(frame_data *frame);

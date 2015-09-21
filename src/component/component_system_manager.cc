@@ -11,10 +11,13 @@ surface_attachment_component_manager surface_man;
 switch_component_manager switch_man;
 switchable_component_manager switchable_man;
 type_component_manager type_man;
-updateable_component_manager updateable_man;
 
 
 extern void mark_lightfield_update(glm::ivec3 center);
+
+
+/* I have no clue how we're going to actually handle these */
+const char * comms_msg_type_switch_state = "switch_state";
 
 
 void
@@ -81,30 +84,60 @@ tick_power_consumers(ship_space * ship) {
         }
 
         if (powered != old_powered) {
-            assert(updateable_man.exists(ce) || !"updateable should always exist");
-            updateable_man.updated(ce) = true;
-        }
-    }
-}
-
-
-void
-tick_updateables(ship_space * ship) {
-    for (auto i = 0u; i < updateable_man.buffer.num; i++) {
-        auto const & entity = updateable_man.instance_pool.entity[i];
-
-        /* _something_ updated last frame */
-        if (updateable_man.instance_pool.updated[i]) {
-            /* was it lights? */
-            if (light_man.exists(entity)) {
-                /* could have been. mark it */
-                auto pos = pos_man.position(entity);
+            /* if a light changed power state, do the required update now */
+            if (light_man.exists(ce)) {
+                auto pos = pos_man.position(ce);
                 auto block_pos = get_coord_containing(pos);
                 mark_lightfield_update(block_pos);
             }
         }
+    }
+}
 
-        updateable_man.instance_pool.updated[i] = false;
+void
+tick_light_components(ship_space* ship) {
+    for (auto i = 0u; i < light_man.buffer.num; i++) {
+        auto ce = light_man.instance_pool.entity[i];
+        auto type = wire_type_comms;
+
+        /* all lights currently require: power, position */
+        assert(switchable_man.exists(ce) || !"lights must be switchable");
+        assert(pos_man.exists(ce) || !"lights must have a position");
+
+        auto & comms_attaches = ship->entity_to_attach_lookups[type];
+        auto attaches = comms_attaches.find(ce);
+        if (attaches == comms_attaches.end()) {
+            continue;
+        }
+
+        std::unordered_set<unsigned> visited_wires;
+        for (auto const & sea : attaches->second) {
+            auto const & attach = ship->wire_attachments[type][sea];
+            auto wire_index = attach_topo_find(ship, type, attach.parent);
+            if (visited_wires.find(wire_index) != visited_wires.end()) {
+                continue;
+            }
+
+            auto const & wire = ship->comms_wires[wire_index];
+
+            visited_wires.insert(wire_index);
+
+            /* now that we have the wire, see if it has any msgs for us */
+            for (auto msg : wire.msg_buffer) {
+                if (msg.desc == comms_msg_type_switch_state) {
+                    switchable_man.enabled(ce) = msg.data > 0;
+
+                    auto pos = pos_man.position(ce);
+                    auto block_pos = get_coord_containing(pos);
+                    mark_lightfield_update(block_pos);
+                }
+            }
+        }
+    }
+
+    for (auto & wires : ship->comms_wires) {
+        auto & wire = wires.second;
+        wire.msg_buffer.clear();
     }
 }
 

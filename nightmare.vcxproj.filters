@@ -144,9 +144,6 @@
     <ClCompile Include="src\component\power_provider_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
-    <ClCompile Include="src\component\updateable_component.cc">
-      <Filter>Source Files\component</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -267,9 +264,6 @@
       <Filter>Header Files\wiring</Filter>
     </ClInclude>
     <ClInclude Include="src\component\power_provider_component.h">
-      <Filter>Header Files\component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\component\updateable_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\tools\tools.h">

@@ -87,16 +87,20 @@ draw_segments(ship_space *ship, frame_data *frame) {
 
 bool
 remove_segments_containing(ship_space *ship, wire_type type, unsigned attach) {
-    /* remove all segments that contain attach */
+    /* remove all segments that contain attach. relocates segments from
+     * the end to avoid having to shuffle everything down. this is safe
+     * without any further fixups -- nobody refers to segments /across/ this call
+     * by index. */
     auto changed = false;
     auto & wire_segments = ship->wire_segments[type];
-    for (auto si = wire_segments.begin(); si != wire_segments.end(); ) {
-        if (si->first == attach || si->second == attach) {
-            si = wire_segments.erase(si);
+    for (auto i = 0u; i < wire_segments.size(); ) {
+        if (wire_segments[i].first == attach || wire_segments[i].second == attach) {
+            wire_segments[i] = wire_segments.back();
+            wire_segments.pop_back();
             changed = true;
         }
         else {
-            ++si;
+            ++i;
         }
     }
     return changed;
@@ -137,7 +141,7 @@ relocate_segments_and_entity_attaches(ship_space *ship, wire_type type,
 void
 reduce_segments(ship_space *ship, wire_type type) {
     auto & wire_segments = ship->wire_segments[type];
-    for (size_t i1 = 0; i1 < wire_segments.size(); ++i1) {
+    for (auto i1 = 0u; i1 < wire_segments.size();) {
         auto remove = false;
 
         auto const & seg1 = wire_segments[i1];
@@ -166,6 +170,9 @@ reduce_segments(ship_space *ship, wire_type type) {
         if (remove) {
             wire_segments[i1] = wire_segments.back();
             wire_segments.pop_back();
+        }
+        else {
+            i1++;
         }
     }
 }
@@ -221,8 +228,6 @@ attach_topo_rebuild(ship_space *ship, wire_type type) {
     auto &wire_attachments = ship->wire_attachments[type];
     auto &wire_segments = ship->wire_segments[type];
 
-    ship->power_wires.clear();
-
     /* 1. everything points to itself, with rank 0 */
     auto count = wire_attachments.size();
     for (auto i = 0u; i < count; i++) {
@@ -241,7 +246,7 @@ attach_topo_rebuild(ship_space *ship, wire_type type) {
  * assumes a rebuilt attach topo
  */
 void
-calculate_power(ship_space *ship) {
+calculate_power_wires(ship_space *ship) {
     ship->power_wires.clear();
     const auto type = wire_type_power;
 
@@ -256,7 +261,7 @@ calculate_power(ship_space *ship) {
             for (auto attach : attaches->second) {
                 auto wire = attach_topo_find(ship, type, attach);
                 auto & power_data = ship->power_wires[wire];
-                
+
                 auto power_draw_if_enabled = power_man.instance_pool.required_power[i];
 
                 power_data.num_consumers++;
@@ -284,4 +289,19 @@ calculate_power(ship_space *ship) {
             }
         }
     }
+}
+
+void
+calculate_comms_wires(ship_space* ship) {
+
+}
+
+void
+publish_message(ship_space* ship, unsigned wire_id, comms_msg msg) {
+    if (ship->comms_wires.find(wire_id) == ship->comms_wires.end()) {
+        return;
+    }
+
+    auto & wire = ship->comms_wires[wire_id];
+    wire.msg_buffer.push_back(msg);
 }

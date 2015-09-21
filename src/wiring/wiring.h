@@ -20,6 +20,8 @@ struct wire_segment {
     unsigned second;
 };
 
+static unsigned const invalid_attach = -1;
+
 void
 draw_attachments(ship_space *ship, frame_data *frame);
 
@@ -49,4 +51,10 @@ void
 attach_topo_rebuild(ship_space *ship, wire_type type);
 
 void
-calculate_power(ship_space *ship);
+calculate_power_wires(ship_space *ship);
+
+void
+calculate_comms_wires(ship_space *ship);
+
+void
+publish_message(ship_space *ship, unsigned wire_id, comms_msg msg);

@@ -55,6 +55,7 @@ struct ship_space {
     std::unordered_map<c_entity, std::unordered_set<unsigned>> entity_to_attach_lookups[num_wire_types];
 
     std::unordered_map<unsigned, power_wiring_data> power_wires;
+    std::unordered_map<unsigned, comms_wiring_data> comms_wires;
 
     /* create an empty ship_space */
     ship_space();
