@@ -100,7 +100,7 @@ tick_light_components(ship_space* ship) {
         auto ce = light_man.instance_pool.entity[i];
         auto type = wire_type_comms;
 
-        /* all lights currently require: power, position */
+        /* all lights currently require: switchable, position */
         assert(switchable_man.exists(ce) || !"lights must be switchable");
         assert(pos_man.exists(ce) || !"lights must have a position");
 
@@ -122,9 +122,13 @@ tick_light_components(ship_space* ship) {
             visited_wires.insert(wire_index);
 
             /* now that we have the wire, see if it has any msgs for us */
+            /* todo: origin discrimination */
             for (auto msg : wire.read_buffer) {
                 if (msg.desc == comms_msg_type_switch_state) {
                     switchable_man.enabled(ce) = msg.data > 0;
+                    auto data = clamp(msg.data, 0.f, 1.f);
+                    light_man.intensity(ce) = data;
+                    switchable_man.enabled(ce) = data > 0;
 
                     auto pos = pos_man.position(ce);
                     auto block_pos = get_coord_containing(pos);
