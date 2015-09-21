@@ -93,11 +93,14 @@ remove_segments_containing(ship_space *ship, wire_type type, unsigned attach) {
      * by index. */
     auto changed = false;
     auto & wire_segments = ship->wire_segments[type];
-    for (auto si = wire_segments.begin(); si != wire_segments.end(); si++) {
-        if (si->first == attach || si->second == attach) {
-            *si = wire_segments.back();
+    for (auto i = 0u; i < wire_segments.size(); ) {
+        if (wire_segments[i].first == attach || wire_segments[i].second == attach) {
+            wire_segments[i] = wire_segments.back();
             wire_segments.pop_back();
             changed = true;
+        }
+        else {
+            ++i;
         }
     }
     return changed;
