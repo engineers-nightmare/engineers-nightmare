@@ -117,6 +117,7 @@ void
 handle_update_message(ENetEvent *event, uint8_t *data)
 {
     int x, y, z, px, py, pz;
+    glm::ivec3 b, p;
     block *bl, *os;
 
     switch(*data) {
@@ -125,8 +126,9 @@ handle_update_message(ENetEvent *event, uint8_t *data)
             px = pack_int(data, 1);
             py = pack_int(data, 5);
             pz = pack_int(data, 9);
+            p = glm::ivec3(px, py,pz);
             printf("setting block at %d,%d,%d to %d\n", px, py, pz, data[13]);
-            bl = ship->get_block(px, py, pz);
+            bl = ship->get_block(p);
             if(bl) {
                 bl->type = (enum block_type)data[13];
                 for(int i = 0; i < MAX_SLOTS; i++) {
@@ -147,13 +149,15 @@ handle_update_message(ENetEvent *event, uint8_t *data)
             px = pack_int(data, 13);
             py = pack_int(data, 17);
             pz = pack_int(data, 21);
+            b = glm::ivec3(x, y, z);
+            p = glm::ivec3(px, py, pz);
             printf("setting texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
                     x, y, z, px, py, pz, data[26], data[25]);
-            bl = ship->get_block(x, y, z);
-            os = ship->get_block(px, py, pz);
+            bl = ship->get_block(b);
+            os = ship->get_block(p);
             if(bl && os) {
-                ship->ensure_block(x, y, z);
-                ship->ensure_block(px, py, pz);
+                ship->ensure_block(b);
+                ship->ensure_block(p);
                 bl->surfs[data[25]] = (enum surface_type)data[26];
                 os->surfs[data[25] ^ 1] = (enum surface_type)data[26];
                 for(int i = 0; i < MAX_SLOTS; i++) {

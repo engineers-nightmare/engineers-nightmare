@@ -87,11 +87,7 @@ ship_space::get_topo_info(glm::ivec3 block)
     int wb_x, wb_y, wb_z;
     glm::ivec3 ch;
 
-    split_coord(block.x, &wb_x, &ch.x);
-    split_coord(block.y, &wb_y, &ch.y);
-    split_coord(block.z, &wb_z, &ch.z);
-
-    chunk *c = this->get_chunk(ch);
+    chunk *c = this->get_chunk(block);
 
     if (!c) {
         return &this->outside_topo_info;
@@ -147,7 +143,7 @@ std::vector<unsigned char> *
 ship_space::serialize_chunk(int chunk_x, int chunk_y, int chunk_z)
 {
     // Ensure we have a chunk
-    chunk *c = this->get_chunk(chunk_x, chunk_y, chunk_z);
+    chunk *c = this->get_chunk(glm::ivec3(chunk_x, chunk_y, chunk_z));
 
     if (!c) {
         return 0;
@@ -197,8 +193,8 @@ bool
 ship_space::unserialize_chunk(int chunk_x, int chunk_y, int chunk_z, unsigned char *data, size_t len)
 {
     // Create a chunk and access it
-    this->ensure_chunk(chunk_x, chunk_y, chunk_z);
-    chunk *c = this->get_chunk(chunk_x, chunk_y, chunk_z);
+    this->ensure_chunk(glm::ivec3(chunk_x, chunk_y, chunk_z));
+    chunk *c = this->get_chunk(glm::ivec3(chunk_x, chunk_y, chunk_z));
     assert( c );
 
     // Prepare buffer range

@@ -30,6 +30,9 @@
 /* UPDATE_MSG subtype */
 #define SET_BLOCK_TYPE      0x00
 #define SET_SURFACE_TYPE    0x01
+#define REMOVE_BLOCK        0x02
+#define REMOVE_SURFACE      0x03
+
 
 /* assumes 4 byte int, obviously not always true */
 /* FIXME: need a 4 byte integer vector */
@@ -68,10 +71,11 @@ bool send_ship_chunk(ENetPeer *peer, ship_space *space, int chunk_x,
 bool reply_whole_ship(ENetPeer *peer, ship_space *space);
 
 /* update messages */
-bool set_block_type(ENetPeer *peer, glm::vec3 other_side,
-        enum block_type type);
-bool set_block_surface(ENetPeer *peer, glm::vec3 block, glm::vec3 other_side,
+bool set_block_type(ENetPeer *peer, glm::ivec3 block, enum block_type type);
+bool set_block_surface(ENetPeer *peer, glm::ivec3 block, glm::ivec3 other_side,
         uint8_t idx, uint8_t st);
+bool remove_surface(ENetPeer *peer, glm::ivec3 block, glm::ivec3 other_side,
+        uint8_t idx);
 
 /* raw messages */
 bool send_data(ENetPeer *peer, uint8_t *data, size_t size);

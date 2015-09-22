@@ -5,6 +5,9 @@
 
 extern ship_space *ship;
 
+extern void
+remove_ents_from_surface(int x, int y, int z, int face);
+
 static bool send_packet(ENetPeer *peer, ENetPacket *packet)
 {
     if(!packet) {
@@ -158,13 +161,13 @@ bool reply_whole_ship(ENetPeer *peer, ship_space *space) {
 }
 
 bool
-set_block_type(ENetPeer *peer, glm::vec3 b, enum block_type type)
+set_block_type(ENetPeer *peer, glm::ivec3 b, enum block_type type)
 {
     ENetPacket *packet;
 
     assert(peer);
 
-    ship->get_block(b.x, b.y, b.z)->type = type;
+    ship->get_block(b)->type = type;
     printf("set chunk at %.2f,%.2f,%.2f to %d\n", b.x, b.y, b.z, type);
     uint8_t data[15] = {UPDATE_MSG, SET_BLOCK_TYPE,
         unpack_static_int(b.x),
@@ -177,15 +180,15 @@ set_block_type(ENetPeer *peer, glm::vec3 b, enum block_type type)
 }
 
 bool
-set_block_surface(ENetPeer *peer, glm::vec3 b, glm::vec3 os, uint8_t idx,
+set_block_surface(ENetPeer *peer, glm::ivec3 b, glm::vec3 os, uint8_t idx,
         uint8_t st)
 {
     ENetPacket *packet;
 
     assert(peer);
 
-    ship->get_block(b.x, b.y, b.z)->surfs[idx] = (enum surface_type)st;
-    ship->get_block(os.x, os.y, os.z)->surfs[idx ^ 1] = (enum surface_type)st;
+    ship->get_block(b)->surfs[idx] = (enum surface_type)st;
+    ship->get_block(os)->surfs[idx ^ 1] = (enum surface_type)st;
 
     printf("set texture at %.2f,%.2f,%.2f|%.2f,%.2f,%.2f to %d on %d\n",
             b.x, b.y, b.z, os.x, os.y, os.z, st, idx);
@@ -202,10 +205,37 @@ set_block_surface(ENetPeer *peer, glm::vec3 b, glm::vec3 os, uint8_t idx,
     return send_packet(peer, packet);
 }
 
+
+bool
+remove_surface(ENetPeer *peer, glm::vec3 b, glm::vec3 os, uint8_t idx)
+{
+    ENetPacket *packet;
+
+    assert(peer);
+
+    ship->get_block(b)->surfs[idx] = surface_none;
+    ship->get_block(os)->surfs[idx ^ 1] =surface_none;
+    // remove_ents_from_surface(b.x, b.y, b.z, idx);
+    // remove_ents_from_surface(os.x, os.y, os.z, idx ^ 1);
+
+    uint8_t data[27] = {UPDATE_MSG, REMOVE_SURFACE,
+        unpack_static_int(b.x),
+        unpack_static_int(b.y),
+        unpack_static_int(b.z),
+        unpack_static_int(os.x),
+        unpack_static_int(os.y),
+        unpack_static_int(os.z),
+        idx
+    };
+    packet = enet_packet_create(data, sizeof(data), ENET_PACKET_FLAG_RELIABLE);
+    return send_packet(peer, packet);
+}
+
 bool
 send_data(ENetPeer *peer, uint8_t *data, size_t size)
 {
     assert(peer && data);
     return send_packet(peer, enet_packet_create(data, size,
                     ENET_PACKET_FLAG_RELIABLE));
+
 }

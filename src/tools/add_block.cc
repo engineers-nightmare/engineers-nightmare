@@ -33,8 +33,7 @@ struct add_block_tool : tool
 
         /* can only build on the side of an existing frame */
         if (bl && rc->block->type == block_frame) {
-            set_block_type(peer, glm::vec3(rc->px, rc->py, rc->pz),
-                    block_frame);
+            set_block_type(peer, rc->p, block_frame);
             /* dirty the chunk */
             ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
             ship->get_chunk_containing(rc->p)->phys_chunk.valid = false;
