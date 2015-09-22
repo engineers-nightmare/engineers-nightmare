@@ -1525,6 +1525,8 @@ void render() {
 
     world_textures->bind(0);
 
+    prepare_chunks();
+
     for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
         for (int j = ship->mins.y; j <= ship->maxs.y; j++) {
             for (int i = ship->mins.x; i <= ship->maxs.x; i++) {
@@ -1660,10 +1662,6 @@ update()
         phy->tick(fast_tick_accum.period);
 
     }
-
-    prepare_chunks();
-
-    render();
 }
 
 
@@ -2182,6 +2180,8 @@ run()
         handle_input();
 
         update();
+
+        render();
 
         SDL_GL_SwapWindow(wnd.ptr);
 
