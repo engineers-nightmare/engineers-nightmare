@@ -169,16 +169,14 @@ tick_pressure_sensors(ship_space* ship) {
 
         auto wire_type = wire_type_comms;
         auto & comms_attaches = ship->entity_to_attach_lookups[wire_type];
-
-        if (comms_attaches.find(ce) == comms_attaches.end()) {
+        auto attaches = comms_attaches.find(ce);
+        if (attaches == comms_attaches.end()) {
             return;
         }
 
         std::unordered_set<unsigned> visited_wires;
-        auto const & attaches = comms_attaches[ce];
-        for (auto const & sea : attaches) {
-            auto const & attach = ship->wire_attachments[wire_type][sea];
-            auto wire_index = attach_topo_find(ship, wire_type, attach.parent);
+        for (auto const & sea : attaches->second) {
+            auto wire_index = attach_topo_find(ship, wire_type, sea);
             if (visited_wires.find(wire_index) != visited_wires.end()) {
                 continue;
             }
