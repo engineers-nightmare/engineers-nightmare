@@ -52,6 +52,9 @@ struct ship_space {
     std::vector<wire_attachment> wire_attachments[num_wire_types];
     std::vector<wire_segment> wire_segments[num_wire_types];
 
+    /* for rendering currently edited wire */
+    unsigned active_wire[num_wire_types][2];
+
     std::unordered_map<c_entity, std::unordered_set<unsigned>> entity_to_attach_lookups[num_wire_types];
 
     std::unordered_map<unsigned, power_wiring_data> power_wires;

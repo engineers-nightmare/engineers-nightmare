@@ -17,18 +17,64 @@ hw_mesh *wire_hw_meshes[num_wire_types];
 void
 draw_attachments(ship_space *ship, frame_data *frame)
 {
-    for (auto const & wire_attachments : ship->wire_attachments) {
+    for (auto type = 0u; type < num_wire_types; ++type) {
+        auto const & wire_attachments = ship->wire_attachments[type];
         auto count = wire_attachments.size();
         for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
+            auto drawn_attaches = 0u;
             auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
             auto attachment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
 
             for (auto j = 0u; j < batch_size; j++) {
-                attachment_matrices.ptr[j] = wire_attachments[i + j].transform;
+                auto const & attach = wire_attachments[i + j];
+                auto const & active_wires = ship->active_wire[type];
+
+                auto wire = attach_topo_find(ship, (wire_type)type, attach.parent);
+
+                if (wire == active_wires[0] || wire == active_wires[1]) {
+                    continue;
+                }
+
+                attachment_matrices.ptr[drawn_attaches] = attach.transform;
+
+                ++drawn_attaches;
             }
 
             attachment_matrices.bind(1, frame);
-            draw_mesh_instanced(attachment_hw, batch_size);
+            draw_mesh_instanced(attachment_hw, drawn_attaches);
+        }
+    }
+}
+
+
+void
+draw_attachments_on_active_wire(ship_space *ship, frame_data *frame)
+{
+    for (auto type = 0u; type < num_wire_types; ++type) {
+        auto const & wire_attachments = ship->wire_attachments[type];
+        auto count = wire_attachments.size();
+        for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
+            auto drawn_attaches = 0u;
+            auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
+            auto attachment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
+
+            for (auto j = 0u; j < batch_size; j++) {
+                auto const & attach = wire_attachments[i + j];
+                auto const & active_wires = ship->active_wire[type];
+
+                auto wire = attach_topo_find(ship, (wire_type)type, attach.parent);
+
+                if (wire != active_wires[0] && wire != active_wires[1]) {
+                    continue;
+                }
+
+                attachment_matrices.ptr[drawn_attaches] = attach.transform;
+
+                ++drawn_attaches;
+            }
+
+            attachment_matrices.bind(1, frame);
+            draw_mesh_instanced(attachment_hw, drawn_attaches);
         }
     }
 }
@@ -58,12 +104,14 @@ calc_segment_matrix(const wire_attachment &start, const wire_attachment &end) {
 
 void
 draw_segments(ship_space *ship, frame_data *frame) {
-    for (auto wire_type = 0u; wire_type < num_wire_types; ++wire_type) {
-        auto const & wire_attachments = ship->wire_attachments[wire_type];
-        auto const & wire_segments = ship->wire_segments[wire_type];
+    for (auto type = 0u; type < num_wire_types; ++type) {
+        auto const & wire_attachments = ship->wire_attachments[type];
+        auto const & wire_segments = ship->wire_segments[type];
+        auto active_wires = ship->active_wire[type];
 
         auto count = wire_segments.size();
         for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
+            auto drawn_segments = 0u;
             auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
             auto segment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
 
@@ -75,11 +123,60 @@ draw_segments(ship_space *ship, frame_data *frame) {
 
                 auto mat = calc_segment_matrix(a1, a2);
 
-                segment_matrices.ptr[j] = mat;
+                auto wire = attach_topo_find(ship, (wire_type)type, a1.parent);
+                if (wire == active_wires[0] || wire == active_wires[1]) {
+                    continue;
+                }
+
+                segment_matrices.ptr[drawn_segments] = mat;
+
+                ++drawn_segments;
             }
 
             segment_matrices.bind(1, frame);
-            draw_mesh_instanced(wire_hw_meshes[wire_type], batch_size);
+            draw_mesh_instanced(wire_hw_meshes[type], drawn_segments);
+        }
+    }
+}
+
+
+void
+draw_active_segments(ship_space *ship, frame_data *frame) {
+    for (auto type = 0u; type < num_wire_types; ++type) {
+        auto const & wire_attachments = ship->wire_attachments[type];
+        auto const & wire_segments = ship->wire_segments[type];
+        auto active_wires = ship->active_wire[type];
+
+        if (active_wires[0] == invalid_wire && active_wires[1] == invalid_wire) {
+            continue;
+        }
+
+        auto count = wire_segments.size();
+        for (auto i = 0u; i < count; i += INSTANCE_BATCH_SIZE) {
+            auto drawn_segments = 0u;
+            auto batch_size = std::min(INSTANCE_BATCH_SIZE, (unsigned)(count - i));
+            auto segment_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
+
+            for (auto j = 0u; j < batch_size; j++) {
+                auto segment = wire_segments[i + j];
+
+                auto a1 = wire_attachments[segment.first];
+                auto a2 = wire_attachments[segment.second];
+
+                auto wire = attach_topo_find(ship, (wire_type)type, a1.parent);
+                if (wire != active_wires[0] && wire != active_wires[1]) {
+                    continue;
+                }
+
+                auto mat = calc_segment_matrix(a1, a2);
+
+                segment_matrices.ptr[drawn_segments] = mat;
+
+                ++drawn_segments;
+            }
+
+            segment_matrices.bind(1, frame);
+            draw_mesh_instanced(wire_hw_meshes[type], drawn_segments);
         }
     }
 }
