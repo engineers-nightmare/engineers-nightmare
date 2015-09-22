@@ -1491,6 +1491,9 @@ struct time_accumulator
 
 
 void render() {
+    float depthClearValue = 1.0f;
+    glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
+
     frame = &frames[frame_index++];
     if (frame_index >= NUM_INFLIGHT_FRAMES) {
         frame_index = 0;
@@ -1587,9 +1590,6 @@ update()
 {
     frame_info.tick();
     auto dt = frame_info.dt;
-
-    float depthClearValue = 1.0f;
-    glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
 
     main_tick_accum.add(dt);
     fast_tick_accum.add(dt);
