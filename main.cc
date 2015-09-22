@@ -474,7 +474,8 @@ struct game_state {
     virtual ~game_state() {}
 
     virtual void handle_input() = 0;
-    virtual void update(float dt, frame_data *frame) = 0;
+    virtual void update(float dt) = 0;
+    virtual void render(frame_data *frame) = 0;
     virtual void rebuild_ui() = 0;
 
     static game_state *create_play_state();
@@ -1190,6 +1191,9 @@ struct add_wiring_tool : tool
                 mat = mat_rotate_mesh(pt, normal);
             }
 
+            /* todo: this is bad. we shouldn't be modifying state in preview
+             * as preview now lives in our draw loop
+             */
             wire_attachments[current_attach].transform = mat;
         }
 
@@ -1542,6 +1546,8 @@ void render() {
         }
     }
 
+    state->render(frame);
+
     draw_renderables(frame);
 
     /* draw the projectiles */
@@ -1597,7 +1603,7 @@ update()
     fast_tick_accum.add(dt);
 
     /* this absolutely must run every frame */
-    state->update(dt, frame);
+    state->update(dt);
 
     /* things that can run at a pretty slow rate */
     while (main_tick_accum.tick()) {
@@ -1759,7 +1765,7 @@ struct play_state : game_state {
         }
     }
 
-    void update(float dt, frame_data *frame) override {
+    void update(float dt) override {
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_FALSE) {
             SDL_SetRelativeMouseMode(SDL_TRUE);
         }
@@ -1768,32 +1774,9 @@ struct play_state : game_state {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
 
-        tool *t = tools[pl.selected_slot];
-
-        /* both tool use and overlays need the raycast itself */
-        raycast_info rc;
-        ship->raycast(pl.eye, pl.dir, &rc);
-
-        /* tool use */
-        if (pl.use_tool && t) {
-            t->use(&rc);
-        }
-
-        if (pl.alt_use_tool && t) {
-            t->alt_use(&rc);
-        }
-
-        if (pl.long_use_tool && t) {
-            t->long_use(&rc);
-        }
-
-        if (pl.cycle_mode && t) {
-            t->cycle_mode();
-        }
-
         /* interact with ents */
         entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
-                                       phy->ghostObj, phy->dynamicsWorld);
+            phy->ghostObj, phy->dynamicsWorld);
 
         if (hit_ent != use_entity) {
             use_entity = hit_ent;
@@ -1804,8 +1787,46 @@ struct play_state : game_state {
             use_action_on_entity(ship, hit_ent->ce);
         }
 
+        auto *t = tools[pl.selected_slot];
+
+        if (t == nullptr) {
+            return;
+        }
+
+        /* both tool use and overlays need the raycast itself */
+        raycast_info rc;
+        ship->raycast(pl.eye, pl.dir, &rc);
+
+        /* tool use */
+        if (pl.use_tool) {
+            t->use(&rc);
+        }
+
+        if (pl.alt_use_tool) {
+            t->alt_use(&rc);
+        }
+
+        if (pl.long_use_tool) {
+            t->long_use(&rc);
+        }
+
+        if (pl.cycle_mode) {
+            t->cycle_mode();
+        }
+    }
+
+    void render(frame_data *frame) override {
+        auto *t = tools[pl.selected_slot];
+
+        if (t == nullptr) {
+            return;
+        }
+
+        raycast_info rc;
+        ship->raycast(pl.eye, pl.dir, &rc);
+
         /* tool preview */
-        if (rc.hit && t) {
+        if (rc.hit) {
             t->preview(&rc, frame);
         }
     }
@@ -1941,10 +1962,13 @@ struct menu_state : game_state
         items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
     }
 
-    void update(float dt, frame_data *frame) override {
+    void update(float dt) override {
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
+    }
+
+    void render(frame_data *frame) override {
     }
 
     void put_item_text(char *dest, char const *src, unsigned index) {
@@ -2031,10 +2055,13 @@ struct menu_settings_state : game_state
         game_settings.input.mouse_invert *= -1;
     }
 
-    void update(float dt, frame_data *frame) override {
+    void update(float dt) override {
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
+    }
+
+    void render(frame_data *frame) override {
     }
 
     void put_item_text(char *dest, char const *src, int index) {
