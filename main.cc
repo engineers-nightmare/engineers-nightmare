@@ -1158,6 +1158,11 @@ struct add_wiring_tool : tool
         glm::vec3 pt;
         glm::vec3 normal;
 
+        for (auto t = 0u; t < num_wire_types; ++t) {
+            ship->active_wire[t][0] = invalid_wire;
+            ship->active_wire[t][1] = invalid_wire;
+        }
+
         if (!get_attach_point(&hit_entity, pl.eye, pl.dir, pt, normal)) {
             return;
         }
@@ -1175,6 +1180,8 @@ struct add_wiring_tool : tool
 
         if (current_attach != invalid_attach) {
             a1 = wire_attachments[current_attach];
+
+            ship->active_wire[type][0] = attach_topo_find(ship, type, a1.parent);
         }
 
         if (moving_existing) {
@@ -1196,6 +1203,8 @@ struct add_wiring_tool : tool
         if (existing_attach != invalid_attach) {
             a2 = wire_attachments[existing_attach];
             pt = glm::vec3(a2.transform[3]);
+
+            ship->active_wire[type][1] = attach_topo_find(ship, type, a2.parent);
         }
         else {
             a2 = { mat_rotate_mesh(pt, normal) };
@@ -1621,6 +1630,9 @@ update()
     glUseProgram(lit_instanced_shader);
     draw_attachments(ship, frame);
     draw_segments(ship, frame);
+    glUseProgram(unlit_instanced_shader);
+    draw_attachments_on_active_wire(ship, frame);
+    draw_active_segments(ship, frame);
 
     /* draw the sky */
     glUseProgram(sky_shader);
