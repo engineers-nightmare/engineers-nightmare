@@ -202,6 +202,7 @@ entity_type entity_types[] = {
     { "Switch", "mesh/panel_1x1.obj", 9, true },
     { "Door", "mesh/single_door_frame.obj", 2, false },
     { "Plaidnicator", "mesh/frobnicator.obj", 13, false },
+    { "Pressure Sensor", "mesh/panel_1x1.obj", 12, true },
 };
 
 
@@ -289,6 +290,11 @@ struct entity
             power_provider_man.assign_entity(ce);
             power_provider_man.max_provided(ce) = 12;
             power_provider_man.provided(ce) = 12;
+        }
+        // pressure sensor
+        else if (type == 6) {
+            pressure_man.assign_entity(ce);
+            pressure_man.pressure(ce) = 0.f;
         }
     }
 };
@@ -695,27 +701,18 @@ resize(int width, int height)
 void
 destroy_entity(entity *e)
 {
-    pos_man.destroy_entity_instance(e->ce);
-
-    render_man.destroy_entity_instance(e->ce);
-
+    gas_man.destroy_entity_instance(e->ce);
+    light_man.destroy_entity_instance(e->ce);
     teardown_static_physics_setup(nullptr, nullptr, &physics_man.rigid(e->ce));
     physics_man.destroy_entity_instance(e->ce);
-
+    pos_man.destroy_entity_instance(e->ce);
     power_man.destroy_entity_instance(e->ce);
-
     power_provider_man.destroy_entity_instance(e->ce);
-
-    gas_man.destroy_entity_instance(e->ce);
-
-    light_man.destroy_entity_instance(e->ce);
-
+    pressure_man.destroy_entity_instance(e->ce);
+    render_man.destroy_entity_instance(e->ce);
     surface_man.destroy_entity_instance(e->ce);
-
     switch_man.destroy_entity_instance(e->ce);
-
     switchable_man.destroy_entity_instance(e->ce);
-
     type_man.destroy_entity_instance(e->ce);
 
     for (auto _type = 0; _type < num_wire_types; _type++) {
@@ -1551,6 +1548,7 @@ update()
         tick_gas_producers(ship);
         tick_power_consumers(ship);
         tick_light_components(ship);
+        tick_pressure_sensors(ship);
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);

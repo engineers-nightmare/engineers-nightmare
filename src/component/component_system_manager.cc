@@ -6,6 +6,7 @@ physics_component_manager physics_man;
 relative_position_component_manager pos_man;
 power_component_manager power_man;
 power_provider_component_manager power_provider_man;
+pressure_sensor_component_manager pressure_man;
 renderable_component_manager render_man;
 surface_attachment_component_manager surface_man;
 switch_component_manager switch_man;
@@ -18,6 +19,7 @@ extern void mark_lightfield_update(glm::ivec3 center);
 
 /* I have no clue how we're going to actually handle these */
 const char * comms_msg_type_switch_state = "switch_state";
+const char * comms_msg_type_pressure_sensor_state = "pressure_sensor_state";
 
 
 void
@@ -99,7 +101,7 @@ tick_light_components(ship_space* ship) {
         auto ce = light_man.instance_pool.entity[i];
         auto type = wire_type_comms;
 
-        /* all lights currently require: power, position */
+        /* all lights currently require: switchable, position */
         assert(switchable_man.exists(ce) || !"lights must be switchable");
         assert(pos_man.exists(ce) || !"lights must have a position");
 
@@ -121,9 +123,14 @@ tick_light_components(ship_space* ship) {
             visited_wires.insert(wire_index);
 
             /* now that we have the wire, see if it has any msgs for us */
+            /* todo: origin discrimination */
             for (auto msg : wire.read_buffer) {
-                if (msg.desc == comms_msg_type_switch_state) {
-                    switchable_man.enabled(ce) = msg.data > 0;
+                if (msg.desc == comms_msg_type_switch_state ||
+                    msg.desc == comms_msg_type_pressure_sensor_state) {
+
+                    auto data = clamp(msg.data, 0.f, 1.f);
+                    light_man.intensity(ce) = data;
+                    switchable_man.enabled(ce) = data > 0;
 
                     auto pos = pos_man.position(ce);
                     auto block_pos = get_coord_containing(pos);
@@ -134,6 +141,49 @@ tick_light_components(ship_space* ship) {
     }
 }
 
+void tick_pressure_sensors(ship_space* ship) {
+    for (auto i = 0u; i < pressure_man.buffer.num; i++) {
+        auto ce = pressure_man.instance_pool.entity[i];
+        auto type = wire_type_comms;
+
+        /* all pressure sensors currently require: position */
+        assert(pos_man.exists(ce) || !"pressure sensors must have a position");
+
+        auto pos = pos_man.position(ce);
+
+        glm::ivec3 pos_block = get_coord_containing(pos);
+
+        topo_info *t = topo_find(ship->get_topo_info(pos_block));
+        topo_info *outside = topo_find(&ship->outside_topo_info);
+        zone_info *z = ship->get_zone_info(t);
+        float pressure = z ? (z->air_amount / t->size) : 0.0f;
+
+        auto wire_type = wire_type_comms;
+        auto & comms_attaches = ship->entity_to_attach_lookups[wire_type];
+
+        if (comms_attaches.find(ce) == comms_attaches.end()) {
+            return;
+        }
+
+        std::unordered_set<unsigned> visited_wires;
+        auto const & attaches = comms_attaches[ce];
+        for (auto const & sea : attaches) {
+            auto const & attach = ship->wire_attachments[wire_type][sea];
+            auto wire_index = attach_topo_find(ship, wire_type, attach.parent);
+            if (visited_wires.find(wire_index) != visited_wires.end()) {
+                continue;
+            }
+
+            visited_wires.insert(wire_index);
+
+            comms_msg msg;
+            msg.originator = ce;
+            msg.desc = comms_msg_type_pressure_sensor_state;
+            msg.data = pressure;
+            publish_message(ship, wire_index, msg);
+        }
+    }
+}
 
 void
 draw_renderables(frame_data *frame)
