@@ -2137,6 +2137,7 @@ run()
                     wnd.has_focus = true;
                     break;
                 }
+                break;
 
             case SDL_MOUSEMOTION:
             {
@@ -2167,8 +2168,6 @@ run()
         update();
 
         SDL_GL_SwapWindow(wnd.ptr);
-        glClearColor(0, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
 
         if (exit_requested) return;
     }
