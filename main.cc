@@ -474,7 +474,8 @@ struct game_state {
     virtual ~game_state() {}
 
     virtual void handle_input() = 0;
-    virtual void update(float dt, frame_data *frame) = 0;
+    virtual void update(float dt) = 0;
+    virtual void render(frame_data *frame) = 0;
     virtual void rebuild_ui() = 0;
 
     static game_state *create_play_state();
@@ -1190,6 +1191,9 @@ struct add_wiring_tool : tool
                 mat = mat_rotate_mesh(pt, normal);
             }
 
+            /* todo: this is bad. we shouldn't be modifying state in preview
+             * as preview now lives in our draw loop
+             */
             wire_attachments[current_attach].transform = mat;
         }
 
@@ -1490,14 +1494,9 @@ struct time_accumulator
 };
 
 
-time_accumulator main_tick_accum(1/15.0f, 1.f);  /* 15Hz tick for game logic */
-time_accumulator fast_tick_accum(1/60.0f, 1.f);  /* 60Hz tick for motion */
-
-void
-update()
-{
-    frame_info.tick();
-    auto dt = frame_info.dt;
+void render() {
+    float depthClearValue = 1.0f;
+    glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
 
     frame = &frames[frame_index++];
     if (frame_index >= NUM_INFLIGHT_FRAMES) {
@@ -1506,14 +1505,11 @@ update()
 
     frame->begin();
 
-    float depthClearValue = 1.0f;
-    glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
-
     pl.dir = glm::vec3(
-            cosf(pl.angle) * cosf(pl.elev),
-            sinf(pl.angle) * cosf(pl.elev),
-            sinf(pl.elev)
-            );
+        cosf(pl.angle) * cosf(pl.elev),
+        sinf(pl.angle) * cosf(pl.elev),
+        sinf(pl.elev)
+        );
 
     /* pl.pos is center of capsule */
     pl.eye = pl.pos + glm::vec3(0, 0, pl.height / 2 - EYE_OFFSET_Z);
@@ -1531,11 +1527,83 @@ update()
     camera_params.ptr->aspect = (float)wnd.width / wnd.height;
     camera_params.bind(0, frame);
 
+    world_textures->bind(0);
+
+    prepare_chunks();
+
+    for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
+        for (int j = ship->mins.y; j <= ship->maxs.y; j++) {
+            for (int i = ship->mins.x; i <= ship->maxs.x; i++) {
+                /* TODO: prepare all the matrices first, and do ONE upload */
+                chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
+                if (ch) {
+                    auto chunk_matrix = frame->alloc_aligned<glm::mat4>(1);
+                    *chunk_matrix.ptr = mat_position(CHUNK_SIZE * glm::ivec3(i, j, k));
+                    chunk_matrix.bind(1, frame);
+                    draw_mesh(ch->render_chunk.mesh);
+                }
+            }
+        }
+    }
+
+    state->render(frame);
+
+    draw_renderables(frame);
+
+    /* draw the projectiles */
+    glUseProgram(unlit_instanced_shader);
+    draw_projectiles(proj_man, frame);
+    glUseProgram(lit_instanced_shader);
+    draw_attachments(ship, frame);
+    draw_segments(ship, frame);
+    glUseProgram(unlit_instanced_shader);
+    draw_attachments_on_active_wire(ship, frame);
+    draw_active_segments(ship, frame);
+
+    /* draw the sky */
+    glUseProgram(sky_shader);
+    skybox->bind(0);
+    glDepthMask(GL_FALSE);
+    glDepthFunc(GL_LEQUAL);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDepthFunc(GL_LESS);
+    glDepthMask(GL_TRUE);
+
+    if (draw_hud) {
+        /* draw the ui */
+        glDisable(GL_DEPTH_TEST);
+
+        glUseProgram(ui_shader);
+        text->draw();
+        glUseProgram(ui_sprites_shader);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        ui_sprites->draw();
+        glDisable(GL_BLEND);
+
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    glUseProgram(simple_shader);
+
+    frame->end();
+}
+
+
+time_accumulator main_tick_accum(1/15.0f, 1.f);  /* 15Hz tick for game logic */
+time_accumulator fast_tick_accum(1/60.0f, 1.f);  /* 60Hz tick for motion */
+
+void
+update()
+{
+    frame_info.tick();
+    auto dt = frame_info.dt;
+
     main_tick_accum.add(dt);
     fast_tick_accum.add(dt);
 
     /* this absolutely must run every frame */
-    state->update(dt, frame);
+    state->update(dt);
 
     /* things that can run at a pretty slow rate */
     while (main_tick_accum.tick()) {
@@ -1600,66 +1668,8 @@ update()
         phy->tick(fast_tick_accum.period);
 
     }
-
-    world_textures->bind(0);
-
-    prepare_chunks();
-
-    for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
-        for (int j = ship->mins.y; j <= ship->maxs.y; j++) {
-            for (int i = ship->mins.x; i <= ship->maxs.x; i++) {
-                /* TODO: prepare all the matrices first, and do ONE upload */
-                chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
-                if (ch) {
-                    auto chunk_matrix = frame->alloc_aligned<glm::mat4>(1);
-                    *chunk_matrix.ptr = mat_position(CHUNK_SIZE * glm::ivec3(i, j, k));
-                    chunk_matrix.bind(1, frame);
-                    draw_mesh(ch->render_chunk.mesh);
-                }
-            }
-        }
-    }
-
-    draw_renderables(frame);
-
-    /* draw the projectiles */
-    glUseProgram(unlit_instanced_shader);
-    draw_projectiles(proj_man, frame);
-    glUseProgram(lit_instanced_shader);
-    draw_attachments(ship, frame);
-    draw_segments(ship, frame);
-    glUseProgram(unlit_instanced_shader);
-    draw_attachments_on_active_wire(ship, frame);
-    draw_active_segments(ship, frame);
-
-    /* draw the sky */
-    glUseProgram(sky_shader);
-    skybox->bind(0);
-    glDepthMask(GL_FALSE);
-    glDepthFunc(GL_LEQUAL);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDepthFunc(GL_LESS);
-    glDepthMask(GL_TRUE);
-
-    if (draw_hud) {
-        /* draw the ui */
-        glDisable(GL_DEPTH_TEST);
-
-        glUseProgram(ui_shader);
-        text->draw();
-        glUseProgram(ui_sprites_shader);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        ui_sprites->draw();
-        glDisable(GL_BLEND);
-
-        glEnable(GL_DEPTH_TEST);
-    }
-
-    glUseProgram(simple_shader);
-
-    frame->end();
 }
+
 
 
 action const* get_input(en_action a) {
@@ -1755,7 +1765,7 @@ struct play_state : game_state {
         }
     }
 
-    void update(float dt, frame_data *frame) override {
+    void update(float dt) override {
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_FALSE) {
             SDL_SetRelativeMouseMode(SDL_TRUE);
         }
@@ -1764,32 +1774,9 @@ struct play_state : game_state {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
 
-        tool *t = tools[pl.selected_slot];
-
-        /* both tool use and overlays need the raycast itself */
-        raycast_info rc;
-        ship->raycast(pl.eye, pl.dir, &rc);
-
-        /* tool use */
-        if (pl.use_tool && t) {
-            t->use(&rc);
-        }
-
-        if (pl.alt_use_tool && t) {
-            t->alt_use(&rc);
-        }
-
-        if (pl.long_use_tool && t) {
-            t->long_use(&rc);
-        }
-
-        if (pl.cycle_mode && t) {
-            t->cycle_mode();
-        }
-
         /* interact with ents */
         entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
-                                       phy->ghostObj, phy->dynamicsWorld);
+            phy->ghostObj, phy->dynamicsWorld);
 
         if (hit_ent != use_entity) {
             use_entity = hit_ent;
@@ -1800,8 +1787,46 @@ struct play_state : game_state {
             use_action_on_entity(ship, hit_ent->ce);
         }
 
+        auto *t = tools[pl.selected_slot];
+
+        if (t == nullptr) {
+            return;
+        }
+
+        /* both tool use and overlays need the raycast itself */
+        raycast_info rc;
+        ship->raycast(pl.eye, pl.dir, &rc);
+
+        /* tool use */
+        if (pl.use_tool) {
+            t->use(&rc);
+        }
+
+        if (pl.alt_use_tool) {
+            t->alt_use(&rc);
+        }
+
+        if (pl.long_use_tool) {
+            t->long_use(&rc);
+        }
+
+        if (pl.cycle_mode) {
+            t->cycle_mode();
+        }
+    }
+
+    void render(frame_data *frame) override {
+        auto *t = tools[pl.selected_slot];
+
+        if (t == nullptr) {
+            return;
+        }
+
+        raycast_info rc;
+        ship->raycast(pl.eye, pl.dir, &rc);
+
         /* tool preview */
-        if (rc.hit && t) {
+        if (rc.hit) {
             t->preview(&rc, frame);
         }
     }
@@ -1937,10 +1962,13 @@ struct menu_state : game_state
         items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
     }
 
-    void update(float dt, frame_data *frame) override {
+    void update(float dt) override {
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
+    }
+
+    void render(frame_data *frame) override {
     }
 
     void put_item_text(char *dest, char const *src, unsigned index) {
@@ -2027,10 +2055,13 @@ struct menu_settings_state : game_state
         game_settings.input.mouse_invert *= -1;
     }
 
-    void update(float dt, frame_data *frame) override {
+    void update(float dt) override {
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
+    }
+
+    void render(frame_data *frame) override {
     }
 
     void put_item_text(char *dest, char const *src, int index) {
@@ -2176,6 +2207,8 @@ run()
         handle_input();
 
         update();
+
+        render();
 
         SDL_GL_SwapWindow(wnd.ptr);
 
