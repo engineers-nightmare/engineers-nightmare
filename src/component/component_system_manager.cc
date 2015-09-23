@@ -20,7 +20,9 @@ extern void mark_lightfield_update(glm::ivec3 center);
 
 /* I have no clue how we're going to actually handle these */
 const char * comms_msg_type_switch_state = "switch_state";
-const char * comms_msg_type_pressure_sensor_state = "pressure_sensor_state";
+const char * comms_msg_type_pressure_sensor_1_state = "pressure_sensor_1_state";
+const char * comms_msg_type_pressure_sensor_2_state = "pressure_sensor_2_state";
+const char * comms_msg_type_sensor_comparison_state = "sensor_comparison_state";
 
 
 void
@@ -96,10 +98,12 @@ tick_power_consumers(ship_space * ship) {
     }
 }
 
+
 void
 tick_light_components(ship_space* ship) {
     for (auto i = 0u; i < light_man.buffer.num; i++) {
         auto ce = light_man.instance_pool.entity[i];
+        auto light_type = light_man.instance_pool.type[i];
         auto type = wire_type_comms;
 
         /* all lights currently require: switchable, position */
@@ -126,8 +130,12 @@ tick_light_components(ship_space* ship) {
             /* now that we have the wire, see if it has any msgs for us */
             /* todo: origin discrimination */
             for (auto msg : wire.read_buffer) {
-                if (msg.desc == comms_msg_type_switch_state ||
-                    msg.desc == comms_msg_type_pressure_sensor_state) {
+
+                if (light_type == 1 &&
+                       (msg.desc == comms_msg_type_switch_state ||
+                        msg.desc == comms_msg_type_pressure_sensor_1_state ||
+                        msg.desc == comms_msg_type_pressure_sensor_2_state) ||
+                    light_type == 2 && msg.desc == comms_msg_type_sensor_comparison_state) {
 
                     auto data = clamp(msg.data, 0.f, 1.f);
                     light_man.intensity(ce) = data;
@@ -142,7 +150,9 @@ tick_light_components(ship_space* ship) {
     }
 }
 
-void tick_pressure_sensors(ship_space* ship) {
+
+void
+tick_pressure_sensors(ship_space* ship) {
     for (auto i = 0u; i < pressure_man.buffer.num; i++) {
         auto ce = pressure_man.instance_pool.entity[i];
         auto type = wire_type_comms;
@@ -175,16 +185,105 @@ void tick_pressure_sensors(ship_space* ship) {
                 continue;
             }
 
+            auto which_sensor = pressure_man.type(ce);
+            auto desc = comms_msg_type_pressure_sensor_1_state;
+            if (which_sensor == 2) {
+                desc = comms_msg_type_pressure_sensor_2_state;
+            }
             visited_wires.insert(wire_index);
 
             comms_msg msg;
             msg.originator = ce;
-            msg.desc = comms_msg_type_pressure_sensor_state;
+            msg.desc = desc;
             msg.data = pressure;
             publish_message(ship, wire_index, msg);
         }
     }
 }
+
+
+void
+tick_sensor_comparators(ship_space* ship) {
+    for (auto i = 0u; i < comparator_man.buffer.num; i++) {
+        auto ce = comparator_man.instance_pool.entity[i];
+        auto type = wire_type_comms;
+        auto sensor_1 = FLT_MAX;
+        auto sensor_2 = FLT_MAX;
+        auto epsilon = comparator_man.instance_pool.compare_epsilon[i];
+        auto & difference = comparator_man.instance_pool.compare_result[i];
+        difference = 0.f;
+
+        /* read pressure sensors from wire
+         * bail after encountering first of each
+         */
+        auto & comms_attaches = ship->entity_to_attach_lookups[type];
+        auto attaches = comms_attaches.find(ce);
+        if (attaches == comms_attaches.end()) {
+            continue;
+        }
+
+        std::unordered_set<unsigned> visited_wires;
+        for (auto const & sea : attaches->second) {
+            auto wire_index = attach_topo_find(ship, type, sea);
+            if (visited_wires.find(wire_index) != visited_wires.end()) {
+                continue;
+            }
+
+            auto const & wire = ship->comms_wires[wire_index];
+
+            visited_wires.insert(wire_index);
+
+            /* now that we have the wire, see if it has any msgs for us */
+            /* todo: origin discrimination */
+            for (auto msg : wire.read_buffer) {
+                if (sensor_1 == FLT_MAX && msg.desc == comms_msg_type_pressure_sensor_1_state) {
+                    sensor_1 = msg.data;
+                }
+                if (sensor_2 == FLT_MAX && msg.desc == comms_msg_type_pressure_sensor_2_state) {
+                    sensor_2 = msg.data;
+                }
+
+                if (sensor_1 != FLT_MAX && sensor_2 != FLT_MAX) {
+                    break;
+                }
+            }
+        }
+
+
+        /* calculate difference */
+        /* was epsilon chosen wisely? */
+
+        /* the following code always returns 0??
+         * difference = (fabsf(sensor_1 - sensor_2) < epsilon) ? 1.f : 0.f;
+         */
+        auto d = fabsf(sensor_1 - sensor_2);
+        auto b = d < epsilon;
+        difference = b ? 1.f : 0.f;
+
+        /* publish result */
+        visited_wires.clear();
+
+        auto const & pub_attaches = comms_attaches[ce];
+        for (auto const & sea : pub_attaches) {
+            auto const & attach = ship->wire_attachments[type][sea];
+            auto wire_index = attach_topo_find(ship, type, attach.parent);
+            if (visited_wires.find(wire_index) != visited_wires.end()) {
+                continue;
+            }
+
+            auto desc = comms_msg_type_sensor_comparison_state;
+
+            visited_wires.insert(wire_index);
+
+            comms_msg msg;
+            msg.originator = ce;
+            msg.desc = desc;
+            msg.data = difference;
+            publish_message(ship, wire_index, msg);
+        }
+    }
+}
+
 
 void
 draw_renderables(frame_data *frame)

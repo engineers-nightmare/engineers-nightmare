@@ -34,7 +34,9 @@ extern switchable_component_manager switchable_man;
 extern type_component_manager type_man;
 
 extern const char * comms_msg_type_switch_state;
-extern const char * comms_msg_type_pressure_sensor_state;
+extern const char * comms_msg_type_pressure_sensor_1_state;
+extern const char * comms_msg_type_pressure_sensor_2_state;
+extern const char * comms_msg_type_sensor_comparison_state;
 
 
 void
@@ -48,6 +50,9 @@ tick_light_components(ship_space * ship);
 
 void
 tick_pressure_sensors(ship_space * ship);
+
+void
+tick_sensor_comparators(ship_space* ship);
 
 void
 draw_renderables(frame_data *frame);

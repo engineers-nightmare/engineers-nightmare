@@ -283,6 +283,7 @@ struct entity
 
             light_man.assign_entity(ce);
             light_man.intensity(ce) = 1.f;
+            light_man.type(ce) = 1;
         }
         // warning light
         else if (type == 3) {
@@ -295,6 +296,7 @@ struct entity
 
             light_man.assign_entity(ce);
             light_man.intensity(ce) = 1.f;
+            light_man.type(ce) = 2;
         }
         // switch
         else if (type == 4) {
@@ -1665,6 +1667,7 @@ update()
         tick_power_consumers(ship);
         tick_light_components(ship);
         tick_pressure_sensors(ship);
+        tick_sensor_comparators(ship);
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);
