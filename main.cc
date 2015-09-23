@@ -1440,7 +1440,17 @@ struct add_wiring_tool : tool
     }
 
     void get_description(char *str) override {
-        sprintf(str, "Place wiring type %u", type);
+        switch (type) {
+        case wire_type_power:
+            sprintf(str, "Place wiring type %s", "power");
+            break;
+        case wire_type_comms:
+            sprintf(str, "Place wiring type %s", "comms");
+            break;
+        default:
+            sprintf(str, "Place wiring type %u", type);
+            break;
+        }
     }
 };
 
