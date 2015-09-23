@@ -1470,17 +1470,8 @@ struct add_wiring_tool : tool
     }
 
     void get_description(char *str) override {
-        switch (type) {
-        case wire_type_power:
-            sprintf(str, "Place wiring type %s", "power");
-            break;
-        case wire_type_comms:
-            sprintf(str, "Place wiring type %s", "comms");
-            break;
-        default:
-            sprintf(str, "Place wiring type %u", type);
-            break;
-        }
+        auto name = ship->wire_type_names[type];
+        sprintf(str, "Place %s wiring", name);
     }
 };
 
