@@ -196,14 +196,13 @@ struct entity_type
 
 
 entity_type entity_types[] = {
-    { "Frobnicator", "mesh/frobnicator.obj", 3, false },
-    { "Display Panel (4x4)", "mesh/panel_4x4.obj", 7, true },
-    { "Light (4x4)", "mesh/panel_4x4.obj", 8, true },
-    { "Warning Light", "mesh/warning_light.obj", 8, true },
-    { "Switch", "mesh/panel_1x1.obj", 9, true },
     { "Door", "mesh/single_door_frame.obj", 2, false },
+    { "Frobnicator", "mesh/frobnicator.obj", 3, false },
+    { "Light", "mesh/panel_4x4.obj", 8, true },
+    { "Warning Light", "mesh/warning_light.obj", 8, true },
+    { "Display Panel", "mesh/panel_4x4.obj", 7, true },
+    { "Switch", "mesh/panel_1x1.obj", 9, true },
     { "Plaidnicator", "mesh/frobnicator.obj", 13, false },
-    { "Pressure Sensor", "mesh/panel_1x1.obj", 12, true },
     { "Pressure Sensor 1", "mesh/panel_1x1.obj", 12, true },
     { "Pressure Sensor 2", "mesh/panel_1x1.obj", 14, true },
     { "Sensor Comparator", "mesh/panel_1x1.obj", 13, true },
@@ -248,7 +247,7 @@ struct entity
         render_man.mesh(ce) = *et->hw;
 
         // frobnicator
-        if (type == 0) {
+        if (type == 1) {
             power_man.assign_entity(ce);
             power_man.powered(ce) = false;
             power_man.required_power(ce) = 12;
@@ -259,18 +258,6 @@ struct entity
             gas_man.assign_entity(ce);
             gas_man.flow_rate(ce) = 0.1f;
             gas_man.max_pressure(ce) = 1.0f;
-        }
-        // display panel
-        else if (type == 1) {
-            power_man.assign_entity(ce);
-            power_man.powered(ce) = false;
-            power_man.required_power(ce) = 4;
-
-            light_man.assign_entity(ce);
-            light_man.intensity(ce) = 0.15f;
-
-            switchable_man.assign_entity(ce);
-            switchable_man.enabled(ce) = true;
         }
         // light
         else if (type == 2) {
@@ -298,8 +285,20 @@ struct entity
             light_man.intensity(ce) = 1.f;
             light_man.type(ce) = 2;
         }
-        // switch
+        // display panel
         else if (type == 4) {
+            power_man.assign_entity(ce);
+            power_man.powered(ce) = false;
+            power_man.required_power(ce) = 4;
+
+            light_man.assign_entity(ce);
+            light_man.intensity(ce) = 0.15f;
+
+            switchable_man.assign_entity(ce);
+            switchable_man.enabled(ce) = true;
+        }
+        // switch
+        else if (type == 5) {
             switch_man.assign_entity(ce);
             switch_man.enabled(ce) = true;
         }
@@ -868,7 +867,7 @@ remove_ents_from_surface(glm::ivec3 b, int face)
 
 struct add_block_entity_tool : tool
 {
-    unsigned type = 0;
+    unsigned type = 1;
 
     bool can_use(raycast_info *rc) {
         if (!rc->hit || rc->inside)
@@ -948,7 +947,7 @@ struct add_block_entity_tool : tool
 
 struct add_surface_entity_tool : tool
 {
-    unsigned type = 1;  /* bit of a hack -- this is the first with placed_on_surface set. */
+    unsigned type = 2;  /* bit of a hack -- this is the first with placed_on_surface set. */
                         /* note that we can't cycle_mode() in our ctor as that runs too early,
                            before the entity types are even set up. */
 
