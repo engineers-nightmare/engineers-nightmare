@@ -5,6 +5,7 @@
 #include "../mesh.h"
 #include "../render_data.h"
 #include "../ship_space.h"
+#include "sensor_comparator_component.h"
 #include "gas_production_component.h"
 #include "light_component.h"
 #include "physics_component.h"
@@ -18,6 +19,7 @@
 #include "switchable_component.h"
 #include "type_component.h"
 
+extern sensor_comparator_component_manager comparator_man;
 extern gas_production_component_manager gas_man;
 extern light_component_manager light_man;
 extern physics_component_manager physics_man;
