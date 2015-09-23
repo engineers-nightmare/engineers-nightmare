@@ -199,10 +199,14 @@ entity_type entity_types[] = {
     { "Frobnicator", "mesh/frobnicator.obj", 3, false },
     { "Display Panel (4x4)", "mesh/panel_4x4.obj", 7, true },
     { "Light (4x4)", "mesh/panel_4x4.obj", 8, true },
+    { "Warning Light", "mesh/warning_light.obj", 8, true },
     { "Switch", "mesh/panel_1x1.obj", 9, true },
     { "Door", "mesh/single_door_frame.obj", 2, false },
     { "Plaidnicator", "mesh/frobnicator.obj", 13, false },
     { "Pressure Sensor", "mesh/panel_1x1.obj", 12, true },
+    { "Pressure Sensor 1", "mesh/panel_1x1.obj", 12, true },
+    { "Pressure Sensor 2", "mesh/panel_1x1.obj", 14, true },
+    { "Sensor Comparator", "mesh/panel_1x1.obj", 13, true },
 };
 
 
@@ -280,21 +284,45 @@ struct entity
             light_man.assign_entity(ce);
             light_man.intensity(ce) = 1.f;
         }
-        // switch
+        // warning light
         else if (type == 3) {
+            power_man.assign_entity(ce);
+            power_man.powered(ce) = false;
+            power_man.required_power(ce) = 6;
+
+            switchable_man.assign_entity(ce);
+            switchable_man.enabled(ce) = false;
+
+            light_man.assign_entity(ce);
+            light_man.intensity(ce) = 1.f;
+        }
+        // switch
+        else if (type == 4) {
             switch_man.assign_entity(ce);
             switch_man.enabled(ce) = true;
         }
         // plaidnicator
-        else if (type == 5) {
+        else if (type == 6) {
             power_provider_man.assign_entity(ce);
             power_provider_man.max_provided(ce) = 12;
             power_provider_man.provided(ce) = 12;
         }
-        // pressure sensor
-        else if (type == 6) {
+        // pressure sensor 1
+        else if (type == 7) {
             pressure_man.assign_entity(ce);
             pressure_man.pressure(ce) = 0.f;
+            pressure_man.type(ce) = 1;
+        }
+        // pressure sensor 2
+        else if (type == 8) {
+            pressure_man.assign_entity(ce);
+            pressure_man.pressure(ce) = 0.f;
+            pressure_man.type(ce) = 2;
+        }
+        // sensor comparator
+        else if (type == 9) {
+            comparator_man.assign_entity(ce);
+            comparator_man.compare_epsilon(ce) = 0.0001f;
         }
     }
 };
