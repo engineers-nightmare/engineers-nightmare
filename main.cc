@@ -702,6 +702,7 @@ resize(int width, int height)
 void
 destroy_entity(entity *e)
 {
+    comparator_man.destroy_entity_instance(e->ce);
     gas_man.destroy_entity_instance(e->ce);
     light_man.destroy_entity_instance(e->ce);
     teardown_static_physics_setup(nullptr, nullptr, &physics_man.rigid(e->ce));
