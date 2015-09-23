@@ -131,11 +131,11 @@ tick_light_components(ship_space* ship) {
             /* todo: origin discrimination */
             for (auto msg : wire.read_buffer) {
 
-                if (light_type == 1 &&
+                if ((light_type == 1 &&
                        (msg.desc == comms_msg_type_switch_state ||
                         msg.desc == comms_msg_type_pressure_sensor_1_state ||
-                        msg.desc == comms_msg_type_pressure_sensor_2_state) ||
-                    light_type == 2 && msg.desc == comms_msg_type_sensor_comparison_state) {
+                        msg.desc == comms_msg_type_pressure_sensor_2_state)) ||
+                    (light_type == 2 && msg.desc == comms_msg_type_sensor_comparison_state)) {
 
                     auto data = clamp(msg.data, 0.f, 1.f);
                     light_man.intensity(ce) = data;
@@ -155,7 +155,6 @@ void
 tick_pressure_sensors(ship_space* ship) {
     for (auto i = 0u; i < pressure_man.buffer.num; i++) {
         auto ce = pressure_man.instance_pool.entity[i];
-        auto type = wire_type_comms;
 
         /* all pressure sensors currently require: position */
         assert(pos_man.exists(ce) || !"pressure sensors must have a position");
@@ -165,7 +164,6 @@ tick_pressure_sensors(ship_space* ship) {
         glm::ivec3 pos_block = get_coord_containing(pos);
 
         topo_info *t = topo_find(ship->get_topo_info(pos_block));
-        topo_info *outside = topo_find(&ship->outside_topo_info);
         zone_info *z = ship->get_zone_info(t);
         float pressure = z ? (z->air_amount / t->size) : 0.0f;
 
