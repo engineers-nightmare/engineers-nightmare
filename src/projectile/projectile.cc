@@ -69,9 +69,9 @@ projectile_manager::spawn(glm::vec3 pos, glm::vec3 dir) {
 
     auto index = buffer.num++;
 
-    position(index) = pos;
-    velocity(index) = dir * initial_speed;
-    lifetime(index) = initial_lifetime;
+    projectile_pool.position[index] = pos;
+    projectile_pool.velocity[index] = dir * initial_speed;
+    projectile_pool.lifetime[index] = initial_lifetime;
 }
 
 void projectile_linear_manager::simulate(float dt) {
@@ -137,7 +137,7 @@ draw_projectiles(projectile_manager & proj_man, frame_data *frame)
         auto projectile_matrices = frame->alloc_aligned<glm::mat4>(batch_size);
 
         for (auto j = 0u; j < batch_size; j++) {
-            projectile_matrices.ptr[j] = mat_position(proj_man.position(i + j));
+            projectile_matrices.ptr[j] = mat_position(proj_man.projectile_pool.position[i+j]);
         }
 
         projectile_matrices.bind(1, frame);
