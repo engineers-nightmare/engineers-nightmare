@@ -89,10 +89,10 @@ void projectile_linear_manager::simulate(float dt) {
 
         if (projectile_pool.lifetime[i] <= 0.f) {
             destroy_instance(i);
-            --i;
         }
-
-        ++i;
+        else {
+            ++i;
+        }
     }
 }
 
