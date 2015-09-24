@@ -1,4 +1,5 @@
 #include "component_system_manager.h"
+#include "../particle.h"
 
 sensor_comparator_component_manager comparator_man;
 gas_production_component_manager gas_man;
@@ -14,8 +15,11 @@ switch_component_manager switch_man;
 switchable_component_manager switchable_man;
 type_component_manager type_man;
 
+#include <glm/gtc/random.hpp>
+
 
 extern void mark_lightfield_update(glm::ivec3 center);
+extern particle_manager *particle_man;
 
 
 /* I have no clue how we're going to actually handle these */
@@ -53,6 +57,29 @@ tick_gas_producers(ship_space * ship)
         float max_gas = gas_man.instance_pool.max_pressure[i] * t->size;
         if (z->air_amount < max_gas) {
             z->air_amount = std::min(max_gas, z->air_amount + gas_man.instance_pool.flow_rate[i]);
+
+            /* particle visibility is based on condensation/deposition process
+             * as the gas enters a /much/ lower pressure environment.
+             * we'll say it goes to zero at 0.3atm, and falloff is roughly quadratic
+             */
+            auto vis = std::max(0.0f, 0.3f - (float)z->air_amount / max_gas) / 0.3f;
+            vis = vis * vis;
+
+            if (vis > 0.0f) {
+                /* emit some particles */
+                auto mat = glm::mat3(pos_man.mat(ce));
+                for (auto j = 0; j < 5; j++) {
+                    auto spawn_pos = pos_man.position(ce)
+                            + 0.78f * glm::vec3(mat[2])
+                            + glm::linearRand(0.25f * (mat[0] + mat[1]), 0.75f * (mat[0] + mat[1]));
+                    spawn_pos.x = 0.1f * glm::round(spawn_pos.x / 0.1f);
+                    particle_man->spawn(
+                            spawn_pos,
+                            0.01f * glm::vec3(mat[2]) +
+                            glm::gaussRand(glm::vec3(0.0f), glm::vec3(0.005f)),
+                            vis);
+                }
+            }
         }
     }
 }

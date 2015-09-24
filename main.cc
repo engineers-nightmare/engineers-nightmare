@@ -21,6 +21,7 @@
 #include "src/physics.h"
 #include "src/player.h"
 #include "src/projectile/projectile.h"
+#include "src/particle.h"
 #include "src/render_data.h"
 #include "src/scopetimer.h"
 #include "src/shader.h"
@@ -114,7 +115,7 @@ unsigned frame_index;
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
-GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader;
+GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader;
 texture_set *world_textures;
 texture_set *skybox;
 ship_space *ship;
@@ -143,6 +144,7 @@ extern hw_mesh *wire_hw_meshes[num_wire_types];
 sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
 projectile_linear_manager proj_man;
+particle_manager *particle_man;
 
 glm::mat4
 mat_block_face(glm::ivec3 p, int face)
@@ -581,6 +583,9 @@ init()
 
     mesher_init();
 
+    particle_man = new particle_manager();
+    particle_man->create_particle_data(1000);
+
     projectile_sw = load_mesh("mesh/sphere.obj");
     for (auto i = 0u; i < projectile_sw->num_vertices; ++i) {
         projectile_sw->verts[i].x *= 0.01f;
@@ -633,6 +638,7 @@ init()
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
     ui_sprites_shader = load_shader("shaders/ui_sprites.vert", "shaders/ui_sprites.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
+    particle_shader = load_shader("shaders/particle.vert", "shaders/particle.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
 
@@ -654,6 +660,7 @@ init()
     world_textures->load(12, "textures/wire.png");
     world_textures->load(13, "textures/plaidnicator.png");
     world_textures->load(14, "textures/comms_wire.png");
+    world_textures->load(15, "textures/particle.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
@@ -1597,6 +1604,15 @@ void render() {
     glDepthFunc(GL_LEQUAL);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glDepthFunc(GL_LESS);
+
+    /* Draw particles with depth test on but writes off */
+    glUseProgram(particle_shader);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    draw_particles(particle_man, frame);
+    glDisable(GL_BLEND);
+
+    /* Reenable depth write */
     glDepthMask(GL_TRUE);
 
     if (draw_hud) {
@@ -1695,6 +1711,7 @@ update()
     while (fast_tick_accum.tick()) {
 
         proj_man.simulate(fast_tick_accum.period);
+        particle_man->simulate(fast_tick_accum.period);
 
         phy->tick(fast_tick_accum.period);
 
