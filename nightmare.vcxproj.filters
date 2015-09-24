@@ -150,6 +150,9 @@
     <ClCompile Include="src\component\sensor_comparator_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
+    <ClCompile Include="src\particle.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -280,6 +283,9 @@
     </ClInclude>
     <ClInclude Include="src\component\sensor_comparator_component.h">
       <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\particle.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
