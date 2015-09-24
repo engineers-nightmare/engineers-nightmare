@@ -6,7 +6,6 @@
 
 struct projectile_manager {
     struct projectile_instance_data {
-        float *mass;
         float *lifetime;
         glm::vec3 *position;
         glm::vec3 *velocity;
