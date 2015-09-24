@@ -33,22 +33,6 @@ struct projectile_manager {
 
     virtual void spawn(glm::vec3 pos, glm::vec3 vel);
 
-    float & mass(unsigned index) {
-        return projectile_pool.mass[index];
-    }
-
-    float & lifetime(unsigned index) {
-        return projectile_pool.lifetime[index];
-    }
-
-    glm::vec3 & position(unsigned index) {
-        return projectile_pool.position[index];
-    }
-
-    glm::vec3 & velocity(unsigned index) {
-        return projectile_pool.velocity[index];
-    }
-
     virtual ~projectile_manager() {
         free(buffer.buffer);
         buffer.buffer = nullptr;
