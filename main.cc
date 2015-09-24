@@ -128,7 +128,6 @@ hw_mesh *surfs_hw[6];
 text_renderer *text;
 sprite_renderer *ui_sprites;
 light_field *light;
-entity *use_entity = nullptr;
 
 extern hw_mesh *projectile_hw;
 extern sw_mesh *projectile_sw;
@@ -1710,6 +1709,8 @@ action const* get_input(en_action a) {
 
 
 struct play_state : game_state {
+    entity *use_entity = nullptr;
+
     play_state() {
     }
 
@@ -1806,7 +1807,35 @@ struct play_state : game_state {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
 
-        /* interact with ents */
+
+        auto *t = tools[pl.selected_slot];
+
+        if (t) {
+            /* both tool use and overlays need the raycast itself */
+            raycast_info rc;
+            ship->raycast(pl.eye, pl.dir, &rc);
+
+            /* tool use */
+            if (pl.use_tool) {
+                t->use(&rc);
+            }
+
+            if (pl.alt_use_tool) {
+                t->alt_use(&rc);
+            }
+
+            if (pl.long_use_tool) {
+                t->long_use(&rc);
+            }
+
+            if (pl.cycle_mode) {
+                t->cycle_mode();
+            }
+        }
+
+        /* interact with ents. do this /after/
+         * anything that may delete the entity
+         */
         entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
             phy->ghostObj, phy->dynamicsWorld);
 
@@ -1817,33 +1846,6 @@ struct play_state : game_state {
 
         if (pl.use && hit_ent) {
             use_action_on_entity(ship, hit_ent->ce);
-        }
-
-        auto *t = tools[pl.selected_slot];
-
-        if (t == nullptr) {
-            return;
-        }
-
-        /* both tool use and overlays need the raycast itself */
-        raycast_info rc;
-        ship->raycast(pl.eye, pl.dir, &rc);
-
-        /* tool use */
-        if (pl.use_tool) {
-            t->use(&rc);
-        }
-
-        if (pl.alt_use_tool) {
-            t->alt_use(&rc);
-        }
-
-        if (pl.long_use_tool) {
-            t->long_use(&rc);
-        }
-
-        if (pl.cycle_mode) {
-            t->cycle_mode();
         }
     }
 
