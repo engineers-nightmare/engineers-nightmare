@@ -100,35 +100,6 @@ void projectile_linear_manager::simulate(float dt) {
     }
 }
 
-void projectile_sine_manager::simulate(float dt) {
-    static auto time = 0.f;
-    time += dt;
-    for (auto i = 0u; i < buffer.num; ) {
-        auto new_pos = projectile_pool.position[i] + projectile_pool.velocity[i] * dt;
-        new_pos.z += sin(projectile_pool.lifetime[i] * 20)* 0.01f;
-
-        auto hit = phys_raycast_generic(projectile_pool.position[i], new_pos,
-            phy->ghostObj, phy->dynamicsWorld);
-
-        if (hit.hit) {
-            new_pos = hit.hitCoord;
-            projectile_pool.velocity[i] = glm::vec3(0);
-            projectile_pool.lifetime[i] = after_collision_lifetime;
-        }
-
-        projectile_pool.position[i] = new_pos;
-
-        projectile_pool.lifetime[i] -= dt;
-
-        if (projectile_pool.lifetime[i] <= 0.f) {
-            destroy_instance(i);
-            --i;
-        }
-
-        ++i;
-    }
-}
-
 void
 draw_projectiles(projectile_manager & proj_man, frame_data *frame)
 {
