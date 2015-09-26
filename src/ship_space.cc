@@ -279,11 +279,41 @@ ship_space::ensure_block(glm::ivec3 block)
     return get_block(block);
 }
 
+/* internal helper for creating chunks in a valid state.
+ * all blocks within the newly-created chunk are connected to the outside
+ * node in the atmo topology. this is the correct behavior for on-demand
+ * chunk creation as you edit the world. clients doing bulk creation of
+ * chunks should rebuild the atmo topology when they are finished making
+ * changes.
+ */
+static chunk *
+create_chunk(ship_space *ship)
+{
+    auto *ch = new chunk();
+
+    /* All the topo nodes in the new chunk should be attached
+     * to the outside node.
+     */
+    for (auto k = 0; k < CHUNK_SIZE; k++) {
+        for (auto j = 0; j < CHUNK_SIZE; j++) {
+            for (auto i = 0; i < CHUNK_SIZE; i++) {
+                topo_info *t = ch->topo.get(i, j, k);
+                t->p = &ship->outside_topo_info;
+            }
+        }
+    }
+
+    /* Adjust the size of the outside chunk. This is currently not
+     * used for anything, but the consistency is nice and the cost is negligible.
+     */
+    ship->outside_topo_info.size += CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
+    return ch;
+}
+
 /* ensure that the specified chunk exists
  *
- * this will instantiate a new chunk if necessary
- *
- * this will not instantiate or modify any other chunks
+ * this will instantiate a new chunk if necessary -- any other possibly-enclosed
+ * missing chunks to unconfuse the atmo system.
  */
 chunk *
 ship_space::ensure_chunk(glm::ivec3 v)
@@ -291,26 +321,22 @@ ship_space::ensure_chunk(glm::ivec3 v)
     /* automatically creates the entry if not present */
     auto &ch = this->chunks[v];
     if (!ch) {
-        ch = new chunk();
         this->mins = glm::min(this->mins, v);
         this->maxs = glm::max(this->maxs, v);
 
-        /* All the topo nodes in the new chunk should be attached
-         * to the outside node.
-         */
-        for (auto k = 0; k < CHUNK_SIZE; k++) {
-            for (auto j = 0; j < CHUNK_SIZE; j++) {
-                for (auto i = 0; i < CHUNK_SIZE; i++) {
-                    topo_info *t = ch->topo.get(i, j, k);
-                    t->p = &this->outside_topo_info;
+        ch = create_chunk(this);
+
+        /* ensure any other missing possibly-enclosed chunks exist too */
+        for (auto k = this->mins.z + 1; k < this->maxs.z; k++) {
+            for (auto j = this->mins.y + 1; j < this->maxs.y; j++) {
+                for (auto i = this->mins.x + 1; i < this->maxs.x; i++) {
+                    auto &other_ch = this->chunks[glm::ivec3(i, j, k)];
+                    if (!other_ch) {
+                        other_ch = create_chunk(this);
+                    }
                 }
             }
         }
-
-        /* Adjust the size of the outside chunk. This is currently not
-         * used for anything, but the consistency is nice and the cost is negligible.
-         */
-        this->outside_topo_info.size += CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
     }
 
     return ch;

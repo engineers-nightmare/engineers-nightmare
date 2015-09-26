@@ -99,16 +99,12 @@ struct ship_space {
     /* ensure that the specified block_{x,y,z} can be fetched with a get_block
      *
      * this will instantiate a new containing chunk if necessary
-     *
-     * this will not instantiate or modify any other chunks
      */
     block * ensure_block(glm::ivec3 block);
 
     /* ensure that the specified chunk exists
      *
      * this will instantiate a new chunk if necessary
-     *
-     * this will not instantiate or modify any other chunks
      */
     chunk * ensure_chunk(glm::ivec3 chunk);
 
