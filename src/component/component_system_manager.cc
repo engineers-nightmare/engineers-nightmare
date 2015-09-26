@@ -40,7 +40,7 @@ tick_gas_producers(ship_space * ship)
 
         auto should_produce = switchable_man.enabled(ce) && power_man.powered(ce);
         if (!should_produce) {
-            return;
+            continue;
         }
 
         auto pos = get_coord_containing(pos_man.position(ce));
@@ -198,7 +198,7 @@ tick_pressure_sensors(ship_space* ship) {
         auto & comms_attaches = ship->entity_to_attach_lookups[wire_type];
         auto attaches = comms_attaches.find(ce);
         if (attaches == comms_attaches.end()) {
-            return;
+            continue;
         }
 
         std::unordered_set<unsigned> visited_wires;
