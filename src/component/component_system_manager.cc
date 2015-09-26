@@ -129,7 +129,7 @@ tick_power_consumers(ship_space * ship) {
         }
 
         std::unordered_set<unsigned> visited_wires;
-        for (auto const & sea : attaches->second) {
+        for (auto sea : attaches->second) {
             auto wire_index = attach_topo_find(ship, wire_type_power, sea);
             if (visited_wires.find(wire_index) != visited_wires.end()) {
                 continue;
@@ -172,7 +172,7 @@ tick_light_components(ship_space* ship) {
         }
 
         std::unordered_set<unsigned> visited_wires;
-        for (auto const & sea : attaches->second) {
+        for (auto sea : attaches->second) {
             auto wire_index = attach_topo_find(ship, type, sea);
             if (visited_wires.find(wire_index) != visited_wires.end()) {
                 continue;
@@ -230,7 +230,7 @@ tick_pressure_sensors(ship_space* ship) {
         }
 
         std::unordered_set<unsigned> visited_wires;
-        for (auto const & sea : attaches->second) {
+        for (auto sea : attaches->second) {
             auto wire_index = attach_topo_find(ship, wire_type, sea);
             if (visited_wires.find(wire_index) != visited_wires.end()) {
                 continue;
@@ -274,7 +274,7 @@ tick_sensor_comparators(ship_space* ship) {
         }
 
         std::unordered_set<unsigned> visited_wires;
-        for (auto const & sea : attaches->second) {
+        for (auto sea : attaches->second) {
             auto wire_index = attach_topo_find(ship, type, sea);
             if (visited_wires.find(wire_index) != visited_wires.end()) {
                 continue;
@@ -315,9 +315,8 @@ tick_sensor_comparators(ship_space* ship) {
         visited_wires.clear();
 
         auto const & pub_attaches = comms_attaches[ce];
-        for (auto const & sea : pub_attaches) {
-            auto const & attach = ship->wire_attachments[type][sea];
-            auto wire_index = attach_topo_find(ship, type, attach.parent);
+        for (auto sea : pub_attaches) {
+            auto wire_index = attach_topo_find(ship, type, sea);
             if (visited_wires.find(wire_index) != visited_wires.end()) {
                 continue;
             }
