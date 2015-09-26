@@ -111,7 +111,7 @@ tick_power_consumers(ship_space * ship) {
 
             visited_wires.insert(wire_index);
             /* todo: this needs to somehow handle multiple wires */
-            powered |= wire.total_power >= wire.total_draw;
+            powered |= wire.total_power >= wire.total_draw && wire.total_power > 0;
         }
 
         if (powered != old_powered) {
