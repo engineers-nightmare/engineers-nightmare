@@ -574,7 +574,7 @@ ship_space::rebuild_topology()
                     if (air_permeable(bl->surfs[i])) {
                         glm::ivec3 offset = dirs[i];
                         topo_unite(to,
-                            get_topo_info(CHUNK_SIZE * it->first.x + glm::ivec3(CHUNK_SIZE - 1, y, z) + offset));
+                            get_topo_info(CHUNK_SIZE * it->first + glm::ivec3(CHUNK_SIZE - 1, y, z) + offset));
                     }
                 }
 
