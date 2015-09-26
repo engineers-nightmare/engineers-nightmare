@@ -198,7 +198,7 @@ tick_pressure_sensors(ship_space* ship) {
         auto & comms_attaches = ship->entity_to_attach_lookups[wire_type];
         auto attaches = comms_attaches.find(ce);
         if (attaches == comms_attaches.end()) {
-            return;
+            continue;
         }
 
         std::unordered_set<unsigned> visited_wires;
