@@ -40,7 +40,7 @@ tick_gas_producers(ship_space * ship)
 
         auto should_produce = switchable_man.enabled(ce) && power_man.powered(ce);
         if (!should_produce) {
-            return;
+            continue;
         }
 
         auto pos = get_coord_containing(pos_man.position(ce));
