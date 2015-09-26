@@ -1117,7 +1117,7 @@ struct add_wiring_tool : tool
             auto d = glm::vec3(wire_attachments[i].transform[3][0],
                 wire_attachments[i].transform[3][1],
                 wire_attachments[i].transform[3][2]) - pt;
-            if (glm::dot(d, d) <= 0.05f * 0.05f) {
+            if (glm::dot(d, d) <= 0.025f * 0.025f) {
                 if (i == ignore) {
                     continue;
                 }
@@ -1140,8 +1140,8 @@ struct add_wiring_tool : tool
         if (!hit.hit)
             return false;
 
-        // offset 0.05 as that's how model is
-        pt = hit.hitCoord + hit.hitNormal * 0.05f;
+        // offset 0.025 as that's how model is
+        pt = hit.hitCoord + hit.hitNormal * 0.025f;
         normal = hit.hitNormal;
 
         return true;
