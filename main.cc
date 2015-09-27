@@ -190,6 +190,7 @@ struct entity_type
     char const *mesh;
     int material;
     bool placed_on_surface;
+    int height;
 
     /* loader loop does these */
     sw_mesh *sw;
@@ -200,16 +201,16 @@ struct entity_type
 
 
 entity_type entity_types[] = {
-    { "Door", "mesh/single_door_frame.obj", 2, false },
-    { "Frobnicator", "mesh/frobnicator.obj", 3, false },
-    { "Light", "mesh/panel_4x4.obj", 8, true },
-    { "Warning Light", "mesh/warning_light.obj", 8, true },
-    { "Display Panel", "mesh/panel_4x4.obj", 7, true },
-    { "Switch", "mesh/panel_1x1.obj", 9, true },
-    { "Plaidnicator", "mesh/frobnicator.obj", 13, false },
-    { "Pressure Sensor 1", "mesh/panel_1x1.obj", 12, true },
-    { "Pressure Sensor 2", "mesh/panel_1x1.obj", 14, true },
-    { "Sensor Comparator", "mesh/panel_1x1.obj", 13, true },
+    { "Door", "mesh/single_door_frame.obj", 2, false, 2 },
+    { "Frobnicator", "mesh/frobnicator.obj", 3, false, 1 },
+    { "Light", "mesh/panel_4x4.obj", 8, true, 1 },
+    { "Warning Light", "mesh/warning_light.obj", 8, true, 1 },
+    { "Display Panel", "mesh/panel_4x4.obj", 7, true, 1 },
+    { "Switch", "mesh/panel_1x1.obj", 9, true, 1 },
+    { "Plaidnicator", "mesh/frobnicator.obj", 13, false, 1 },
+    { "Pressure Sensor 1", "mesh/panel_1x1.obj", 12, true, 1 },
+    { "Pressure Sensor 2", "mesh/panel_1x1.obj", 14, true, 1 },
+    { "Sensor Comparator", "mesh/panel_1x1.obj", 13, true, 1 },
 };
 
 
@@ -750,6 +751,28 @@ resize(int width, int height)
 void
 destroy_entity(entity *e)
 {
+    /* removing block influence from this ent */
+    /* this should really be componentified */
+    if (surface_man.exists(e->ce)) {
+        auto b = surface_man.block(e->ce);
+        auto type = &entity_types[type_man.type(e->ce)];
+
+        for (auto i = 0; i < type->height; i++) {
+            auto p = b + glm::ivec3(0, 0, i);
+            block *bl = ship->get_block(p);
+            assert(bl);
+            if (bl->type == block_entity) {
+                printf("emptying %d,%d,%d on remove of ent\n", p.x, p.y, p.z);
+                bl->type = block_empty;
+
+                for (auto face = 0; face < 6; face++) {
+                    /* unreserve all the space */
+                    bl->surf_space[face] = 0;
+                }
+            }
+        }
+    }
+
     comparator_man.destroy_entity_instance(e->ce);
     gas_man.destroy_entity_instance(e->ce);
     light_man.destroy_entity_instance(e->ce);
@@ -861,26 +884,19 @@ remove_ents_from_surface(glm::ivec3 b, int face)
         const auto & p = surface_man.block(e->ce);
         const auto & f = surface_man.face(e->ce);
 
-        if (p == b && f == face) {
+        auto type = &entity_types[type_man.type(e->ce)];
+
+        if (p.x == b.x && p.y == b.y && p.z <= b.z && p.z + type->height > b.z && f == face) {
             destroy_entity(e);
             it = ch->entities.erase(it);
+
+            block *bl = ship->get_block(p);
+            assert(bl);
+            bl->surf_space[face] = 0;   /* we've popped *everything* off, it must be empty now */
         }
         else {
             ++it;
         }
-    }
-
-    block *bl = ship->get_block(b);
-    assert(bl);
-
-    bl->surf_space[face] = 0;   /* we've popped *everything* off, it must be empty now */
-
-    if (face == surface_zm) {
-
-        if (bl->type == block_entity)
-            bl->type = block_empty;
-
-        ch->render_chunk.valid = false;
     }
 }
 
@@ -898,37 +914,44 @@ struct add_block_entity_tool : tool
             rc->p == get_coord_containing(pl.pos))
             return false;
 
-        block *bl = ship->get_block(rc->p);
-
-        if (bl) {
-            /* check for surface ents that would conflict */
-            for (int face = 0; face < face_count; face++)
-                if (bl->surf_space[face])
-                    return false;
+        /* block ents can only be placed in empty space, on a scaffold */
+        if (!rc->block || rc->block->type != block_support) {
+            return false;
         }
 
-        /* block ents can only be placed in empty space, on a scaffold */
-        return bl && rc->block->type == block_support;
+        for (auto i = 0; i < entity_types[type].height; i++) {
+            block *bl = ship->get_block(rc->p + glm::ivec3(0, 0, i));
+            if (bl) {
+                /* check for surface ents that would conflict */
+                for (int face = 0; face < face_count; face++)
+                    if (bl->surf_space[face])
+                        return false;
+            }
+        }
+
+        return true;
     }
 
     void use(raycast_info *rc) override {
         if (!can_use(rc))
             return;
 
-        /* dirty the chunk -- TODO: do we really have to do this when changing a cell from
-         * empty -> entity? */
         chunk *ch = ship->get_chunk_containing(rc->p);
-        ch->render_chunk.valid = false;
         ch->entities.push_back(
             new entity(rc->p, type, surface_zm)
             );
 
-        block *bl = ship->get_block(rc->p);
-        bl->type = block_entity;
+        for (auto i = 0; i < entity_types[type].height; i++) {
+            auto p = rc->p + glm::ivec3(0, 0, i);
+            block *bl = ship->ensure_block(p);
+            bl->type = block_entity;
+            printf("taking block %d,%d,%d\n", p.x, p.y, p.z);
 
-        /* consume ALL the space on the surfaces */
-        for (int face = 0; face < face_count; face++)
-            bl->surf_space[face] = ~0;
+            /* consume ALL the space on the surfaces */
+            for (int face = 0; face < face_count; face++) {
+                bl->surf_space[face] = ~0;
+            }
+        }
     }
 
     void alt_use(raycast_info *rc) override {}
