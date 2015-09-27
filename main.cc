@@ -1409,8 +1409,10 @@ struct add_wiring_tool : tool
         unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
 
         auto changed = remove_segments_containing(ship, type, existing_attach);
-        changed |= relocate_segments_and_entity_attaches(ship, type,
-            existing_attach, attach_moving_for_delete);
+        if (relocate_segments_and_entity_attaches(ship, type,
+            existing_attach, attach_moving_for_delete)) {
+            changed = true;
+        }
 
         /* move attach_moving_for_delete to existing_attach, and trim off the last one. */
         wire_attachments[existing_attach] = wire_attachments[attach_moving_for_delete];
@@ -1418,7 +1420,6 @@ struct add_wiring_tool : tool
 
         /* if we changed anything, rebuild the topology */
         if (changed) {
-            /* TODO: fix add wiring tool to support more wire types */
             attach_topo_rebuild(ship, type);
         }
     }
