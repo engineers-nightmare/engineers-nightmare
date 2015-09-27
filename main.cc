@@ -115,7 +115,7 @@ unsigned frame_index;
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
-GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader;
+GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader, modelspace_uv_shader;
 texture_set *world_textures;
 texture_set *skybox;
 ship_space *ship;
@@ -651,6 +651,7 @@ init()
     ui_sprites_shader = load_shader("shaders/ui_sprites.vert", "shaders/ui_sprites.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
     particle_shader = load_shader("shaders/particle.vert", "shaders/particle.frag");
+    modelspace_uv_shader = load_shader("shaders/simple_modelspace_uv.vert", "shaders/simple.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
 
@@ -1600,6 +1601,7 @@ void render() {
     state->render(frame);
 
     draw_renderables(frame);
+    glUseProgram(modelspace_uv_shader);
     draw_doors(frame);
 
     /* draw the projectiles */
