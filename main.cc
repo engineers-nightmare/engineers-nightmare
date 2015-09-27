@@ -130,6 +130,9 @@ text_renderer *text;
 sprite_renderer *ui_sprites;
 light_field *light;
 
+sw_mesh *door_sw;
+hw_mesh *door_hw;
+
 extern hw_mesh *projectile_hw;
 extern sw_mesh *projectile_sw;
 
@@ -600,6 +603,10 @@ init()
     wire_hw_meshes[wire_type_power] = upload_mesh(wire_sw);
     set_mesh_material(wire_sw, 14);
     wire_hw_meshes[wire_type_comms] = upload_mesh(wire_sw);
+
+    door_sw = load_mesh("mesh/single_door.obj");
+    set_mesh_material(door_sw, 2);  /* TODO: paint a new texture for this one */
+    door_hw = upload_mesh(door_sw);
 
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
 
