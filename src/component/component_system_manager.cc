@@ -115,6 +115,56 @@ tick_gas_producers(ship_space * ship)
 
 
 void
+tick_doors(ship_space * ship)
+{
+    for (auto i = 0u; i < door_man.buffer.num; i++) {
+        auto ce = door_man.instance_pool.entity[i];
+
+        /* gas producers require: power, position */
+        assert(switchable_man.exists(ce) || !"gas producer must be switchable");
+
+        auto comms = wire_type_comms;
+        auto & comms_attaches = ship->entity_to_attach_lookups[comms];
+        auto attaches = comms_attaches.find(ce);
+        if (attaches != comms_attaches.end()) {
+            std::unordered_set<unsigned> visited_wires;
+            for (auto const & sea : attaches->second) {
+                auto wire_index = attach_topo_find(ship, comms, sea);
+                if (visited_wires.find(wire_index) != visited_wires.end()) {
+                    continue;
+                }
+
+                auto const & wire = ship->comms_wires[wire_index];
+
+                visited_wires.insert(wire_index);
+
+                /* now that we have the wire, see if it has any msgs for us */
+                /* todo: origin discrimination */
+                for (auto msg : wire.read_buffer) {
+
+                    if (msg.desc == comms_msg_type_switch_state) {
+
+                        auto data = clamp(msg.data, 0.f, 1.f);
+                        switchable_man.enabled(ce) = data > 0;
+                    }
+                }
+            }
+        }
+
+        /* it's a power door, it's not going /anywhere/ without power */
+        if (!power_man.powered(ce)) {
+            continue;
+        }
+
+        auto desired_state = switchable_man.enabled(ce) ? 1.0f : 0.0f;
+
+        auto delta = clamp(door_man.instance_pool.pos[i] - desired_state, -0.1f, 0.1f);
+        door_man.instance_pool.pos[i] -= delta;
+    }
+}
+
+
+void
 tick_power_consumers(ship_space * ship) {
     for (auto i = 0u; i < power_man.buffer.num; i++) {
         auto ce = power_man.instance_pool.entity[i];

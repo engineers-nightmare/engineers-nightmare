@@ -1688,6 +1688,7 @@ update()
         tick_light_components(ship);
         tick_pressure_sensors(ship);
         tick_sensor_comparators(ship);
+        tick_doors(ship);
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);

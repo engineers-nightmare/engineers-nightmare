@@ -45,6 +45,9 @@ void
 tick_gas_producers(ship_space * ship);
 
 void
+tick_doors(ship_space * ship);
+
+void
 tick_power_consumers(ship_space * ship);
 
 void
