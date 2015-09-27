@@ -1848,6 +1848,12 @@ struct play_state : game_state {
          */
         entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
             phy->ghostObj, phy->dynamicsWorld);
+        /* can only interact with entities which have
+         * the switch component
+         */
+        if (hit_ent && !switch_man.exists(hit_ent->ce)) {
+            hit_ent = nullptr;
+        }
 
         if (hit_ent != use_entity) {
             use_entity = hit_ent;
