@@ -105,6 +105,9 @@
     <ClCompile Include="src\projectile\projectile.cc">
       <Filter>Source Files\projectile</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\door_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
     <ClCompile Include="src\component\gas_production_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
@@ -222,6 +225,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\component\component_manager.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\door_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\component\gas_production_component.h">

@@ -18,6 +18,7 @@
 #include "switch_component.h"
 #include "switchable_component.h"
 #include "type_component.h"
+#include "door_component.h"
 
 extern sensor_comparator_component_manager comparator_man;
 extern gas_production_component_manager gas_man;
@@ -32,6 +33,7 @@ extern surface_attachment_component_manager surface_man;
 extern switch_component_manager switch_man;
 extern switchable_component_manager switchable_man;
 extern type_component_manager type_man;
+extern door_component_manager door_man;
 
 extern const char * comms_msg_type_switch_state;
 extern const char * comms_msg_type_pressure_sensor_1_state;
@@ -41,6 +43,9 @@ extern const char * comms_msg_type_sensor_comparison_state;
 
 void
 tick_gas_producers(ship_space * ship);
+
+void
+tick_doors(ship_space * ship);
 
 void
 tick_power_consumers(ship_space * ship);
@@ -56,3 +61,6 @@ tick_sensor_comparators(ship_space* ship);
 
 void
 draw_renderables(frame_data *frame);
+
+void
+draw_doors(frame_data *frame);
