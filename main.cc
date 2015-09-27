@@ -1128,7 +1128,7 @@ struct add_wiring_tool : tool
         return invalid_attach;
     }
 
-    bool get_attach_point(entity ** hit_entity, glm::vec3 start, glm::vec3 dir, glm::vec3 & pt, glm::vec3 & normal) {
+    bool get_attach_point(glm::vec3 start, glm::vec3 dir, glm::vec3 *pt, glm::vec3 *normal, entity **hit_entity) {
         auto end = start + dir * 5.0f;
 
         *hit_entity = phys_raycast(start, end,
@@ -1141,8 +1141,8 @@ struct add_wiring_tool : tool
             return false;
 
         // offset 0.025 as that's how model is
-        pt = hit.hitCoord + hit.hitNormal * 0.025f;
-        normal = hit.hitNormal;
+        *pt = hit.hitCoord + hit.hitNormal * 0.025f;
+        *normal = hit.hitNormal;
 
         return true;
     }
@@ -1197,7 +1197,7 @@ struct add_wiring_tool : tool
             ship->active_wire[t][1] = invalid_wire;
         }
 
-        if (!get_attach_point(&hit_entity, pl.eye, pl.dir, pt, normal)) {
+        if (!get_attach_point(pl.eye, pl.dir, &pt, &normal, &hit_entity)) {
             return;
         }
 
@@ -1277,7 +1277,7 @@ struct add_wiring_tool : tool
         glm::vec3 pt;
         glm::vec3 normal;
 
-        if (!get_attach_point(&hit_entity, pl.eye, pl.dir, pt, normal))
+        if (!get_attach_point(pl.eye, pl.dir, &pt, &normal, &hit_entity))
             return;
 
         auto & wire_attachments = ship->wire_attachments[type];
@@ -1391,7 +1391,7 @@ struct add_wiring_tool : tool
         glm::vec3 pt;
         glm::vec3 normal;
 
-        if (!get_attach_point(&hit_entity, pl.eye, pl.dir, pt, normal)) {
+        if (!get_attach_point(pl.eye, pl.dir, &pt, &normal, &hit_entity)) {
             return;
         }
 
@@ -1434,7 +1434,7 @@ struct add_wiring_tool : tool
         auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
 
         if (current_attach == invalid_attach) {
-            if (!get_attach_point(&hit_entity, pl.eye, pl.dir, pt, normal))
+            if (!get_attach_point(pl.eye, pl.dir, &pt, &normal, &hit_entity))
                 return;
 
             existing_attach = get_existing_attach_near(pt);
@@ -1450,7 +1450,7 @@ struct add_wiring_tool : tool
             auto att_rot = glm::vec3(att_mat[2][0], att_mat[2][1], att_mat[2][2]);
             auto att_pos = glm::vec3(att_mat[3]);
             att_rot *= -1.f;
-            get_attach_point(&hit_entity, att_pos, att_rot, pt, normal);
+            get_attach_point(att_pos, att_rot, &pt, &normal, &hit_entity);
 
             current_attach = existing_attach;
 
