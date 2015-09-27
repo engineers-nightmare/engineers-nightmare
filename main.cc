@@ -115,7 +115,7 @@ unsigned frame_index;
 sw_mesh *scaffold_sw;
 sw_mesh *surfs_sw[6];
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
-GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader;
+GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader, modelspace_uv_shader;
 texture_set *world_textures;
 texture_set *skybox;
 ship_space *ship;
@@ -129,6 +129,9 @@ hw_mesh *surfs_hw[6];
 text_renderer *text;
 sprite_renderer *ui_sprites;
 light_field *light;
+
+sw_mesh *door_sw;
+hw_mesh *door_hw;
 
 extern hw_mesh *projectile_hw;
 extern sw_mesh *projectile_sw;
@@ -247,8 +250,20 @@ struct entity
         render_man.assign_entity(ce);
         render_man.mesh(ce) = *et->hw;
 
+        if (type == 0) {
+            power_man.assign_entity(ce);
+            power_man.powered(ce) = false;
+            power_man.required_power(ce) = 8;
+
+            switchable_man.assign_entity(ce);
+            switchable_man.enabled(ce) = true;
+
+            door_man.assign_entity(ce);
+            door_man.mesh(ce) = door_hw;
+            door_man.pos(ce) = 1.0f;
+        }
         // frobnicator
-        if (type == 1) {
+        else if (type == 1) {
             power_man.assign_entity(ce);
             power_man.powered(ce) = false;
             power_man.required_power(ce) = 12;
@@ -548,6 +563,7 @@ init()
     switch_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     switchable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     type_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    door_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
     proj_man.create_projectile_data(1000);
 
@@ -601,6 +617,10 @@ init()
     set_mesh_material(wire_sw, 14);
     wire_hw_meshes[wire_type_comms] = upload_mesh(wire_sw);
 
+    door_sw = load_mesh("mesh/single_door.obj");
+    set_mesh_material(door_sw, 2);  /* TODO: paint a new texture for this one */
+    door_hw = upload_mesh(door_sw);
+
     scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
 
     surfs_sw[surface_xp] = load_mesh("mesh/x_quad_p.obj");
@@ -631,6 +651,7 @@ init()
     ui_sprites_shader = load_shader("shaders/ui_sprites.vert", "shaders/ui_sprites.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
     particle_shader = load_shader("shaders/particle.vert", "shaders/particle.frag");
+    modelspace_uv_shader = load_shader("shaders/simple_modelspace_uv.vert", "shaders/simple.frag");
 
     scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
 
@@ -743,6 +764,7 @@ destroy_entity(entity *e)
     switch_man.destroy_entity_instance(e->ce);
     switchable_man.destroy_entity_instance(e->ce);
     type_man.destroy_entity_instance(e->ce);
+    door_man.destroy_entity_instance(e->ce);
 
     for (auto _type = 0; _type < num_wire_types; _type++) {
         auto type = (wire_type)_type;
@@ -1579,6 +1601,8 @@ void render() {
     state->render(frame);
 
     draw_renderables(frame);
+    glUseProgram(modelspace_uv_shader);
+    draw_doors(frame);
 
     /* draw the projectiles */
     glUseProgram(unlit_instanced_shader);
@@ -1666,6 +1690,7 @@ update()
         tick_light_components(ship);
         tick_pressure_sensors(ship);
         tick_sensor_comparators(ship);
+        tick_doors(ship);
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);
