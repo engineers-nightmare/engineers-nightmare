@@ -551,6 +551,7 @@ init()
     switch_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     switchable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     type_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    door_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
     proj_man.create_projectile_data(1000);
 
@@ -750,6 +751,7 @@ destroy_entity(entity *e)
     switch_man.destroy_entity_instance(e->ce);
     switchable_man.destroy_entity_instance(e->ce);
     type_man.destroy_entity_instance(e->ce);
+    door_man.destroy_entity_instance(e->ce);
 
     for (auto _type = 0; _type < num_wire_types; _type++) {
         auto type = (wire_type)_type;

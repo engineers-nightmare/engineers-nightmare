@@ -14,6 +14,7 @@ surface_attachment_component_manager surface_man;
 switch_component_manager switch_man;
 switchable_component_manager switchable_man;
 type_component_manager type_man;
+door_component_manager door_man;
 
 #include <glm/gtc/random.hpp>
 
