@@ -250,8 +250,20 @@ struct entity
         render_man.assign_entity(ce);
         render_man.mesh(ce) = *et->hw;
 
+        if (type == 0) {
+            power_man.assign_entity(ce);
+            power_man.powered(ce) = false;
+            power_man.required_power(ce) = 8;
+
+            switchable_man.assign_entity(ce);
+            switchable_man.enabled(ce) = true;
+
+            door_man.assign_entity(ce);
+            door_man.mesh(ce) = door_hw;
+            door_man.pos(ce) = 1.0f;
+        }
         // frobnicator
-        if (type == 1) {
+        else if (type == 1) {
             power_man.assign_entity(ce);
             power_man.powered(ce) = false;
             power_man.required_power(ce) = 12;
