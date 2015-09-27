@@ -254,7 +254,7 @@ struct entity
             power_man.required_power(ce) = 12;
 
             switchable_man.assign_entity(ce);
-            switchable_man.enabled(ce) = false;
+            switchable_man.enabled(ce) = true;
 
             gas_man.assign_entity(ce);
             gas_man.flow_rate(ce) = 0.1f;
@@ -338,14 +338,6 @@ void use_action_on_entity(ship_space *ship, c_entity ce) {
     auto type = &entity_types[type_man.type(ce)];
     printf("player using the %s at %f %f %f\n",
             type->name, pos.x, pos.y, pos.z);
-
-    // hacks abound until we get wiring in
-    if (switchable_man.exists(ce)) {
-        // gas producer toggles directly
-        if (gas_man.exists(ce)) {
-            switchable_man.enabled(ce) ^= true;
-        }
-    }
 
     if (switch_man.exists(ce)) {
         /* publish new state on all attached comms wires */
