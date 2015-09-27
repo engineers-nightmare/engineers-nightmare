@@ -58,3 +58,6 @@ tick_sensor_comparators(ship_space* ship);
 
 void
 draw_renderables(frame_data *frame);
+
+void
+draw_doors(frame_data *frame);

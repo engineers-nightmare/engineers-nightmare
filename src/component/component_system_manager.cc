@@ -351,3 +351,26 @@ draw_renderables(frame_data *frame)
         draw_mesh(&mesh);
     }
 }
+
+
+void
+draw_doors(frame_data *frame)
+{
+    for (auto i = 0u; i < door_man.buffer.num; i++) {
+        auto ce = door_man.instance_pool.entity[i];
+        auto & mesh = door_man.instance_pool.mesh[i];
+        glm::mat4 mat = pos_man.mat(ce);
+
+        auto pos = door_man.instance_pool.pos[i];
+
+        mat[3][0] += pos * mat[0][0];
+        mat[3][1] += pos * mat[0][1];
+        mat[3][2] += pos * mat[0][2];
+
+        auto entity_matrix = frame->alloc_aligned<glm::mat4>(1);
+        *entity_matrix.ptr = mat;
+        entity_matrix.bind(1, frame);
+
+        draw_mesh(mesh);
+    }
+}

@@ -1600,6 +1600,7 @@ void render() {
     state->render(frame);
 
     draw_renderables(frame);
+    draw_doors(frame);
 
     /* draw the projectiles */
     glUseProgram(unlit_instanced_shader);
