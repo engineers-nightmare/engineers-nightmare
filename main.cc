@@ -1601,6 +1601,7 @@ void render() {
     state->render(frame);
 
     draw_renderables(frame);
+    glUseProgram(modelspace_uv_shader);
     draw_doors(frame);
 
     /* draw the projectiles */
