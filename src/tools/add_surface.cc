@@ -38,28 +38,10 @@ add_surface_tool::use(raycast_info *rc) {
     block *other_side = ship->get_block(rc->p);
 
     if (can_use(bl, other_side, index)) {
-
-        if (!bl) {
-            ship->ensure_block(rc->bl);
-            bl = ship->get_block(rc->bl);
-        }
-
-        if (!other_side) {
-            ship->ensure_block(rc->p);
-            other_side = ship->get_block(rc->p);
-        }
-
-        bl->surfs[index] = this->st;
-        ship->get_chunk_containing(rc->bl)->render_chunk.valid = false;
-
-        other_side->surfs[index ^ 1] = this->st;
-        ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
+        ship->set_surface(rc->bl, rc->p, (surface_index)index, st);
 
         mark_lightfield_update(rc->bl);
         mark_lightfield_update(rc->p);
-
-        ship->update_topology_for_add_surface(rc->bl, rc->p, index);
-
     }
 }
 
