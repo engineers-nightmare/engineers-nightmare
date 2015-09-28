@@ -675,6 +675,7 @@ init()
     world_textures->load(13, "textures/plaidnicator.png");
     world_textures->load(14, "textures/comms_wire.png");
     world_textures->load(15, "textures/particle.png");
+    world_textures->load(16, "textures/transparent_block.png");
 
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
     skybox->load(0, "textures/sky_right1.png");
