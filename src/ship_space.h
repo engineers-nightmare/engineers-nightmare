@@ -123,6 +123,10 @@ struct ship_space {
     int num_false_splits;       /* number of useless rebuilds taken */
 
     bool validate();
+
+    void set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index,
+        surface_type st);
+    void remove_surface(glm::ivec3 a, glm::ivec3 b, surface_index index);
 };
 
 /* helper */
