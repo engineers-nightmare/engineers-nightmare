@@ -39,6 +39,12 @@ tick_gas_producers(ship_space * ship)
         /* gas producers require: power, position */
         assert(switchable_man.exists(ce) || !"gas producer must be switchable");
 
+        /* don't do anything if we aren't powered and turned on */
+        auto should_produce = switchable_man.enabled(ce) && power_man.powered(ce);
+        if (!should_produce) {
+            continue;
+        }
+
         auto comms = wire_type_comms;
         auto & comms_attaches = ship->entity_to_attach_lookups[comms];
         auto attaches = comms_attaches.find(ce);
@@ -65,11 +71,6 @@ tick_gas_producers(ship_space * ship)
                     }
                 }
             }
-        }
-
-        auto should_produce = switchable_man.enabled(ce) && power_man.powered(ce);
-        if (!should_produce) {
-            continue;
         }
 
         auto pos = get_coord_containing(pos_man.position(ce));
@@ -120,8 +121,14 @@ tick_doors(ship_space * ship)
     for (auto i = 0u; i < door_man.buffer.num; i++) {
         auto ce = door_man.instance_pool.entity[i];
 
-        /* gas producers require: power, position */
-        assert(switchable_man.exists(ce) || !"gas producer must be switchable");
+        /* doors require: switchable, powered */
+        assert(switchable_man.exists(ce) || !"doors must be switchable");
+        assert(power_man.exists(ce) || !"doors must be powerable");
+
+        /* it's a power door, it's not going /anywhere/ without power */
+        if (!power_man.powered(ce)) {
+            continue;
+        }
 
         auto comms = wire_type_comms;
         auto & comms_attaches = ship->entity_to_attach_lookups[comms];
@@ -149,11 +156,6 @@ tick_doors(ship_space * ship)
                     }
                 }
             }
-        }
-
-        /* it's a power door, it's not going /anywhere/ without power */
-        if (!power_man.powered(ce)) {
-            continue;
         }
 
         auto desired_state = switchable_man.enabled(ce) ? 1.0f : 0.0f;
