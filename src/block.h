@@ -9,6 +9,7 @@ enum block_type {
 enum surface_type : unsigned char {
     surface_blocks_light = 0x40,
     surface_blocks_air = 0x80,
+    surface_is_door = 0x20,
     surface_none = 0,
 
     surface_wall = surface_blocks_light | surface_blocks_air,
@@ -16,6 +17,8 @@ enum surface_type : unsigned char {
     surface_grate = surface_blocks_light,
 
     surface_glass = surface_blocks_air,
+
+    surface_door = surface_blocks_light | surface_blocks_air | surface_is_door,
 };
 
 /* 6 surfaces currently, all axis aligned

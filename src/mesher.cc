@@ -150,6 +150,7 @@ mesher_init()
     surface_type_to_material[surface_wall] = 2;
     surface_type_to_material[surface_grate] = 4;
     surface_type_to_material[surface_glass] = 6;
+    surface_type_to_material[surface_door] = 0;
 }
 
 
