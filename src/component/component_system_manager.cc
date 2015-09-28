@@ -121,8 +121,9 @@ tick_doors(ship_space * ship)
     for (auto i = 0u; i < door_man.buffer.num; i++) {
         auto ce = door_man.instance_pool.entity[i];
 
-        /* doors require: switchable */
+        /* doors require: switchable, powered */
         assert(switchable_man.exists(ce) || !"doors must be switchable");
+        assert(power_man.exists(ce) || !"doors must be powerable");
 
         /* it's a power door, it's not going /anywhere/ without power */
         if (!power_man.powered(ce)) {
