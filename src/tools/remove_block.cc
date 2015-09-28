@@ -37,11 +37,12 @@ struct remove_block_tool : tool
         /* if there was a block entity here, find and remove it. block
          * ents are "attached" to the zm surface */
         if (bl->type == block_entity) {
+            /* TODO: should this even allow entity removal? This may be nothing more than
+             * historical accident.
+             */
             remove_ents_from_surface(rc->bl, surface_zm);
-
-            for (int face = 0; face < face_count; face++) {
-                bl->surf_space[face] = 0;   /* we've just thrown away the block ent */
-            }
+            mark_lightfield_update(rc->bl);
+            return;
         }
 
         /* block removal */
