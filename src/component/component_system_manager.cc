@@ -176,9 +176,11 @@ tick_doors(ship_space * ship)
 
             auto pos = glm::ivec3(pos_man.position(door_man.instance_pool.entity[i]));
 
+            /* todo: this has no support for rotation whatsoever */
             for (auto h = 0; h < 2; ++h) {
                 auto ym = glm::ivec3(pos.x, pos.y - 1, pos.z);
                 auto yp = glm::ivec3(pos.x, pos.y + 1, pos.z);
+
                 auto chunk = ship->get_chunk_containing(pos);
                 chunk->render_chunk.valid = false;
                 chunk = ship->get_chunk_containing(ym);
@@ -186,13 +188,27 @@ tick_doors(ship_space * ship)
                 chunk = ship->get_chunk_containing(yp);
                 chunk->render_chunk.valid = false;
 
+                /* we'll be calling ensure in set/remove surfaces anyway */
+                auto bl = ship->ensure_block(pos);
+                auto surfs = bl->surfs;
+
                 if (s == surface_none) {
-                    ship->remove_surface(pos, yp, surface_yp);
-                    ship->remove_surface(pos, ym, surface_ym);
+                    if (surfs[surface_yp] == surface_door) {
+                        ship->remove_surface(pos, yp, surface_yp);
+                    }
+
+                    if (surfs[surface_ym] == surface_door) {
+                        ship->remove_surface(pos, ym, surface_ym);
+                    }
                 }
                 else {
-                    ship->set_surface(pos, yp, surface_yp, s);
-                    ship->set_surface(pos, ym, surface_ym, s);
+                    if (surfs[surface_yp] == surface_none) {
+                        ship->set_surface(pos, yp, surface_yp, s);
+                    }
+
+                    if (surfs[surface_ym] == surface_none) {
+                        ship->set_surface(pos, ym, surface_ym, s);
+                    }
                 }
 
                 mark_lightfield_update(pos);
