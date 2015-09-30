@@ -36,11 +36,12 @@ tick_gas_producers(ship_space * ship)
     for (auto i = 0u; i < gas_man.buffer.num; i++) {
         auto ce = gas_man.instance_pool.entity[i];
 
-        /* gas producers require: power, position */
+        /* gas producers require: power, switchable */
         assert(switchable_man.exists(ce) || !"gas producer must be switchable");
+        assert(power_man.exists(ce) || !"gas producer must be powerable");
 
         /* don't do anything if we aren't powered and turned on */
-        auto should_produce = switchable_man.enabled(ce) && power_man.powered(ce);
+        auto should_produce = power_man.powered(ce);
         if (!should_produce) {
             continue;
         }
@@ -71,6 +72,11 @@ tick_gas_producers(ship_space * ship)
                     }
                 }
             }
+        }
+
+        /* we are powered if we get here. check if turned on */
+        if (!switchable_man.enabled(ce)) {
+            return;
         }
 
         auto pos = get_coord_containing(pos_man.position(ce));
@@ -113,7 +119,6 @@ tick_gas_producers(ship_space * ship)
         }
     }
 }
-
 
 void
 tick_doors(ship_space * ship)
@@ -160,8 +165,57 @@ tick_doors(ship_space * ship)
 
         auto desired_state = switchable_man.enabled(ce) ? 1.0f : 0.0f;
 
+        auto in_desired_state = door_man.instance_pool.pos[i] == desired_state;
+
         auto delta = clamp(door_man.instance_pool.pos[i] - desired_state, -0.1f, 0.1f);
         door_man.instance_pool.pos[i] -= delta;
+
+        /* did we just enter desired state? */
+        if (desired_state == door_man.instance_pool.pos[i] && !in_desired_state) {
+            auto s = desired_state ? surface_none : surface_door;
+
+            auto pos = glm::ivec3(pos_man.position(door_man.instance_pool.entity[i]));
+
+            /* todo: this has no support for rotation whatsoever */
+            for (auto h = 0; h < 2; ++h) {
+                auto ym = glm::ivec3(pos.x, pos.y - 1, pos.z);
+                auto yp = glm::ivec3(pos.x, pos.y + 1, pos.z);
+
+                auto chunk = ship->get_chunk_containing(pos);
+                chunk->render_chunk.valid = false;
+                chunk = ship->get_chunk_containing(ym);
+                chunk->render_chunk.valid = false;
+                chunk = ship->get_chunk_containing(yp);
+                chunk->render_chunk.valid = false;
+
+                /* we'll be calling ensure in set/remove surfaces anyway */
+                auto bl = ship->ensure_block(pos);
+                auto surfs = bl->surfs;
+
+                if (s == surface_none) {
+                    if (surfs[surface_yp] == surface_door) {
+                        ship->remove_surface(pos, yp, surface_yp);
+                    }
+
+                    if (surfs[surface_ym] == surface_door) {
+                        ship->remove_surface(pos, ym, surface_ym);
+                    }
+                }
+                else {
+                    if (surfs[surface_yp] == surface_none) {
+                        ship->set_surface(pos, yp, surface_yp, s);
+                    }
+
+                    if (surfs[surface_ym] == surface_none) {
+                        ship->set_surface(pos, ym, surface_ym, s);
+                    }
+                }
+
+                mark_lightfield_update(pos);
+
+                ++pos.z;
+            }
+        }
     }
 }
 

@@ -43,28 +43,10 @@ struct remove_surface_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        bl->surfs[index] = surface_none;
-        ship->get_chunk_containing(rc->bl)->render_chunk.valid = false;
-
-        /* cause the other side to exist */
-        block *other_side = ship->get_block(rc->p);
-
-        if (!other_side) {
-            /* expand: note: we shouldn't ever actually have to do this... */
-        }
-        else {
-            other_side->surfs[index ^ 1] = surface_none;
-            ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
-        }
-
-        /* remove any ents using the surface */
-        remove_ents_from_surface(rc->p, index ^ 1);
-        remove_ents_from_surface(rc->bl, index);
+        ship->remove_surface(rc->bl, rc->p, (surface_index)index);
 
         mark_lightfield_update(rc->bl);
         mark_lightfield_update(rc->p);
-
-        ship->update_topology_for_remove_surface(rc->bl, rc->p);
     }
 
     void alt_use(raycast_info *rc) override {}

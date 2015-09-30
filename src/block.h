@@ -13,6 +13,8 @@ enum surface_type : unsigned char {
 
     surface_wall = surface_blocks_light | surface_blocks_air,
 
+    surface_door,
+
     surface_grate = surface_blocks_light,
 
     surface_glass = surface_blocks_air,
