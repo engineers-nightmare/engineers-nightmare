@@ -13,13 +13,13 @@ struct pressure_sensor_component_manager : component_manager {
 
     void create_component_instance_data(unsigned count) override;
     void destroy_instance(instance i) override;
-    void entity(c_entity const &e) override;
+    void entity(c_entity e) override;
 
-    float & pressure(c_entity const &e) {
+    float & pressure(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.pressure[inst.index];
     }
-    unsigned & type(c_entity const &e) {
+    unsigned & type(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.type[inst.index];
     }

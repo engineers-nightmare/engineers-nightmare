@@ -14,17 +14,17 @@ struct gas_production_component_manager : component_manager {
 
     void create_component_instance_data(unsigned count) override;
     void destroy_instance(instance i) override;
-    void entity(c_entity const &e) override;
+    void entity(c_entity e) override;
 
-    unsigned & gas_type(c_entity const &e) {
+    unsigned & gas_type(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.gas_type[inst.index];
     }
-    float & flow_rate(c_entity const &e) {
+    float & flow_rate(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.flow_rate[inst.index];
     }
-    float & max_pressure(c_entity const &e) {
+    float & max_pressure(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.max_pressure[inst.index];
     }

@@ -12,9 +12,9 @@ struct renderable_component_manager : component_manager {
 
     void create_component_instance_data(unsigned count) override;
     void destroy_instance(instance i) override;
-    void entity(c_entity const &e) override;
+    void entity(c_entity e) override;
 
-    hw_mesh * & mesh(c_entity const &e) {
+    hw_mesh * & mesh(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.mesh[inst.index];
     }
