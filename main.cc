@@ -249,7 +249,7 @@ struct entity
         pos_man.mat(ce) = mat;
 
         render_man.assign_entity(ce);
-        render_man.mesh(ce) = *et->hw;
+        render_man.mesh(ce) = et->hw;
 
         if (type == 0) {
             power_man.assign_entity(ce);

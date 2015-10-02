@@ -454,7 +454,7 @@ draw_renderables(frame_data *frame)
         *entity_matrix.ptr = mat;
         entity_matrix.bind(1, frame);
 
-        draw_mesh(&mesh);
+        draw_mesh(mesh);
     }
 }
 
