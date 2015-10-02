@@ -36,8 +36,6 @@ struct remove_surface_tool : tool
         if (!can_use(rc))
             return;
 
-        block *bl = rc->block;
-
         int index = normal_to_surface_index(rc);
 
         ship->remove_surface(rc->bl, rc->p, (surface_index)index);
