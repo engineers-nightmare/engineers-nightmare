@@ -214,11 +214,6 @@ entity_type entity_types[] = {
 };
 
 
-/* fwd for temp spawn logic just below */
-void
-mark_lightfield_update(glm::ivec3 p);
-
-
 struct entity
 {
     /* TODO: replace this completely, it's silly. */
