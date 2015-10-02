@@ -13,13 +13,13 @@ struct surface_attachment_component_manager : component_manager {
 
     void create_component_instance_data(unsigned count) override;
     void destroy_instance(instance i) override;
-    void entity(c_entity const &e) override;
+    void entity(c_entity e) override;
 
-    glm::ivec3 & block(c_entity const &e) {
+    glm::ivec3 & block(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.block[inst.index];
     }
-    int & face(c_entity const &e) {
+    int & face(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.face[inst.index];
     }

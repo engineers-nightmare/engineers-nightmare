@@ -11,9 +11,6 @@ extern GLuint add_overlay_shader;
 extern GLuint remove_overlay_shader;
 extern GLuint simple_shader;
 
-extern void
-mark_lightfield_update(glm::ivec3 p);
-
 extern ship_space *ship;
 
 extern hw_mesh *surfs_hw[6];
@@ -38,8 +35,6 @@ struct remove_surface_tool : tool
     {
         if (!can_use(rc))
             return;
-
-        block *bl = rc->block;
 
         int index = normal_to_surface_index(rc);
 

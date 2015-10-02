@@ -53,7 +53,7 @@ pressure_sensor_component_manager::destroy_instance(instance i) {
 }
 
 void
-pressure_sensor_component_manager::entity(c_entity const &e) {
+pressure_sensor_component_manager::entity(c_entity e) {
     if (buffer.num >= buffer.allocated) {
         printf("Increasing size of pressure_sensor buffer. Please adjust\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);

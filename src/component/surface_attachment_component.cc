@@ -53,7 +53,7 @@ surface_attachment_component_manager::destroy_instance(instance i) {
 }
 
 void
-surface_attachment_component_manager::entity(c_entity const &e) {
+surface_attachment_component_manager::entity(c_entity e) {
     if (buffer.num >= buffer.allocated) {
         printf("Increasing size of surface_attachment buffer. Please adjust\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);

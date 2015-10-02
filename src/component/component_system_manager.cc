@@ -19,7 +19,6 @@ door_component_manager door_man;
 #include <glm/gtc/random.hpp>
 
 
-extern void mark_lightfield_update(glm::ivec3 center);
 extern particle_manager *particle_man;
 
 
@@ -454,7 +453,7 @@ draw_renderables(frame_data *frame)
         *entity_matrix.ptr = mat;
         entity_matrix.bind(1, frame);
 
-        draw_mesh(&mesh);
+        draw_mesh(mesh);
     }
 }
 

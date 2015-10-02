@@ -13,13 +13,13 @@ struct light_component_manager : component_manager {
 
     void create_component_instance_data(unsigned count) override;
     void destroy_instance(instance i) override;
-    void entity(c_entity const &e) override;
+    void entity(c_entity e) override;
 
-    float & intensity(c_entity const &e) {
+    float & intensity(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.intensity[inst.index];
     }
-    unsigned & type(c_entity const &e) {
+    unsigned & type(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.type[inst.index];
     }

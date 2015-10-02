@@ -26,11 +26,11 @@ header_template_3="""    } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
     void destroy_instance(instance i) override;
-    void entity(c_entity const &e) override;
+    void entity(c_entity e) override;
 
 """
 
-header_template_4="""    %(type)s & %(name)s(c_entity const &e) {
+header_template_4="""    %(type)s & %(name)s(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.%(name)s[inst.index];
     }
@@ -106,7 +106,7 @@ impl_template_9="""
 }
 
 void
-%s_component_manager::entity(c_entity const &e) {
+%s_component_manager::entity(c_entity e) {
     if (buffer.num >= buffer.allocated) {
         printf("Increasing size of %s buffer. Please adjust\\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);

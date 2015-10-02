@@ -49,7 +49,7 @@ switch_component_manager::destroy_instance(instance i) {
 }
 
 void
-switch_component_manager::entity(c_entity const &e) {
+switch_component_manager::entity(c_entity e) {
     if (buffer.num >= buffer.allocated) {
         printf("Increasing size of switch buffer. Please adjust\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);

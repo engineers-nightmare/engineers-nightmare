@@ -65,3 +65,6 @@ static inline glm::mat4
 mat_scale(float x, float y, float z) {
     return mat_scale(glm::vec3(x, y, z));
 }
+
+void
+mark_lightfield_update(glm::ivec3 p);

@@ -12,9 +12,9 @@ struct physics_component_manager : component_manager {
 
     void create_component_instance_data(unsigned count) override;
     void destroy_instance(instance i) override;
-    void entity(c_entity const &e) override;
+    void entity(c_entity e) override;
 
-    btRigidBody * & rigid(c_entity const &e) {
+    btRigidBody * & rigid(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.rigid[inst.index];
     }

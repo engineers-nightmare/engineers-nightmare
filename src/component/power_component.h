@@ -13,13 +13,13 @@ struct power_component_manager : component_manager {
 
     void create_component_instance_data(unsigned count) override;
     void destroy_instance(instance i) override;
-    void entity(c_entity const &e) override;
+    void entity(c_entity e) override;
 
-    unsigned & required_power(c_entity const &e) {
+    unsigned & required_power(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.required_power[inst.index];
     }
-    bool & powered(c_entity const &e) {
+    bool & powered(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.powered[inst.index];
     }
