@@ -1,0 +1,2 @@
+unsigned,required_power
+bool,powered

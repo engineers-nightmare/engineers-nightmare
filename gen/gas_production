@@ -1,0 +1,3 @@
+unsigned,gas_type
+float,flow_rate
+float,max_pressure

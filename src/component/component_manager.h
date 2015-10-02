@@ -2,6 +2,11 @@
 
 #include <unordered_map>
 #include <string.h>
+#include <glm/glm.hpp>
+#include "../mesh.h"
+
+/* fwd */
+class btRigidBody;
 
 static unsigned entities_id_ref = 1;
 struct c_entity {
