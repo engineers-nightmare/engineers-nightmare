@@ -1151,11 +1151,18 @@ struct remove_surface_entity_tool : tool
 
 struct add_wiring_tool : tool
 {
+    enum add_wiring_state {
+        aws_none,
+        aws_placing,
+        aws_moving,
+    };
+
     unsigned current_attach = invalid_attach;
     bool moving_existing = false;
     wire_attachment old_attach;
     entity *old_entity = nullptr;
     wire_type type;
+    add_wiring_state state = aws_none;
 
     add_wiring_tool() {
         type = (wire_type)0;
@@ -1205,32 +1212,41 @@ struct add_wiring_tool : tool
 
         auto allow_placement = true;
 
-        auto & ent_att_lookup = ship->entity_to_attach_lookups[type];
-        auto const & a1 = ship->wire_attachments[type][current_attach];
-        auto const & a2 = ship->wire_attachments[type][existing_attach];
+        switch (state) {
+        case aws_none:
+        case aws_placing:
+        case aws_moving:
+        default:
+            {
+                auto & ent_att_lookup = ship->entity_to_attach_lookups[type];
+                auto const & a1 = ship->wire_attachments[type][current_attach];
+                auto const & a2 = ship->wire_attachments[type][existing_attach];
 
-        // not pointing at existing
+                // not pointing at existing
 
-        if (existing_attach != invalid_attach && moving_existing) {
-            auto w1 = attach_topo_find(ship, type, a1.parent);
-            auto w2 = attach_topo_find(ship, type, a2.parent);
+                if (existing_attach != invalid_attach && moving_existing) {
+                    auto w1 = attach_topo_find(ship, type, a1.parent);
+                    auto w2 = attach_topo_find(ship, type, a2.parent);
 
-            if (w1 != w2) {
-                allow_placement = false;
-            }
-        }
+                    if (w1 != w2) {
+                        allow_placement = false;
+                    }
+                }
 
-        if (allow_placement &&
-            (existing_attach == invalid_attach || moving_existing)) {
+                if (allow_placement &&
+                    (existing_attach == invalid_attach || moving_existing)) {
 
-            /* don't allow placement on entity with existing power attach */
-            if (hit_entity &&
-                ent_att_lookup.find(hit_entity->ce) != ent_att_lookup.end()) {
-                auto const & atts = ent_att_lookup[hit_entity->ce];
-                if (atts.size() > 0) {
-                    allow_placement = false;
+                    /* don't allow placement on entity with existing wire_type attach */
+                    if (hit_entity &&
+                        ent_att_lookup.find(hit_entity->ce) != ent_att_lookup.end()) {
+                        auto const & atts = ent_att_lookup[hit_entity->ce];
+                        if (atts.size() > 0) {
+                            allow_placement = false;
+                        }
+                    }
                 }
             }
+            break;
         }
         return allow_placement;
     }
@@ -1258,69 +1274,78 @@ struct add_wiring_tool : tool
         unsigned existing_attach = get_existing_attach_near(pt);
         unsigned existing_attach_ignore = get_existing_attach_near(pt, current_attach);
 
-        auto allow_placement = can_place(ship, current_attach,
-            existing_attach, hit_entity);
-
         wire_attachment a1;
         wire_attachment a2;
 
-        if (current_attach != invalid_attach) {
-            a1 = wire_attachments[current_attach];
+        auto allow_placement = can_place(ship, current_attach,
+            existing_attach, hit_entity);
 
-            ship->active_wire[type][0] = attach_topo_find(ship, type, a1.parent);
-        }
+        switch (state) {
+        case aws_none:
+        case aws_placing:
+        case aws_moving:
+        default:
+            {
+                if (current_attach != invalid_attach) {
+                    a1 = wire_attachments[current_attach];
 
-        if (moving_existing) {
-            glm::mat4 mat;
-            if (existing_attach_ignore != invalid_attach) {
-                mat = wire_attachments[existing_attach_ignore].transform;
+                    ship->active_wire[type][0] = attach_topo_find(ship, type, a1.parent);
+                }
+
+                if (moving_existing) {
+                    glm::mat4 mat;
+                    if (existing_attach_ignore != invalid_attach) {
+                        mat = wire_attachments[existing_attach_ignore].transform;
+                    }
+                    else {
+                        mat = mat_rotate_mesh(pt, normal);
+                    }
+
+                    /* todo: this is bad. we shouldn't be modifying state in preview
+                     * as preview now lives in our draw loop
+                     */
+                    wire_attachments[current_attach].transform = mat;
+                }
+
+                if (current_attach == existing_attach) {
+                    a1.transform = mat_position(pt);
+                }
+
+                if (existing_attach != invalid_attach) {
+                    a2 = wire_attachments[existing_attach];
+                    pt = glm::vec3(a2.transform[3]);
+
+                    ship->active_wire[type][1] = attach_topo_find(ship, type, a2.parent);
+                }
+                else {
+                    a2 = { mat_rotate_mesh(pt, normal) };
+                }
+
+                /* if existing, place preview mesh as existing
+                 * otherwise use raycast info
+                 */
+                auto mat = frame->alloc_aligned<glm::mat4>(1);
+                *mat.ptr = a2.transform;
+                mat.bind(1, frame);
+
+                glUseProgram(unlit_shader);
+                draw_mesh(allow_placement ? attachment_hw : no_placement_hw);
+                glUseProgram(simple_shader);
+
+                if (current_attach == invalid_attach)
+                    return;
+
+                if (allow_placement && current_attach != existing_attach) {
+                    mat = frame->alloc_aligned<glm::mat4>(1);
+                    *mat.ptr = calc_segment_matrix(a1, a2);
+                    mat.bind(1, frame);
+
+                    glUseProgram(unlit_shader);
+                    draw_mesh(wire_hw_meshes[type]);
+                    glUseProgram(simple_shader);
+                }
             }
-            else {
-                mat = mat_rotate_mesh(pt, normal);
-            }
-
-            /* todo: this is bad. we shouldn't be modifying state in preview
-             * as preview now lives in our draw loop
-             */
-            wire_attachments[current_attach].transform = mat;
-        }
-
-        if (current_attach == existing_attach) {
-            a1.transform = mat_position(pt);
-        }
-
-        if (existing_attach != invalid_attach) {
-            a2 = wire_attachments[existing_attach];
-            pt = glm::vec3(a2.transform[3]);
-
-            ship->active_wire[type][1] = attach_topo_find(ship, type, a2.parent);
-        }
-        else {
-            a2 = { mat_rotate_mesh(pt, normal) };
-        }
-
-        /* if existing, place preview mesh as existing
-         * otherwise use raycast info
-         */
-        auto mat = frame->alloc_aligned<glm::mat4>(1);
-        *mat.ptr = a2.transform;
-        mat.bind(1, frame);
-
-        glUseProgram(unlit_shader);
-        draw_mesh(allow_placement ? attachment_hw : no_placement_hw);
-        glUseProgram(simple_shader);
-
-        if (current_attach == invalid_attach)
-            return;
-
-        if (allow_placement && current_attach != existing_attach) {
-            mat = frame->alloc_aligned<glm::mat4>(1);
-            *mat.ptr = calc_segment_matrix(a1, a2);
-            mat.bind(1, frame);
-
-            glUseProgram(unlit_shader);
-            draw_mesh(wire_hw_meshes[type]);
-            glUseProgram(simple_shader);
+            break;
         }
     }
 
@@ -1336,79 +1361,88 @@ struct add_wiring_tool : tool
         auto & wire_segments = ship->wire_segments[type];
         auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
 
-        if (moving_existing) {
-            /* did we just move to an already existing attach */
-            unsigned existing_attach = get_existing_attach_near(pt, current_attach);
+        switch (state) {
+        case aws_none:
+        case aws_placing:
+        case aws_moving:
+        default:
+            {
+                if (moving_existing) {
+                    /* did we just move to an already existing attach */
+                    unsigned existing_attach = get_existing_attach_near(pt, current_attach);
 
-            /* we did move to an existing. need to merge
-             */
-            if (existing_attach != invalid_attach) {
-                relocate_segments_and_entity_attaches(ship, type, existing_attach, current_attach);
+                    /* we did move to an existing. need to merge
+                     */
+                    if (existing_attach != invalid_attach) {
+                        relocate_segments_and_entity_attaches(ship, type, existing_attach, current_attach);
 
-                auto back_attach = (unsigned)wire_attachments.size() - 1;
-                /* no segments */
-                if (back_attach != invalid_attach) {
-                    wire_attachments[current_attach] = wire_attachments[back_attach];
-                    wire_attachments.pop_back();
+                        auto back_attach = (unsigned)wire_attachments.size() - 1;
+                        /* no segments */
+                        if (back_attach != invalid_attach) {
+                            wire_attachments[current_attach] = wire_attachments[back_attach];
+                            wire_attachments.pop_back();
 
-                    relocate_segments_and_entity_attaches(ship, type, current_attach, back_attach);
+                            relocate_segments_and_entity_attaches(ship, type, current_attach, back_attach);
 
-                    attach_topo_rebuild(ship, type);
+                            attach_topo_rebuild(ship, type);
+                        }
+
+                        /* update current */
+                        current_attach = existing_attach;
+                    }
+
+                    /* did we move to be on an entity */
+                    if (hit_entity && current_attach != invalid_attach) {
+                        if (current_attach != existing_attach &&
+                            !can_place(ship, current_attach, existing_attach,
+                                hit_entity)) {
+
+                            return;
+                        }
+
+                        entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
+                    }
+
+                    moving_existing = false;
+                    current_attach = invalid_attach;
                 }
+                else {
+                    unsigned existing_attach = get_existing_attach_near(pt);
 
-                /* update current */
-                current_attach = existing_attach;
-            }
+                    if (!can_place(ship, current_attach, existing_attach,
+                        hit_entity)) {
 
-            /* did we move to be on an entity */
-            if (hit_entity && current_attach != invalid_attach) {
-                if (current_attach != existing_attach &&
-                    !can_place(ship, current_attach, existing_attach,
-                    hit_entity)) {
+                        return;
+                    }
 
-                    return;
+                    unsigned new_attach;
+                    if (existing_attach == invalid_attach) {
+                        new_attach = (unsigned)wire_attachments.size();
+                        wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
+                        wire_attachments.push_back(wa);
+                    }
+                    else {
+                        new_attach = existing_attach;
+                    }
+
+                    if (current_attach != invalid_attach) {
+                        wire_segment s;
+                        s.first = current_attach;
+                        s.second = new_attach;
+                        wire_segments.push_back(s);
+
+                        /* merge! */
+                        attach_topo_unite(ship, type, current_attach, new_attach);
+                    }
+
+                    current_attach = new_attach;
+
+                    if (hit_entity && current_attach != invalid_attach) {
+                        entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
+                    }
                 }
-
-                entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
             }
-
-            moving_existing = false;
-            current_attach = invalid_attach;
-        }
-        else {
-            unsigned existing_attach = get_existing_attach_near(pt);
-
-            if (!can_place(ship, current_attach, existing_attach,
-                hit_entity)) {
-
-                return;
-            }
-
-            unsigned new_attach;
-            if (existing_attach == invalid_attach) {
-                new_attach = (unsigned)wire_attachments.size();
-                wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
-                wire_attachments.push_back(wa);
-            }
-            else {
-                new_attach = existing_attach;
-            }
-
-            if (current_attach != invalid_attach) {
-                wire_segment s;
-                s.first = current_attach;
-                s.second = new_attach;
-                wire_segments.push_back(s);
-
-                /* merge! */
-                attach_topo_unite(ship, type, current_attach, new_attach);
-            }
-
-            current_attach = new_attach;
-
-            if (hit_entity && current_attach != invalid_attach) {
-                entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
-            }
+            break;
         }
 
         reduce_segments(ship, type);
@@ -1418,61 +1452,70 @@ struct add_wiring_tool : tool
         auto & wire_attachments = ship->wire_attachments[type];
         auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
 
-        /* reset to old spot if moving. "cancel" */
-        if (moving_existing) {
-            wire_attachments[current_attach] = old_attach;
+        switch (state) {
+        case aws_none:
+        case aws_placing:
+        case aws_moving:
+        default:
+            {
+                /* reset to old spot if moving. "cancel" */
+                if (moving_existing) {
+                    wire_attachments[current_attach] = old_attach;
 
-            if (old_entity) {
-                entity_to_attach_lookup[old_entity->ce].insert(current_attach);
-                old_entity = nullptr;
+                    if (old_entity) {
+                        entity_to_attach_lookup[old_entity->ce].insert(current_attach);
+                        old_entity = nullptr;
+                    }
+
+                    moving_existing = false;
+                    current_attach = invalid_attach;
+                    return;
+                }
+
+                /* terminate the current run */
+                if (current_attach != invalid_attach) {
+                    current_attach = invalid_attach;
+                    return;
+                }
+
+                /* remove existing attach, and dependent segments */
+                entity *hit_entity = nullptr;
+                glm::vec3 pt;
+                glm::vec3 normal;
+
+                if (!get_attach_point(pl.eye, pl.dir, &pt, &normal, &hit_entity)) {
+                    return;
+                }
+
+                unsigned existing_attach = get_existing_attach_near(pt);
+                if (existing_attach == invalid_attach) {
+                    /* not pointing at an attach */
+                    return;
+                }
+
+                /* remove attach from entity lookup */
+                if (hit_entity) {
+                    entity_to_attach_lookup[hit_entity->ce].erase(existing_attach);
+                }
+
+                unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
+
+                auto changed = remove_segments_containing(ship, type, existing_attach);
+                if (relocate_segments_and_entity_attaches(ship, type,
+                    existing_attach, attach_moving_for_delete)) {
+                    changed = true;
+                }
+
+                /* move attach_moving_for_delete to existing_attach, and trim off the last one. */
+                wire_attachments[existing_attach] = wire_attachments[attach_moving_for_delete];
+                wire_attachments.pop_back();
+
+                /* if we changed anything, rebuild the topology */
+                if (changed) {
+                    attach_topo_rebuild(ship, type);
+                }
             }
-
-            moving_existing = false;
-            current_attach = invalid_attach;
-            return;
-        }
-
-        /* terminate the current run */
-        if (current_attach != invalid_attach) {
-            current_attach = invalid_attach;
-            return;
-        }
-
-        /* remove existing attach, and dependent segments */
-        entity *hit_entity = nullptr;
-        glm::vec3 pt;
-        glm::vec3 normal;
-
-        if (!get_attach_point(pl.eye, pl.dir, &pt, &normal, &hit_entity)) {
-            return;
-        }
-
-        unsigned existing_attach = get_existing_attach_near(pt);
-        if (existing_attach == invalid_attach) {
-            /* not pointing at an attach */
-            return;
-        }
-
-        /* remove attach from entity lookup */
-        if (hit_entity) {
-            entity_to_attach_lookup[hit_entity->ce].erase(existing_attach);
-        }
-
-        unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
-
-        auto changed = remove_segments_containing(ship, type, existing_attach);
-        if (relocate_segments_and_entity_attaches(ship, type,
-            existing_attach, attach_moving_for_delete)) {
-            changed = true;
-        }
-
-        /* move attach_moving_for_delete to existing_attach, and trim off the last one. */
-        wire_attachments[existing_attach] = wire_attachments[attach_moving_for_delete];
-        wire_attachments.pop_back();
-
-        /* if we changed anything, rebuild the topology */
-        if (changed) {
-            attach_topo_rebuild(ship, type);
+            break;
         }
     }
 
@@ -1485,47 +1528,65 @@ struct add_wiring_tool : tool
         auto & wire_attachments = ship->wire_attachments[type];
         auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
 
-        if (current_attach == invalid_attach) {
-            if (!get_attach_point(pl.eye, pl.dir, &pt, &normal, &hit_entity))
-                return;
+        switch (state) {
+        case aws_none:
+        case aws_placing:
+        case aws_moving:
+        default:
+            {
+                if (current_attach == invalid_attach) {
+                    if (!get_attach_point(pl.eye, pl.dir, &pt, &normal, &hit_entity))
+                        return;
 
-            existing_attach = get_existing_attach_near(pt);
+                    existing_attach = get_existing_attach_near(pt);
 
-            if (existing_attach == invalid_attach) {
-                return;
+                    if (existing_attach == invalid_attach) {
+                        return;
+                    }
+
+                    /* cast ray backwards from attach
+                     * should find us the entity attach is on
+                     */
+                    auto att_mat = wire_attachments[existing_attach].transform;
+                    auto att_rot = glm::vec3(att_mat[2][0], att_mat[2][1], att_mat[2][2]);
+                    auto att_pos = glm::vec3(att_mat[3]);
+                    att_rot *= -1.f;
+                    get_attach_point(att_pos, att_rot, &pt, &normal, &hit_entity);
+
+                    current_attach = existing_attach;
+
+                    /* remove this attach from entity attaches
+                     * will get added back if needed in use()/alt_use()
+                     */
+                    auto & lookup = entity_to_attach_lookup;
+                    if (hit_entity && lookup.find(hit_entity->ce) != lookup.end()) {
+                        lookup[hit_entity->ce].erase(current_attach);
+                    }
+
+                    moving_existing = true;
+                    old_attach = wire_attachments[current_attach];
+                    old_entity = hit_entity;
+                }
             }
-
-            /* cast ray backwards from attach
-             * should find us the entity attach is on
-             */
-            auto att_mat = wire_attachments[existing_attach].transform;
-            auto att_rot = glm::vec3(att_mat[2][0], att_mat[2][1], att_mat[2][2]);
-            auto att_pos = glm::vec3(att_mat[3]);
-            att_rot *= -1.f;
-            get_attach_point(att_pos, att_rot, &pt, &normal, &hit_entity);
-
-            current_attach = existing_attach;
-
-            /* remove this attach from entity attaches
-             * will get added back if needed in use()/alt_use()
-             */
-            auto & lookup = entity_to_attach_lookup;
-            if (hit_entity && lookup.find(hit_entity->ce) != lookup.end()) {
-                lookup[hit_entity->ce].erase(current_attach);
-            }
-
-            moving_existing = true;
-            old_attach = wire_attachments[current_attach];
-            old_entity = hit_entity;
+            break;
         }
     }
 
     void cycle_mode() override {
-        if (moving_existing || current_attach != invalid_attach) {
-            return;
-        }
+        switch (state) {
+        case aws_none:
+        case aws_placing:
+        case aws_moving:
+        default:
+            {
+                if (moving_existing || current_attach != invalid_attach) {
+                    return;
+                }
 
-        type = (wire_type)(((unsigned)type + (unsigned)num_wire_types + 1) % (unsigned)num_wire_types);
+                type = (wire_type)(((unsigned)type + (unsigned)num_wire_types + 1) % (unsigned)num_wire_types);
+            }
+            break;
+        }
     }
 
     void get_description(char *str) override {
