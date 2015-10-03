@@ -1882,18 +1882,22 @@ struct play_state : game_state {
             /* tool use */
             if (pl.use_tool) {
                 t->use(&rc);
+                pl.ui_dirty = true;
             }
 
             if (pl.alt_use_tool) {
                 t->alt_use(&rc);
+                pl.ui_dirty = true;
             }
 
             if (pl.long_use_tool) {
                 t->long_use(&rc);
+                pl.ui_dirty = true;
             }
 
             if (pl.cycle_mode) {
                 t->cycle_mode();
+                pl.ui_dirty = true;
             }
         }
 
