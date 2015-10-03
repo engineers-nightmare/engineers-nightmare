@@ -30,12 +30,7 @@ header_template_3="""    } instance_pool;
 
 """
 
-header_template_4="""    %(type)s & %(name)s(c_entity e) {
-        auto inst = lookup(e);
-        return instance_pool.%(name)s[inst.index];
-    }
-
-"""
+header_template_4=""
 
 header_template_5="""    instance_data get_instance_data(c_entity e) {
         instance_data d;

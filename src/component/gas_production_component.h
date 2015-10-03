@@ -16,21 +16,6 @@ struct gas_production_component_manager : component_manager {
     void destroy_instance(instance i) override;
     void entity(c_entity e) override;
 
-    unsigned & gas_type(c_entity e) {
-        auto inst = lookup(e);
-        return instance_pool.gas_type[inst.index];
-    }
-
-    float & flow_rate(c_entity e) {
-        auto inst = lookup(e);
-        return instance_pool.flow_rate[inst.index];
-    }
-
-    float & max_pressure(c_entity e) {
-        auto inst = lookup(e);
-        return instance_pool.max_pressure[inst.index];
-    }
-
     instance_data get_instance_data(c_entity e) {
         instance_data d;
         auto inst = lookup(e);

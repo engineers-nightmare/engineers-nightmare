@@ -15,16 +15,6 @@ struct power_provider_component_manager : component_manager {
     void destroy_instance(instance i) override;
     void entity(c_entity e) override;
 
-    unsigned & max_provided(c_entity e) {
-        auto inst = lookup(e);
-        return instance_pool.max_provided[inst.index];
-    }
-
-    unsigned & provided(c_entity e) {
-        auto inst = lookup(e);
-        return instance_pool.provided[inst.index];
-    }
-
     instance_data get_instance_data(c_entity e) {
         instance_data d;
         auto inst = lookup(e);
