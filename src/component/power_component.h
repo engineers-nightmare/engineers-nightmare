@@ -7,9 +7,9 @@
 struct power_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
-        unsigned *required_power;
+        float *required_power;
         bool *powered;
-        unsigned *max_required_power;
+        float *max_required_power;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;

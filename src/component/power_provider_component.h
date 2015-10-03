@@ -7,8 +7,8 @@
 struct power_provider_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
-        unsigned *max_provided;
-        unsigned *provided;
+        float *max_provided;
+        float *provided;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
