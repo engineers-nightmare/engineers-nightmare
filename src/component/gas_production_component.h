@@ -20,12 +20,26 @@ struct gas_production_component_manager : component_manager {
         auto inst = lookup(e);
         return instance_pool.gas_type[inst.index];
     }
+
     float & flow_rate(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.flow_rate[inst.index];
     }
+
     float & max_pressure(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.max_pressure[inst.index];
+    }
+
+    instance_data get_instance_data(c_entity e) {
+        instance_data d;
+        auto inst = lookup(e);
+
+        d.entity = instance_pool.entity + inst.index;
+        d.gas_type = instance_pool.gas_type + inst.index;
+        d.flow_rate = instance_pool.flow_rate + inst.index;
+        d.max_pressure = instance_pool.max_pressure + inst.index;
+
+        return d;
     }
 };

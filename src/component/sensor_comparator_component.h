@@ -19,8 +19,20 @@ struct sensor_comparator_component_manager : component_manager {
         auto inst = lookup(e);
         return instance_pool.compare_result[inst.index];
     }
+
     float & compare_epsilon(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.compare_epsilon[inst.index];
+    }
+
+    instance_data get_instance_data(c_entity e) {
+        instance_data d;
+        auto inst = lookup(e);
+
+        d.entity = instance_pool.entity + inst.index;
+        d.compare_result = instance_pool.compare_result + inst.index;
+        d.compare_epsilon = instance_pool.compare_epsilon + inst.index;
+
+        return d;
     }
 };

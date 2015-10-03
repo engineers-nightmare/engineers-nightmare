@@ -18,4 +18,14 @@ struct renderable_component_manager : component_manager {
         auto inst = lookup(e);
         return instance_pool.mesh[inst.index];
     }
+
+    instance_data get_instance_data(c_entity e) {
+        instance_data d;
+        auto inst = lookup(e);
+
+        d.entity = instance_pool.entity + inst.index;
+        d.mesh = instance_pool.mesh + inst.index;
+
+        return d;
+    }
 };

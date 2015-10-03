@@ -19,8 +19,20 @@ struct power_component_manager : component_manager {
         auto inst = lookup(e);
         return instance_pool.required_power[inst.index];
     }
+
     bool & powered(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.powered[inst.index];
+    }
+
+    instance_data get_instance_data(c_entity e) {
+        instance_data d;
+        auto inst = lookup(e);
+
+        d.entity = instance_pool.entity + inst.index;
+        d.required_power = instance_pool.required_power + inst.index;
+        d.powered = instance_pool.powered + inst.index;
+
+        return d;
     }
 };

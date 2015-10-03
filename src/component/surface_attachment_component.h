@@ -19,8 +19,20 @@ struct surface_attachment_component_manager : component_manager {
         auto inst = lookup(e);
         return instance_pool.block[inst.index];
     }
+
     int & face(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.face[inst.index];
+    }
+
+    instance_data get_instance_data(c_entity e) {
+        instance_data d;
+        auto inst = lookup(e);
+
+        d.entity = instance_pool.entity + inst.index;
+        d.block = instance_pool.block + inst.index;
+        d.face = instance_pool.face + inst.index;
+
+        return d;
     }
 };

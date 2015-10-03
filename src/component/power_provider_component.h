@@ -19,8 +19,20 @@ struct power_provider_component_manager : component_manager {
         auto inst = lookup(e);
         return instance_pool.max_provided[inst.index];
     }
+
     unsigned & provided(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.provided[inst.index];
+    }
+
+    instance_data get_instance_data(c_entity e) {
+        instance_data d;
+        auto inst = lookup(e);
+
+        d.entity = instance_pool.entity + inst.index;
+        d.max_provided = instance_pool.max_provided + inst.index;
+        d.provided = instance_pool.provided + inst.index;
+
+        return d;
     }
 };

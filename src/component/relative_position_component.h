@@ -19,8 +19,20 @@ struct relative_position_component_manager : component_manager {
         auto inst = lookup(e);
         return instance_pool.position[inst.index];
     }
+
     glm::mat4 & mat(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.mat[inst.index];
+    }
+
+    instance_data get_instance_data(c_entity e) {
+        instance_data d;
+        auto inst = lookup(e);
+
+        d.entity = instance_pool.entity + inst.index;
+        d.position = instance_pool.position + inst.index;
+        d.mat = instance_pool.mat + inst.index;
+
+        return d;
     }
 };

@@ -34,9 +34,22 @@ header_template_4="""    %(type)s & %(name)s(c_entity e) {
         auto inst = lookup(e);
         return instance_pool.%(name)s[inst.index];
     }
+
 """
 
-header_template_5="""};
+header_template_5="""    instance_data get_instance_data(c_entity e) {
+        instance_data d;
+        auto inst = lookup(e);
+
+        d.entity = instance_pool.entity + inst.index;
+"""
+header_template_6="""        d.%(name)s = instance_pool.%(name)s + inst.index;
+"""
+
+header_template_7="""
+        return d;
+    }
+};
 """
 
 impl_template_1="""#include <algorithm>
@@ -143,11 +156,14 @@ def main():
             for fi in fields:
                 g.write(header_template_4 % fi)
             g.write(header_template_5)
+            for fi in fields:
+                g.write(header_template_6 % fi)
+            g.write(header_template_7)
 
         with open("src/component/%s_component.cc" % component_name, "w") as g:
             g.write(impl_template_1 % (component_name, component_name))
             for fi in fields:
-                g.write(impl_template_2 % fi, )
+                g.write(impl_template_2 % fi)
             g.write(impl_template_3)
             for fi in fields:
                 g.write(impl_template_4 % fi)

@@ -18,4 +18,14 @@ struct switch_component_manager : component_manager {
         auto inst = lookup(e);
         return instance_pool.enabled[inst.index];
     }
+
+    instance_data get_instance_data(c_entity e) {
+        instance_data d;
+        auto inst = lookup(e);
+
+        d.entity = instance_pool.entity + inst.index;
+        d.enabled = instance_pool.enabled + inst.index;
+
+        return d;
+    }
 };
