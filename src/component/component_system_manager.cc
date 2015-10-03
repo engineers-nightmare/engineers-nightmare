@@ -70,8 +70,9 @@ tick_gas_producers(ship_space * ship)
 
                     if (msg.desc == comms_msg_type_switch_state) {
 
-                        auto data = clamp(msg.data, 0.f, 1.f);
+                        auto data = clamp(msg.data, 0.0f, 1.0f);
                         *switchable.enabled = data > 0;
+                        *power.required_power = *switchable.enabled ? *power.max_required_power : 0.0f;
                     }
                 }
             }
