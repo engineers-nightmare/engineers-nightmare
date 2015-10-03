@@ -375,14 +375,14 @@ void use_action_on_entity(ship_space *ship, c_entity ce) {
     /* used by the player */
     assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
 
-    auto pos = pos_man.position(ce);
-    auto type = &entity_types[type_man.type(ce)];
+    auto pos = *pos_man.get_instance_data(ce).position;
+    auto type = &entity_types[*type_man.get_instance_data(ce).type];
     printf("player using the %s at %f %f %f\n",
             type->name, pos.x, pos.y, pos.z);
 
     if (switch_man.exists(ce)) {
         /* publish new state on all attached comms wires */
-        auto & enabled = switch_man.enabled(ce);
+        auto & enabled = *switch_man.get_instance_data(ce).enabled;
         enabled ^= true;
 
         auto wire_type = wire_type_comms;
