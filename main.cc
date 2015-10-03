@@ -494,7 +494,8 @@ update_lightfield()
         auto pos = get_coord_containing(*pos_man.get_instance_data(ce).position);
         auto powered = *power_man.get_instance_data(ce).powered;
         if (powered) {
-            set_light_level(pos.x, pos.y, pos.z, (int)(255 * light_man.instance_pool.intensity[i]));
+            set_light_level(pos.x, pos.y, pos.z, std::max(
+                        (int)get_light_level(pos.x, pos.y, pos.z), (int)(255 * light_man.instance_pool.intensity[i])));
         }
     }
 
