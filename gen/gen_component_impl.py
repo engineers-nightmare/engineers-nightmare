@@ -126,6 +126,7 @@ void
 }
 """
 
+import os
 import sys
 import glob
 
@@ -135,7 +136,7 @@ def main():
 
     for fl in files:
         fields = []
-        component_name = fl.split('/')[-1]
+        component_name = fl.split(os.sep)[-1]
         with open(fl, 'r') as f:
             prev = 'entity';
             for l in f:

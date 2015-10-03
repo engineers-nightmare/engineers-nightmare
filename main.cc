@@ -293,6 +293,7 @@ struct entity
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);
             *light.intensity = 1.0f;
+            *light.requested_intensity = 1.0f;
             *light.type = 1;
         }
         // warning light
@@ -306,6 +307,7 @@ struct entity
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);
             *light.intensity = 1.0f;
+            *light.requested_intensity = 1.0f;
             *light.type = 2;
         }
         // display panel
@@ -319,6 +321,7 @@ struct entity
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);
             *light.intensity = 0.15f;
+            *light.requested_intensity = 0.15f;
             *light.type = 0;
         }
         // switch
