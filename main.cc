@@ -781,8 +781,8 @@ destroy_entity(entity *e)
     /* removing block influence from this ent */
     /* this should really be componentified */
     if (surface_man.exists(e->ce)) {
-        auto b = surface_man.block(e->ce);
-        auto type = &entity_types[type_man.type(e->ce)];
+        auto b = *surface_man.get_instance_data(e->ce).block;
+        auto type = &entity_types[*type_man.get_instance_data(e->ce).type];
 
         for (auto i = 0; i < type->height; i++) {
             auto p = b + glm::ivec3(0, 0, i);
@@ -803,7 +803,7 @@ destroy_entity(entity *e)
     comparator_man.destroy_entity_instance(e->ce);
     gas_man.destroy_entity_instance(e->ce);
     light_man.destroy_entity_instance(e->ce);
-    teardown_static_physics_setup(nullptr, nullptr, &physics_man.rigid(e->ce));
+    teardown_static_physics_setup(nullptr, nullptr, physics_man.get_instance_data(e->ce).rigid);
     physics_man.destroy_entity_instance(e->ce);
     pos_man.destroy_entity_instance(e->ce);
     power_man.destroy_entity_instance(e->ce);
