@@ -349,7 +349,7 @@ struct entity
             pressure_man.assign_entity(ce);
             auto pressure = pressure_man.get_instance_data(ce);
             *pressure.pressure = 0.0f;
-            *pressure.type = 1;
+            *pressure.type = 2;
         }
         // sensor comparator
         else if (type == 9) {
