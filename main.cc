@@ -260,6 +260,7 @@ struct entity
             auto power = power_man.get_instance_data(ce);
             *power.powered = false;
             *power.required_power = 8;
+            *power.max_required_power = 8;
 
             switchable_man.assign_entity(ce);
             auto switchable = switchable_man.get_instance_data(ce);
@@ -276,6 +277,7 @@ struct entity
             auto power = power_man.get_instance_data(ce);
             *power.powered = false;
             *power.required_power = 12;
+            *power.max_required_power = 12;
 
             switchable_man.assign_entity(ce);
             auto switchable = switchable_man.get_instance_data(ce);
@@ -292,6 +294,7 @@ struct entity
             auto power = power_man.get_instance_data(ce);
             *power.powered = false;
             *power.required_power = 6;
+            *power.max_required_power = 6;
 
             switchable_man.assign_entity(ce);
             auto switchable = switchable_man.get_instance_data(ce);
@@ -308,6 +311,7 @@ struct entity
             auto power = power_man.get_instance_data(ce);
             *power.powered = false;
             *power.required_power = 6;
+            *power.max_required_power = 6;
 
             switchable_man.assign_entity(ce);
             auto switchable = switchable_man.get_instance_data(ce);
@@ -324,6 +328,7 @@ struct entity
             auto power = power_man.get_instance_data(ce);
             *power.powered = false;
             *power.required_power = 4;
+            *power.max_required_power = 4;
 
             switchable_man.assign_entity(ce);
             auto switchable = switchable_man.get_instance_data(ce);

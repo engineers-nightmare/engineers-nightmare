@@ -9,6 +9,7 @@ struct power_component_manager : component_manager {
         c_entity *entity;
         unsigned *required_power;
         bool *powered;
+        unsigned *max_required_power;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -22,6 +23,7 @@ struct power_component_manager : component_manager {
         d.entity = instance_pool.entity + inst.index;
         d.required_power = instance_pool.required_power + inst.index;
         d.powered = instance_pool.powered + inst.index;
+        d.max_required_power = instance_pool.max_required_power + inst.index;
 
         return d;
     }
