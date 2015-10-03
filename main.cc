@@ -492,10 +492,8 @@ update_lightfield()
     for (auto i = 0u; i < light_man.buffer.num; i++) {
         auto ce = light_man.instance_pool.entity[i];
         auto pos = get_coord_containing(*pos_man.get_instance_data(ce).position);
-        auto exists = switchable_man.exists(ce);
         auto powered = *power_man.get_instance_data(ce).powered;
-        auto should_emit = exists ? *switchable_man.get_instance_data(ce).enabled && powered : powered;
-        if (should_emit) {
+        if (powered) {
             set_light_level(pos.x, pos.y, pos.z, (int)(255 * light_man.instance_pool.intensity[i]));
         }
     }
