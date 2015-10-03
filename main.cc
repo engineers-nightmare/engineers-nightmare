@@ -48,6 +48,8 @@
 bool exit_requested = false;
 
 bool draw_hud = true;
+bool draw_debug_text = false;
+bool draw_fps = false;
 
 auto hfov = DEG2RAD(90.f);
 
@@ -1714,28 +1716,31 @@ update()
         calculate_power_wires(ship);
         propagate_comms_wires(ship);
 
-        /* HACK: dirty this every frame for now while debugging atmo */
-        if (1 || pl.ui_dirty) {
+        if (pl.ui_dirty || draw_debug_text || draw_fps) {
             text->reset();
             ui_sprites->reset();
+
             state->rebuild_ui();
 
-            char buf[3][256];
-            float w[3] = { 0, 0, 0 }, h = 0;
+            if (draw_fps) {
+                char buf[3][256];
+                float w[3] = { 0, 0, 0 }, h = 0;
 
-            sprintf(buf[0], "%.2f", frame_info.dt * 1000);
-            sprintf(buf[1], "%.2f", 1.f / frame_info.dt);
-            sprintf(buf[2], "%.2f", frame_info.fps);
+                sprintf(buf[0], "%.2f", frame_info.dt * 1000);
+                sprintf(buf[1], "%.2f", 1.f / frame_info.dt);
+                sprintf(buf[2], "%.2f", frame_info.fps);
 
-            text->measure(buf[0], &w[0], &h);
-            text->measure(buf[1], &w[1], &h);
-            text->measure(buf[2], &w[2], &h);
+                text->measure(buf[0], &w[0], &h);
+                text->measure(buf[1], &w[1], &h);
+                text->measure(buf[2], &w[2], &h);
 
-            add_text_with_outline(buf[0], -DEFAULT_WIDTH / 2 + (100 - w[0]), DEFAULT_HEIGHT / 2 + 100);
-            add_text_with_outline(buf[1], -DEFAULT_WIDTH / 2 + (100 - w[1]), DEFAULT_HEIGHT / 2 + 82);
-            add_text_with_outline(buf[2], -DEFAULT_WIDTH / 2 + (100 - w[2]), DEFAULT_HEIGHT / 2 + 64);
+                add_text_with_outline(buf[0], -DEFAULT_WIDTH / 2 + (100 - w[0]), DEFAULT_HEIGHT / 2 + 100);
+                add_text_with_outline(buf[1], -DEFAULT_WIDTH / 2 + (100 - w[1]), DEFAULT_HEIGHT / 2 + 82);
+                add_text_with_outline(buf[2], -DEFAULT_WIDTH / 2 + (100 - w[2]), DEFAULT_HEIGHT / 2 + 64);
+            }
 
             text->upload();
+
             ui_sprites->upload();
             pl.ui_dirty = false;
         }
@@ -1815,7 +1820,7 @@ struct play_state : game_state {
         }
 
         /* debug text */
-        if (0) {
+        if (draw_debug_text) {
             /* Atmo status */
             glm::ivec3 eye_block = get_coord_containing(pl.eye);
 
@@ -1872,18 +1877,22 @@ struct play_state : game_state {
             /* tool use */
             if (pl.use_tool) {
                 t->use(&rc);
+                pl.ui_dirty = true;
             }
 
             if (pl.alt_use_tool) {
                 t->alt_use(&rc);
+                pl.ui_dirty = true;
             }
 
             if (pl.long_use_tool) {
                 t->long_use(&rc);
+                pl.ui_dirty = true;
             }
 
             if (pl.cycle_mode) {
                 t->cycle_mode();
+                pl.ui_dirty = true;
             }
         }
 

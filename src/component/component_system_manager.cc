@@ -75,7 +75,7 @@ tick_gas_producers(ship_space * ship)
 
         /* we are powered if we get here. check if turned on */
         if (!switchable_man.enabled(ce)) {
-            return;
+            continue;
         }
 
         auto pos = get_coord_containing(pos_man.position(ce));
