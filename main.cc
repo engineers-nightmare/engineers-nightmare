@@ -1842,7 +1842,7 @@ struct play_state : game_state {
         bind = game_settings.bindings.bindings.find(action_use);
         key = lookup_key((*bind).second.binds.inputs[0]);
         if (use_entity) {
-            auto type = &entity_types[type_man.type(use_entity->ce)];
+            auto type = &entity_types[*type_man.get_instance_data(use_entity->ce).type];
             sprintf(buf2, "%s Use the %s", key, type->name);
             w = 0; h = 0;
             text->measure(buf2, &w, &h);
