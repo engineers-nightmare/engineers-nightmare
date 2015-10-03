@@ -296,10 +296,6 @@ struct entity
             *power.required_power = 6;
             *power.max_required_power = 6;
 
-            switchable_man.assign_entity(ce);
-            auto switchable = switchable_man.get_instance_data(ce);
-            *switchable.enabled = true;
-
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);
             *light.intensity = 1.0f;
@@ -313,10 +309,6 @@ struct entity
             *power.required_power = 6;
             *power.max_required_power = 6;
 
-            switchable_man.assign_entity(ce);
-            auto switchable = switchable_man.get_instance_data(ce);
-            *switchable.enabled = false;
-
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);
             *light.intensity = 1.0f;
@@ -329,10 +321,6 @@ struct entity
             *power.powered = false;
             *power.required_power = 4;
             *power.max_required_power = 4;
-
-            switchable_man.assign_entity(ce);
-            auto switchable = switchable_man.get_instance_data(ce);
-            *switchable.enabled = true;
 
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);

@@ -281,8 +281,7 @@ tick_light_components(ship_space* ship) {
         auto light_type = light_man.instance_pool.type[i];
         auto type = wire_type_comms;
 
-        /* all lights currently require: switchable, position */
-        assert(switchable_man.exists(ce) || !"lights must be switchable");
+        /* all lights currently require: position */
         assert(pos_man.exists(ce) || !"lights must have a position");
 
         auto & comms_attaches = ship->entity_to_attach_lookups[type];
@@ -315,7 +314,6 @@ tick_light_components(ship_space* ship) {
                     auto data = clamp(msg.data, 0.f, 1.f);
                     light_man.instance_pool.intensity[i] = data;
 
-                    *switchable_man.get_instance_data(ce).enabled = data > 0;
                     auto power = power_man.get_instance_data(ce);
                     /* TODO: scale power usage based on intensity rather than enabled */
                     *power.required_power = data > 0 ? *power.max_required_power : 0;
