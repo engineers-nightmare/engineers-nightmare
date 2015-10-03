@@ -35,13 +35,11 @@ tick_gas_producers(ship_space * ship)
     for (auto i = 0u; i < gas_man.buffer.num; i++) {
         auto ce = gas_man.instance_pool.entity[i];
 
-        /* gas producers require: power, switchable */
-        assert(switchable_man.exists(ce) || !"gas producer must be switchable");
+        /* gas producers require: power */
         assert(power_man.exists(ce) || !"gas producer must be powerable");
         assert(pos_man.exists(ce) || !"gas producer must have position");
 
         auto power = power_man.get_instance_data(ce);
-        auto switchable = switchable_man.get_instance_data(ce);
         auto position = pos_man.get_instance_data(ce);
 
         /* don't do anything if we aren't powered and turned on */
@@ -71,15 +69,15 @@ tick_gas_producers(ship_space * ship)
                     if (msg.desc == comms_msg_type_switch_state) {
 
                         auto data = clamp(msg.data, 0.0f, 1.0f);
-                        *switchable.enabled = data > 0;
-                        *power.required_power = *switchable.enabled ? *power.max_required_power : 0.0f;
+                        gas_man.instance_pool.enabled[i] = data > 0;
+                        *power.required_power = data > 0 ? *power.max_required_power : 0.0f;
                     }
                 }
             }
         }
 
         /* we are powered if we get here. check if turned on */
-        if (!*switchable.enabled) {
+        if (!gas_man.instance_pool.enabled[i]) {
             continue;
         }
 

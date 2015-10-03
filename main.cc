@@ -276,14 +276,11 @@ struct entity
             *power.required_power = 12;
             *power.max_required_power = 12;
 
-            switchable_man.assign_entity(ce);
-            auto switchable = switchable_man.get_instance_data(ce);
-            *switchable.enabled = true;
-
             gas_man.assign_entity(ce);
             auto gas = gas_man.get_instance_data(ce);
             *gas.flow_rate = 0.1f;
             *gas.max_pressure = 1.0f;
+            *gas.enabled = true;
         }
         // light
         else if (type == 2) {

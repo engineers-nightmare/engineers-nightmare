@@ -10,6 +10,7 @@ struct gas_production_component_manager : component_manager {
         unsigned *gas_type;
         float *flow_rate;
         float *max_pressure;
+        bool *enabled;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -24,6 +25,7 @@ struct gas_production_component_manager : component_manager {
         d.gas_type = instance_pool.gas_type + inst.index;
         d.flow_rate = instance_pool.flow_rate + inst.index;
         d.max_pressure = instance_pool.max_pressure + inst.index;
+        d.enabled = instance_pool.enabled + inst.index;
 
         return d;
     }
