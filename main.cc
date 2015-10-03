@@ -908,10 +908,11 @@ remove_ents_from_surface(glm::ivec3 b, int face)
             continue;
         }
 
-        const auto & p = surface_man.block(e->ce);
-        const auto & f = surface_man.face(e->ce);
+        auto surface = surface_man.get_instance_data(e->ce);
+        auto p = *surface.block;
+        auto f = *surface.face;
 
-        auto type = &entity_types[type_man.type(e->ce)];
+        auto type = &entity_types[*type_man.get_instance_data(e->ce).type];
 
         if (p.x == b.x && p.y == b.y && p.z <= b.z && p.z + type->height > b.z && f == face) {
             destroy_entity(e);
