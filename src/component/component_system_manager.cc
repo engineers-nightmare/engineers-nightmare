@@ -12,7 +12,6 @@ pressure_sensor_component_manager pressure_man;
 renderable_component_manager render_man;
 surface_attachment_component_manager surface_man;
 switch_component_manager switch_man;
-switchable_component_manager switchable_man;
 type_component_manager type_man;
 door_component_manager door_man;
 

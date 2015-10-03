@@ -574,7 +574,6 @@ init()
     render_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     surface_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     switch_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
-    switchable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     type_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     door_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
@@ -798,7 +797,6 @@ destroy_entity(entity *e)
     render_man.destroy_entity_instance(e->ce);
     surface_man.destroy_entity_instance(e->ce);
     switch_man.destroy_entity_instance(e->ce);
-    switchable_man.destroy_entity_instance(e->ce);
     type_man.destroy_entity_instance(e->ce);
     door_man.destroy_entity_instance(e->ce);
 
