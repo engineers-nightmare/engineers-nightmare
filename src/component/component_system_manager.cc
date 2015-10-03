@@ -314,6 +314,9 @@ tick_light_components(ship_space* ship) {
                     light_man.instance_pool.intensity[i] = data;
 
                     *switchable_man.get_instance_data(ce).enabled = data > 0;
+                    auto power = power_man.get_instance_data(ce);
+                    /* TODO: scale power usage based on intensity rather than enabled */
+                    *power.required_power = data > 0 ? *power.max_required_power : 0;
 
                     auto pos = *pos_man.get_instance_data(ce).position;
                     auto block_pos = get_coord_containing(pos);
