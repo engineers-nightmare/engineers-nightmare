@@ -229,115 +229,143 @@ struct entity
         auto et = &entity_types[type];
 
         type_man.assign_entity(ce);
-        type_man.type(ce) = type;
+        auto type_comp = type_man.get_instance_data(ce);
+        *type_comp.type = type;
 
         physics_man.assign_entity(ce);
-        physics_man.rigid(ce) = nullptr;
-        build_static_physics_rb_mat(&mat, et->phys_shape, &physics_man.rigid(ce));
+        auto physics = physics_man.get_instance_data(ce);
+        *physics.rigid = nullptr;
+        build_static_physics_rb_mat(&mat, et->phys_shape, physics.rigid);
         /* so that we can get back to the entity from a phys raycast */
-        physics_man.rigid(ce)->setUserPointer(this);
+        /* TODO: change this for getting rid of entity* and for supporting submesh */
+        (*physics.rigid)->setUserPointer(this);
 
         surface_man.assign_entity(ce);
-        surface_man.block(ce) = p;
-        surface_man.face(ce) = face;
+        auto surface = surface_man.get_instance_data(ce);
+        *surface.block = p;
+        *surface.face = face;
 
         pos_man.assign_entity(ce);
-        pos_man.position(ce) = p;
-        pos_man.mat(ce) = mat;
+        auto pos = pos_man.get_instance_data(ce);
+        *pos.position = p;
+        *pos.mat = mat;
 
         render_man.assign_entity(ce);
-        render_man.mesh(ce) = et->hw;
+        auto render = render_man.get_instance_data(ce);
+        *render.mesh = et->hw;
 
+        // door
         if (type == 0) {
             power_man.assign_entity(ce);
-            power_man.powered(ce) = false;
-            power_man.required_power(ce) = 8;
+            auto power = power_man.get_instance_data(ce);
+            *power.powered = false;
+            *power.required_power = 8;
 
             switchable_man.assign_entity(ce);
-            switchable_man.enabled(ce) = true;
+            auto switchable = switchable_man.get_instance_data(ce);
+            *switchable.enabled = true;
 
             door_man.assign_entity(ce);
-            door_man.mesh(ce) = door_hw;
-            door_man.pos(ce) = 1.0f;
+            auto door = door_man.get_instance_data(ce);
+            *door.mesh = door_hw;
+            *door.pos = 1.0f;
         }
         // frobnicator
         else if (type == 1) {
             power_man.assign_entity(ce);
-            power_man.powered(ce) = false;
-            power_man.required_power(ce) = 12;
+            auto power = power_man.get_instance_data(ce);
+            *power.powered = false;
+            *power.required_power = 12;
 
             switchable_man.assign_entity(ce);
-            switchable_man.enabled(ce) = true;
+            auto switchable = switchable_man.get_instance_data(ce);
+            *switchable.enabled = true;
 
             gas_man.assign_entity(ce);
-            gas_man.flow_rate(ce) = 0.1f;
-            gas_man.max_pressure(ce) = 1.0f;
+            auto gas = gas_man.get_instance_data(ce);
+            *gas.flow_rate = 0.1f;
+            *gas.max_pressure = 1.0f;
         }
         // light
         else if (type == 2) {
             power_man.assign_entity(ce);
-            power_man.powered(ce) = false;
-            power_man.required_power(ce) = 6;
+            auto power = power_man.get_instance_data(ce);
+            *power.powered = false;
+            *power.required_power = 6;
 
             switchable_man.assign_entity(ce);
-            switchable_man.enabled(ce) = true;
+            auto switchable = switchable_man.get_instance_data(ce);
+            *switchable.enabled = true;
 
             light_man.assign_entity(ce);
-            light_man.intensity(ce) = 1.f;
-            light_man.type(ce) = 1;
+            auto light = light_man.get_instance_data(ce);
+            *light.intensity = 1.0f;
+            *light.type = 1;
         }
         // warning light
         else if (type == 3) {
             power_man.assign_entity(ce);
-            power_man.powered(ce) = false;
-            power_man.required_power(ce) = 6;
+            auto power = power_man.get_instance_data(ce);
+            *power.powered = false;
+            *power.required_power = 6;
 
             switchable_man.assign_entity(ce);
-            switchable_man.enabled(ce) = false;
+            auto switchable = switchable_man.get_instance_data(ce);
+            *switchable.enabled = false;
 
             light_man.assign_entity(ce);
-            light_man.intensity(ce) = 1.f;
-            light_man.type(ce) = 2;
+            auto light = light_man.get_instance_data(ce);
+            *light.intensity = 1.0f;
+            *light.type = 2;
         }
         // display panel
         else if (type == 4) {
             power_man.assign_entity(ce);
-            power_man.powered(ce) = false;
-            power_man.required_power(ce) = 4;
-
-            light_man.assign_entity(ce);
-            light_man.intensity(ce) = 0.15f;
+            auto power = power_man.get_instance_data(ce);
+            *power.powered = false;
+            *power.required_power = 4;
 
             switchable_man.assign_entity(ce);
-            switchable_man.enabled(ce) = true;
+            auto switchable = switchable_man.get_instance_data(ce);
+            *switchable.enabled = true;
+
+            light_man.assign_entity(ce);
+            auto light = light_man.get_instance_data(ce);
+            *light.intensity = 0.15f;
+            *light.type = 0;
         }
         // switch
         else if (type == 5) {
             switch_man.assign_entity(ce);
-            switch_man.enabled(ce) = true;
+            auto sw = switch_man.get_instance_data(ce);
+            *sw.enabled = true;
         }
         // plaidnicator
         else if (type == 6) {
             power_provider_man.assign_entity(ce);
-            power_provider_man.max_provided(ce) = 12;
-            power_provider_man.provided(ce) = 12;
+            auto power_provider = power_provider_man.get_instance_data(ce);
+            *power_provider.max_provided = 12;
+            *power_provider.provided = 12;
         }
         // pressure sensor 1
         else if (type == 7) {
             pressure_man.assign_entity(ce);
-            pressure_man.pressure(ce) = 0.f;
-            pressure_man.type(ce) = 1;
+            auto pressure = pressure_man.get_instance_data(ce);
+            *pressure.pressure = 0.0f;
+            *pressure.type = 1;
         }
         // pressure sensor 2
         else if (type == 8) {
             pressure_man.assign_entity(ce);
-            pressure_man.pressure(ce) = 0.f;
-            pressure_man.type(ce) = 2;
+            auto pressure = pressure_man.get_instance_data(ce);
+            *pressure.pressure = 0.0f;
+            *pressure.type = 1;
         }
         // sensor comparator
         else if (type == 9) {
             comparator_man.assign_entity(ce);
-            comparator_man.compare_epsilon(ce) = 0.0001f;
+            auto comparator = comparator_man.get_instance_data(ce);
+            *comparator.compare_epsilon = 0.0001f;
         }
     }
 };
