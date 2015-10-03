@@ -364,7 +364,7 @@ calculate_power_wires(ship_space *ship) {
                 power_data.num_consumers++;
                 power_data.peak_draw += power_draw_if_enabled;
 
-                if (!switchable_man.exists(ce) || switchable_man.enabled(ce)) {
+                if (!switchable_man.exists(ce) || *switchable_man.get_instance_data(ce).enabled) {
                     power_data.total_draw += power_draw_if_enabled;
                 }
             }

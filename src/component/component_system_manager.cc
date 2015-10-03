@@ -38,10 +38,14 @@ tick_gas_producers(ship_space * ship)
         /* gas producers require: power, switchable */
         assert(switchable_man.exists(ce) || !"gas producer must be switchable");
         assert(power_man.exists(ce) || !"gas producer must be powerable");
+        assert(pos_man.exists(ce) || !"gas producer must have position");
+
+        auto power = power_man.get_instance_data(ce);
+        auto switchable = switchable_man.get_instance_data(ce);
+        auto position = pos_man.get_instance_data(ce);
 
         /* don't do anything if we aren't powered and turned on */
-        auto should_produce = power_man.powered(ce);
-        if (!should_produce) {
+        if (!*power.powered) {
             continue;
         }
 
@@ -67,18 +71,18 @@ tick_gas_producers(ship_space * ship)
                     if (msg.desc == comms_msg_type_switch_state) {
 
                         auto data = clamp(msg.data, 0.f, 1.f);
-                        switchable_man.enabled(ce) = data > 0;
+                        *switchable.enabled = data > 0;
                     }
                 }
             }
         }
 
         /* we are powered if we get here. check if turned on */
-        if (!switchable_man.enabled(ce)) {
+        if (!*switchable.enabled) {
             continue;
         }
 
-        auto pos = get_coord_containing(pos_man.position(ce));
+        auto pos = get_coord_containing(*position.position);
 
         /* topo node containing the entity */
         topo_info *t = topo_find(ship->get_topo_info(pos));
@@ -102,9 +106,9 @@ tick_gas_producers(ship_space * ship)
 
             if (vis > 0.0f) {
                 /* emit some particles */
-                auto mat = glm::mat3(pos_man.mat(ce));
+                auto mat = glm::mat3(*position.mat);
                 for (auto j = 0; j < 5; j++) {
-                    auto spawn_pos = pos_man.position(ce)
+                    auto spawn_pos = *position.position
                             + 0.78f * glm::vec3(mat[2])
                             + glm::linearRand(0.25f * (mat[0] + mat[1]), 0.75f * (mat[0] + mat[1]));
                     spawn_pos.x = 0.1f * glm::round(spawn_pos.x / 0.1f);
@@ -128,9 +132,14 @@ tick_doors(ship_space * ship)
         /* doors require: switchable, powered */
         assert(switchable_man.exists(ce) || !"doors must be switchable");
         assert(power_man.exists(ce) || !"doors must be powerable");
+        assert(pos_man.exists(ce) || !"doors must be positioned");
+
+        auto power = power_man.get_instance_data(ce);
+        auto switchable = switchable_man.get_instance_data(ce);
+        auto position = pos_man.get_instance_data(ce);
 
         /* it's a power door, it's not going /anywhere/ without power */
-        if (!power_man.powered(ce)) {
+        if (!*power.powered) {
             continue;
         }
 
@@ -156,13 +165,13 @@ tick_doors(ship_space * ship)
                     if (msg.desc == comms_msg_type_switch_state) {
 
                         auto data = clamp(msg.data, 0.f, 1.f);
-                        switchable_man.enabled(ce) = data > 0;
+                        *switchable.enabled = data > 0;
                     }
                 }
             }
         }
 
-        auto desired_state = switchable_man.enabled(ce) ? 1.0f : 0.0f;
+        auto desired_state = *switchable.enabled ? 1.0f : 0.0f;
 
         auto in_desired_state = door_man.instance_pool.pos[i] == desired_state;
 
@@ -173,7 +182,7 @@ tick_doors(ship_space * ship)
         if (desired_state == door_man.instance_pool.pos[i] && !in_desired_state) {
             auto s = desired_state ? surface_none : surface_door;
 
-            auto pos = glm::ivec3(pos_man.position(door_man.instance_pool.entity[i]));
+            auto pos = glm::ivec3(*position.position);
 
             /* todo: this has no support for rotation whatsoever */
             for (auto h = 0; h < 2; ++h) {
@@ -224,7 +233,7 @@ tick_power_consumers(ship_space * ship) {
     for (auto i = 0u; i < power_man.buffer.num; i++) {
         auto ce = power_man.instance_pool.entity[i];
 
-        auto & powered = power_man.powered(ce);
+        auto & powered = power_man.instance_pool.powered[i];
         auto old_powered = powered;
         powered = false;
 
@@ -251,7 +260,7 @@ tick_power_consumers(ship_space * ship) {
         if (powered != old_powered) {
             /* if a light changed power state, do the required update now */
             if (light_man.exists(ce)) {
-                auto pos = pos_man.position(ce);
+                auto pos = *pos_man.get_instance_data(ce).position;
                 auto block_pos = get_coord_containing(pos);
                 mark_lightfield_update(block_pos);
             }
@@ -299,10 +308,11 @@ tick_light_components(ship_space* ship) {
                     (light_type == 2 && msg.desc == comms_msg_type_sensor_comparison_state)) {
 
                     auto data = clamp(msg.data, 0.f, 1.f);
-                    light_man.intensity(ce) = data;
-                    switchable_man.enabled(ce) = data > 0;
+                    light_man.instance_pool.intensity[i] = data;
 
-                    auto pos = pos_man.position(ce);
+                    *switchable_man.get_instance_data(ce).enabled = data > 0;
+
+                    auto pos = *pos_man.get_instance_data(ce).position;
                     auto block_pos = get_coord_containing(pos);
                     mark_lightfield_update(block_pos);
                 }
@@ -320,7 +330,7 @@ tick_pressure_sensors(ship_space* ship) {
         /* all pressure sensors currently require: position */
         assert(pos_man.exists(ce) || !"pressure sensors must have a position");
 
-        auto pos = pos_man.position(ce);
+        auto pos = *pos_man.get_instance_data(ce).position;
 
         glm::ivec3 pos_block = get_coord_containing(pos);
 
@@ -342,7 +352,7 @@ tick_pressure_sensors(ship_space* ship) {
                 continue;
             }
 
-            auto which_sensor = pressure_man.type(ce);
+            auto which_sensor = pressure_man.instance_pool.type[i];
             auto desc = comms_msg_type_pressure_sensor_1_state;
             if (which_sensor == 2) {
                 desc = comms_msg_type_pressure_sensor_2_state;
@@ -447,7 +457,7 @@ draw_renderables(frame_data *frame)
     for (auto i = 0u; i < render_man.buffer.num; i++) {
         auto ce = render_man.instance_pool.entity[i];
         auto & mesh = render_man.instance_pool.mesh[i];
-        auto & mat = pos_man.mat(ce);
+        auto & mat = *pos_man.get_instance_data(ce).mat;
 
         auto entity_matrix = frame->alloc_aligned<glm::mat4>(1);
         *entity_matrix.ptr = mat;
@@ -464,7 +474,7 @@ draw_doors(frame_data *frame)
     for (auto i = 0u; i < door_man.buffer.num; i++) {
         auto ce = door_man.instance_pool.entity[i];
         auto & mesh = door_man.instance_pool.mesh[i];
-        glm::mat4 mat = pos_man.mat(ce);
+        glm::mat4 mat = *pos_man.get_instance_data(ce).mat;
 
         auto pos = door_man.instance_pool.pos[i];
 
