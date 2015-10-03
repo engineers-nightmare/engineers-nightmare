@@ -1,2 +1,3 @@
 hw_mesh *,mesh
 float,pos
+float,desired_pos

@@ -260,15 +260,13 @@ struct entity
             auto power = power_man.get_instance_data(ce);
             *power.powered = false;
             *power.required_power = 8;
-
-            switchable_man.assign_entity(ce);
-            auto switchable = switchable_man.get_instance_data(ce);
-            *switchable.enabled = true;
+            *power.max_required_power = 8;
 
             door_man.assign_entity(ce);
             auto door = door_man.get_instance_data(ce);
             *door.mesh = door_hw;
             *door.pos = 1.0f;
+            *door.desired_pos = 1.0f;
         }
         // frobnicator
         else if (type == 1) {
@@ -276,15 +274,13 @@ struct entity
             auto power = power_man.get_instance_data(ce);
             *power.powered = false;
             *power.required_power = 12;
-
-            switchable_man.assign_entity(ce);
-            auto switchable = switchable_man.get_instance_data(ce);
-            *switchable.enabled = true;
+            *power.max_required_power = 12;
 
             gas_man.assign_entity(ce);
             auto gas = gas_man.get_instance_data(ce);
             *gas.flow_rate = 0.1f;
             *gas.max_pressure = 1.0f;
+            *gas.enabled = true;
         }
         // light
         else if (type == 2) {
@@ -292,10 +288,7 @@ struct entity
             auto power = power_man.get_instance_data(ce);
             *power.powered = false;
             *power.required_power = 6;
-
-            switchable_man.assign_entity(ce);
-            auto switchable = switchable_man.get_instance_data(ce);
-            *switchable.enabled = true;
+            *power.max_required_power = 6;
 
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);
@@ -308,10 +301,7 @@ struct entity
             auto power = power_man.get_instance_data(ce);
             *power.powered = false;
             *power.required_power = 6;
-
-            switchable_man.assign_entity(ce);
-            auto switchable = switchable_man.get_instance_data(ce);
-            *switchable.enabled = false;
+            *power.max_required_power = 6;
 
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);
@@ -324,10 +314,7 @@ struct entity
             auto power = power_man.get_instance_data(ce);
             *power.powered = false;
             *power.required_power = 4;
-
-            switchable_man.assign_entity(ce);
-            auto switchable = switchable_man.get_instance_data(ce);
-            *switchable.enabled = true;
+            *power.max_required_power = 4;
 
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);
@@ -487,11 +474,10 @@ update_lightfield()
     for (auto i = 0u; i < light_man.buffer.num; i++) {
         auto ce = light_man.instance_pool.entity[i];
         auto pos = get_coord_containing(*pos_man.get_instance_data(ce).position);
-        auto exists = switchable_man.exists(ce);
         auto powered = *power_man.get_instance_data(ce).powered;
-        auto should_emit = exists ? *switchable_man.get_instance_data(ce).enabled && powered : powered;
-        if (should_emit) {
-            set_light_level(pos.x, pos.y, pos.z, (int)(255 * light_man.instance_pool.intensity[i]));
+        if (powered) {
+            set_light_level(pos.x, pos.y, pos.z, std::max(
+                        (int)get_light_level(pos.x, pos.y, pos.z), (int)(255 * light_man.instance_pool.intensity[i])));
         }
     }
 
@@ -588,7 +574,6 @@ init()
     render_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     surface_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     switch_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
-    switchable_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     type_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     door_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
@@ -812,7 +797,6 @@ destroy_entity(entity *e)
     render_man.destroy_entity_instance(e->ce);
     surface_man.destroy_entity_instance(e->ce);
     switch_man.destroy_entity_instance(e->ce);
-    switchable_man.destroy_entity_instance(e->ce);
     type_man.destroy_entity_instance(e->ce);
     door_man.destroy_entity_instance(e->ce);
 

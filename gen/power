@@ -1,2 +1,3 @@
-unsigned,required_power
+float,required_power
 bool,powered
+float,max_required_power

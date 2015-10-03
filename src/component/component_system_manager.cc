@@ -12,7 +12,6 @@ pressure_sensor_component_manager pressure_man;
 renderable_component_manager render_man;
 surface_attachment_component_manager surface_man;
 switch_component_manager switch_man;
-switchable_component_manager switchable_man;
 type_component_manager type_man;
 door_component_manager door_man;
 
@@ -35,13 +34,11 @@ tick_gas_producers(ship_space * ship)
     for (auto i = 0u; i < gas_man.buffer.num; i++) {
         auto ce = gas_man.instance_pool.entity[i];
 
-        /* gas producers require: power, switchable */
-        assert(switchable_man.exists(ce) || !"gas producer must be switchable");
+        /* gas producers require: power */
         assert(power_man.exists(ce) || !"gas producer must be powerable");
         assert(pos_man.exists(ce) || !"gas producer must have position");
 
         auto power = power_man.get_instance_data(ce);
-        auto switchable = switchable_man.get_instance_data(ce);
         auto position = pos_man.get_instance_data(ce);
 
         /* don't do anything if we aren't powered and turned on */
@@ -70,15 +67,16 @@ tick_gas_producers(ship_space * ship)
 
                     if (msg.desc == comms_msg_type_switch_state) {
 
-                        auto data = clamp(msg.data, 0.f, 1.f);
-                        *switchable.enabled = data > 0;
+                        auto data = clamp(msg.data, 0.0f, 1.0f);
+                        gas_man.instance_pool.enabled[i] = data > 0;
+                        *power.required_power = data > 0 ? *power.max_required_power : 0.0f;
                     }
                 }
             }
         }
 
         /* we are powered if we get here. check if turned on */
-        if (!*switchable.enabled) {
+        if (!gas_man.instance_pool.enabled[i]) {
             continue;
         }
 
@@ -129,13 +127,11 @@ tick_doors(ship_space * ship)
     for (auto i = 0u; i < door_man.buffer.num; i++) {
         auto ce = door_man.instance_pool.entity[i];
 
-        /* doors require: switchable, powered */
-        assert(switchable_man.exists(ce) || !"doors must be switchable");
+        /* doors require: powered */
         assert(power_man.exists(ce) || !"doors must be powerable");
         assert(pos_man.exists(ce) || !"doors must be positioned");
 
         auto power = power_man.get_instance_data(ce);
-        auto switchable = switchable_man.get_instance_data(ce);
         auto position = pos_man.get_instance_data(ce);
 
         /* it's a power door, it's not going /anywhere/ without power */
@@ -165,15 +161,16 @@ tick_doors(ship_space * ship)
                     if (msg.desc == comms_msg_type_switch_state) {
 
                         auto data = clamp(msg.data, 0.f, 1.f);
-                        *switchable.enabled = data > 0;
+                        door_man.instance_pool.desired_pos[i] = data > 0 ? 1.0f : 0.0f;
                     }
                 }
             }
         }
 
-        auto desired_state = *switchable.enabled ? 1.0f : 0.0f;
-
+        auto desired_state = door_man.instance_pool.desired_pos[i];
         auto in_desired_state = door_man.instance_pool.pos[i] == desired_state;
+        /* TODO: magic number for quiescent power */
+        *power.required_power = in_desired_state ? 1 : *power.max_required_power;
 
         auto delta = clamp(door_man.instance_pool.pos[i] - desired_state, -0.1f, 0.1f);
         door_man.instance_pool.pos[i] -= delta;
@@ -254,7 +251,9 @@ tick_power_consumers(ship_space * ship) {
 
             visited_wires.insert(wire_index);
             /* todo: this needs to somehow handle multiple wires */
-            powered |= wire.total_power >= wire.total_draw && wire.total_power > 0;
+            if (wire.total_power >= wire.total_draw && wire.total_power > 0) {
+                powered = true;
+            }
         }
 
         if (powered != old_powered) {
@@ -276,8 +275,7 @@ tick_light_components(ship_space* ship) {
         auto light_type = light_man.instance_pool.type[i];
         auto type = wire_type_comms;
 
-        /* all lights currently require: switchable, position */
-        assert(switchable_man.exists(ce) || !"lights must be switchable");
+        /* all lights currently require: position */
         assert(pos_man.exists(ce) || !"lights must have a position");
 
         auto & comms_attaches = ship->entity_to_attach_lookups[type];
@@ -310,7 +308,9 @@ tick_light_components(ship_space* ship) {
                     auto data = clamp(msg.data, 0.f, 1.f);
                     light_man.instance_pool.intensity[i] = data;
 
-                    *switchable_man.get_instance_data(ce).enabled = data > 0;
+                    auto power = power_man.get_instance_data(ce);
+                    /* TODO: scale power usage based on intensity rather than enabled */
+                    *power.required_power = data > 0 ? *power.max_required_power : 0;
 
                     auto pos = *pos_man.get_instance_data(ce).position;
                     auto block_pos = get_coord_containing(pos);

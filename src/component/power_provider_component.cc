@@ -13,8 +13,8 @@ power_provider_component_manager::create_component_instance_data(unsigned count)
     instance_data new_pool;
 
     size_t size = sizeof(c_entity) * count;
-    size = sizeof(unsigned) * count + align_size<unsigned>(size);
-    size = sizeof(unsigned) * count + align_size<unsigned>(size);
+    size = sizeof(float) * count + align_size<float>(size);
+    size = sizeof(float) * count + align_size<float>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -23,12 +23,12 @@ power_provider_component_manager::create_component_instance_data(unsigned count)
     memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
-    new_pool.max_provided = align_ptr((unsigned *)(new_pool.entity + count));
-    new_pool.provided = align_ptr((unsigned *)(new_pool.max_provided + count));
+    new_pool.max_provided = align_ptr((float *)(new_pool.entity + count));
+    new_pool.provided = align_ptr((float *)(new_pool.max_provided + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
-    memcpy(new_pool.max_provided, instance_pool.max_provided, buffer.num * sizeof(unsigned));
-    memcpy(new_pool.provided, instance_pool.provided, buffer.num * sizeof(unsigned));
+    memcpy(new_pool.max_provided, instance_pool.max_provided, buffer.num * sizeof(float));
+    memcpy(new_pool.provided, instance_pool.provided, buffer.num * sizeof(float));
 
     free(buffer.buffer);
     buffer = new_buffer;

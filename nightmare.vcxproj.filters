@@ -123,9 +123,6 @@
     <ClCompile Include="src\component\switch_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
-    <ClCompile Include="src\component\switchable_component.cc">
-      <Filter>Source Files\component</Filter>
-    </ClCompile>
     <ClCompile Include="src\component\component_system_manager.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
@@ -243,9 +240,6 @@
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\component\switch_component.h">
-      <Filter>Header Files\component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\component\switchable_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\memory.h">
