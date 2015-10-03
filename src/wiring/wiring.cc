@@ -359,14 +359,9 @@ calculate_power_wires(ship_space *ship) {
                 auto wire = attach_topo_find(ship, type, attach);
                 auto & power_data = ship->power_wires[wire];
 
-                auto power_draw_if_enabled = power_man.instance_pool.required_power[i];
-
                 power_data.num_consumers++;
-                power_data.peak_draw += power_draw_if_enabled;
-
-                if (!switchable_man.exists(ce) || *switchable_man.get_instance_data(ce).enabled) {
-                    power_data.total_draw += power_draw_if_enabled;
-                }
+                power_data.peak_draw += power_man.instance_pool.max_required_power[i];
+                power_data.total_draw += power_man.instance_pool.required_power[i];
             }
         }
     }
