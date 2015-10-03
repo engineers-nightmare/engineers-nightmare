@@ -277,47 +277,56 @@ tick_light_components(ship_space* ship) {
 
         /* all lights currently require: position */
         assert(pos_man.exists(ce) || !"lights must have a position");
+        assert(power_man.exists(ce) || !"lights must have power");
+
+        auto power = power_man.get_instance_data(ce);
+        auto light = light_man.get_instance_data(ce);
 
         auto & comms_attaches = ship->entity_to_attach_lookups[type];
         auto attaches = comms_attaches.find(ce);
-        if (attaches == comms_attaches.end()) {
-            continue;
-        }
+        if (attaches != comms_attaches.end()) {
 
-        std::unordered_set<unsigned> visited_wires;
-        for (auto sea : attaches->second) {
-            auto wire_index = attach_topo_find(ship, type, sea);
-            if (visited_wires.find(wire_index) != visited_wires.end()) {
-                continue;
-            }
+            std::unordered_set<unsigned> visited_wires;
+            for (auto sea : attaches->second) {
+                auto wire_index = attach_topo_find(ship, type, sea);
+                if (visited_wires.find(wire_index) != visited_wires.end()) {
+                    continue;
+                }
 
-            auto const & wire = ship->comms_wires[wire_index];
+                auto const & wire = ship->comms_wires[wire_index];
 
-            visited_wires.insert(wire_index);
+                visited_wires.insert(wire_index);
 
-            /* now that we have the wire, see if it has any msgs for us */
-            /* todo: origin discrimination */
-            for (auto msg : wire.read_buffer) {
+                /* now that we have the wire, see if it has any msgs for us */
+                /* todo: origin discrimination */
+                for (auto msg : wire.read_buffer) {
 
-                if ((light_type == 1 &&
-                       (msg.desc == comms_msg_type_switch_state ||
-                        msg.desc == comms_msg_type_pressure_sensor_1_state ||
-                        msg.desc == comms_msg_type_pressure_sensor_2_state)) ||
-                    (light_type == 2 && msg.desc == comms_msg_type_sensor_comparison_state)) {
+                    if ((light_type == 1 &&
+                           (msg.desc == comms_msg_type_switch_state ||
+                            msg.desc == comms_msg_type_pressure_sensor_1_state ||
+                            msg.desc == comms_msg_type_pressure_sensor_2_state)) ||
+                        (light_type == 2 && msg.desc == comms_msg_type_sensor_comparison_state)) {
 
-                    auto data = clamp(msg.data, 0.f, 1.f);
-                    light_man.instance_pool.intensity[i] = data;
+                        auto data = clamp(msg.data, 0.f, 1.f);
+                        *(light.requested_intensity) = data;
 
-                    auto power = power_man.get_instance_data(ce);
-                    /* TODO: scale power usage based on intensity rather than enabled */
-                    *power.required_power = data > 0 ? *power.max_required_power : 0;
-
-                    auto pos = *pos_man.get_instance_data(ce).position;
-                    auto block_pos = get_coord_containing(pos);
-                    mark_lightfield_update(block_pos);
+                        auto pos = *pos_man.get_instance_data(ce).position;
+                        auto block_pos = get_coord_containing(pos);
+                        mark_lightfield_update(block_pos);
+                    }
                 }
             }
         }
+
+        if (!*power.powered) {
+            *(light.intensity) = 0.0f;
+        }
+        else {
+            *(light.intensity) = *(light.requested_intensity);
+        }
+        
+        *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
+
     }
 }
 
