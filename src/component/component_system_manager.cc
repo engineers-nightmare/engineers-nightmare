@@ -175,6 +175,8 @@ tick_doors(ship_space * ship)
         auto desired_state = *switchable.enabled ? 1.0f : 0.0f;
 
         auto in_desired_state = door_man.instance_pool.pos[i] == desired_state;
+        /* TODO: magic number for quiescent power */
+        *power.required_power = in_desired_state ? 1 : *power.max_required_power;
 
         auto delta = clamp(door_man.instance_pool.pos[i] - desired_state, -0.1f, 0.1f);
         door_man.instance_pool.pos[i] -= delta;
