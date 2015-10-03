@@ -1158,7 +1158,6 @@ struct add_wiring_tool : tool
     };
 
     unsigned current_attach = invalid_attach;
-    bool moving_existing = false;
     wire_attachment old_attach;
     entity *old_entity = nullptr;
     wire_type type;
@@ -1212,37 +1211,36 @@ struct add_wiring_tool : tool
 
         auto allow_placement = true;
 
+        auto & ent_att_lookup = ship->entity_to_attach_lookups[type];
+
         switch (state) {
-        case aws_none:
-        case aws_placing:
         case aws_moving:
-        default:
             {
-                auto & ent_att_lookup = ship->entity_to_attach_lookups[type];
-                auto const & a1 = ship->wire_attachments[type][current_attach];
-                auto const & a2 = ship->wire_attachments[type][existing_attach];
-
-                // not pointing at existing
-
-                if (existing_attach != invalid_attach && moving_existing) {
-                    auto w1 = attach_topo_find(ship, type, a1.parent);
-                    auto w2 = attach_topo_find(ship, type, a2.parent);
-
-                    if (w1 != w2) {
+                /* allow moving attach to entity only
+                 * if moving to existing attach
+                 */
+                if ((existing_attach == invalid_attach ||
+                    existing_attach == current_attach) &&
+                    hit_entity &&
+                    ent_att_lookup.find(hit_entity->ce) != ent_att_lookup.end()) {
+                    auto const & atts = ent_att_lookup[hit_entity->ce];
+                    if (atts.size() > 0) {
                         allow_placement = false;
                     }
                 }
-
-                if (allow_placement &&
-                    (existing_attach == invalid_attach || moving_existing)) {
-
-                    /* don't allow placement on entity with existing wire_type attach */
-                    if (hit_entity &&
-                        ent_att_lookup.find(hit_entity->ce) != ent_att_lookup.end()) {
-                        auto const & atts = ent_att_lookup[hit_entity->ce];
-                        if (atts.size() > 0) {
-                            allow_placement = false;
-                        }
+            }
+            break;
+        case aws_none:
+        case aws_placing:
+        default:
+            {
+                /* allow placement on entity only if on existing attach */
+                if (existing_attach == invalid_attach &&
+                    hit_entity &&
+                    ent_att_lookup.find(hit_entity->ce) != ent_att_lookup.end()) {
+                    auto const & atts = ent_att_lookup[hit_entity->ce];
+                    if (atts.size() > 0) {
+                        allow_placement = false;
                     }
                 }
             }
@@ -1281,10 +1279,7 @@ struct add_wiring_tool : tool
             existing_attach, hit_entity);
 
         switch (state) {
-        case aws_none:
         case aws_placing:
-        case aws_moving:
-        default:
             {
                 if (current_attach != invalid_attach) {
                     a1 = wire_attachments[current_attach];
@@ -1292,21 +1287,7 @@ struct add_wiring_tool : tool
                     ship->active_wire[type][0] = attach_topo_find(ship, type, a1.parent);
                 }
 
-                if (moving_existing) {
-                    glm::mat4 mat;
-                    if (existing_attach_ignore != invalid_attach) {
-                        mat = wire_attachments[existing_attach_ignore].transform;
-                    }
-                    else {
-                        mat = mat_rotate_mesh(pt, normal);
-                    }
-
-                    /* todo: this is bad. we shouldn't be modifying state in preview
-                     * as preview now lives in our draw loop
-                     */
-                    wire_attachments[current_attach].transform = mat;
-                }
-
+                /* placing/moving */
                 if (current_attach == existing_attach) {
                     a1.transform = mat_position(pt);
                 }
@@ -1320,32 +1301,84 @@ struct add_wiring_tool : tool
                 else {
                     a2 = { mat_rotate_mesh(pt, normal) };
                 }
+            }
+            break;
+        case aws_moving:
+            {
+                a1 = wire_attachments[current_attach];
 
-                /* if existing, place preview mesh as existing
-                 * otherwise use raycast info
-                 */
-                auto mat = frame->alloc_aligned<glm::mat4>(1);
-                *mat.ptr = a2.transform;
-                mat.bind(1, frame);
+                if (allow_placement) {
+                    glm::mat4 mat;
+                    if (existing_attach_ignore != invalid_attach) {
+                        mat = wire_attachments[existing_attach_ignore].transform;
+                    }
+                    else {
+                        mat = mat_rotate_mesh(pt, normal);
+                    }
 
-                glUseProgram(unlit_shader);
-                draw_mesh(allow_placement ? attachment_hw : no_placement_hw);
-                glUseProgram(simple_shader);
+                    /* todo: this is bad. we shouldn't be modifying state in preview
+                     * as preview now lives in our draw loop
+                     */
+                    wire_attachments[current_attach].transform = mat;
 
-                if (current_attach == invalid_attach)
-                    return;
+                    if (current_attach == existing_attach) {
+                        a1.transform = mat_position(pt);
+                    }
+                }
 
-                if (allow_placement && current_attach != existing_attach) {
-                    mat = frame->alloc_aligned<glm::mat4>(1);
-                    *mat.ptr = calc_segment_matrix(a1, a2);
-                    mat.bind(1, frame);
+                ship->active_wire[type][0] = attach_topo_find(ship, type, a1.parent);
 
-                    glUseProgram(unlit_shader);
-                    draw_mesh(wire_hw_meshes[type]);
-                    glUseProgram(simple_shader);
+                if (existing_attach != invalid_attach) {
+                    a2 = wire_attachments[existing_attach];
+                    pt = glm::vec3(a2.transform[3]);
+
+                    ship->active_wire[type][1] = attach_topo_find(ship, type, a2.parent);
+                }
+                else {
+                    a2 = { mat_rotate_mesh(pt, normal) };
                 }
             }
             break;
+        case aws_none:
+            {
+                if (existing_attach != invalid_attach) {
+                    a2 = wire_attachments[existing_attach];
+                    pt = glm::vec3(a2.transform[3]);
+
+                    ship->active_wire[type][1] = attach_topo_find(ship, type, a2.parent);
+                }
+                else {
+                    a2 = { mat_rotate_mesh(pt, normal) };
+                }
+            }
+            break;
+        default:
+            break;
+        }
+
+        /* if existing, place preview mesh as existing
+        * otherwise use raycast info
+        */
+        auto mat = frame->alloc_aligned<glm::mat4>(1);
+        *mat.ptr = a2.transform;
+        mat.bind(1, frame);
+
+        glUseProgram(unlit_shader);
+        draw_mesh(allow_placement ? attachment_hw : no_placement_hw);
+        glUseProgram(simple_shader);
+
+        if (current_attach == invalid_attach)
+            return;
+
+        /* draw wire segment to preview attach location */
+        if (allow_placement && current_attach != existing_attach) {
+            mat = frame->alloc_aligned<glm::mat4>(1);
+            *mat.ptr = calc_segment_matrix(a1, a2);
+            mat.bind(1, frame);
+
+            glUseProgram(unlit_shader);
+            draw_mesh(wire_hw_meshes[type]);
+            glUseProgram(simple_shader);
         }
     }
 
@@ -1364,84 +1397,86 @@ struct add_wiring_tool : tool
         switch (state) {
         case aws_none:
         case aws_placing:
-        case aws_moving:
-        default:
             {
-                if (moving_existing) {
-                    /* did we just move to an already existing attach */
-                    unsigned existing_attach = get_existing_attach_near(pt, current_attach);
+                unsigned existing_attach = get_existing_attach_near(pt);
 
-                    /* we did move to an existing. need to merge
-                     */
-                    if (existing_attach != invalid_attach) {
-                        relocate_segments_and_entity_attaches(ship, type, existing_attach, current_attach);
+                if (!can_place(ship, current_attach, existing_attach,
+                    hit_entity)) {
 
-                        auto back_attach = (unsigned)wire_attachments.size() - 1;
-                        /* no segments */
-                        if (back_attach != invalid_attach) {
-                            wire_attachments[current_attach] = wire_attachments[back_attach];
-                            wire_attachments.pop_back();
+                    return;
+                }
 
-                            relocate_segments_and_entity_attaches(ship, type, current_attach, back_attach);
-
-                            attach_topo_rebuild(ship, type);
-                        }
-
-                        /* update current */
-                        current_attach = existing_attach;
-                    }
-
-                    /* did we move to be on an entity */
-                    if (hit_entity && current_attach != invalid_attach) {
-                        if (current_attach != existing_attach &&
-                            !can_place(ship, current_attach, existing_attach,
-                                hit_entity)) {
-
-                            return;
-                        }
-
-                        entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
-                    }
-
-                    moving_existing = false;
-                    current_attach = invalid_attach;
+                unsigned new_attach;
+                if (existing_attach == invalid_attach) {
+                    new_attach = (unsigned)wire_attachments.size();
+                    wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
+                    wire_attachments.push_back(wa);
                 }
                 else {
-                    unsigned existing_attach = get_existing_attach_near(pt);
+                    new_attach = existing_attach;
+                }
 
-                    if (!can_place(ship, current_attach, existing_attach,
-                        hit_entity)) {
+                if (current_attach != invalid_attach) {
+                    wire_segment s;
+                    s.first = current_attach;
+                    s.second = new_attach;
+                    wire_segments.push_back(s);
+
+                    /* merge! */
+                    attach_topo_unite(ship, type, current_attach, new_attach);
+                }
+
+                current_attach = new_attach;
+
+                if (hit_entity && current_attach != invalid_attach) {
+                    entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
+                }
+
+                state = aws_placing;
+            }
+            break;
+        case aws_moving:
+            {
+                /* did we just move to an already existing attach */
+                unsigned existing_attach = get_existing_attach_near(pt, current_attach);
+
+                /* we did move to an existing. need to merge */
+                if (existing_attach != invalid_attach) {
+                    relocate_segments_and_entity_attaches(ship, type, existing_attach, current_attach);
+
+                    auto back_attach = (unsigned)wire_attachments.size() - 1;
+                    /* no segments */
+                    if (back_attach != invalid_attach) {
+                        wire_attachments[current_attach] = wire_attachments[back_attach];
+                        wire_attachments.pop_back();
+
+                        relocate_segments_and_entity_attaches(ship, type, current_attach, back_attach);
+
+                        attach_topo_rebuild(ship, type);
+                    }
+
+                    /* update current */
+                    current_attach = existing_attach;
+                }
+
+                /* did we move to be on an entity */
+                if (hit_entity && current_attach != invalid_attach) {
+                    if (current_attach != existing_attach &&
+                        !can_place(ship, current_attach, existing_attach,
+                            hit_entity)) {
 
                         return;
                     }
 
-                    unsigned new_attach;
-                    if (existing_attach == invalid_attach) {
-                        new_attach = (unsigned)wire_attachments.size();
-                        wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
-                        wire_attachments.push_back(wa);
-                    }
-                    else {
-                        new_attach = existing_attach;
-                    }
-
-                    if (current_attach != invalid_attach) {
-                        wire_segment s;
-                        s.first = current_attach;
-                        s.second = new_attach;
-                        wire_segments.push_back(s);
-
-                        /* merge! */
-                        attach_topo_unite(ship, type, current_attach, new_attach);
-                    }
-
-                    current_attach = new_attach;
-
-                    if (hit_entity && current_attach != invalid_attach) {
-                        entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
-                    }
+                    entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
                 }
+
+                current_attach = invalid_attach;
+
+                state = aws_none;
             }
+            break;
+        default:
             break;
         }
 
@@ -1454,43 +1489,21 @@ struct add_wiring_tool : tool
 
         switch (state) {
         case aws_none:
-        case aws_placing:
-        case aws_moving:
-        default:
             {
-                /* reset to old spot if moving. "cancel" */
-                if (moving_existing) {
-                    wire_attachments[current_attach] = old_attach;
-
-                    if (old_entity) {
-                        entity_to_attach_lookup[old_entity->ce].insert(current_attach);
-                        old_entity = nullptr;
-                    }
-
-                    moving_existing = false;
-                    current_attach = invalid_attach;
-                    return;
-                }
-
-                /* terminate the current run */
-                if (current_attach != invalid_attach) {
-                    current_attach = invalid_attach;
-                    return;
-                }
-
                 /* remove existing attach, and dependent segments */
                 entity *hit_entity = nullptr;
                 glm::vec3 pt;
                 glm::vec3 normal;
 
+                /* nowhere to place attach, so can't find */
                 if (!get_attach_point(pl.eye, pl.dir, &pt, &normal, &hit_entity)) {
-                    return;
+                    break;
                 }
 
                 unsigned existing_attach = get_existing_attach_near(pt);
                 if (existing_attach == invalid_attach) {
                     /* not pointing at an attach */
-                    return;
+                    break;
                 }
 
                 /* remove attach from entity lookup */
@@ -1514,7 +1527,37 @@ struct add_wiring_tool : tool
                 if (changed) {
                     attach_topo_rebuild(ship, type);
                 }
+
+                state = aws_none;
             }
+            break;
+        case aws_placing:
+            {
+                /* terminate the current run */
+                if (current_attach != invalid_attach) {
+                    current_attach = invalid_attach;
+                }
+
+                state = aws_none;
+            }
+            break;
+        case aws_moving:
+            {
+                /* reset to old spot if moving. "cancel" */
+                wire_attachments[current_attach] = old_attach;
+
+                if (old_entity) {
+                    entity_to_attach_lookup[old_entity->ce].insert(current_attach);
+                    old_entity = nullptr;
+                }
+
+                current_attach = invalid_attach;
+                state = aws_none;
+
+                state = aws_none;
+            }
+            break;
+        default:
             break;
         }
     }
@@ -1530,9 +1573,6 @@ struct add_wiring_tool : tool
 
         switch (state) {
         case aws_none:
-        case aws_placing:
-        case aws_moving:
-        default:
             {
                 if (current_attach == invalid_attach) {
                     if (!get_attach_point(pl.eye, pl.dir, &pt, &normal, &hit_entity))
@@ -1563,11 +1603,15 @@ struct add_wiring_tool : tool
                         lookup[hit_entity->ce].erase(current_attach);
                     }
 
-                    moving_existing = true;
                     old_attach = wire_attachments[current_attach];
                     old_entity = hit_entity;
                 }
+                state = aws_moving;
             }
+            break;
+        case aws_placing:
+        case aws_moving:
+        default:
             break;
         }
     }
@@ -1575,16 +1619,13 @@ struct add_wiring_tool : tool
     void cycle_mode() override {
         switch (state) {
         case aws_none:
+            {
+                type = (wire_type)(((unsigned)type + (unsigned)num_wire_types + 1) % (unsigned)num_wire_types);
+            }
+            break;
         case aws_placing:
         case aws_moving:
         default:
-            {
-                if (moving_existing || current_attach != invalid_attach) {
-                    return;
-                }
-
-                type = (wire_type)(((unsigned)type + (unsigned)num_wire_types + 1) % (unsigned)num_wire_types);
-            }
             break;
         }
     }
