@@ -48,8 +48,8 @@
 bool exit_requested = false;
 
 bool draw_hud = true;
-bool draw_debug_text = true;
-bool draw_fps = true;
+bool draw_debug_text = false;
+bool draw_fps = false;
 
 auto hfov = DEG2RAD(90.f);
 
