@@ -262,14 +262,11 @@ struct entity
             *power.required_power = 8;
             *power.max_required_power = 8;
 
-            switchable_man.assign_entity(ce);
-            auto switchable = switchable_man.get_instance_data(ce);
-            *switchable.enabled = true;
-
             door_man.assign_entity(ce);
             auto door = door_man.get_instance_data(ce);
             *door.mesh = door_hw;
             *door.pos = 1.0f;
+            *door.desired_pos = 1.0f;
         }
         // frobnicator
         else if (type == 1) {

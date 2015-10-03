@@ -130,13 +130,11 @@ tick_doors(ship_space * ship)
     for (auto i = 0u; i < door_man.buffer.num; i++) {
         auto ce = door_man.instance_pool.entity[i];
 
-        /* doors require: switchable, powered */
-        assert(switchable_man.exists(ce) || !"doors must be switchable");
+        /* doors require: powered */
         assert(power_man.exists(ce) || !"doors must be powerable");
         assert(pos_man.exists(ce) || !"doors must be positioned");
 
         auto power = power_man.get_instance_data(ce);
-        auto switchable = switchable_man.get_instance_data(ce);
         auto position = pos_man.get_instance_data(ce);
 
         /* it's a power door, it's not going /anywhere/ without power */
@@ -166,14 +164,13 @@ tick_doors(ship_space * ship)
                     if (msg.desc == comms_msg_type_switch_state) {
 
                         auto data = clamp(msg.data, 0.f, 1.f);
-                        *switchable.enabled = data > 0;
+                        door_man.instance_pool.desired_pos[i] = data > 0 ? 1.0f : 0.0f;
                     }
                 }
             }
         }
 
-        auto desired_state = *switchable.enabled ? 1.0f : 0.0f;
-
+        auto desired_state = door_man.instance_pool.desired_pos[i];
         auto in_desired_state = door_man.instance_pool.pos[i] == desired_state;
         /* TODO: magic number for quiescent power */
         *power.required_power = in_desired_state ? 1 : *power.max_required_power;
