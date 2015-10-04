@@ -461,6 +461,44 @@ tick_sensor_comparators(ship_space *ship) {
 
 
 void
+tick_readers(ship_space *ship) {
+    for (auto i = 0u; i < reader_man.buffer.num; i++) {
+        auto ce = reader_man.instance_pool.entity[i];
+
+        auto & comms_attaches = ship->entity_to_attach_lookups[wire_type_comms];
+        auto attaches = comms_attaches.find(ce);
+        if (attaches == comms_attaches.end()) {
+            continue;
+        }
+
+        for (auto sea : attaches->second) {
+            auto wire_index = attach_topo_find(ship, wire_type_comms, sea);
+            auto const & wire = ship->comms_wires[wire_index];
+
+            for (auto msg : wire.read_buffer) {
+                /* if we're filtering by source, and missed -- skip this one. */
+                if (reader_man.instance_pool.source[i].id &&
+                    reader_man.instance_pool.source[i].id != msg.originator.id) {
+                    continue;
+                }
+
+                /* if we're filtering by desc, and missed -- skip */
+                /* we /assume/ that everyone here has their strings interned. */
+                if (reader_man.instance_pool.desc[i] &&
+                    reader_man.instance_pool.desc[i] != msg.desc) {
+                    continue;
+                }
+
+                reader_man.instance_pool.data[i] = msg.data;
+
+                /* TODO: record /when/ we last got a matching packet */
+            }
+        }
+    }
+}
+
+
+void
 draw_renderables(frame_data *frame)
 {
     for (auto i = 0u; i < render_man.buffer.num; i++) {

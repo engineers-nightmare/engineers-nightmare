@@ -1725,6 +1725,7 @@ update()
         }
 
         /* allow the entities to tick */
+        tick_readers(ship);
         tick_gas_producers(ship);
         tick_power_consumers(ship);
         tick_light_components(ship);

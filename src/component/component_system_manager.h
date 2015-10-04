@@ -60,6 +60,9 @@ void
 tick_sensor_comparators(ship_space *ship);
 
 void
+tick_readers(ship_space *ship);
+
+void
 draw_renderables(frame_data *frame);
 
 void
