@@ -23,14 +23,14 @@ extern particle_manager *particle_man;
 
 
 /* I have no clue how we're going to actually handle these */
-const char * comms_msg_type_switch_state = "switch_state";
-const char * comms_msg_type_pressure_sensor_1_state = "pressure_sensor_1_state";
-const char * comms_msg_type_pressure_sensor_2_state = "pressure_sensor_2_state";
-const char * comms_msg_type_sensor_comparison_state = "sensor_comparison_state";
+const char *comms_msg_type_switch_state = "switch_state";
+const char *comms_msg_type_pressure_sensor_1_state = "pressure_sensor_1_state";
+const char *comms_msg_type_pressure_sensor_2_state = "pressure_sensor_2_state";
+const char *comms_msg_type_sensor_comparison_state = "sensor_comparison_state";
 
 
 void
-tick_gas_producers(ship_space * ship)
+tick_gas_producers(ship_space *ship)
 {
     for (auto i = 0u; i < gas_man.buffer.num; i++) {
         auto ce = gas_man.instance_pool.entity[i];
@@ -123,7 +123,7 @@ tick_gas_producers(ship_space * ship)
 }
 
 void
-tick_doors(ship_space * ship)
+tick_doors(ship_space *ship)
 {
     for (auto i = 0u; i < door_man.buffer.num; i++) {
         auto ce = door_man.instance_pool.entity[i];
@@ -227,7 +227,7 @@ tick_doors(ship_space * ship)
 
 
 void
-tick_power_consumers(ship_space * ship) {
+tick_power_consumers(ship_space *ship) {
     for (auto i = 0u; i < power_man.buffer.num; i++) {
         auto ce = power_man.instance_pool.entity[i];
 
@@ -270,7 +270,7 @@ tick_power_consumers(ship_space * ship) {
 
 
 void
-tick_light_components(ship_space* ship) {
+tick_light_components(ship_space *ship) {
     for (auto i = 0u; i < light_man.buffer.num; i++) {
         auto ce = light_man.instance_pool.entity[i];
         auto light_type = light_man.instance_pool.type[i];
@@ -325,9 +325,8 @@ tick_light_components(ship_space* ship) {
         else {
             *(light.intensity) = *(light.requested_intensity);
         }
-        
-        *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
 
+        *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
     }
 }
 
@@ -380,7 +379,7 @@ tick_pressure_sensors(ship_space* ship) {
 
 
 void
-tick_sensor_comparators(ship_space* ship) {
+tick_sensor_comparators(ship_space *ship) {
     for (auto i = 0u; i < comparator_man.buffer.num; i++) {
         auto ce = comparator_man.instance_pool.entity[i];
         auto type = wire_type_comms;

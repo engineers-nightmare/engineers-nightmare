@@ -35,29 +35,29 @@ extern type_component_manager type_man;
 extern door_component_manager door_man;
 extern reader_component_manager reader_man;
 
-extern const char * comms_msg_type_switch_state;
-extern const char * comms_msg_type_pressure_sensor_1_state;
-extern const char * comms_msg_type_pressure_sensor_2_state;
-extern const char * comms_msg_type_sensor_comparison_state;
+extern const char *comms_msg_type_switch_state;
+extern const char *comms_msg_type_pressure_sensor_1_state;
+extern const char *comms_msg_type_pressure_sensor_2_state;
+extern const char *comms_msg_type_sensor_comparison_state;
 
 
 void
-tick_gas_producers(ship_space * ship);
+tick_gas_producers(ship_space *ship);
 
 void
-tick_doors(ship_space * ship);
+tick_doors(ship_space *ship);
 
 void
-tick_power_consumers(ship_space * ship);
+tick_power_consumers(ship_space *ship);
 
 void
-tick_light_components(ship_space * ship);
+tick_light_components(ship_space *ship);
 
 void
-tick_pressure_sensors(ship_space * ship);
+tick_pressure_sensors(ship_space *ship);
 
 void
-tick_sensor_comparators(ship_space* ship);
+tick_sensor_comparators(ship_space *ship);
 
 void
 draw_renderables(frame_data *frame);
