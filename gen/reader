@@ -1,0 +1,4 @@
+char const *,name
+c_entity,source
+char const *,desc
+float,data
