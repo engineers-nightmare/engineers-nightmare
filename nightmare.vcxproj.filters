@@ -153,6 +153,9 @@
     <ClCompile Include="src\particle.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\reader_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -286,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="src\particle.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\reader_component.h">
+      <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
