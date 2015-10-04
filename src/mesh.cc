@@ -31,7 +31,7 @@ load_mesh(char const *filename) {
     }
 
     aiScene const *scene = aiImportFileExWithProperties(filename, aiProcess_Triangulate |
-            aiProcess_MakeLeftHanded | aiProcess_GenNormals | aiProcess_OptimizeMeshes | aiProcess_RemoveComponent,
+            aiProcess_GenNormals | aiProcess_OptimizeMeshes | aiProcess_RemoveComponent,
             NULL /* IO */,
             meshImportProps);
 

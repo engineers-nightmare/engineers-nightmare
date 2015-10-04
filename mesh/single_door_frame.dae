@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.75.0 commit date:2015-07-07, commit time:14:56, hash:c27589e</authoring_tool>
+    </contributor>
+    <created>2015-10-04T15:03:57</created>
+    <modified>2015-10-04T15:03:57</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_images/>
+  <library_effects>
+    <effect id="None_001-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">0.64 0.64 0.64 1</color>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="None_001-material" name="None_001">
+      <instance_effect url="#None_001-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="single_door_frame_single_door_frame__002-mesh" name="single_door_frame_single_door_frame..002">
+      <mesh>
+        <source id="single_door_frame_single_door_frame__002-mesh-positions">
+          <float_array id="single_door_frame_single_door_frame__002-mesh-positions-array" count="144">0.999999 0.5499978 1.9 0.999999 0.5499978 2 0.899999 0.5499978 2 0.899999 0.5499978 1.9 0.899999 0.6999979 2 0.999999 0.6999979 2 0.999999 0.6999979 1.9 0.899999 0.6999979 1.9 0.9 0.55 0 0.9 0.7 0 10e-7 0.5499978 1.9 0.100001 0.5499978 1.9 0.100001 0.5499978 2 10e-7 0.5499978 2 0.100001 0.6999979 2 10e-7 0.6999979 2 10e-7 0.6999979 1.9 0.100001 0.6999979 1.9 0 0.7 0 0 0.55 0 0.1 0.55 0 1 0.7 0 1 0.55 0 0.1 0.7 0 0.999999 0.4500018 1.9 0.899999 0.4500018 1.9 0.899999 0.4500018 2 0.999999 0.4500018 2 0.899999 0.3000018 2 0.999999 0.3000018 2 0.999999 0.3000018 1.9 0.899999 0.3000018 1.9 0.9 0.45 0 0.9 0.3 0 10e-7 0.4500018 1.9 10e-7 0.4500018 2 0.100001 0.4500018 2 0.100001 0.4500018 1.9 0.100001 0.3000018 2 10e-7 0.3000018 2 10e-7 0.3000018 1.9 0.100001 0.3000018 1.9 0 0.3 0 0 0.45 0 0.1 0.45 0 1 0.45 0 1 0.3 0 0.1 0.3 0</float_array>
+          <technique_common>
+            <accessor source="#single_door_frame_single_door_frame__002-mesh-positions-array" count="48" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="single_door_frame_single_door_frame__002-mesh-normals">
+          <float_array id="single_door_frame_single_door_frame__002-mesh-normals-array" count="243">0 -1 0 0 -1 -3.76447e-7 0 -7.94728e-7 1 0 -7.94729e-7 1 0 -7.94728e-7 1 1 0 2.66652e-7 1 0 0 1 0 0 0 1 0 0 1 5.50303e-7 -1 0 -5.01934e-7 -1 0 -5.01934e-7 -1 0 -5.01934e-7 0 -1 -3.79065e-7 0 -7.94729e-7 1 0 -7.94728e-7 1 0 -7.94728e-7 1 -1 0 2.63158e-7 -1 0 2.63158e-7 -1 0 0 0 1 5.86953e-7 -1 0 5.26316e-7 0 -1 -1.17509e-6 0 -1 -5.69253e-7 0 -7.94729e-7 1 0 7.94729e-7 -1 0 7.94728e-7 -1 0 1 3.92136e-7 0 0 -1 0 1 1.17378e-6 0 1 3.65994e-7 1 0 2.66653e-7 1 0 5.33305e-7 0 -1 -5.65458e-7 0 -1 -1.17483e-6 0 0 -1 0 0 -1 1 0 -5.25462e-7 1 0 -5.25462e-7 0 1 1.10422e-6 0 1 1.10172e-6 0 1 -3.2678e-7 0 0 1 1 0 2.66652e-7 1 0 0 0 -1 4.61154e-7 -1 -7.94598e-7 -5.01934e-7 -1 -8.36557e-7 -5.01934e-7 -1 0 -5.01934e-7 0 1 -3.18934e-7 -1 0 2.63158e-7 0 -1 4.70563e-7 -1 0 2.63158e-7 -1 0 5.26316e-7 0 1 -4.79451e-7 0 1 -1.01745e-6 0 0 -1 0 -1 3.13709e-7 0 -1 9.44269e-7 0 -1 9.45057e-7 1 7.94598e-7 5.33305e-7 1 0 2.66652e-7 0 1 -9.42438e-7 0 1 -4.89514e-7 1 0 -5.25462e-7 1 0 -5.25462e-7 0 -1 9.41126e-7 -1 0 -5.01934e-7 -1 0 5.26316e-7 0 -1 -1.17641e-6 0 7.94728e-7 -1 0 1 1.17641e-6 0 -1 -1.17641e-6 0 0 -1 0 -1 3.07173e-7 -1 0 -5.01934e-7 -1 0 5.26316e-7 0 1 -1.01955e-6 1 8.36557e-7 5.33305e-7 0 1 -9.41126e-7 1 0 -5.25462e-7</float_array>
+          <technique_common>
+            <accessor source="#single_door_frame_single_door_frame__002-mesh-normals-array" count="81" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="single_door_frame_single_door_frame__002-mesh-map-0">
+          <float_array id="single_door_frame_single_door_frame__002-mesh-map-0-array" count="528">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</float_array>
+          <technique_common>
+            <accessor source="#single_door_frame_single_door_frame__002-mesh-map-0-array" count="264" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="single_door_frame_single_door_frame__002-mesh-vertices">
+          <input semantic="POSITION" source="#single_door_frame_single_door_frame__002-mesh-positions"/>
+        </vertices>
+        <polylist material="None_001-material" count="88">
+          <input semantic="VERTEX" source="#single_door_frame_single_door_frame__002-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#single_door_frame_single_door_frame__002-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#single_door_frame_single_door_frame__002-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>1 0 0 2 0 1 3 1 2 2 2 3 1 3 4 5 4 5 6 5 6 5 6 7 1 7 8 4 8 9 5 8 10 6 9 11 8 10 12 3 11 13 7 12 14 11 13 15 12 0 16 13 0 17 15 14 18 13 15 19 12 16 20 16 17 21 10 18 22 13 19 23 16 20 24 15 8 25 14 8 26 19 21 27 10 18 28 16 17 29 20 22 30 11 13 31 10 23 32 14 24 33 12 16 34 2 2 35 11 25 36 17 25 37 7 26 38 12 0 39 11 13 40 3 1 41 17 27 42 14 8 43 4 8 44 21 28 45 22 28 46 8 28 47 9 29 48 7 30 49 6 9 50 6 5 51 0 31 52 22 32 53 0 33 54 3 1 55 8 34 56 20 28 57 19 35 58 18 36 59 20 37 60 23 37 61 17 38 62 23 39 63 18 40 64 16 20 65 25 41 66 26 8 67 27 8 68 29 42 69 27 42 70 26 42 71 24 43 72 27 44 73 29 44 74 30 45 75 29 0 76 28 0 77 32 46 78 33 47 79 31 48 80 35 8 81 36 8 82 37 49 83 36 42 84 35 42 85 39 42 86 39 19 87 35 19 88 34 50 89 38 0 90 39 0 91 40 51 92 40 52 93 34 50 94 43 53 95 34 54 96 37 49 97 44 55 98 26 42 99 36 42 100 38 42 101 31 56 102 41 56 103 37 56 104 25 41 105 37 49 106 36 8 107 28 0 108 38 0 109 41 57 110 32 28 111 45 28 112 46 28 113 33 58 114 46 59 115 30 45 116 45 60 117 24 43 118 30 61 119 32 62 120 25 41 121 24 63 122 42 36 123 43 35 124 44 28 125 44 64 126 37 38 127 41 65 128 47 66 129 41 57 130 40 51 131 0 33 132 1 0 133 3 1 134 4 16 135 2 2 136 5 4 137 0 31 138 6 5 139 1 7 140 7 30 141 4 8 142 6 9 143 9 67 144 8 10 145 7 12 146 10 23 147 11 13 148 13 0 149 14 24 150 15 14 151 12 16 152 15 19 153 16 17 154 13 19 155 17 27 156 16 20 157 14 8 158 18 68 159 19 21 160 16 17 161 19 69 162 20 22 163 10 23 164 4 16 165 14 24 166 2 2 167 3 70 168 11 25 169 7 26 170 2 0 171 12 0 172 3 1 173 7 30 174 17 27 175 4 8 176 9 28 177 21 28 178 8 28 179 21 71 180 9 29 181 6 9 182 21 32 183 6 5 184 22 32 185 22 72 186 0 33 187 8 34 188 23 73 189 20 28 190 18 36 191 11 38 192 20 37 193 17 38 194 17 27 195 23 39 196 16 20 197 24 63 198 25 41 199 27 8 200 28 42 201 29 42 202 26 42 203 30 61 204 24 43 205 29 44 206 31 74 207 30 45 208 28 0 209 25 75 210 32 46 211 31 48 212 34 54 213 35 8 214 37 49 215 38 42 216 36 42 217 39 42 218 40 52 219 39 19 220 34 50 221 41 57 222 38 0 223 40 51 224 42 76 225 40 52 226 43 53 227 43 77 228 34 54 229 44 55 230 28 42 231 26 42 232 38 42 233 25 56 234 31 56 235 37 56 236 26 8 237 25 41 238 36 8 239 31 74 240 28 0 241 41 57 242 33 28 243 32 28 244 46 28 245 31 74 246 33 58 247 30 45 248 46 78 249 45 60 250 30 61 251 45 79 252 32 62 253 24 63 254 47 73 255 42 36 256 44 28 257 47 80 258 44 64 259 41 65 260 42 66 261 47 66 262 40 51 263</p>
+        </polylist>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_controllers/>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="single_door_frame_single_door_frame__002" name="single_door_frame_single_door_frame__002" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#single_door_frame_single_door_frame__002-mesh" name="single_door_frame_single_door_frame__002">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="None_001-material" target="#None_001-material"/>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

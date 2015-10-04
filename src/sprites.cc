@@ -66,12 +66,12 @@ sprite_renderer::add(sprite_metrics const *m, float x, float y)
     sprite_vertex p3 = { x, y - m->h, u0, v1 };
 
     verts.push_back(p0);
-    verts.push_back(p1);
     verts.push_back(p2);
+    verts.push_back(p1);
 
     verts.push_back(p0);
-    verts.push_back(p2);
     verts.push_back(p3);
+    verts.push_back(p2);
 }
 
 

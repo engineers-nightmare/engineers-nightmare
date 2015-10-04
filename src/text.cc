@@ -99,12 +99,12 @@ text_renderer::add(char const *str, float x, float y, float r, float g, float b)
         text_vertex p3 = { xx, yy - m->h, u0, v1, r, g, b };
 
         verts.push_back(p0);
-        verts.push_back(p1);
         verts.push_back(p2);
+        verts.push_back(p1);
 
         verts.push_back(p0);
-        verts.push_back(p2);
         verts.push_back(p3);
+        verts.push_back(p2);
 
         xx += m->advance;
     }
