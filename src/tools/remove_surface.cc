@@ -40,6 +40,10 @@ struct remove_surface_tool : tool
 
         ship->remove_surface(rc->bl, rc->p, (surface_index)index);
 
+        /* remove any ents using the surface */
+        remove_ents_from_surface(rc->p, index ^ 1);
+        remove_ents_from_surface(rc->bl, index);
+
         mark_lightfield_update(rc->bl);
         mark_lightfield_update(rc->p);
     }
