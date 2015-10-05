@@ -55,7 +55,7 @@ load_mesh(char const *filename) {
 
         for (unsigned int j = 0; j < m->mNumVertices; j++)
             verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z,
-                        m->mNormals[j].x, m->mNormals[j].y, m->mNormals[j].z, 0 /* mat */));
+                        -m->mNormals[j].x, -m->mNormals[j].y, -m->mNormals[j].z, 0 /* mat */));
 
         for (unsigned int j = 0; j < m->mNumFaces; j++) {
             if (m->mFaces[j].mNumIndices != 3)
