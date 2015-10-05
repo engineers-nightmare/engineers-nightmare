@@ -203,16 +203,16 @@ struct entity_type
 
 
 entity_type entity_types[] = {
-    { "Door", "mesh/single_door_frame.obj", 2, false, 2 },
-    { "Frobnicator", "mesh/frobnicator.obj", 3, false, 1 },
-    { "Light", "mesh/panel_4x4.obj", 8, true, 1 },
-    { "Warning Light", "mesh/warning_light.obj", 8, true, 1 },
-    { "Display Panel", "mesh/panel_4x4.obj", 7, true, 1 },
-    { "Switch", "mesh/panel_1x1.obj", 9, true, 1 },
-    { "Plaidnicator", "mesh/frobnicator.obj", 13, false, 1 },
-    { "Pressure Sensor 1", "mesh/panel_1x1.obj", 12, true, 1 },
-    { "Pressure Sensor 2", "mesh/panel_1x1.obj", 14, true, 1 },
-    { "Sensor Comparator", "mesh/panel_1x1.obj", 13, true, 1 },
+    { "Door", "mesh/single_door_frame.dae", 2, false, 2 },
+    { "Frobnicator", "mesh/frobnicator.dae", 3, false, 1 },
+    { "Light", "mesh/panel_4x4.dae", 8, true, 1 },
+    { "Warning Light", "mesh/warning_light.dae", 8, true, 1 },
+    { "Display Panel", "mesh/panel_4x4.dae", 7, true, 1 },
+    { "Switch", "mesh/panel_1x1.dae", 9, true, 1 },
+    { "Plaidnicator", "mesh/frobnicator.dae", 13, false, 1 },
+    { "Pressure Sensor 1", "mesh/panel_1x1.dae", 12, true, 1 },
+    { "Pressure Sensor 2", "mesh/panel_1x1.dae", 14, true, 1 },
+    { "Sensor Comparator", "mesh/panel_1x1.dae", 13, true, 1 },
 };
 
 
@@ -610,7 +610,7 @@ init()
     particle_man = new particle_manager();
     particle_man->create_particle_data(1000);
 
-    projectile_sw = load_mesh("mesh/sphere.obj");
+    projectile_sw = load_mesh("mesh/sphere.dae");
     for (auto i = 0u; i < projectile_sw->num_vertices; ++i) {
         projectile_sw->verts[i].x *= 0.01f;
         projectile_sw->verts[i].y *= 0.01f;
@@ -619,32 +619,32 @@ init()
     set_mesh_material(projectile_sw, 11);
     projectile_hw = upload_mesh(projectile_sw);
 
-    attachment_sw = load_mesh("mesh/attach.obj");
+    attachment_sw = load_mesh("mesh/attach.dae");
     set_mesh_material(attachment_sw, 10);
     attachment_hw = upload_mesh(attachment_sw);
 
-    no_placement_sw = load_mesh("mesh/no_place.obj");
+    no_placement_sw = load_mesh("mesh/no_place.dae");
     set_mesh_material(no_placement_sw, 11);
     no_placement_hw = upload_mesh(no_placement_sw);
 
-    auto wire_sw = load_mesh("mesh/wire.obj");
+    auto wire_sw = load_mesh("mesh/wire.dae");
     set_mesh_material(wire_sw, 12);
     wire_hw_meshes[wire_type_power] = upload_mesh(wire_sw);
     set_mesh_material(wire_sw, 14);
     wire_hw_meshes[wire_type_comms] = upload_mesh(wire_sw);
 
-    door_sw = load_mesh("mesh/single_door.obj");
+    door_sw = load_mesh("mesh/single_door.dae");
     set_mesh_material(door_sw, 2);  /* TODO: paint a new texture for this one */
     door_hw = upload_mesh(door_sw);
 
-    scaffold_sw = load_mesh("mesh/initial_scaffold.obj");
+    scaffold_sw = load_mesh("mesh/initial_scaffold.dae");
 
-    surfs_sw[surface_xp] = load_mesh("mesh/x_quad_p.obj");
-    surfs_sw[surface_xm] = load_mesh("mesh/x_quad.obj");
-    surfs_sw[surface_yp] = load_mesh("mesh/y_quad_p.obj");
-    surfs_sw[surface_ym] = load_mesh("mesh/y_quad.obj");
-    surfs_sw[surface_zp] = load_mesh("mesh/z_quad_p.obj");
-    surfs_sw[surface_zm] = load_mesh("mesh/z_quad.obj");
+    surfs_sw[surface_xp] = load_mesh("mesh/x_quad_p.dae");
+    surfs_sw[surface_xm] = load_mesh("mesh/x_quad.dae");
+    surfs_sw[surface_yp] = load_mesh("mesh/y_quad_p.dae");
+    surfs_sw[surface_ym] = load_mesh("mesh/y_quad.dae");
+    surfs_sw[surface_zp] = load_mesh("mesh/z_quad_p.dae");
+    surfs_sw[surface_zm] = load_mesh("mesh/z_quad.dae");
 
     for (int i = 0; i < 6; i++)
         surfs_hw[i] = upload_mesh(surfs_sw[i]);
@@ -731,7 +731,7 @@ init()
     phy = new physics(&pl);
 
     glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CW);
+    glFrontFace(GL_CCW);
 
     text = new text_renderer("fonts/pixelmix.ttf", 16);
 

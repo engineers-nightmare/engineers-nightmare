@@ -18,8 +18,8 @@ out vec3 view_dir;
 void main(void)
 {
     gl_Position = vec4(-1, -1, 1.0, 1);
-    if (gl_VertexID == 2) gl_Position.x += 4;
-    if (gl_VertexID == 1) gl_Position.y += 4;
+    if (gl_VertexID == 1) gl_Position.x += 4;
+    if (gl_VertexID == 2) gl_Position.y += 4;
 
     view_dir = (inv_centered_view_proj_matrix * gl_Position).xyz;
 }
