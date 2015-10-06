@@ -1,9 +1,9 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtc/packing.hpp>
-
 #include <epoxy/gl.h>
+
+#include "wiring/wiring_data.h"
 
 struct hw_mesh {
     GLuint vbo;
@@ -39,6 +39,9 @@ struct sw_mesh {
     unsigned int *indices;
     unsigned int num_vertices;
     unsigned int num_indices;
+
+    glm::mat4 *attach_points[num_wire_types];
+    unsigned int num_attach_points[num_wire_types];
 };
 
 sw_mesh *load_mesh(char const *filename);

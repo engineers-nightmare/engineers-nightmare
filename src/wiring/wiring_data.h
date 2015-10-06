@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+
+#include "../component/c_entity.h"
+
 enum wire_type {
     wire_type_power = 0,
     wire_type_comms = 1,
@@ -7,6 +11,7 @@ enum wire_type {
     num_wire_types
 };
 
+extern char const *wire_type_names[num_wire_types];
 
 struct power_wiring_data {
     float total_power = 0;

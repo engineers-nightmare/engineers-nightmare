@@ -156,6 +156,9 @@
     <ClCompile Include="src\component\reader_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
+    <ClCompile Include="src\wiring\wiring_data.cc">
+      <Filter>Source Files\wiring</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -292,6 +295,9 @@
     </ClInclude>
     <ClInclude Include="src\component\reader_component.h">
       <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\c_entity.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

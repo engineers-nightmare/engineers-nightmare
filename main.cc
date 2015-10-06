@@ -30,6 +30,7 @@
 #include "src/textureset.h"
 #include "src/tools/tools.h"
 #include "src/wiring/wiring.h"
+#include "src/wiring/wiring_data.h"
 
 
 #define APP_NAME        "Engineer's Nightmare"
@@ -1049,15 +1050,28 @@ struct add_surface_entity_tool : tool
         /* the chunk we're placing into is guaranteed to exist, because there's
          * a surface facing into it */
         assert(ch);
-        ch->entities.push_back(
-            new entity(rc->p, type, index ^ 1)
-            );
+
+        auto e = new entity(rc->p, type, index ^ 1);
+        ch->entities.push_back(e);
 
         /* take the space. */
         other_side->surf_space[index ^ 1] |= required_space;
 
         /* mark lighting for rebuild around this point */
         mark_lightfield_update(rc->p);
+
+        auto const & et = entity_types[type];
+
+        for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
+            auto wt = (wire_type)wire_index;
+            for (auto i = 0u; i < et.sw->num_attach_points[wt]; ++i) {
+                auto mat = mat_block_face(rc->p, index ^ 1) * et.sw->attach_points[wt][i];
+                wire_attachment wa = { mat, (unsigned)ship->wire_attachments[wt].size() };
+                auto attach_index = (unsigned)ship->wire_attachments[wt].size();
+                ship->wire_attachments[wt].push_back(wa);
+                ship->entity_to_attach_lookups[wt][e->ce].insert(attach_index);
+            }
+        }
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -1633,7 +1647,7 @@ struct add_wiring_tool : tool
     }
 
     void get_description(char *str) override {
-        auto name = ship->wire_type_names[type];
+        auto name = wire_type_names[type];
         sprintf(str, "Place %s wiring", name);
     }
 };

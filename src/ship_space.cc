@@ -14,9 +14,6 @@ ship_space::ship_space(void)
 {
     /* start rather large */
     power_wires.reserve(MAX_WIRE_INSTANCES);
-
-    wire_type_names[wire_type_power] = "power";
-    wire_type_names[wire_type_comms] = "comms";
 }
 
 
