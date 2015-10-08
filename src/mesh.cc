@@ -20,7 +20,7 @@
 sw_mesh *
 load_mesh(char const *filename) {
 
-    static aiPropertyStore* meshImportProps = 0;
+    static aiPropertyStore* meshImportProps = nullptr;
     if (!meshImportProps) {
         /* FIXME: threading hazard if we want to do concurrent loading */
         meshImportProps = aiCreatePropertyStore();
@@ -55,7 +55,7 @@ load_mesh(char const *filename) {
 
         auto type = wire_type_power;
 
-        /* match on "attach_{wire_type}_nnn" 
+        /* match on "attach_{wire_type}_nnn"
          * for instance, "attach_power_001"
          * name assumed to be lower case
          */

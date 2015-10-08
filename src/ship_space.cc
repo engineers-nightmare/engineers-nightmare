@@ -1,7 +1,6 @@
 #include "ship_space.h"
 #include <assert.h>
 #include <math.h>
-#include <algorithm>
 
 
 #define MAX_WIRE_INSTANCES 64 * 1024
