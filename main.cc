@@ -362,7 +362,8 @@ struct entity
 };
 
 
-void use_action_on_entity(ship_space *ship, c_entity ce) {
+void
+use_action_on_entity(ship_space *ship, c_entity ce) {
     /* used by the player */
     assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
 
@@ -399,6 +400,23 @@ void use_action_on_entity(ship_space *ship, c_entity ce) {
             msg.desc = comms_msg_type_switch_state;
             msg.data = enabled ? 1.f : 0.f;
             publish_message(ship, wire_index, msg);
+        }
+    }
+}
+
+/* todo: support free-placed entities*/
+void
+place_entity_attaches(raycast_info* rc, int index, entity* e, unsigned entity_type) {
+    auto const & et = entity_types[entity_type];
+
+    for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
+        auto wt = (wire_type)wire_index;
+        for (auto i = 0u; i < et.sw->num_attach_points[wt]; ++i) {
+            auto mat = mat_block_face(rc->p, index ^ 1) * et.sw->attach_points[wt][i];
+            wire_attachment wa = { mat, (unsigned)ship->wire_attachments[wt].size() };
+            auto attach_index = (unsigned)ship->wire_attachments[wt].size();
+            ship->wire_attachments[wt].push_back(wa);
+            ship->entity_to_attach_lookups[wt][e->ce].insert(attach_index);
         }
     }
 }
@@ -955,9 +973,8 @@ struct add_block_entity_tool : tool
             return;
 
         chunk *ch = ship->get_chunk_containing(rc->p);
-        ch->entities.push_back(
-            new entity(rc->p, type, surface_zm)
-            );
+        auto e = new entity(rc->p, type, surface_zm);
+        ch->entities.push_back(e);
 
         for (auto i = 0; i < entity_types[type].height; i++) {
             auto p = rc->p + glm::ivec3(0, 0, i);
@@ -970,6 +987,8 @@ struct add_block_entity_tool : tool
                 bl->surf_space[face] = ~0;
             }
         }
+
+        place_entity_attaches(rc, surface_zp, e, type);
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -1060,18 +1079,7 @@ struct add_surface_entity_tool : tool
         /* mark lighting for rebuild around this point */
         mark_lightfield_update(rc->p);
 
-        auto const & et = entity_types[type];
-
-        for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
-            auto wt = (wire_type)wire_index;
-            for (auto i = 0u; i < et.sw->num_attach_points[wt]; ++i) {
-                auto mat = mat_block_face(rc->p, index ^ 1) * et.sw->attach_points[wt][i];
-                wire_attachment wa = { mat, (unsigned)ship->wire_attachments[wt].size() };
-                auto attach_index = (unsigned)ship->wire_attachments[wt].size();
-                ship->wire_attachments[wt].push_back(wa);
-                ship->entity_to_attach_lookups[wt][e->ce].insert(attach_index);
-            }
-        }
+        place_entity_attaches(rc, index, e, type);
     }
 
     void alt_use(raycast_info *rc) override {}
