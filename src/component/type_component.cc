@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <string.h>
 #include "../memory.h"
 #include "type_component.h"
 

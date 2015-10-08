@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <string.h>
 #include "../memory.h"
 #include "pressure_sensor_component.h"
 
