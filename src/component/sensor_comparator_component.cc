@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <string.h>
 #include "../memory.h"
 #include "sensor_comparator_component.h"
 

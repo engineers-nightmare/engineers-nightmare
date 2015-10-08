@@ -48,6 +48,7 @@ header_template_7="""
 """
 
 impl_template_1="""#include <algorithm>
+#include <string.h>
 #include "../memory.h"
 #include "%s_component.h"
 

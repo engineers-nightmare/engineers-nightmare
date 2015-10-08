@@ -51,7 +51,6 @@ struct ship_space {
 
     std::vector<wire_attachment> wire_attachments[num_wire_types];
     std::vector<wire_segment> wire_segments[num_wire_types];
-    char const * wire_type_names[num_wire_types];
 
     /* for rendering currently edited wire */
     unsigned active_wire[num_wire_types][2];

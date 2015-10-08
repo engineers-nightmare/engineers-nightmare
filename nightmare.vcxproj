@@ -259,6 +259,7 @@
     <ClCompile Include="src\tools\remove_block.cc" />
     <ClCompile Include="src\tools\remove_surface.cc" />
     <ClCompile Include="src\wiring\wiring.cc" />
+    <ClCompile Include="src\wiring\wiring_data.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h" />
@@ -268,6 +269,7 @@
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\component\component_manager.h" />
     <ClInclude Include="src\component\component_system_manager.h" />
+    <ClInclude Include="src\component\c_entity.h" />
     <ClInclude Include="src\component\door_component.h" />
     <ClInclude Include="src\component\gas_production_component.h" />
     <ClInclude Include="src\component\light_component.h" />

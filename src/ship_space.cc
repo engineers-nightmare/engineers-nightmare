@@ -1,7 +1,6 @@
 #include "ship_space.h"
 #include <assert.h>
 #include <math.h>
-#include <algorithm>
 
 
 #define MAX_WIRE_INSTANCES 64 * 1024
@@ -15,8 +14,10 @@ ship_space::ship_space(void)
     /* start rather large */
     power_wires.reserve(MAX_WIRE_INSTANCES);
 
-    wire_type_names[wire_type_power] = "power";
-    wire_type_names[wire_type_comms] = "comms";
+    for (auto i = 0; i < num_wire_types; ++i) {
+        active_wire[i][0] = invalid_attach;
+        active_wire[i][1] = invalid_attach;
+    }
 }
 
 
