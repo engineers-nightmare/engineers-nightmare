@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.75.0 commit date:2015-07-07, commit time:14:56, hash:c27589e</authoring_tool>
     </contributor>
-    <created>2015-10-04T15:05:49</created>
-    <modified>2015-10-04T15:05:49</modified>
+    <created>2015-10-07T23:46:48</created>
+    <modified>2015-10-07T23:46:48</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -26,7 +26,7 @@
               <color sid="diffuse">0.64 0.64 0.64 1</color>
             </diffuse>
             <specular>
-              <color sid="specular">0.5 0.5 0.5 1</color>
+              <color sid="specular">0.25 0.25 0.25 1</color>
             </specular>
             <shininess>
               <float sid="shininess">50</float>
@@ -48,7 +48,7 @@
     <geometry id="Cylinder_001-mesh" name="Cylinder.001">
       <mesh>
         <source id="Cylinder_001-mesh-positions">
-          <float_array id="Cylinder_001-mesh-positions-array" count="48">0 -0.01000005 0 0 -0.01000005 -1 0.007070958 -0.007071077 -1 0.007070958 -0.007071077 0 0.00999999 0 -1 0.00999999 0 0 0.007070958 0.007070899 -1 0.007070958 0.007070899 0 0 0.009999871 -1 0 0.009999871 0 -0.007070958 0.007070899 -1 -0.007070958 0.007070899 0 -0.00999999 0 -1 -0.00999999 0 0 -0.007070958 -0.007071077 -1 -0.007070958 -0.007071077 0</float_array>
+          <float_array id="Cylinder_001-mesh-positions-array" count="48">0 0.01000005 0 0 0.009999871 1 0.007070899 0.007070899 1 0.007070899 0.007071018 0 0.00999999 -1.50996e-7 1 0.00999999 0 0 0.007070899 -0.007071018 1 0.007070899 -0.007070899 0 0 -0.00999999 1 0 -0.009999871 0 -0.007070899 -0.007071018 1 -0.007070899 -0.007070899 0 -0.00999999 -1.50996e-7 1 -0.00999999 0 0 -0.007070899 0.007070899 1 -0.007070899 0.007071018 0</float_array>
           <technique_common>
             <accessor source="#Cylinder_001-mesh-positions-array" count="16" stride="3">
               <param name="X" type="float"/>
@@ -58,9 +58,9 @@
           </technique_common>
         </source>
         <source id="Cylinder_001-mesh-normals">
-          <float_array id="Cylinder_001-mesh-normals-array" count="54">0.3826941 -0.9238751 0 0.3826941 -0.9238752 0 0.9238751 -0.3826941 0 0.9238752 -0.3826941 0 0.9238752 0.3826941 0 0.9238751 0.3826941 0 0.3826941 0.9238751 0 0.3826941 0.9238752 0 -0.3826941 0.9238751 0 -0.3826941 0.9238752 0 -0.9238751 0.3826941 0 -0.9238752 0.3826941 0 0 0 -1 -0.3826941 -0.9238751 0 -0.3826941 -0.9238752 0 -0.9238752 -0.3826941 0 -0.9238751 -0.3826941 0 0 0 1</float_array>
+          <float_array id="Cylinder_001-mesh-normals-array" count="57">0.3826931 0.9238756 1.37846e-7 0.9238751 0.3826941 0 0.9238717 -0.3827024 0 0.3826929 -0.9238756 -1.40698e-7 -0.3826929 -0.9238756 -1.40698e-7 -0.9238717 -0.3827024 0 0 0 1 -0.3826931 0.9238756 1.37846e-7 -0.9238751 0.3826941 0 0 1.50996e-7 -1 0.3826931 0.9238756 1.40698e-7 0.3826929 -0.9238756 -1.37846e-7 -0.3826929 -0.9238756 -1.37846e-7 -0.3826931 0.9238756 1.40698e-7 0 1.50996e-7 -1 0 1.50996e-7 -1 0 1.50996e-7 -1 0 1.50996e-7 -1 0 1.50996e-7 -1</float_array>
           <technique_common>
-            <accessor source="#Cylinder_001-mesh-normals-array" count="18" stride="3">
+            <accessor source="#Cylinder_001-mesh-normals-array" count="19" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
@@ -74,7 +74,7 @@
           <input semantic="VERTEX" source="#Cylinder_001-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cylinder_001-mesh-normals" offset="1"/>
           <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
-          <p>1 0 2 1 3 0 2 2 4 2 5 3 4 4 6 4 7 5 6 6 8 7 9 6 8 8 10 9 11 8 10 10 12 10 13 11 2 12 14 12 10 12 14 13 1 14 0 13 12 15 14 15 15 16 0 17 3 17 9 17 0 1 1 0 3 0 3 3 2 2 5 3 5 5 4 4 7 5 7 7 6 6 9 6 9 9 8 8 11 8 11 11 10 10 13 11 6 12 4 12 2 12 10 12 8 12 6 12 14 12 12 12 10 12 2 12 1 12 14 12 10 12 6 12 2 12 15 14 14 13 0 13 13 16 12 15 15 16 13 17 15 17 0 17 0 17 11 17 13 17 5 17 7 17 9 17 9 17 3 17 5 17 9 17 11 17 0 17</p>
+          <p>1 0 2 0 3 0 2 1 4 1 5 1 4 2 6 2 7 2 6 3 8 3 9 3 8 4 10 4 11 4 10 5 12 5 13 5 2 6 14 6 10 6 14 7 1 7 0 7 12 8 14 8 15 8 0 9 3 9 9 9 0 10 1 10 3 10 3 1 2 1 5 1 5 2 4 2 7 2 7 11 6 11 9 11 9 12 8 12 11 12 11 5 10 5 13 5 6 6 4 6 2 6 10 6 8 6 6 6 14 6 12 6 10 6 2 6 1 6 14 6 10 6 6 6 2 6 15 13 14 13 0 13 13 8 12 8 15 8 13 14 15 14 0 14 0 15 11 15 13 15 5 16 7 16 9 16 9 17 3 17 5 17 9 18 11 18 0 18</p>
         </polylist>
       </mesh>
     </geometry>
@@ -83,7 +83,7 @@
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
       <node id="Cylinder_001" name="Cylinder_001" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 -1 8.74228e-8 0 0 -8.74228e-8 -1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Cylinder_001-mesh" name="Cylinder_001">
           <bind_material>
             <technique_common>
