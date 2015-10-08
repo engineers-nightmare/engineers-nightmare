@@ -91,12 +91,12 @@ calc_segment_matrix(const wire_attachment &start, const wire_attachment &end) {
     auto p1 = glm::vec3(p1_4.x, p1_4.y, p1_4.z);
     auto p2 = glm::vec3(p2_4.x, p2_4.y, p2_4.z);
 
-    auto seg = p1 - p2;
+    auto seg = p2 - p1;
     auto len = glm::length(seg);
 
     auto scale = mat_scale(1, 1, len);
 
-    auto rot = mat_rotate_mesh(p2, glm::normalize(p2 - p1));
+    auto rot = mat_rotate_mesh(p2, glm::normalize(p1 - p2));
 
     return rot * scale;
 }
