@@ -426,25 +426,11 @@ tick_sensor_comparators(ship_space *ship) {
         difference = b ? 1.f : 0.f;
 
         /* publish result */
-        visited_wires.clear();
-
-        auto const & pub_attaches = comms_attaches[ce];
-        for (auto sea : pub_attaches) {
-            auto wire_index = attach_topo_find(ship, type, sea);
-            if (visited_wires.find(wire_index) != visited_wires.end()) {
-                continue;
-            }
-
-            auto desc = comms_msg_type_sensor_comparison_state;
-
-            visited_wires.insert(wire_index);
-
-            comms_msg msg;
-            msg.originator = ce;
-            msg.desc = desc;
-            msg.data = difference;
-            publish_msg_to_wire(ship, wire_index, msg);
-        }
+        comms_msg msg;
+        msg.originator = ce;
+        msg.desc = comms_msg_type_sensor_comparison_state;
+        msg.data = difference;
+        publish_msg(ship, ce, msg);
     }
 }
 
