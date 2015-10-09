@@ -235,7 +235,6 @@ tick_power_consumers(ship_space *ship) {
         auto ce = power_man.instance_pool.entity[i];
 
         auto & powered = power_man.instance_pool.powered[i];
-        auto old_powered = powered;
         powered = false;
 
         auto & power_attaches = ship->entity_to_attach_lookups[wire_type_power];
@@ -257,15 +256,6 @@ tick_power_consumers(ship_space *ship) {
             /* todo: this needs to somehow handle multiple wires */
             if (wire.total_power >= wire.total_draw && wire.total_power > 0) {
                 powered = true;
-            }
-        }
-
-        if (powered != old_powered) {
-            /* if a light changed power state, do the required update now */
-            if (light_man.exists(ce)) {
-                auto pos = *pos_man.get_instance_data(ce).position;
-                auto block_pos = get_coord_containing(pos);
-                mark_lightfield_update(block_pos);
             }
         }
     }
