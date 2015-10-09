@@ -133,43 +133,18 @@ tick_doors(ship_space *ship)
         /* doors require: powered */
         assert(power_man.exists(ce) || !"doors must be powerable");
         assert(pos_man.exists(ce) || !"doors must be positioned");
+        assert(reader_man.exists(ce) || !"doors must have reader");
 
         auto power = power_man.get_instance_data(ce);
         auto position = pos_man.get_instance_data(ce);
+        auto reader = reader_man.get_instance_data(ce);
 
         /* it's a power door, it's not going /anywhere/ without power */
         if (!*power.powered) {
             continue;
         }
 
-        auto comms = wire_type_comms;
-        auto & comms_attaches = ship->entity_to_attach_lookups[comms];
-        auto attaches = comms_attaches.find(ce);
-        if (attaches != comms_attaches.end()) {
-            std::unordered_set<unsigned> visited_wires;
-            for (auto const & sea : attaches->second) {
-                auto wire_index = attach_topo_find(ship, comms, sea);
-                if (visited_wires.find(wire_index) != visited_wires.end()) {
-                    continue;
-                }
-
-                auto const & wire = ship->comms_wires[wire_index];
-
-                visited_wires.insert(wire_index);
-
-                /* now that we have the wire, see if it has any msgs for us */
-                /* todo: origin discrimination */
-                for (auto msg : wire.read_buffer) {
-
-                    if (msg.desc == comms_msg_type_switch_state ||
-                        msg.desc == comms_msg_type_proximity_sensor_state)  {
-
-                        auto data = clamp(msg.data, 0.f, 1.f);
-                        door_man.instance_pool.desired_pos[i] = data > 0 ? 1.0f : 0.0f;
-                    }
-                }
-            }
-        }
+        door_man.instance_pool.desired_pos[i] = *reader.data > 0 ? 1.0f : 0.0f;
 
         auto desired_state = door_man.instance_pool.desired_pos[i];
         auto in_desired_state = door_man.instance_pool.pos[i] == desired_state;

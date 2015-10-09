@@ -269,6 +269,13 @@ struct entity
             *door.mesh = door_hw;
             *door.pos = 1.0f;
             *door.desired_pos = 1.0f;
+
+            reader_man.assign_entity(ce);
+            auto reader = reader_man.get_instance_data(ce);
+            *reader.name = "desired state";
+            reader.source->id = 0;
+            *reader.desc = nullptr;
+            *reader.data = 1.0f;
         }
         // frobnicator
         else if (type == 1) {
