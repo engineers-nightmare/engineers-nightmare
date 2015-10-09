@@ -214,6 +214,7 @@ entity_type entity_types[] = {
     { "Pressure Sensor 1", "mesh/panel_1x1.dae", 12, true, 1 },
     { "Pressure Sensor 2", "mesh/panel_1x1.dae", 14, true, 1 },
     { "Sensor Comparator", "mesh/panel_1x1.dae", 13, true, 1 },
+    { "Proximity Sensor", "mesh/panel_1x1.dae", 3, true, 1 },
 };
 
 
@@ -357,6 +358,19 @@ struct entity
             comparator_man.assign_entity(ce);
             auto comparator = comparator_man.get_instance_data(ce);
             *comparator.compare_epsilon = 0.0001f;
+        }
+        // proximity sensor
+        else if (type == 10) {
+            power_man.assign_entity(ce);
+            auto power = power_man.get_instance_data(ce);
+            *power.powered = false;
+            *power.required_power = 1;
+            *power.max_required_power = 1;
+
+            proximity_man.assign_entity(ce);
+            auto proximity_sensor = proximity_man.get_instance_data(ce);
+            *proximity_sensor.range = 5;
+            *proximity_sensor.is_detected = false;
         }
     }
 };
@@ -599,6 +613,7 @@ init()
     type_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     door_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     reader_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    proximity_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
     proj_man.create_projectile_data(1000);
 
@@ -823,6 +838,7 @@ destroy_entity(entity *e)
     type_man.destroy_entity_instance(e->ce);
     door_man.destroy_entity_instance(e->ce);
     reader_man.destroy_entity_instance(e->ce);
+    proximity_man.destroy_entity_instance(e->ce);
 
     for (auto _type = 0; _type < num_wire_types; _type++) {
         auto type = (wire_type)_type;
@@ -1855,6 +1871,7 @@ update()
         tick_light_components(ship);
         tick_pressure_sensors(ship);
         tick_sensor_comparators(ship);
+        tick_proximity_sensors(ship, &pl);
         tick_doors(ship);
 
         calculate_power_wires(ship);

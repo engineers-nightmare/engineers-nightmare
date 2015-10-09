@@ -5,6 +5,7 @@
 #include "../mesh.h"
 #include "../render_data.h"
 #include "../ship_space.h"
+#include "../player.h"
 #include "sensor_comparator_component.h"
 #include "gas_production_component.h"
 #include "light_component.h"
@@ -19,6 +20,7 @@
 #include "type_component.h"
 #include "door_component.h"
 #include "reader_component.h"
+#include "proximity_sensor_component.h"
 
 extern sensor_comparator_component_manager comparator_man;
 extern gas_production_component_manager gas_man;
@@ -34,11 +36,13 @@ extern switch_component_manager switch_man;
 extern type_component_manager type_man;
 extern door_component_manager door_man;
 extern reader_component_manager reader_man;
+extern proximity_sensor_component_manager proximity_man;
 
 extern const char *comms_msg_type_switch_state;
 extern const char *comms_msg_type_pressure_sensor_1_state;
 extern const char *comms_msg_type_pressure_sensor_2_state;
 extern const char *comms_msg_type_sensor_comparison_state;
+extern const char *comms_msg_type_proximity_sensor_state;
 
 
 void
@@ -61,6 +65,9 @@ tick_sensor_comparators(ship_space *ship);
 
 void
 tick_readers(ship_space *ship);
+
+void
+tick_proximity_sensors(ship_space *ship, player *pl);
 
 void
 draw_renderables(frame_data *frame);
