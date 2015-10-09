@@ -276,61 +276,30 @@ void
 tick_light_components(ship_space *ship) {
     for (auto i = 0u; i < light_man.buffer.num; i++) {
         auto ce = light_man.instance_pool.entity[i];
-        auto light_type = light_man.instance_pool.type[i];
-        auto type = wire_type_comms;
 
-        /* all lights currently require: position */
+        /* all lights currently require: position, power, reader */
         assert(pos_man.exists(ce) || !"lights must have a position");
         assert(power_man.exists(ce) || !"lights must have power");
+        assert(reader_man.exists(ce) || !"lights must have reader");
 
         auto power = power_man.get_instance_data(ce);
         auto light = light_man.get_instance_data(ce);
+        auto reader = reader_man.get_instance_data(ce);
 
-        auto & comms_attaches = ship->entity_to_attach_lookups[type];
-        auto attaches = comms_attaches.find(ce);
-        if (attaches != comms_attaches.end()) {
+        *(light.requested_intensity) = clamp(*(reader.data), 0.0f, 1.0f);
 
-            std::unordered_set<unsigned> visited_wires;
-            for (auto sea : attaches->second) {
-                auto wire_index = attach_topo_find(ship, type, sea);
-                if (visited_wires.find(wire_index) != visited_wires.end()) {
-                    continue;
-                }
+        auto old_intensity = *(light.intensity);
+        auto new_intensity = *power.powered ? *(light.requested_intensity) : 0.0f;
 
-                auto const & wire = ship->comms_wires[wire_index];
+        if (old_intensity != new_intensity) {
 
-                visited_wires.insert(wire_index);
+            *(light.intensity) = new_intensity;
+            *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
 
-                /* now that we have the wire, see if it has any msgs for us */
-                /* todo: origin discrimination */
-                for (auto msg : wire.read_buffer) {
-
-                    if ((light_type == 1 &&
-                           (msg.desc == comms_msg_type_switch_state ||
-                            msg.desc == comms_msg_type_pressure_sensor_1_state ||
-                            msg.desc == comms_msg_type_pressure_sensor_2_state ||
-                            msg.desc == comms_msg_type_proximity_sensor_state)) ||
-                        (light_type == 2 && msg.desc == comms_msg_type_sensor_comparison_state)) {
-
-                        auto data = clamp(msg.data, 0.f, 1.f);
-                        *(light.requested_intensity) = data;
-
-                        auto pos = *pos_man.get_instance_data(ce).position;
-                        auto block_pos = get_coord_containing(pos);
-                        mark_lightfield_update(block_pos);
-                    }
-                }
-            }
+            auto pos = *pos_man.get_instance_data(ce).position;
+            auto block_pos = get_coord_containing(pos);
+            mark_lightfield_update(block_pos);
         }
-
-        if (!*power.powered) {
-            *(light.intensity) = 0.0f;
-        }
-        else {
-            *(light.intensity) = *(light.requested_intensity);
-        }
-
-        *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
     }
 }
 
