@@ -507,27 +507,11 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
         //Only publish the message if the sensor state changed
         if (was_detected != *(proximity.is_detected))
         {
-            auto wire_type = wire_type_comms;
-            auto & comms_attaches = ship->entity_to_attach_lookups[wire_type];
-            auto attaches = comms_attaches.find(ce);
-            if (attaches == comms_attaches.end()) {
-                continue;
-            }
-
-            std::unordered_set<unsigned> visited_wires;
-            for (auto sea : attaches->second) {
-                auto wire_index = attach_topo_find(ship, wire_type, sea);
-                if (visited_wires.find(wire_index) != visited_wires.end()) {
-                    continue;
-                }
-                visited_wires.insert(wire_index);
-
-                comms_msg msg;
-                msg.originator = ce;
-                msg.desc = comms_msg_type_proximity_sensor_state;
-                msg.data = (*(proximity.is_detected)) ? 1.0f : 0.0f;
-                publish_msg_to_wire(ship, wire_index, msg);
-            }
+            comms_msg msg;
+            msg.originator = ce;
+            msg.desc = comms_msg_type_proximity_sensor_state;
+            msg.data = (*(proximity.is_detected)) ? 1.0f : 0.0f;
+            publish_msg(ship, ce, msg);
         }
     }
 }
