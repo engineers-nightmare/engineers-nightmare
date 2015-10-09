@@ -391,30 +391,11 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
         auto & enabled = *switch_man.get_instance_data(ce).enabled;
         enabled ^= true;
 
-        auto wire_type = wire_type_comms;
-        auto & comms_attaches = ship->entity_to_attach_lookups[wire_type];
-
-        if (comms_attaches.find(ce) == comms_attaches.end()) {
-            return;
-        }
-
-        std::unordered_set<unsigned> visited_wires;
-        auto const & attaches = comms_attaches[ce];
-        for (auto const & sea : attaches) {
-            auto const & attach = ship->wire_attachments[wire_type][sea];
-            auto wire_index = attach_topo_find(ship, wire_type, attach.parent);
-            if (visited_wires.find(wire_index) != visited_wires.end()) {
-                continue;
-            }
-
-            visited_wires.insert(wire_index);
-
-            comms_msg msg;
-            msg.originator = ce;
-            msg.desc = comms_msg_type_switch_state;
-            msg.data = enabled ? 1.f : 0.f;
-            publish_msg_to_wire(ship, wire_index, msg);
-        }
+        comms_msg msg;
+        msg.originator = ce;
+        msg.desc = comms_msg_type_switch_state;
+        msg.data = enabled ? 1.f : 0.f;
+        publish_msg(ship, ce, msg);
     }
 }
 
