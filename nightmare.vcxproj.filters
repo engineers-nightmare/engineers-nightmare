@@ -159,6 +159,9 @@
     <ClCompile Include="src\wiring\wiring_data.cc">
       <Filter>Source Files\wiring</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\proximity_sensor_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -298,6 +301,9 @@
     </ClInclude>
     <ClInclude Include="src\component\c_entity.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\proximity_sensor_component.h">
+      <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -15,6 +15,7 @@ switch_component_manager switch_man;
 type_component_manager type_man;
 door_component_manager door_man;
 reader_component_manager reader_man;
+proximity_sensor_component_manager proximity_man;
 
 #include <glm/gtc/random.hpp>
 
@@ -27,6 +28,7 @@ const char *comms_msg_type_switch_state = "switch_state";
 const char *comms_msg_type_pressure_sensor_1_state = "pressure_sensor_1_state";
 const char *comms_msg_type_pressure_sensor_2_state = "pressure_sensor_2_state";
 const char *comms_msg_type_sensor_comparison_state = "sensor_comparison_state";
+const char *comms_msg_type_proximity_sensor_state = "proximity_sensor_state";
 
 
 void
@@ -159,7 +161,8 @@ tick_doors(ship_space *ship)
                 /* todo: origin discrimination */
                 for (auto msg : wire.read_buffer) {
 
-                    if (msg.desc == comms_msg_type_switch_state) {
+                    if (msg.desc == comms_msg_type_switch_state ||
+                        msg.desc == comms_msg_type_proximity_sensor_state)  {
 
                         auto data = clamp(msg.data, 0.f, 1.f);
                         door_man.instance_pool.desired_pos[i] = data > 0 ? 1.0f : 0.0f;
@@ -305,7 +308,8 @@ tick_light_components(ship_space *ship) {
                     if ((light_type == 1 &&
                            (msg.desc == comms_msg_type_switch_state ||
                             msg.desc == comms_msg_type_pressure_sensor_1_state ||
-                            msg.desc == comms_msg_type_pressure_sensor_2_state)) ||
+                            msg.desc == comms_msg_type_pressure_sensor_2_state ||
+                            msg.desc == comms_msg_type_proximity_sensor_state)) ||
                         (light_type == 2 && msg.desc == comms_msg_type_sensor_comparison_state)) {
 
                         auto data = clamp(msg.data, 0.f, 1.f);
@@ -455,6 +459,104 @@ tick_sensor_comparators(ship_space *ship) {
             msg.desc = desc;
             msg.data = difference;
             publish_message(ship, wire_index, msg);
+        }
+    }
+}
+
+void
+tick_proximity_sensors(ship_space *ship, player *pl) {
+    for (auto i = 0u; i < proximity_man.buffer.num; i++) {
+        auto ce = proximity_man.instance_pool.entity[i];
+
+        /* all proximity sensors currently require: position and power */
+        assert(pos_man.exists(ce) || !"proximity sensors must have a position");
+        assert(surface_man.exists(ce) || !"proximity sensors must have a surface");
+        assert(power_man.exists(ce) || !"proximity sensors must have power");
+
+        // Cannot detect or generate messages if the sensor isn't powered
+        if (!*power_man.get_instance_data(ce).powered) {
+            continue;
+        }
+
+        auto proximity = proximity_man.get_instance_data(ce);
+        auto surface = surface_man.get_instance_data(ce);
+        bool was_detected = *(proximity.is_detected);
+
+        auto pos = *pos_man.get_instance_data(ce).position;
+        glm::ivec3 sensor_pos_block = get_coord_containing(pos);
+        glm::ivec3 player_pos_block = get_coord_containing(pl->pos);
+
+        glm::vec3 delta = player_pos_block - sensor_pos_block;
+
+        // Do quick relative range check first
+        if (glm::length((delta)) <= *(proximity.range)) {
+
+            glm::vec3 normal_ray;
+            glm::vec3 entity_pos_offset;
+            switch (*(surface.face)) {
+            case surface_zp:
+                entity_pos_offset = glm::vec3(0, 0, -1);
+                normal_ray = glm::vec3(0.0f, 0.0f, -1.0f);
+                break;
+            case surface_zm:
+                entity_pos_offset = glm::vec3(0, 0, 0);
+                normal_ray = glm::vec3(0.0f, 0.0f, 1.0f);
+                break;
+            case surface_xp:
+                entity_pos_offset = glm::vec3(-1, 0, 0);
+                normal_ray = glm::vec3(-1.0f, 0.0f, 0.0f);
+                break;
+            case surface_xm:
+                entity_pos_offset = glm::vec3(0, 0, 0);
+                normal_ray = glm::vec3(1.0f, 0.0f, 0.0f);
+                break;
+            case surface_yp:
+                entity_pos_offset = glm::vec3(0, -1, 0);
+                normal_ray = glm::vec3(0.0f, -1.0f, 0.0f);
+                break;
+            case surface_ym:
+                entity_pos_offset = glm::vec3(0, 0, 0);
+                normal_ray = glm::vec3(0.0f, 1.0f, 0.0f);
+                break;
+            default:
+                entity_pos_offset = glm::vec3(0, 0, 0);
+                normal_ray = glm::vec3(0.0f, 0.0f, 0.0f);
+                break;
+            }
+
+            // Check angle between player to sensor and sensor normal to make sure it is less than or equal to 90 degrees
+            glm::vec3 player_to_sensor = pl->pos - pos + entity_pos_offset;
+            *(proximity.is_detected) = glm::dot(normal_ray, player_to_sensor) >= 0;
+        }
+        else
+        {
+            *(proximity.is_detected) = false;
+        }
+
+        //Only publish the message if the sensor state changed
+        if (was_detected != *(proximity.is_detected))
+        {
+            auto wire_type = wire_type_comms;
+            auto & comms_attaches = ship->entity_to_attach_lookups[wire_type];
+            auto attaches = comms_attaches.find(ce);
+            if (attaches == comms_attaches.end()) {
+                continue;
+            }
+
+            std::unordered_set<unsigned> visited_wires;
+            for (auto sea : attaches->second) {
+                auto wire_index = attach_topo_find(ship, wire_type, sea);
+                if (visited_wires.find(wire_index) != visited_wires.end()) {
+                    continue;
+                }
+                visited_wires.insert(wire_index);
+
+                comms_msg msg;
+                msg.originator = ce;
+                msg.desc = comms_msg_type_proximity_sensor_state;
+                msg.data = (*(proximity.is_detected)) ? 1.0f : 0.0f;
+                publish_message(ship, wire_index, msg);
+            }
         }
     }
 }
