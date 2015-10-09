@@ -234,8 +234,7 @@ tick_power_consumers(ship_space *ship) {
     for (auto i = 0u; i < power_man.buffer.num; i++) {
         auto ce = power_man.instance_pool.entity[i];
 
-        auto & powered = power_man.instance_pool.powered[i];
-        powered = false;
+        power_man.instance_pool.powered[i] = false;
 
         auto & power_attaches = ship->entity_to_attach_lookups[wire_type_power];
         auto attaches = power_attaches.find(ce);
@@ -243,19 +242,13 @@ tick_power_consumers(ship_space *ship) {
             continue;
         }
 
-        std::unordered_set<unsigned> visited_wires;
         for (auto sea : attaches->second) {
             auto wire_index = attach_topo_find(ship, wire_type_power, sea);
-            if (visited_wires.find(wire_index) != visited_wires.end()) {
-                continue;
-            }
 
             auto const & wire = ship->power_wires[wire_index];
 
-            visited_wires.insert(wire_index);
-            /* todo: this needs to somehow handle multiple wires */
             if (wire.total_power >= wire.total_draw && wire.total_power > 0) {
-                powered = true;
+                power_man.instance_pool.powered[i] = true;
             }
         }
     }
