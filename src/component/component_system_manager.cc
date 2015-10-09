@@ -376,7 +376,7 @@ tick_pressure_sensors(ship_space* ship) {
             msg.originator = ce;
             msg.desc = desc;
             msg.data = pressure;
-            publish_message(ship, wire_index, msg);
+            publish_msg_to_wire(ship, wire_index, msg);
         }
     }
 }
@@ -458,7 +458,7 @@ tick_sensor_comparators(ship_space *ship) {
             msg.originator = ce;
             msg.desc = desc;
             msg.data = difference;
-            publish_message(ship, wire_index, msg);
+            publish_msg_to_wire(ship, wire_index, msg);
         }
     }
 }
@@ -555,7 +555,7 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
                 msg.originator = ce;
                 msg.desc = comms_msg_type_proximity_sensor_state;
                 msg.data = (*(proximity.is_detected)) ? 1.0f : 0.0f;
-                publish_message(ship, wire_index, msg);
+                publish_msg_to_wire(ship, wire_index, msg);
             }
         }
     }

@@ -398,11 +398,7 @@ propagate_comms_wires(ship_space *ship) {
 }
 
 void
-publish_message(ship_space* ship, unsigned wire_id, comms_msg msg) {
-    if (ship->comms_wires.find(wire_id) == ship->comms_wires.end()) {
-        return;
-    }
-
+publish_msg_to_wire(ship_space* ship, unsigned wire_id, comms_msg msg) {
     auto & wire = ship->comms_wires[wire_id];
     wire.write_buffer.push_back(msg);
 }

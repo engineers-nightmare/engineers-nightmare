@@ -413,7 +413,7 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
             msg.originator = ce;
             msg.desc = comms_msg_type_switch_state;
             msg.data = enabled ? 1.f : 0.f;
-            publish_message(ship, wire_index, msg);
+            publish_msg_to_wire(ship, wire_index, msg);
         }
     }
 }
