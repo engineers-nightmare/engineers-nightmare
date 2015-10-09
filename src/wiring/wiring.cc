@@ -398,13 +398,6 @@ propagate_comms_wires(ship_space *ship) {
 }
 
 
-void
-publish_msg_to_wire(ship_space* ship, unsigned wire_id, comms_msg msg) {
-    auto & wire = ship->comms_wires[wire_id];
-    wire.write_buffer.push_back(msg);
-}
-
-
 /* The common case for publishing comms_msg: broadcast to all connected wires. */
 void
 publish_msg(ship_space *ship, c_entity ce, comms_msg msg)
@@ -423,6 +416,6 @@ publish_msg(ship_space *ship, c_entity ce, comms_msg msg)
         }
 
         visited_wires.insert(wire_index);
-        publish_msg_to_wire(ship, wire_index, msg);
+        ship->comms_wires[wire_index].write_buffer.push_back(msg);
     }
 }
