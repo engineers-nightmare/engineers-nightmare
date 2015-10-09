@@ -351,33 +351,18 @@ tick_pressure_sensors(ship_space* ship) {
         zone_info *z = ship->get_zone_info(t);
         float pressure = z ? (z->air_amount / t->size) : 0.0f;
 
-        auto wire_type = wire_type_comms;
-        auto & comms_attaches = ship->entity_to_attach_lookups[wire_type];
-        auto attaches = comms_attaches.find(ce);
-        if (attaches == comms_attaches.end()) {
-            continue;
+        auto which_sensor = pressure_man.instance_pool.type[i];
+        auto desc = comms_msg_type_pressure_sensor_1_state;
+        if (which_sensor == 2) {
+            desc = comms_msg_type_pressure_sensor_2_state;
         }
 
-        std::unordered_set<unsigned> visited_wires;
-        for (auto sea : attaches->second) {
-            auto wire_index = attach_topo_find(ship, wire_type, sea);
-            if (visited_wires.find(wire_index) != visited_wires.end()) {
-                continue;
-            }
+        comms_msg msg;
+        msg.originator = ce;
+        msg.desc = desc;
+        msg.data = pressure;
 
-            auto which_sensor = pressure_man.instance_pool.type[i];
-            auto desc = comms_msg_type_pressure_sensor_1_state;
-            if (which_sensor == 2) {
-                desc = comms_msg_type_pressure_sensor_2_state;
-            }
-            visited_wires.insert(wire_index);
-
-            comms_msg msg;
-            msg.originator = ce;
-            msg.desc = desc;
-            msg.data = pressure;
-            publish_msg_to_wire(ship, wire_index, msg);
-        }
+        publish_msg(ship, ce, msg);
     }
 }
 
