@@ -397,8 +397,32 @@ propagate_comms_wires(ship_space *ship) {
     }
 }
 
+
 void
 publish_msg_to_wire(ship_space* ship, unsigned wire_id, comms_msg msg) {
     auto & wire = ship->comms_wires[wire_id];
     wire.write_buffer.push_back(msg);
+}
+
+
+/* The common case for publishing comms_msg: broadcast to all connected wires. */
+void
+publish_msg(ship_space *ship, c_entity ce, comms_msg msg)
+{
+    auto & comms_attaches = ship->entity_to_attach_lookups[wire_type_comms];
+    auto attaches = comms_attaches.find(ce);
+    if (attaches == comms_attaches.end()) {
+        return;
+    }
+
+    std::unordered_set<unsigned> visited_wires;
+    for (auto sea : attaches->second) {
+        auto wire_index = attach_topo_find(ship, wire_type_comms, sea);
+        if (visited_wires.find(wire_index) != visited_wires.end()) {
+            continue;
+        }
+
+        visited_wires.insert(wire_index);
+        publish_msg_to_wire(ship, wire_index, msg);
+    }
 }

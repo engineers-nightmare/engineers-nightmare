@@ -65,3 +65,6 @@ propagate_comms_wires(ship_space *ship);
 
 void
 publish_msg_to_wire(ship_space *ship, unsigned wire_id, comms_msg msg);
+
+void
+publish_msg(ship_space *ship, c_entity ce, comms_msg msg);
