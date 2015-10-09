@@ -297,6 +297,13 @@ struct entity
             *light.intensity = 1.0f;
             *light.requested_intensity = 1.0f;
             *light.type = 1;
+
+            reader_man.assign_entity(ce);
+            auto reader = reader_man.get_instance_data(ce);
+            *reader.name = "light brightness";
+            reader.source->id = 0;
+            *reader.desc = nullptr;
+            *reader.data = 1.0f;
         }
         // warning light
         else if (type == 3) {
@@ -311,6 +318,13 @@ struct entity
             *light.intensity = 1.0f;
             *light.requested_intensity = 1.0f;
             *light.type = 2;
+
+            reader_man.assign_entity(ce);
+            auto reader = reader_man.get_instance_data(ce);
+            *reader.name = "light brightness";
+            reader.source->id = 0;
+            *reader.desc = comms_msg_type_sensor_comparison_state;      // temp until we have discriminator tool
+            *reader.data = 1.0f;
         }
         // display panel
         else if (type == 4) {
@@ -325,6 +339,13 @@ struct entity
             *light.intensity = 0.15f;
             *light.requested_intensity = 0.15f;
             *light.type = 0;
+
+            reader_man.assign_entity(ce);
+            auto reader = reader_man.get_instance_data(ce);
+            *reader.name = "light brightness";
+            reader.source->id = 0;
+            *reader.desc = nullptr;
+            *reader.data = 0.15f;
         }
         // switch
         else if (type == 5) {
