@@ -296,7 +296,6 @@ struct entity
             auto light = light_man.get_instance_data(ce);
             *light.intensity = 1.0f;
             *light.requested_intensity = 1.0f;
-            *light.type = 1;
 
             reader_man.assign_entity(ce);
             auto reader = reader_man.get_instance_data(ce);
@@ -317,7 +316,6 @@ struct entity
             auto light = light_man.get_instance_data(ce);
             *light.intensity = 1.0f;
             *light.requested_intensity = 1.0f;
-            *light.type = 2;
 
             reader_man.assign_entity(ce);
             auto reader = reader_man.get_instance_data(ce);
@@ -338,7 +336,6 @@ struct entity
             auto light = light_man.get_instance_data(ce);
             *light.intensity = 0.15f;
             *light.requested_intensity = 0.15f;
-            *light.type = 0;
 
             reader_man.assign_entity(ce);
             auto reader = reader_man.get_instance_data(ce);
