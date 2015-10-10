@@ -9,7 +9,6 @@ struct light_component_manager : component_manager {
         c_entity *entity;
         float *intensity;
         float *requested_intensity;
-        unsigned *type;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -23,7 +22,6 @@ struct light_component_manager : component_manager {
         d.entity = instance_pool.entity + inst.index;
         d.intensity = instance_pool.intensity + inst.index;
         d.requested_intensity = instance_pool.requested_intensity + inst.index;
-        d.type = instance_pool.type + inst.index;
 
         return d;
     }
