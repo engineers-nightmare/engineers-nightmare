@@ -215,6 +215,7 @@ entity_type entity_types[] = {
     { "Pressure Sensor 2", "mesh/panel_1x1.dae", 14, true, 1 },
     { "Sensor Comparator", "mesh/panel_1x1.dae", 13, true, 1 },
     { "Proximity Sensor", "mesh/panel_1x1.dae", 3, true, 1 },
+    { "Flashlight", "mesh/no_place.dae", 3, true, 1 },
 };
 
 
@@ -396,6 +397,21 @@ struct entity
             auto proximity_sensor = proximity_man.get_instance_data(ce);
             *proximity_sensor.range = 5;
             *proximity_sensor.is_detected = false;
+        }
+        // flashlight
+        else if (type == 11) {
+            power_man.assign_entity(ce);
+            auto power = power_man.get_instance_data(ce);
+            *power.powered = false; /* Flashlight starts off */
+            *power.required_power = 1;
+            *power.max_required_power = 1;
+            *power.power_override = 1; /* Not controlled by a real power source */
+
+            light_man.assign_entity(ce);
+            auto light = light_man.get_instance_data(ce);
+            *light.intensity = 1.0f;
+            *light.requested_intensity = 1.0f;
+            *light.type = 3;
         }
     }
 };
@@ -1686,6 +1702,100 @@ struct add_wiring_tool : tool
 };
 
 
+struct flashlight_tool : tool
+{
+    /* A good flashlight can throw pretty far. 5m is chosen as an average
+     * midrange [nice] flashlight / 10. */
+    const float flashlight_throw = 5.0f;
+    struct entity *flashlight = nullptr;
+    glm::ivec3 last_pos;
+    bool flashlight_on = false;
+
+    /* The flashlight is just a light at some location which can be "seen"
+     * by the player, move it to where the raycast hit */
+    void update_light() {
+        glm::ivec3 new_pos;
+        bool should_light = false;
+        power_component_manager::instance_data power =
+            power_man.get_instance_data(flashlight->ce);
+
+        /* FIXME: flashlight shouldn't be at eye, should be mid body */
+        entity *hit_entity = phys_raycast(pl.eye, pl.eye + pl.dir * flashlight_throw,
+                                          phy->ghostObj, phy->dynamicsWorld);
+
+
+        if (hit_entity) {
+            /* The raycast hit a mesh which needs no special considerations for
+             * lighting. */
+            new_pos = *pos_man.get_instance_data(hit_entity->ce).position;
+            should_light = true;
+        } else {
+            generic_raycast_info hit = phys_raycast_generic(pl.eye,
+                                                            pl.eye + pl.dir * flashlight_throw,
+                                                            phy->ghostObj, phy->dynamicsWorld);
+
+            if (hit.hit) {
+                assert(ship->get_block(hit.hitCoord)); /* must be a block */
+
+                /* The goal is to not place the lighting within the block. The
+                 * perfect solution would put the light exactly on the
+                 * containing block of the hit. This is not necessary. If this
+                 * is a block, there must be a direct line of sight, and we
+                 * should be able to simply "back out" a reasonable amount,
+                 * provided it isn't behind the player
+                 */
+
+                new_pos = hit.hitCoord + hit.hitNormal * 0.5f;
+                should_light = true;
+            }
+        }
+
+        should_light = should_light && flashlight_on;
+
+        new_pos = get_coord_containing(new_pos);
+
+        /* To prevent unnecessary processing, we only want to update things if
+         * the position changed, or the flashlight status changed */
+        if (new_pos == last_pos && *power.powered == should_light) {
+            return;
+        }
+
+        *power.powered = should_light;
+        *pos_man.get_instance_data(flashlight->ce).position = new_pos;
+        mark_lightfield_update(new_pos);
+        mark_lightfield_update(last_pos);
+        last_pos = new_pos;
+    }
+
+    void use(raycast_info *rc) override {
+        if (!flashlight) {
+            flashlight = new entity(rc->p, 11, surface_xp);
+            last_pos = pl.pos;
+        }
+
+        flashlight_on = !flashlight_on;
+        update_light();
+    }
+
+    void alt_use(raycast_info *rc) override { }
+
+    void long_use(raycast_info *rc) override { }
+
+    void cycle_mode() override {
+        /* different flashlight focal lengths */
+    }
+
+    void preview(raycast_info *rc, frame_data *frame) override {
+        if (flashlight)
+            update_light();
+    }
+
+    void get_description(char *str) override {
+        sprintf(str, "Ghetto flashlight");
+    }
+};
+
+
 tool *tools[] = {
     tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
@@ -1695,7 +1805,8 @@ tool *tools[] = {
     new add_block_entity_tool(),
     new add_surface_entity_tool(),
     new remove_surface_entity_tool(),
-    new add_wiring_tool()
+    new add_wiring_tool(),
+    new flashlight_tool()
 };
 
 
