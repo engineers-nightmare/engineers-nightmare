@@ -14,6 +14,7 @@
 #include <SDL.h>
 #include <unordered_map>
 
+#include "src/server_common.h"
 #include "src/common.h"
 #include "src/component/component_system_manager.h"
 #include "src/config.h"
@@ -34,7 +35,6 @@
 #include "src/tools/tools.h"
 #include "src/wiring/wiring.h"
 #include "src/wiring/wiring_data.h"
-#include "src/server_common.h"
 
 #define VSN_MAJOR 0
 #define VSN_MINOR 1
