@@ -27,20 +27,22 @@ struct entity_type
     btCollisionShape *phys_shape;
 };
 
+
 static entity_type entity_types[] = {
-    { "Door", "mesh/single_door_frame.obj", 2, false, 2 },
-    { "Frobnicator", "mesh/frobnicator.obj", 3, false, 1 },
-    { "Light", "mesh/panel_4x4.obj", 8, true, 1 },
-    { "Warning Light", "mesh/warning_light.obj", 8, true, 1 },
-    { "Display Panel", "mesh/panel_4x4.obj", 7, true, 1 },
-    { "Switch", "mesh/panel_1x1.obj", 9, true, 1 },
-    { "Plaidnicator", "mesh/frobnicator.obj", 13, false, 1 },
-    { "Pressure Sensor 1", "mesh/panel_1x1.obj", 12, true, 1 },
-    { "Pressure Sensor 2", "mesh/panel_1x1.obj", 14, true, 1 },
-    { "Sensor Comparator", "mesh/panel_1x1.obj", 13, true, 1 },
+    { "Door", "mesh/single_door_frame.dae", 2, false, 2 },
+    { "Frobnicator", "mesh/frobnicator.dae", 3, false, 1 },
+    { "Light", "mesh/panel_4x4.dae", 8, true, 1 },
+    { "Warning Light", "mesh/warning_light.dae", 8, true, 1 },
+    { "Display Panel", "mesh/panel_4x4.dae", 7, true, 1 },
+    { "Switch", "mesh/panel_1x1.dae", 9, true, 1 },
+    { "Plaidnicator", "mesh/frobnicator.dae", 13, false, 1 },
+    { "Pressure Sensor 1", "mesh/panel_1x1.dae", 12, true, 1 },
+    { "Pressure Sensor 2", "mesh/panel_1x1.dae", 14, true, 1 },
+    { "Sensor Comparator", "mesh/panel_1x1.dae", 13, true, 1 },
+    { "Proximity Sensor", "mesh/panel_1x1.dae", 3, true, 1 },
     { "Flashlight", "mesh/no_place.dae", 3, true, 1 },
 };
 
 c_entity spawn_entity(glm::ivec3 p, unsigned type, int face);
 
-void destroy_entity(entity *e);
+void destroy_entity(c_entity e);
