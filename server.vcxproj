@@ -229,10 +229,12 @@
     <ClCompile Include="server.cc" />
     <ClCompile Include="src\mock_ship_junk.cc" />
     <ClCompile Include="src\network.cc" />
+    <ClCompile Include="src\server_common.cc" />
     <ClCompile Include="src\ship_space.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\network.h" />
+    <ClInclude Include="src\server_common.h" />
     <ClInclude Include="src\ship_space.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -255,6 +255,7 @@
     <ClCompile Include="src\network.cc" />
     <ClCompile Include="src\physics.cc" />
     <ClCompile Include="src\projectile\projectile.cc" />
+    <ClCompile Include="src\server_common.cc" />
     <ClCompile Include="src\settings.cc" />
     <ClCompile Include="src\shader.cc" />
     <ClCompile Include="src\ship_space.cc" />
@@ -307,6 +308,7 @@
     <ClInclude Include="src\projectile\projectile.h" />
     <ClInclude Include="src\render_data.h" />
     <ClInclude Include="src\scopetimer.h" />
+    <ClInclude Include="src\server_common.h" />
     <ClInclude Include="src\settings.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\ship_space.h" />

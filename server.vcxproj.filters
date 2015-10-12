@@ -27,12 +27,18 @@
     <ClCompile Include="src\mock_ship_junk.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\server_common.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ship_space.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\network.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

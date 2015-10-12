@@ -165,6 +165,9 @@
     <ClCompile Include="src\network.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\server_common.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -310,6 +313,9 @@
     </ClInclude>
     <ClInclude Include="src\component\proximity_sensor_component.h">
       <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server_common.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
