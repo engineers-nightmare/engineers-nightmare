@@ -7,6 +7,8 @@
 
 light_field *light;
 
+bool need_lightfield_update = false;
+
 void
 set_light_level(int x, int y, int z, int level) {
     if (x < 0 || x >= 128) return;

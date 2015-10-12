@@ -202,7 +202,6 @@ ship_space::unserialize_chunk(int chunk_x, int chunk_y, int chunk_z, unsigned ch
     assert( c );
 
     // Prepare buffer range
-    unsigned char *data_beg = data;
     unsigned char *data_end = data + len;
 
     // Read each block

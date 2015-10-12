@@ -46,11 +46,11 @@ const int light_atten = 50;
 /* as far as we can ever light from a light source */
 const int max_light_prop = (255 + light_atten - 1) / light_atten;
 
-static bool need_lightfield_update = false;
 static glm::ivec3 lightfield_update_mins;
 static glm::ivec3 lightfield_update_maxs;
 
 extern light_field *light;
+extern bool need_lightfield_update;
 
 
 void set_light_level(int x, int y, int z, int level);

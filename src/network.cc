@@ -170,12 +170,12 @@ set_block_type(ENetPeer *peer, glm::ivec3 b, enum block_type type)
     assert(peer);
 
     ship->get_block(b)->type = type;
-    printf("set chunk at %.2f,%.2f,%.2f to %d\n", b.x, b.y, b.z, type);
+    printf("set chunk at %.2d,%.2d,%.2d to %d\n", b.x, b.y, b.z, type);
     uint8_t data[15] = {UPDATE_MSG, SET_BLOCK_TYPE,
         unpack_static_int(b.x),
         unpack_static_int(b.y),
         unpack_static_int(b.z),
-        type
+        (uint8_t)type
     };
     packet = enet_packet_create(data, sizeof(data), ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
@@ -192,7 +192,7 @@ set_block_surface(ENetPeer *peer, glm::ivec3 b, glm::vec3 os, uint8_t idx,
     ship->get_block(b)->surfs[idx] = (enum surface_type)st;
     ship->get_block(os)->surfs[idx ^ 1] = (enum surface_type)st;
 
-    printf("set texture at %.2f,%.2f,%.2f|%.2f,%.2f,%.2f to %d on %d\n",
+    printf("set texture at %.2d,%.2d,%.2d|%.2f,%.2f,%.2f to %d on %d\n",
             b.x, b.y, b.z, os.x, os.y, os.z, st, idx);
     uint8_t data[28] = {UPDATE_MSG, SET_SURFACE_TYPE,
         unpack_static_int(b.x),
