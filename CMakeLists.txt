@@ -62,6 +62,7 @@ target_link_libraries(nightmare-server
 
 target_link_libraries(nightmare-test-client
                       ${LIBENET_LIBRARIES}
+                      ${BULLET_LIBRARIES}
                       NIGHTMARE)
 
 # the following is based on
@@ -84,15 +85,17 @@ foreach(test_src ${TESTS_SRCS})
         add_executable(${test_name} ${test_src})
 
         # link to our libs
-        target_link_libraries(${test_name} NIGHTMARE)
+        target_link_libraries(${test_name}
+                      ${BULLET_LIBRARIES}
+                      NIGHTMARE)
 
         # move into test_bin
-        set_target_properties(${test_name} PROPERTIES 
+        set_target_properties(${test_name} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/test_bin)
 
         # add it as a test
         add_test(NAME ${test_name}
-                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test_bin 
+                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test_bin
                  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test_bin/${test_name} )
 
 endforeach(test_src)
