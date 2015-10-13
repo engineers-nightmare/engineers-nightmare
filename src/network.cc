@@ -1,6 +1,8 @@
-#include <cassert>
 #include "network.h"
+
+#include <cassert>
 #include <stdio.h>
+
 #include "ship_space.h"
 
 extern ship_space *ship;

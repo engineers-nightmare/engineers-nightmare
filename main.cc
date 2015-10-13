@@ -4,10 +4,10 @@
 #include "src/winerr.h"
 #endif
 
-/* enet first as it include win header that need to come first */
-#include <enet/enet.h>
-#include <algorithm>
+#include "src/network.h"
+
 #include <epoxy/gl.h>
+#include <algorithm>
 #include <functional>
 #include <glm/glm.hpp>
 #include <stdio.h>
@@ -21,7 +21,6 @@
 #include "src/input.h"
 #include "src/light_field.h"
 #include "src/mesh.h"
-#include "src/network.h"
 #include "src/physics.h"
 #include "src/player.h"
 #include "src/projectile/projectile.h"

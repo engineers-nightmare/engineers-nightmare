@@ -1,3 +1,5 @@
+#include "../network.h"
+
 #include <epoxy/gl.h>
 
 #include "../common.h"
@@ -5,7 +7,6 @@
 #include "../mesh.h"
 #include "../block.h"
 #include "tools.h"
-#include "../network.h"
 #include "../light_field.h"
 
 
