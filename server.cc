@@ -278,7 +278,7 @@ main(int argc, char **argv)
 
     addr.host = ENET_HOST_ANY;
     addr.port = atoi(argv[1]);
-    printf("listing on *:%d\n", addr.port);
+    printf("listening on *:%d\n", addr.port);
     server = enet_host_create(&addr,
             16, /* allow up to 16 clients */
             2,  /* each client is allowed 2 channels (0 and 1) */

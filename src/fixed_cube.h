@@ -51,7 +51,7 @@ struct fixed_cube {
             y >= N ||
             z >= N ){
             assert(!"out of range");
-            return 0;
+            return nullptr;
         }
 
         return &( contents[x][y][z] );

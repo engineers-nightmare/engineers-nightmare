@@ -69,7 +69,7 @@ ship_space::get_block(glm::ivec3 block)
     chunk *c = this->get_chunk(ch);
 
     if( ! c ){
-        return 0;
+        return nullptr;
     }
 
     return c->blocks.get(wb_x, wb_y, wb_z);
