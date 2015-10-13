@@ -403,9 +403,8 @@ struct entity
             power_man.assign_entity(ce);
             auto power = power_man.get_instance_data(ce);
             *power.powered = false; /* Flashlight starts off */
-            *power.required_power = 1;
-            *power.max_required_power = 1;
-            *power.power_override = 1; /* Not controlled by a real power source */
+            *power.required_power = 0;
+            *power.max_required_power = 0;
 
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);

@@ -1,4 +1,3 @@
 float,required_power
 bool,powered
 float,max_required_power
-bool,power_override

@@ -209,7 +209,8 @@ tick_power_consumers(ship_space *ship) {
     for (auto i = 0u; i < power_man.buffer.num; i++) {
         auto ce = power_man.instance_pool.entity[i];
 
-        if (power_man.instance_pool.power_override[i])
+        if (power_man.instance_pool.max_required_power[i] == 0 &&
+            power_man.instance_pool.required_power[i] == 0)
             continue;
         power_man.instance_pool.powered[i] = false;
 
