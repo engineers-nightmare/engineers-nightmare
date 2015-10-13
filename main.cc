@@ -1970,9 +1970,6 @@ update()
     /* things that can run at a pretty slow rate */
     while (main_tick_accum.tick()) {
 
-        /* rebuild lighting if needed */
-        update_lightfield();
-
         /* remove any air that someone managed to get into the outside */
         {
             topo_info *t = topo_find(&ship->outside_topo_info);
@@ -1992,6 +1989,9 @@ update()
         tick_sensor_comparators(ship);
         tick_proximity_sensors(ship, &pl);
         tick_doors(ship);
+
+        /* rebuild lighting if needed */
+        update_lightfield();
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);
