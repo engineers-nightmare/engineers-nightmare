@@ -30,6 +30,9 @@
     <ClCompile Include="src\server_common.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\light_field.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ship_space.h">

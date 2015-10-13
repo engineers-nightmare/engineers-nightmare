@@ -5,6 +5,7 @@
 #include "../block.h"
 #include "tools.h"
 #include "../network.h"
+#include "../light_field.h"
 
 
 extern GLuint add_overlay_shader;

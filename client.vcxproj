@@ -248,6 +248,7 @@
     <ClCompile Include="src\component\type_component.cc" />
     <ClCompile Include="src\config.cc" />
     <ClCompile Include="src\input.cc" />
+    <ClCompile Include="src\light_field.cc" />
     <ClCompile Include="src\mesh.cc" />
     <ClCompile Include="src\mesher.cc" />
     <ClCompile Include="src\mock_ship_junk.cc" />

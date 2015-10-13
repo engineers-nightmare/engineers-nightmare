@@ -227,6 +227,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="server.cc" />
+    <ClCompile Include="src\light_field.cc" />
     <ClCompile Include="src\mock_ship_junk.cc" />
     <ClCompile Include="src\network.cc" />
     <ClCompile Include="src\server_common.cc" />

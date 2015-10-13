@@ -4,6 +4,7 @@
 #include "../ship_space.h"
 #include "../mesh.h"
 #include "tools.h"
+#include "../light_field.h"
 
 
 extern GLuint add_overlay_shader;
