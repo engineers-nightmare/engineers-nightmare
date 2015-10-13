@@ -253,9 +253,13 @@ struct entity
         *pos.position = p;
         *pos.mat = mat;
 
-        render_man.assign_entity(ce);
-        auto render = render_man.get_instance_data(ce);
-        *render.mesh = et->hw;
+        /* hack to not render a mesh for the flashlight */
+        /* todo: handle entities that don't need to be rendered*/
+        if (type != 11) {
+            render_man.assign_entity(ce);
+            auto render = render_man.get_instance_data(ce);
+            *render.mesh = et->hw;
+        }
 
         // door
         if (type == 0) {
@@ -410,7 +414,13 @@ struct entity
             auto light = light_man.get_instance_data(ce);
             *light.intensity = 1.0f;
             *light.requested_intensity = 1.0f;
-            *light.type = 3;
+
+            reader_man.assign_entity(ce);
+            auto reader = reader_man.get_instance_data(ce);
+            *reader.name = "flashlight brightness";
+            reader.source->id = 0;
+            *reader.desc = nullptr;
+            *reader.data = 1.0f;
         }
     }
 };
@@ -1703,9 +1713,9 @@ struct add_wiring_tool : tool
 
 struct flashlight_tool : tool
 {
-    /* A good flashlight can throw pretty far. 5m is chosen as an average
+    /* A good flashlight can throw pretty far. 10m is chosen as an average
      * midrange [nice] flashlight / 10. */
-    const float flashlight_throw = 5.0f;
+    const float flashlight_throw = 10.0f;
     struct entity *flashlight = nullptr;
     glm::ivec3 last_pos;
     bool flashlight_on = false;
