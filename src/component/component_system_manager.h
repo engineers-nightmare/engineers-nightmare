@@ -6,6 +6,8 @@
 #include "../render_data.h"
 #include "../ship_space.h"
 #include "../player.h"
+#include "../particle.h"
+#include "../projectile/projectile.h"
 #include "sensor_comparator_component.h"
 #include "gas_production_component.h"
 #include "light_component.h"
@@ -37,6 +39,9 @@ extern type_component_manager type_man;
 extern door_component_manager door_man;
 extern reader_component_manager reader_man;
 extern proximity_sensor_component_manager proximity_man;
+
+extern projectile_linear_manager proj_man;
+extern particle_manager *particle_man;
 
 extern const char *comms_msg_type_switch_state;
 extern const char *comms_msg_type_pressure_sensor_1_state;

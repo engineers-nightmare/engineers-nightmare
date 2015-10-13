@@ -1,3 +1,6 @@
+#include <glm/gtc/random.hpp>
+
+#include "../light_field.h"
 #include "component_system_manager.h"
 #include "../particle.h"
 
@@ -17,10 +20,8 @@ door_component_manager door_man;
 reader_component_manager reader_man;
 proximity_sensor_component_manager proximity_man;
 
-#include <glm/gtc/random.hpp>
-
-
-extern particle_manager *particle_man;
+projectile_linear_manager proj_man;
+particle_manager *particle_man;
 
 
 /* I have no clue how we're going to actually handle these */

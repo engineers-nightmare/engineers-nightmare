@@ -156,9 +156,6 @@ extern hw_mesh *wire_hw_meshes[num_wire_types];
 
 sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
-projectile_linear_manager proj_man;
-particle_manager *particle_man;
-
 ENetHost *client;
 ENetPeer *peer;
 bool disconnected = false;
