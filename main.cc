@@ -412,15 +412,15 @@ struct entity
 
             light_man.assign_entity(ce);
             auto light = light_man.get_instance_data(ce);
-            *light.intensity = 1.0f;
-            *light.requested_intensity = 1.0f;
+            *light.intensity = 0.75f;
+            *light.requested_intensity = 0.75f;
 
             reader_man.assign_entity(ce);
             auto reader = reader_man.get_instance_data(ce);
             *reader.name = "flashlight brightness";
             reader.source->id = 0;
             *reader.desc = nullptr;
-            *reader.data = 1.0f;
+            *reader.data = 0.75f;
         }
     }
 };
@@ -1786,7 +1786,14 @@ struct flashlight_tool : tool
         update_light();
     }
 
-    void alt_use(raycast_info *rc) override { }
+    void alt_use(raycast_info *rc) override {
+        if (flashlight_on) {
+            *reader_man.get_instance_data(flashlight->ce).data += 0.25;
+            if (*reader_man.get_instance_data(flashlight->ce).data > 1)
+                *reader_man.get_instance_data(flashlight->ce).data -= 1;
+            update_light();
+        }
+    }
 
     void long_use(raycast_info *rc) override { }
 
@@ -1800,7 +1807,12 @@ struct flashlight_tool : tool
     }
 
     void get_description(char *str) override {
-        sprintf(str, "Ghetto flashlight");
+        if (flashlight) {
+            sprintf(str, "Ghetto flashlight brightness %.0f%%",
+                    *reader_man.get_instance_data(flashlight->ce).data * 100);
+            pl.ui_dirty = true;
+        } else
+            sprintf(str, "Ghetto flashlight");
     }
 };
 
