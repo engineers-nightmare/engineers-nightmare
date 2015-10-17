@@ -1228,6 +1228,8 @@ struct add_wiring_tool : tool
         }
 
         state = aws_none;
+        ship->active_wire[type][0] = invalid_wire;
+        ship->active_wire[type][1] = invalid_wire;
     }
 
     unsigned get_existing_attach_near(glm::vec3 const & pt, unsigned ignore = invalid_attach) {
