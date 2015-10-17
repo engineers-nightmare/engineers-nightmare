@@ -2105,7 +2105,13 @@ struct play_state : game_state {
         /* note: all the number keys are bound, but we may not have 10 toolbelt slots.
          * just drop bogus slot requests on the floor.
          */
-        if (slot < sizeof(tools) / sizeof(tools[0])) {
+        if (slot < sizeof(tools) / sizeof(tools[0]) && slot != pl.selected_slot) {
+
+            auto *old_tool = tools[pl.selected_slot];
+            if (old_tool) {
+                old_tool->unselect();
+            }
+
             pl.selected_slot = slot;
             pl.ui_dirty = true;
         }
