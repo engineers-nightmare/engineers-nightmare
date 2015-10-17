@@ -507,13 +507,7 @@ remove_attaches_for_entity(ship_space *ship, c_entity ce)
             /* remove attaches assigned to entity from ship lookup */
             entity_to_attach_lookup.erase(ce);
 
-            for (auto lookup : fixup_attaches_removed) {
-                /* we moved m to position r */
-                auto r = lookup.second;
-                auto m = lookup.first;
-
-                relocate_single_attach(ship, type, r, m);
-            }
+            relocate_many_attaches(ship, type, fixup_attaches_removed);
 
             attach_topo_rebuild(ship, type);
         }
