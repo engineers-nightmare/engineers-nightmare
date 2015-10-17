@@ -441,14 +441,6 @@ remove_attaches_for_entity(ship_space *ship, c_entity ce)
             auto attaches = std::vector<unsigned>(set.begin(), set.end());
             std::sort(attaches.begin(), attaches.end());
 
-            auto att_size = attaches.size();
-            for (size_t i = 0; i < att_size; ++i) {
-                auto attach = attaches[i];
-
-                // fill left side of fixup map
-                fixup_attaches_removed[attach] = 0;
-            }
-
             /* Remove relevant attaches from wire_attachments
             * relevant is an attach that isn't occupying a position
             * will get popped off as a result of moving before removing
@@ -466,7 +458,6 @@ remove_attaches_for_entity(ship_space *ship, c_entity ce)
                 }
                 else if (swap_index == rem) {
                     wire_attachments.pop_back();
-                    fixup_attaches_removed.erase(rem);
                     --swap_index;
                 }
             }
