@@ -235,6 +235,43 @@ relocate_single_attach(ship_space *ship, wire_type type,
 }
 
 
+bool
+relocate_many_attaches(ship_space *ship, wire_type type,
+    std::unordered_map<unsigned, unsigned> const & remap)
+{
+    /* fixup segments with attaches that were relocated */
+    auto & wire_segments = ship->wire_segments[type];
+    auto changed = false;
+
+    for (auto si = wire_segments.begin(); si != wire_segments.end(); ++si) {
+        auto first_remap = remap.find(si->first);
+        if (first_remap != remap.end()) {
+            si->first = first_remap->second;
+            changed = true;
+        }
+
+        auto second_remap = remap.find(si->second);
+        if (second_remap != remap.end()) {
+            si->second = second_remap->second;
+            changed = true;
+        }
+    }
+
+    /* fixup entity attaches that were relocated */
+    for (auto& sea : ship->entity_to_attach_lookups[type]) {
+        auto & sea_attaches = sea.second;
+        for (auto ch : remap) {
+            if (sea_attaches.erase(ch.first)) {
+                sea_attaches.insert(ch.second);
+            }
+        }
+    }
+
+    return changed;
+
+}
+
+
 void
 reduce_segments(ship_space *ship, wire_type type) {
     auto & wire_segments = ship->wire_segments[type];

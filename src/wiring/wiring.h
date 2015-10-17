@@ -68,3 +68,7 @@ publish_msg(ship_space *ship, c_entity ce, comms_msg msg);
 
 void
 remove_attaches_for_entity(ship_space *ship, c_entity ce);
+
+bool
+relocate_many_attaches(ship_space *ship, wire_type type,
+    std::unordered_map<unsigned, unsigned> const & remap);
