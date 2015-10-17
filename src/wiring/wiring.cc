@@ -453,28 +453,22 @@ remove_attaches_for_entity(ship_space *ship, c_entity ce)
             * relevant is an attach that isn't occupying a position
             * will get popped off as a result of moving before removing
             */
-            unsigned att_index = (unsigned)attaches.size() - 1;
-            auto swap_index = wire_attachments.size() - 1;
-            for (auto s = wire_attachments.rbegin();
-            s != wire_attachments.rend() && att_index != invalid_attach;) {
+            auto swap_index = (unsigned)wire_attachments.size() - 1;
+            for (auto att_index = (unsigned)attaches.size() - 1; att_index != invalid_attach; --att_index) {
 
                 auto from_attach = wire_attachments[swap_index];
                 auto rem = attaches[att_index];
                 if (swap_index > rem) {
                     wire_attachments[rem] = from_attach;
                     wire_attachments.pop_back();
-                    fixup_attaches_removed[rem] = (unsigned)swap_index;
+                    fixup_attaches_removed[rem] = swap_index;
                     --swap_index;
-                    ++s;
                 }
                 else if (swap_index == rem) {
                     wire_attachments.pop_back();
                     fixup_attaches_removed.erase(rem);
                     --swap_index;
-                    ++s;
                 }
-
-                --att_index;
             }
 
             /* remove all segments that contain an attach on entity */
