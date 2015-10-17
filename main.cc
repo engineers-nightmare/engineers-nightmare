@@ -854,10 +854,13 @@ destroy_entity(entity *e)
         }
     }
 
+    if (physics_man.exists(e->ce)) {
+        teardown_static_physics_setup(nullptr, nullptr, physics_man.get_instance_data(e->ce).rigid);
+    }
+
     comparator_man.destroy_entity_instance(e->ce);
     gas_man.destroy_entity_instance(e->ce);
     light_man.destroy_entity_instance(e->ce);
-    teardown_static_physics_setup(nullptr, nullptr, physics_man.get_instance_data(e->ce).rigid);
     physics_man.destroy_entity_instance(e->ce);
     pos_man.destroy_entity_instance(e->ce);
     power_man.destroy_entity_instance(e->ce);
