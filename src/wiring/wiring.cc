@@ -524,9 +524,7 @@ remove_attaches_for_entity(ship_space *ship, c_entity ce)
             }
 
             /* remove all segments that contain an attach on entity */
-            for (auto remove_attach : attaches) {
-                remove_segments_containing(ship, type, remove_attach);
-            }
+            remove_segments_containing_many(ship, type, set);
 
             /* remove attaches assigned to entity from ship lookup */
             entity_to_attach_lookup.erase(ce);
