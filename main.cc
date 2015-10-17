@@ -1573,39 +1573,38 @@ struct add_wiring_tool : tool
                 if (changed) {
                     attach_topo_rebuild(ship, type);
                 }
-
-                state = aws_none;
             }
             break;
         case aws_placing:
             {
                 /* terminate the current run */
-                if (current_attach != invalid_attach) {
-                    current_attach = invalid_attach;
-                }
-
-                state = aws_none;
+                current_attach = invalid_attach;
             }
             break;
         case aws_moving:
             {
-                /* reset to old spot if moving. "cancel" */
-                wire_attachments[current_attach] = old_attach;
-
-                if (old_entity) {
-                    entity_to_attach_lookup[old_entity->ce].insert(current_attach);
-                    old_entity = nullptr;
-                }
-
-                current_attach = invalid_attach;
-                state = aws_none;
-
-                state = aws_none;
+                cancel_moving_attach();
             }
             break;
         default:
             break;
         }
+
+        state = aws_none;
+    }
+
+    void cancel_moving_attach() {
+        auto & wire_attachments = ship->wire_attachments[type];
+        auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
+
+        wire_attachments[current_attach] = old_attach;
+
+        if (old_entity) {
+            entity_to_attach_lookup[old_entity->ce].insert(current_attach);
+            old_entity = nullptr;
+        }
+
+        current_attach = invalid_attach;
     }
 
     void long_use(raycast_info *rc) override {
