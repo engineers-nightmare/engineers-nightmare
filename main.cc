@@ -1467,7 +1467,7 @@ struct add_wiring_tool : tool
 
                 /* we did move to an existing. need to merge */
                 if (existing_attach != invalid_attach) {
-                    relocate_segments_and_entity_attaches(ship, type, existing_attach, current_attach);
+                    relocate_single_attach(ship, type, existing_attach, current_attach);
 
                     auto back_attach = (unsigned)wire_attachments.size() - 1;
                     /* no segments */
@@ -1475,7 +1475,7 @@ struct add_wiring_tool : tool
                         wire_attachments[current_attach] = wire_attachments[back_attach];
                         wire_attachments.pop_back();
 
-                        relocate_segments_and_entity_attaches(ship, type, current_attach, back_attach);
+                        relocate_single_attach(ship, type, current_attach, back_attach);
 
                         attach_topo_rebuild(ship, type);
                     }
@@ -1539,7 +1539,7 @@ struct add_wiring_tool : tool
                 unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
 
                 auto changed = remove_segments_containing(ship, type, existing_attach);
-                if (relocate_segments_and_entity_attaches(ship, type,
+                if (relocate_single_attach(ship, type,
                     existing_attach, attach_moving_for_delete)) {
                     changed = true;
                 }

@@ -205,7 +205,7 @@ remove_segments_containing(ship_space *ship, wire_type type, unsigned attach) {
 
 
 bool
-relocate_segments_and_entity_attaches(ship_space *ship, wire_type type,
+relocate_single_attach(ship_space *ship, wire_type type,
     unsigned relocated_to, unsigned moved_from) {
     /* fixup segments with attaches that were relocated */
     auto & wire_segments = ship->wire_segments[type];
@@ -475,7 +475,7 @@ remove_attaches_for_entity(ship_space *ship, c_entity ce)
                 auto r = lookup.second;
                 auto m = lookup.first;
 
-                relocate_segments_and_entity_attaches(ship, type, r, m);
+                relocate_single_attach(ship, type, r, m);
             }
 
             attach_topo_rebuild(ship, type);

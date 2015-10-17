@@ -39,7 +39,7 @@ bool
 remove_segments_containing(ship_space *ship, wire_type type, unsigned attach);
 
 bool
-relocate_segments_and_entity_attaches(ship_space *ship, wire_type type,
+relocate_single_attach(ship_space *ship, wire_type type,
     unsigned relocated_to, unsigned moved_from);
 
 void
