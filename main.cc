@@ -1213,6 +1213,23 @@ struct add_wiring_tool : tool
         type = (wire_type)0;
     }
 
+    void unselect() override {
+        switch (state) {
+        case aws_placing:
+            current_attach = invalid_attach;
+            break;
+
+        case aws_moving:
+            cancel_moving_attach();
+            break;
+
+        default:
+            break;
+        }
+
+        state = aws_none;
+    }
+
     unsigned get_existing_attach_near(glm::vec3 const & pt, unsigned ignore = invalid_attach) {
         /* Some spatial index might be useful here. */
         auto & wire_attachments = ship->wire_attachments[type];
