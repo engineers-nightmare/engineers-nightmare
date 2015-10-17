@@ -205,6 +205,30 @@ remove_segments_containing(ship_space *ship, wire_type type, unsigned attach) {
 
 
 bool
+remove_segments_containing_many(ship_space *ship, wire_type type,
+    std::unordered_set<unsigned> const &to_remove) {
+    /* remove all segments that contain any attach in to_remove.
+     * relocates segments from the end to avoid having to shuffle everything down.
+     * this is safe without any further fixups -- nobody refers to segments /across/
+     * this call by index. */
+    auto changed = false;
+    auto & wire_segments = ship->wire_segments[type];
+    for (auto i = 0u; i < wire_segments.size(); ) {
+        if (to_remove.find(wire_segments[i].first) != to_remove.end() ||
+            to_remove.find(wire_segments[i].second) != to_remove.end()) {
+            wire_segments[i] = wire_segments.back();
+            wire_segments.pop_back();
+            changed = true;
+        }
+        else {
+            ++i;
+        }
+    }
+    return changed;
+}
+
+
+bool
 relocate_single_attach(ship_space *ship, wire_type type,
     unsigned relocated_to, unsigned moved_from) {
     /* fixup segments with attaches that were relocated */
