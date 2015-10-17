@@ -2138,8 +2138,7 @@ struct play_state : game_state {
         unsigned int cur_slot = pl.selected_slot;
         cur_slot = (cur_slot + num_tools + d) % num_tools;
 
-        pl.selected_slot = cur_slot;
-        pl.ui_dirty = true;
+        set_slot(cur_slot);
     }
 
     void handle_input() override {
