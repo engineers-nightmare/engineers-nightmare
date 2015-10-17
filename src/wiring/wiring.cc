@@ -429,9 +429,9 @@ remove_attaches_for_entity(ship_space *ship, c_entity ce)
         auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
         auto & wire_attachments = ship->wire_attachments[type];
 
-        /* left side is the index of attach on entity that we're removing
-        * right side is the index we moved from the end into left side
-        * 0, 2 would be read as "attach at index 2 moved to index 0
+        /* right side is the index of attach on entity that we're removing
+        * left side is the index we moved from the end into left side
+        * 2 -> 0 would be read as "attach at index 2 moved to index 0
         * and assumed that what was at index 0 is no longer valid in referencers
         */
         std::unordered_map<unsigned, unsigned> fixup_attaches_removed;
@@ -453,7 +453,7 @@ remove_attaches_for_entity(ship_space *ship, c_entity ce)
                 if (swap_index > rem) {
                     wire_attachments[rem] = from_attach;
                     wire_attachments.pop_back();
-                    fixup_attaches_removed[rem] = swap_index;
+                    fixup_attaches_removed[swap_index] = rem;
                     --swap_index;
                 }
                 else if (swap_index == rem) {
@@ -472,8 +472,8 @@ remove_attaches_for_entity(ship_space *ship, c_entity ce)
 
             for (auto lookup : fixup_attaches_removed) {
                 /* we moved m to position r */
-                auto r = lookup.first;
-                auto m = lookup.second;
+                auto r = lookup.second;
+                auto m = lookup.first;
 
                 relocate_segments_and_entity_attaches(ship, type, r, m);
             }
