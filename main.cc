@@ -1315,6 +1315,9 @@ struct add_wiring_tool : tool
     }
 
     void preview(raycast_info *rc, frame_data *frame) override {
+        if (!rc->hit)
+            return;
+
         /* do a real, generic raycast */
 
         /* TODO: Move the assignment logic into the wiring system */
@@ -2114,9 +2117,7 @@ struct play_state : game_state {
         ship->raycast(pl.eye, pl.dir, &rc);
 
         /* tool preview */
-        if (rc.hit) {
-            t->preview(&rc, frame);
-        }
+        t->preview(&rc, frame);
     }
 
     void set_slot(unsigned slot) {
