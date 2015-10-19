@@ -39,7 +39,7 @@ bool
 remove_segments_containing(ship_space *ship, wire_type type, unsigned attach);
 
 bool
-relocate_segments_and_entity_attaches(ship_space *ship, wire_type type,
+relocate_single_attach(ship_space *ship, wire_type type,
     unsigned relocated_to, unsigned moved_from);
 
 void
@@ -65,3 +65,10 @@ propagate_comms_wires(ship_space *ship);
 
 void
 publish_msg(ship_space *ship, c_entity ce, comms_msg msg);
+
+void
+remove_attaches_for_entity(ship_space *ship, c_entity ce);
+
+bool
+relocate_many_attaches(ship_space *ship, wire_type type,
+    std::unordered_map<unsigned, unsigned> const & remap);

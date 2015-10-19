@@ -205,7 +205,31 @@ remove_segments_containing(ship_space *ship, wire_type type, unsigned attach) {
 
 
 bool
-relocate_segments_and_entity_attaches(ship_space *ship, wire_type type,
+remove_segments_containing_many(ship_space *ship, wire_type type,
+    std::unordered_set<unsigned> const &to_remove) {
+    /* remove all segments that contain any attach in to_remove.
+     * relocates segments from the end to avoid having to shuffle everything down.
+     * this is safe without any further fixups -- nobody refers to segments /across/
+     * this call by index. */
+    auto changed = false;
+    auto & wire_segments = ship->wire_segments[type];
+    for (auto i = 0u; i < wire_segments.size(); ) {
+        if (to_remove.find(wire_segments[i].first) != to_remove.end() ||
+            to_remove.find(wire_segments[i].second) != to_remove.end()) {
+            wire_segments[i] = wire_segments.back();
+            wire_segments.pop_back();
+            changed = true;
+        }
+        else {
+            ++i;
+        }
+    }
+    return changed;
+}
+
+
+bool
+relocate_single_attach(ship_space *ship, wire_type type,
     unsigned relocated_to, unsigned moved_from) {
     /* fixup segments with attaches that were relocated */
     auto & wire_segments = ship->wire_segments[type];
@@ -232,6 +256,43 @@ relocate_segments_and_entity_attaches(ship_space *ship, wire_type type,
     }
 
     return changed;
+}
+
+
+bool
+relocate_many_attaches(ship_space *ship, wire_type type,
+    std::unordered_map<unsigned, unsigned> const & remap)
+{
+    /* fixup segments with attaches that were relocated */
+    auto & wire_segments = ship->wire_segments[type];
+    auto changed = false;
+
+    for (auto si = wire_segments.begin(); si != wire_segments.end(); ++si) {
+        auto first_remap = remap.find(si->first);
+        if (first_remap != remap.end()) {
+            si->first = first_remap->second;
+            changed = true;
+        }
+
+        auto second_remap = remap.find(si->second);
+        if (second_remap != remap.end()) {
+            si->second = second_remap->second;
+            changed = true;
+        }
+    }
+
+    /* fixup entity attaches that were relocated */
+    for (auto& sea : ship->entity_to_attach_lookups[type]) {
+        auto & sea_attaches = sea.second;
+        for (auto ch : remap) {
+            if (sea_attaches.erase(ch.first)) {
+                sea_attaches.insert(ch.second);
+            }
+        }
+    }
+
+    return changed;
+
 }
 
 
@@ -417,5 +478,60 @@ publish_msg(ship_space *ship, c_entity ce, comms_msg msg)
 
         visited_wires.insert(wire_index);
         ship->comms_wires[wire_index].write_buffer.push_back(msg);
+    }
+}
+
+
+void
+remove_attaches_for_entity(ship_space *ship, c_entity ce)
+{
+    for (auto _type = 0; _type < num_wire_types; _type++) {
+        auto type = (wire_type)_type;
+        auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
+        auto & wire_attachments = ship->wire_attachments[type];
+
+        /* right side is the index of attach on entity that we're removing
+        * left side is the index we moved from the end into left side
+        * 2 -> 0 would be read as "attach at index 2 moved to index 0
+        * and assumed that what was at index 0 is no longer valid in referencers
+        */
+        std::unordered_map<unsigned, unsigned> fixup_attaches_removed;
+        auto entity_attaches = entity_to_attach_lookup.find(ce);
+        if (entity_attaches != entity_to_attach_lookup.end()) {
+            auto const & set = entity_attaches->second;
+            auto attaches = std::vector<unsigned>(set.begin(), set.end());
+            std::sort(attaches.begin(), attaches.end());
+
+            /* Remove relevant attaches from wire_attachments
+            * relevant is an attach that isn't occupying a position
+            * will get popped off as a result of moving before removing
+            */
+            auto swap_index = (unsigned)wire_attachments.size() - 1;
+            for (auto att_index = (unsigned)attaches.size() - 1; att_index != invalid_attach; --att_index) {
+
+                auto from_attach = wire_attachments[swap_index];
+                auto rem = attaches[att_index];
+                if (swap_index > rem) {
+                    wire_attachments[rem] = from_attach;
+                    wire_attachments.pop_back();
+                    fixup_attaches_removed[swap_index] = rem;
+                    --swap_index;
+                }
+                else if (swap_index == rem) {
+                    wire_attachments.pop_back();
+                    --swap_index;
+                }
+            }
+
+            /* remove all segments that contain an attach on entity */
+            remove_segments_containing_many(ship, type, set);
+
+            /* remove attaches assigned to entity from ship lookup */
+            entity_to_attach_lookup.erase(ce);
+
+            relocate_many_attaches(ship, type, fixup_attaches_removed);
+
+            attach_topo_rebuild(ship, type);
+        }
     }
 }
