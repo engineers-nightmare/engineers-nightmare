@@ -1674,7 +1674,7 @@ struct flashlight_tool : tool
      * by the player, move it to where the raycast hit */
     void update_light() {
         glm::ivec3 new_pos;
-        bool should_light = false;
+        bool hit_something = false;
         power_component_manager::instance_data power =
             power_man.get_instance_data(flashlight->ce);
 
@@ -1682,12 +1682,11 @@ struct flashlight_tool : tool
         entity *hit_entity = phys_raycast(pl.eye, pl.eye + pl.dir * flashlight_throw,
                                           phy->ghostObj, phy->dynamicsWorld);
 
-
         if (hit_entity) {
             /* The raycast hit a mesh which needs no special considerations for
              * lighting. */
             new_pos = *pos_man.get_instance_data(hit_entity->ce).position;
-            should_light = true;
+            hit_something = true;
         } else {
             generic_raycast_info hit = phys_raycast_generic(pl.eye,
                                                             pl.eye + pl.dir * flashlight_throw,
@@ -1703,27 +1702,45 @@ struct flashlight_tool : tool
                  * should be able to simply "back out" a reasonable amount,
                  * provided it isn't behind the player
                  */
-
                 new_pos = hit.hitCoord + hit.hitNormal * 0.5f;
-                should_light = true;
+                hit_something = true;
             }
         }
 
-        should_light = should_light && flashlight_on;
+        if (hit_something && flashlight_on) {
+            /* To prevent unnecessary processing, we only want to update things
+             * if the position changed, or the flashlight status changed */
+            if (new_pos == last_pos && *power.powered == true)
+                return;
 
-        new_pos = get_coord_containing(new_pos);
-
-        /* To prevent unnecessary processing, we only want to update things if
-         * the position changed, or the flashlight status changed */
-        if (new_pos == last_pos && *power.powered == should_light) {
-            return;
+            new_pos = get_coord_containing(new_pos);
+            *power.powered = true;
+            *pos_man.get_instance_data(flashlight->ce).position = new_pos;
+            mark_lightfield_update(new_pos);
+        } else {
+            *power.powered = false;
         }
 
-        *power.powered = should_light;
-        *pos_man.get_instance_data(flashlight->ce).position = new_pos;
-        mark_lightfield_update(new_pos);
         mark_lightfield_update(last_pos);
         last_pos = new_pos;
+    }
+
+    void unselect() override {
+        if (flashlight) {
+            power_component_manager::instance_data power =
+                power_man.get_instance_data(flashlight->ce);
+            *power.powered = false;
+            mark_lightfield_update(last_pos);
+        }
+    }
+
+    void select() override {
+        if (flashlight) {
+            power_component_manager::instance_data power =
+                power_man.get_instance_data(flashlight->ce);
+            *power.powered = flashlight_on;
+            mark_lightfield_update(last_pos);
+        }
     }
 
     void use(raycast_info *rc) override {
@@ -2194,6 +2211,8 @@ struct play_state : game_state {
             if (old_tool) {
                 old_tool->unselect();
             }
+
+            tools[slot]->select();
 
             pl.selected_slot = slot;
             pl.ui_dirty = true;
