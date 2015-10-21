@@ -1726,10 +1726,21 @@ struct flashlight_tool : tool
     }
 
     void unselect() override {
-        if (flashlight)
-            flashlight_on = false;
+        if (flashlight) {
+            power_component_manager::instance_data power =
+                power_man.get_instance_data(flashlight->ce);
+            *power.powered = false;
+            mark_lightfield_update(last_pos);
+        }
+    }
 
-        update_light();
+    void select() override {
+        if (flashlight) {
+            power_component_manager::instance_data power =
+                power_man.get_instance_data(flashlight->ce);
+            *power.powered = flashlight_on;
+            mark_lightfield_update(last_pos);
+        }
     }
 
     void use(raycast_info *rc) override {
@@ -2200,6 +2211,8 @@ struct play_state : game_state {
             if (old_tool) {
                 old_tool->unselect();
             }
+
+            tools[slot]->select();
 
             pl.selected_slot = slot;
             pl.ui_dirty = true;
