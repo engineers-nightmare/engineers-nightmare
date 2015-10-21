@@ -1725,6 +1725,13 @@ struct flashlight_tool : tool
         last_pos = new_pos;
     }
 
+    void unselect() override {
+        if (flashlight)
+            flashlight_on = false;
+
+        update_light();
+    }
+
     void use(raycast_info *rc) override {
         if (!flashlight) {
             flashlight = new entity(rc->p, 11, surface_xp);
