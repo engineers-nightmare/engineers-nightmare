@@ -4,6 +4,7 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/glm.hpp>
 #include "char.h"
+#include "component/c_entity.h"
 
 
 /* in player.h */
@@ -53,6 +54,12 @@ struct generic_raycast_info {
     glm::vec3 fromHit;
 };
 
+/* Identifies an entity and a mesh/meshpart, to be referenced by the physics system. */
+struct phys_ent_ref
+{
+    c_entity ce;
+};
+
 
 void
 build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBody **rb);
@@ -69,9 +76,7 @@ void
 teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);
 
 
-struct entity;
-
-entity *
+phys_ent_ref *
 phys_raycast(glm::vec3 start, glm::vec3 end,
              btCollisionObject *ignore, btCollisionWorld *world);
 

@@ -239,9 +239,12 @@ struct entity
         auto physics = physics_man.get_instance_data(ce);
         *physics.rigid = nullptr;
         build_static_physics_rb_mat(&mat, et->phys_shape, physics.rigid);
+
         /* so that we can get back to the entity from a phys raycast */
-        /* TODO: change this for getting rid of entity* and for supporting submesh */
-        (*physics.rigid)->setUserPointer(this);
+        /* TODO: these should really come from a dense pool rather than the generic allocator */
+        auto per = new phys_ent_ref;
+        per->ce = ce;
+        (*physics.rigid)->setUserPointer(per);
 
         surface_man.assign_entity(ce);
         auto surface = surface_man.get_instance_data(ce);
@@ -855,7 +858,13 @@ destroy_entity(entity *e)
     }
 
     if (physics_man.exists(e->ce)) {
-        teardown_static_physics_setup(nullptr, nullptr, physics_man.get_instance_data(e->ce).rigid);
+        auto phys_data = physics_man.get_instance_data(e->ce);
+        phys_ent_ref *per = (phys_ent_ref *)(*phys_data.rigid)->getUserPointer();
+        if (per) {
+            delete per;
+        }
+
+        teardown_static_physics_setup(nullptr, nullptr, phys_data.rigid);
     }
 
     comparator_man.destroy_entity_instance(e->ce);
@@ -1162,7 +1171,7 @@ struct add_wiring_tool : tool
 
     unsigned current_attach = invalid_attach;
     wire_attachment old_attach;
-    entity *old_entity = nullptr;
+    c_entity old_entity = c_entity();
     wire_type type;
     add_wiring_state state = aws_none;
 
@@ -1208,11 +1217,14 @@ struct add_wiring_tool : tool
         return invalid_attach;
     }
 
-    bool get_attach_point(glm::vec3 start, glm::vec3 dir, glm::vec3 *pt, glm::vec3 *normal, entity **hit_entity) {
+    bool get_attach_point(glm::vec3 start, glm::vec3 dir, glm::vec3 *pt, glm::vec3 *normal, c_entity *hit_entity) {
         auto end = start + dir * 5.0f;
 
-        *hit_entity = phys_raycast(start, end,
+        auto per = phys_raycast(start, end,
                                     phy->ghostObj, phy->dynamicsWorld);
+        if (per) {
+            *hit_entity = per->ce;
+        }
 
         auto hit = phys_raycast_generic(start, end,
                                         phy->ghostObj, phy->dynamicsWorld);
@@ -1229,7 +1241,7 @@ struct add_wiring_tool : tool
 
     bool can_place(ship_space *ship,
         unsigned current_attach, unsigned existing_attach,
-        entity* hit_entity) {
+        c_entity ce) {
 
         auto allow_placement = true;
 
@@ -1243,9 +1255,9 @@ struct add_wiring_tool : tool
                  */
                 if ((existing_attach == invalid_attach ||
                     existing_attach == current_attach) &&
-                    hit_entity &&
-                    ent_att_lookup.find(hit_entity->ce) != ent_att_lookup.end()) {
-                    auto const & atts = ent_att_lookup[hit_entity->ce];
+                    ce.id &&
+                    ent_att_lookup.find(ce) != ent_att_lookup.end()) {
+                    auto const & atts = ent_att_lookup[ce];
                     if (atts.size() > 0) {
                         allow_placement = false;
                     }
@@ -1258,9 +1270,9 @@ struct add_wiring_tool : tool
             {
                 /* allow placement on entity only if on existing attach */
                 if (existing_attach == invalid_attach &&
-                    hit_entity &&
-                    ent_att_lookup.find(hit_entity->ce) != ent_att_lookup.end()) {
-                    auto const & atts = ent_att_lookup[hit_entity->ce];
+                    ce.id &&
+                    ent_att_lookup.find(ce) != ent_att_lookup.end()) {
+                    auto const & atts = ent_att_lookup[ce];
                     if (atts.size() > 0) {
                         allow_placement = false;
                     }
@@ -1279,7 +1291,7 @@ struct add_wiring_tool : tool
 
         /* TODO: Move the assignment logic into the wiring system */
 
-        entity *hit_entity = nullptr;
+        c_entity hit_entity; hit_entity.id = 0;
         glm::vec3 pt;
         glm::vec3 normal;
 
@@ -1408,7 +1420,7 @@ struct add_wiring_tool : tool
     }
 
     void use(raycast_info *rc) override {
-        entity *hit_entity = nullptr;
+        c_entity hit_entity; hit_entity.id = 0;
         glm::vec3 pt;
         glm::vec3 normal;
 
@@ -1453,8 +1465,8 @@ struct add_wiring_tool : tool
 
                 current_attach = new_attach;
 
-                if (hit_entity && current_attach != invalid_attach) {
-                    entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
+                if (hit_entity.id && current_attach != invalid_attach) {
+                    entity_to_attach_lookup[hit_entity].insert(current_attach);
                 }
 
                 state = aws_placing;
@@ -1485,7 +1497,7 @@ struct add_wiring_tool : tool
                 }
 
                 /* did we move to be on an entity */
-                if (hit_entity && current_attach != invalid_attach) {
+                if (hit_entity.id && current_attach != invalid_attach) {
                     if (current_attach != existing_attach &&
                         !can_place(ship, current_attach, existing_attach,
                             hit_entity)) {
@@ -1493,7 +1505,7 @@ struct add_wiring_tool : tool
                         return;
                     }
 
-                    entity_to_attach_lookup[hit_entity->ce].insert(current_attach);
+                    entity_to_attach_lookup[hit_entity].insert(current_attach);
                 }
 
                 current_attach = invalid_attach;
@@ -1516,7 +1528,7 @@ struct add_wiring_tool : tool
         case aws_none:
             {
                 /* remove existing attach, and dependent segments */
-                entity *hit_entity = nullptr;
+                c_entity hit_entity; hit_entity.id = 0;
                 glm::vec3 pt;
                 glm::vec3 normal;
 
@@ -1532,8 +1544,8 @@ struct add_wiring_tool : tool
                 }
 
                 /* remove attach from entity lookup */
-                if (hit_entity) {
-                    entity_to_attach_lookup[hit_entity->ce].erase(existing_attach);
+                if (hit_entity.id) {
+                    entity_to_attach_lookup[hit_entity].erase(existing_attach);
                 }
 
                 unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
@@ -1578,16 +1590,16 @@ struct add_wiring_tool : tool
 
         wire_attachments[current_attach] = old_attach;
 
-        if (old_entity) {
-            entity_to_attach_lookup[old_entity->ce].insert(current_attach);
-            old_entity = nullptr;
+        if (old_entity.id) {
+            entity_to_attach_lookup[old_entity].insert(current_attach);
+            old_entity.id = 0;
         }
 
         current_attach = invalid_attach;
     }
 
     void long_use(raycast_info *rc) override {
-        entity *hit_entity = nullptr;
+        c_entity hit_entity; hit_entity.id = 0;
         glm::vec3 pt;
         glm::vec3 normal;
         unsigned existing_attach;
@@ -1623,8 +1635,8 @@ struct add_wiring_tool : tool
                      * will get added back if needed in use()/alt_use()
                      */
                     auto & lookup = entity_to_attach_lookup;
-                    if (hit_entity && lookup.find(hit_entity->ce) != lookup.end()) {
-                        lookup[hit_entity->ce].erase(current_attach);
+                    if (hit_entity.id && lookup.find(hit_entity) != lookup.end()) {
+                        lookup[hit_entity].erase(current_attach);
                     }
 
                     old_attach = wire_attachments[current_attach];
@@ -1679,13 +1691,13 @@ struct flashlight_tool : tool
             power_man.get_instance_data(flashlight->ce);
 
         /* FIXME: flashlight shouldn't be at eye, should be mid body */
-        entity *hit_entity = phys_raycast(pl.eye, pl.eye + pl.dir * flashlight_throw,
+        auto per = phys_raycast(pl.eye, pl.eye + pl.dir * flashlight_throw,
                                           phy->ghostObj, phy->dynamicsWorld);
 
-        if (hit_entity) {
+        if (per) {
             /* The raycast hit a mesh which needs no special considerations for
              * lighting. */
-            new_pos = *pos_man.get_instance_data(hit_entity->ce).position;
+            new_pos = *pos_man.get_instance_data(per->ce).position;
             hit_something = true;
         } else {
             generic_raycast_info hit = phys_raycast_generic(pl.eye,
@@ -2037,7 +2049,7 @@ action const* get_input(en_action a) {
 
 
 struct play_state : game_state {
-    entity *use_entity = nullptr;
+    phys_ent_ref *use_entity = nullptr;
 
     play_state() {
     }
@@ -2168,7 +2180,7 @@ struct play_state : game_state {
         /* interact with ents. do this /after/
          * anything that may delete the entity
          */
-        entity *hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
+        auto hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
             phy->ghostObj, phy->dynamicsWorld);
         /* can only interact with entities which have
          * the switch component

@@ -861,7 +861,7 @@ void en_char_controller::stand(btCollisionWorld *collisionWorld)
 
 
 /* Not part of CC, but reuses the same callbacks etc. */
-entity *
+phys_ent_ref *
 phys_raycast(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollisionWorld *world)
 {
     btVector3 start_bt = glm_to_bt(start);
@@ -870,7 +870,7 @@ phys_raycast(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollis
     world->rayTest(start_bt, end_bt, callback);
 
     if (callback.hasHit()) {
-        return (entity *)callback.m_collisionObject->getUserPointer();
+        return (phys_ent_ref *)callback.m_collisionObject->getUserPointer();
     }
 
     return nullptr;
