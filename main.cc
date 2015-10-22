@@ -219,214 +219,210 @@ entity_type entity_types[] = {
 };
 
 
-struct entity
-{
-    /* TODO: replace this completely, it's silly. */
-    c_entity ce;
+c_entity spawn_entity(glm::ivec3 p, unsigned type, int face) {
+    auto ce = c_entity::spawn();
 
-    entity(glm::ivec3 p, unsigned type, int face) {
-        ce = c_entity::spawn();
+    auto mat = mat_block_face(p, face);
 
-        auto mat = mat_block_face(p, face);
+    auto et = &entity_types[type];
 
-        auto et = &entity_types[type];
+    type_man.assign_entity(ce);
+    auto type_comp = type_man.get_instance_data(ce);
+    *type_comp.type = type;
 
-        type_man.assign_entity(ce);
-        auto type_comp = type_man.get_instance_data(ce);
-        *type_comp.type = type;
+    physics_man.assign_entity(ce);
+    auto physics = physics_man.get_instance_data(ce);
+    *physics.rigid = nullptr;
+    build_static_physics_rb_mat(&mat, et->phys_shape, physics.rigid);
 
-        physics_man.assign_entity(ce);
-        auto physics = physics_man.get_instance_data(ce);
-        *physics.rigid = nullptr;
-        build_static_physics_rb_mat(&mat, et->phys_shape, physics.rigid);
+    /* so that we can get back to the entity from a phys raycast */
+    /* TODO: these should really come from a dense pool rather than the generic allocator */
+    auto per = new phys_ent_ref;
+    per->ce = ce;
+    (*physics.rigid)->setUserPointer(per);
 
-        /* so that we can get back to the entity from a phys raycast */
-        /* TODO: these should really come from a dense pool rather than the generic allocator */
-        auto per = new phys_ent_ref;
-        per->ce = ce;
-        (*physics.rigid)->setUserPointer(per);
+    surface_man.assign_entity(ce);
+    auto surface = surface_man.get_instance_data(ce);
+    *surface.block = p;
+    *surface.face = face;
 
-        surface_man.assign_entity(ce);
-        auto surface = surface_man.get_instance_data(ce);
-        *surface.block = p;
-        *surface.face = face;
+    pos_man.assign_entity(ce);
+    auto pos = pos_man.get_instance_data(ce);
+    *pos.position = p;
+    *pos.mat = mat;
 
-        pos_man.assign_entity(ce);
-        auto pos = pos_man.get_instance_data(ce);
-        *pos.position = p;
-        *pos.mat = mat;
-
-        /* hack to not render a mesh for the flashlight */
-        /* todo: handle entities that don't need to be rendered*/
-        if (type != 11) {
-            render_man.assign_entity(ce);
-            auto render = render_man.get_instance_data(ce);
-            *render.mesh = et->hw;
-        }
-
-        // door
-        if (type == 0) {
-            power_man.assign_entity(ce);
-            auto power = power_man.get_instance_data(ce);
-            *power.powered = false;
-            *power.required_power = 8;
-            *power.max_required_power = 8;
-
-            door_man.assign_entity(ce);
-            auto door = door_man.get_instance_data(ce);
-            *door.mesh = door_hw;
-            *door.pos = 1.0f;
-            *door.desired_pos = 1.0f;
-
-            reader_man.assign_entity(ce);
-            auto reader = reader_man.get_instance_data(ce);
-            *reader.name = "desired state";
-            reader.source->id = 0;
-            *reader.desc = nullptr;
-            *reader.data = 1.0f;
-        }
-        // frobnicator
-        else if (type == 1) {
-            power_man.assign_entity(ce);
-            auto power = power_man.get_instance_data(ce);
-            *power.powered = false;
-            *power.required_power = 12;
-            *power.max_required_power = 12;
-
-            gas_man.assign_entity(ce);
-            auto gas = gas_man.get_instance_data(ce);
-            *gas.flow_rate = 0.1f;
-            *gas.max_pressure = 1.0f;
-            *gas.enabled = true;
-        }
-        // light
-        else if (type == 2) {
-            power_man.assign_entity(ce);
-            auto power = power_man.get_instance_data(ce);
-            *power.powered = false;
-            *power.required_power = 6;
-            *power.max_required_power = 6;
-
-            light_man.assign_entity(ce);
-            auto light = light_man.get_instance_data(ce);
-            *light.intensity = 1.0f;
-            *light.requested_intensity = 1.0f;
-
-            reader_man.assign_entity(ce);
-            auto reader = reader_man.get_instance_data(ce);
-            *reader.name = "light brightness";
-            reader.source->id = 0;
-            *reader.desc = nullptr;
-            *reader.data = 1.0f;
-        }
-        // warning light
-        else if (type == 3) {
-            power_man.assign_entity(ce);
-            auto power = power_man.get_instance_data(ce);
-            *power.powered = false;
-            *power.required_power = 6;
-            *power.max_required_power = 6;
-
-            light_man.assign_entity(ce);
-            auto light = light_man.get_instance_data(ce);
-            *light.intensity = 1.0f;
-            *light.requested_intensity = 1.0f;
-
-            reader_man.assign_entity(ce);
-            auto reader = reader_man.get_instance_data(ce);
-            *reader.name = "light brightness";
-            reader.source->id = 0;
-            *reader.desc = comms_msg_type_sensor_comparison_state;      // temp until we have discriminator tool
-            *reader.data = 1.0f;
-        }
-        // display panel
-        else if (type == 4) {
-            power_man.assign_entity(ce);
-            auto power = power_man.get_instance_data(ce);
-            *power.powered = false;
-            *power.required_power = 4;
-            *power.max_required_power = 4;
-
-            light_man.assign_entity(ce);
-            auto light = light_man.get_instance_data(ce);
-            *light.intensity = 0.15f;
-            *light.requested_intensity = 0.15f;
-
-            reader_man.assign_entity(ce);
-            auto reader = reader_man.get_instance_data(ce);
-            *reader.name = "light brightness";
-            reader.source->id = 0;
-            *reader.desc = nullptr;
-            *reader.data = 0.15f;
-        }
-        // switch
-        else if (type == 5) {
-            switch_man.assign_entity(ce);
-            auto sw = switch_man.get_instance_data(ce);
-            *sw.enabled = true;
-        }
-        // plaidnicator
-        else if (type == 6) {
-            power_provider_man.assign_entity(ce);
-            auto power_provider = power_provider_man.get_instance_data(ce);
-            *power_provider.max_provided = 12;
-            *power_provider.provided = 12;
-        }
-        // pressure sensor 1
-        else if (type == 7) {
-            pressure_man.assign_entity(ce);
-            auto pressure = pressure_man.get_instance_data(ce);
-            *pressure.pressure = 0.0f;
-            *pressure.type = 1;
-        }
-        // pressure sensor 2
-        else if (type == 8) {
-            pressure_man.assign_entity(ce);
-            auto pressure = pressure_man.get_instance_data(ce);
-            *pressure.pressure = 0.0f;
-            *pressure.type = 2;
-        }
-        // sensor comparator
-        else if (type == 9) {
-            comparator_man.assign_entity(ce);
-            auto comparator = comparator_man.get_instance_data(ce);
-            *comparator.compare_epsilon = 0.0001f;
-        }
-        // proximity sensor
-        else if (type == 10) {
-            power_man.assign_entity(ce);
-            auto power = power_man.get_instance_data(ce);
-            *power.powered = false;
-            *power.required_power = 1;
-            *power.max_required_power = 1;
-
-            proximity_man.assign_entity(ce);
-            auto proximity_sensor = proximity_man.get_instance_data(ce);
-            *proximity_sensor.range = 5;
-            *proximity_sensor.is_detected = false;
-        }
-        // flashlight
-        else if (type == 11) {
-            power_man.assign_entity(ce);
-            auto power = power_man.get_instance_data(ce);
-            *power.powered = false; /* Flashlight starts off */
-            *power.required_power = 0;
-            *power.max_required_power = 0;
-
-            light_man.assign_entity(ce);
-            auto light = light_man.get_instance_data(ce);
-            *light.intensity = 0.75f;
-            *light.requested_intensity = 0.75f;
-
-            reader_man.assign_entity(ce);
-            auto reader = reader_man.get_instance_data(ce);
-            *reader.name = "flashlight brightness";
-            reader.source->id = 0;
-            *reader.desc = nullptr;
-            *reader.data = 0.75f;
-        }
+    /* hack to not render a mesh for the flashlight */
+    /* todo: handle entities that don't need to be rendered*/
+    if (type != 11) {
+        render_man.assign_entity(ce);
+        auto render = render_man.get_instance_data(ce);
+        *render.mesh = et->hw;
     }
-};
+
+    // door
+    if (type == 0) {
+        power_man.assign_entity(ce);
+        auto power = power_man.get_instance_data(ce);
+        *power.powered = false;
+        *power.required_power = 8;
+        *power.max_required_power = 8;
+
+        door_man.assign_entity(ce);
+        auto door = door_man.get_instance_data(ce);
+        *door.mesh = door_hw;
+        *door.pos = 1.0f;
+        *door.desired_pos = 1.0f;
+
+        reader_man.assign_entity(ce);
+        auto reader = reader_man.get_instance_data(ce);
+        *reader.name = "desired state";
+        reader.source->id = 0;
+        *reader.desc = nullptr;
+        *reader.data = 1.0f;
+    }
+    // frobnicator
+    else if (type == 1) {
+        power_man.assign_entity(ce);
+        auto power = power_man.get_instance_data(ce);
+        *power.powered = false;
+        *power.required_power = 12;
+        *power.max_required_power = 12;
+
+        gas_man.assign_entity(ce);
+        auto gas = gas_man.get_instance_data(ce);
+        *gas.flow_rate = 0.1f;
+        *gas.max_pressure = 1.0f;
+        *gas.enabled = true;
+    }
+    // light
+    else if (type == 2) {
+        power_man.assign_entity(ce);
+        auto power = power_man.get_instance_data(ce);
+        *power.powered = false;
+        *power.required_power = 6;
+        *power.max_required_power = 6;
+
+        light_man.assign_entity(ce);
+        auto light = light_man.get_instance_data(ce);
+        *light.intensity = 1.0f;
+        *light.requested_intensity = 1.0f;
+
+        reader_man.assign_entity(ce);
+        auto reader = reader_man.get_instance_data(ce);
+        *reader.name = "light brightness";
+        reader.source->id = 0;
+        *reader.desc = nullptr;
+        *reader.data = 1.0f;
+    }
+    // warning light
+    else if (type == 3) {
+        power_man.assign_entity(ce);
+        auto power = power_man.get_instance_data(ce);
+        *power.powered = false;
+        *power.required_power = 6;
+        *power.max_required_power = 6;
+
+        light_man.assign_entity(ce);
+        auto light = light_man.get_instance_data(ce);
+        *light.intensity = 1.0f;
+        *light.requested_intensity = 1.0f;
+
+        reader_man.assign_entity(ce);
+        auto reader = reader_man.get_instance_data(ce);
+        *reader.name = "light brightness";
+        reader.source->id = 0;
+        *reader.desc = comms_msg_type_sensor_comparison_state;      // temp until we have discriminator tool
+        *reader.data = 1.0f;
+    }
+    // display panel
+    else if (type == 4) {
+        power_man.assign_entity(ce);
+        auto power = power_man.get_instance_data(ce);
+        *power.powered = false;
+        *power.required_power = 4;
+        *power.max_required_power = 4;
+
+        light_man.assign_entity(ce);
+        auto light = light_man.get_instance_data(ce);
+        *light.intensity = 0.15f;
+        *light.requested_intensity = 0.15f;
+
+        reader_man.assign_entity(ce);
+        auto reader = reader_man.get_instance_data(ce);
+        *reader.name = "light brightness";
+        reader.source->id = 0;
+        *reader.desc = nullptr;
+        *reader.data = 0.15f;
+    }
+    // switch
+    else if (type == 5) {
+        switch_man.assign_entity(ce);
+        auto sw = switch_man.get_instance_data(ce);
+        *sw.enabled = true;
+    }
+    // plaidnicator
+    else if (type == 6) {
+        power_provider_man.assign_entity(ce);
+        auto power_provider = power_provider_man.get_instance_data(ce);
+        *power_provider.max_provided = 12;
+        *power_provider.provided = 12;
+    }
+    // pressure sensor 1
+    else if (type == 7) {
+        pressure_man.assign_entity(ce);
+        auto pressure = pressure_man.get_instance_data(ce);
+        *pressure.pressure = 0.0f;
+        *pressure.type = 1;
+    }
+    // pressure sensor 2
+    else if (type == 8) {
+        pressure_man.assign_entity(ce);
+        auto pressure = pressure_man.get_instance_data(ce);
+        *pressure.pressure = 0.0f;
+        *pressure.type = 2;
+    }
+    // sensor comparator
+    else if (type == 9) {
+        comparator_man.assign_entity(ce);
+        auto comparator = comparator_man.get_instance_data(ce);
+        *comparator.compare_epsilon = 0.0001f;
+    }
+    // proximity sensor
+    else if (type == 10) {
+        power_man.assign_entity(ce);
+        auto power = power_man.get_instance_data(ce);
+        *power.powered = false;
+        *power.required_power = 1;
+        *power.max_required_power = 1;
+
+        proximity_man.assign_entity(ce);
+        auto proximity_sensor = proximity_man.get_instance_data(ce);
+        *proximity_sensor.range = 5;
+        *proximity_sensor.is_detected = false;
+    }
+    // flashlight
+    else if (type == 11) {
+        power_man.assign_entity(ce);
+        auto power = power_man.get_instance_data(ce);
+        *power.powered = false; /* Flashlight starts off */
+        *power.required_power = 0;
+        *power.max_required_power = 0;
+
+        light_man.assign_entity(ce);
+        auto light = light_man.get_instance_data(ce);
+        *light.intensity = 0.75f;
+        *light.requested_intensity = 0.75f;
+
+        reader_man.assign_entity(ce);
+        auto reader = reader_man.get_instance_data(ce);
+        *reader.name = "flashlight brightness";
+        reader.source->id = 0;
+        *reader.desc = nullptr;
+        *reader.data = 0.75f;
+    }
+
+    return ce;
+}
 
 
 void
@@ -454,7 +450,7 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
 
 /* todo: support free-placed entities*/
 void
-place_entity_attaches(raycast_info* rc, int index, entity* e, unsigned entity_type) {
+place_entity_attaches(raycast_info* rc, int index, c_entity e, unsigned entity_type) {
     auto const & et = entity_types[entity_type];
 
     for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
@@ -464,7 +460,7 @@ place_entity_attaches(raycast_info* rc, int index, entity* e, unsigned entity_ty
             wire_attachment wa = { mat, (unsigned)ship->wire_attachments[wt].size() };
             auto attach_index = (unsigned)ship->wire_attachments[wt].size();
             ship->wire_attachments[wt].push_back(wa);
-            ship->entity_to_attach_lookups[wt][e->ce].insert(attach_index);
+            ship->entity_to_attach_lookups[wt][e].insert(attach_index);
         }
     }
 }
@@ -833,13 +829,13 @@ resize(int width, int height)
 
 
 void
-destroy_entity(entity *e)
+destroy_entity(c_entity e)
 {
     /* removing block influence from this ent */
     /* this should really be componentified */
-    if (surface_man.exists(e->ce)) {
-        auto b = *surface_man.get_instance_data(e->ce).block;
-        auto type = &entity_types[*type_man.get_instance_data(e->ce).type];
+    if (surface_man.exists(e)) {
+        auto b = *surface_man.get_instance_data(e).block;
+        auto type = &entity_types[*type_man.get_instance_data(e).type];
 
         for (auto i = 0; i < type->height; i++) {
             auto p = b + glm::ivec3(0, 0, i);
@@ -857,8 +853,8 @@ destroy_entity(entity *e)
         }
     }
 
-    if (physics_man.exists(e->ce)) {
-        auto phys_data = physics_man.get_instance_data(e->ce);
+    if (physics_man.exists(e)) {
+        auto phys_data = physics_man.get_instance_data(e);
         phys_ent_ref *per = (phys_ent_ref *)(*phys_data.rigid)->getUserPointer();
         if (per) {
             delete per;
@@ -867,25 +863,23 @@ destroy_entity(entity *e)
         teardown_static_physics_setup(nullptr, nullptr, phys_data.rigid);
     }
 
-    comparator_man.destroy_entity_instance(e->ce);
-    gas_man.destroy_entity_instance(e->ce);
-    light_man.destroy_entity_instance(e->ce);
-    physics_man.destroy_entity_instance(e->ce);
-    pos_man.destroy_entity_instance(e->ce);
-    power_man.destroy_entity_instance(e->ce);
-    power_provider_man.destroy_entity_instance(e->ce);
-    pressure_man.destroy_entity_instance(e->ce);
-    render_man.destroy_entity_instance(e->ce);
-    surface_man.destroy_entity_instance(e->ce);
-    switch_man.destroy_entity_instance(e->ce);
-    type_man.destroy_entity_instance(e->ce);
-    door_man.destroy_entity_instance(e->ce);
-    reader_man.destroy_entity_instance(e->ce);
-    proximity_man.destroy_entity_instance(e->ce);
+    comparator_man.destroy_entity_instance(e);
+    gas_man.destroy_entity_instance(e);
+    light_man.destroy_entity_instance(e);
+    physics_man.destroy_entity_instance(e);
+    pos_man.destroy_entity_instance(e);
+    power_man.destroy_entity_instance(e);
+    power_provider_man.destroy_entity_instance(e);
+    pressure_man.destroy_entity_instance(e);
+    render_man.destroy_entity_instance(e);
+    surface_man.destroy_entity_instance(e);
+    switch_man.destroy_entity_instance(e);
+    type_man.destroy_entity_instance(e);
+    door_man.destroy_entity_instance(e);
+    reader_man.destroy_entity_instance(e);
+    proximity_man.destroy_entity_instance(e);
 
-    remove_attaches_for_entity(ship, e->ce);
-
-    delete e;
+    remove_attaches_for_entity(ship, e);
 }
 
 
@@ -894,24 +888,24 @@ remove_ents_from_surface(glm::ivec3 b, int face)
 {
     chunk *ch = ship->get_chunk_containing(b);
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
-        entity *e = *it;
+        auto ce = *it;
 
         /* entities may have been inserted in this chunk which don't have
          * placement on a surface. don't corrupt everything if we hit one.
          */
-        if (!surface_man.exists(e->ce)) {
+        if (!surface_man.exists(ce)) {
             ++it;
             continue;
         }
 
-        auto surface = surface_man.get_instance_data(e->ce);
+        auto surface = surface_man.get_instance_data(ce);
         auto p = *surface.block;
         auto f = *surface.face;
 
-        auto type = &entity_types[*type_man.get_instance_data(e->ce).type];
+        auto type = &entity_types[*type_man.get_instance_data(ce).type];
 
         if (p.x == b.x && p.y == b.y && p.z <= b.z && p.z + type->height > b.z && f == face) {
-            destroy_entity(e);
+            destroy_entity(ce);
             it = ch->entities.erase(it);
 
             block *bl = ship->get_block(p);
@@ -961,7 +955,7 @@ struct add_block_entity_tool : tool
             return;
 
         chunk *ch = ship->get_chunk_containing(rc->p);
-        auto e = new entity(rc->p, type, surface_zm);
+        auto e = spawn_entity(rc->p, type, surface_zm);
         ch->entities.push_back(e);
 
         for (auto i = 0; i < entity_types[type].height; i++) {
@@ -1058,7 +1052,7 @@ struct add_surface_entity_tool : tool
          * a surface facing into it */
         assert(ch);
 
-        auto e = new entity(rc->p, type, index ^ 1);
+        auto e = spawn_entity(rc->p, type, index ^ 1);
         ch->entities.push_back(e);
 
         /* take the space. */
@@ -1678,7 +1672,7 @@ struct flashlight_tool : tool
     /* A good flashlight can throw pretty far. 10m is chosen as an average
      * midrange [nice] flashlight / 10. */
     const float flashlight_throw = 10.0f;
-    struct entity *flashlight = nullptr;
+    c_entity flashlight = c_entity();
     glm::ivec3 last_pos;
     bool flashlight_on = false;
 
@@ -1688,7 +1682,7 @@ struct flashlight_tool : tool
         glm::ivec3 new_pos;
         bool hit_something = false;
         power_component_manager::instance_data power =
-            power_man.get_instance_data(flashlight->ce);
+            power_man.get_instance_data(flashlight);
 
         /* FIXME: flashlight shouldn't be at eye, should be mid body */
         auto per = phys_raycast(pl.eye, pl.eye + pl.dir * flashlight_throw,
@@ -1727,7 +1721,7 @@ struct flashlight_tool : tool
 
             new_pos = get_coord_containing(new_pos);
             *power.powered = true;
-            *pos_man.get_instance_data(flashlight->ce).position = new_pos;
+            *pos_man.get_instance_data(flashlight).position = new_pos;
             mark_lightfield_update(new_pos);
         } else {
             *power.powered = false;
@@ -1738,26 +1732,26 @@ struct flashlight_tool : tool
     }
 
     void unselect() override {
-        if (flashlight) {
+        if (flashlight.id) {
             power_component_manager::instance_data power =
-                power_man.get_instance_data(flashlight->ce);
+                power_man.get_instance_data(flashlight);
             *power.powered = false;
             mark_lightfield_update(last_pos);
         }
     }
 
     void select() override {
-        if (flashlight) {
+        if (flashlight.id) {
             power_component_manager::instance_data power =
-                power_man.get_instance_data(flashlight->ce);
+                power_man.get_instance_data(flashlight);
             *power.powered = flashlight_on;
             mark_lightfield_update(last_pos);
         }
     }
 
     void use(raycast_info *rc) override {
-        if (!flashlight) {
-            flashlight = new entity(rc->p, 11, surface_xp);
+        if (!flashlight.id) {
+            flashlight = spawn_entity(rc->p, 11, surface_xp);
             last_pos = pl.pos;
         }
 
@@ -1767,9 +1761,9 @@ struct flashlight_tool : tool
 
     void alt_use(raycast_info *rc) override {
         if (flashlight_on) {
-            *reader_man.get_instance_data(flashlight->ce).data += 0.25;
-            if (*reader_man.get_instance_data(flashlight->ce).data > 1)
-                *reader_man.get_instance_data(flashlight->ce).data -= 1;
+            *reader_man.get_instance_data(flashlight).data += 0.25;
+            if (*reader_man.get_instance_data(flashlight).data > 1)
+                *reader_man.get_instance_data(flashlight).data -= 1;
             update_light();
         }
     }
@@ -1781,14 +1775,14 @@ struct flashlight_tool : tool
     }
 
     void preview(raycast_info *rc, frame_data *frame) override {
-        if (flashlight)
+        if (flashlight.id)
             update_light();
     }
 
     void get_description(char *str) override {
-        if (flashlight) {
+        if (flashlight.id) {
             sprintf(str, "Ghetto flashlight brightness %.0f%%",
-                    *reader_man.get_instance_data(flashlight->ce).data * 100);
+                    *reader_man.get_instance_data(flashlight).data * 100);
             pl.ui_dirty = true;
         } else
             sprintf(str, "Ghetto flashlight");

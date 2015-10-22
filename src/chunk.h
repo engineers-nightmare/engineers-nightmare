@@ -3,12 +3,11 @@
 #include "block.h"
 #include "fixed_cube.h"
 #include "mesh.h"
+#include "component/c_entity.h"
 
 #include <vector>
 
 #define CHUNK_SIZE 8
-
-struct entity;
 
 class btTriangleMesh;
 class btCollisionShape;
@@ -43,7 +42,7 @@ struct chunk {
     struct render_chunk render_chunk;
 
     /* entities */
-    std::vector<entity *> entities;
+    std::vector<c_entity> entities;
 
     void prepare_render(int x, int y, int z);
 };
