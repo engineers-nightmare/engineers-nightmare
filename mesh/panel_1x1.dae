@@ -3,10 +3,10 @@
   <asset>
     <contributor>
       <author>Blender User</author>
-      <authoring_tool>Blender 2.75.0 commit date:2015-07-07, commit time:14:56, hash:c27589e</authoring_tool>
+      <authoring_tool>Blender 2.76.0 commit date:2015-10-11, commit time:06:55, hash:48f7dd6</authoring_tool>
     </contributor>
-    <created>2015-10-04T14:57:18</created>
-    <modified>2015-10-04T14:57:18</modified>
+    <created>2015-10-15T22:40:06</created>
+    <modified>2015-10-15T22:40:06</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -26,7 +26,7 @@
               <color sid="diffuse">0.64 0.64 0.64 1</color>
             </diffuse>
             <specular>
-              <color sid="specular">0.5 0.5 0.5 1</color>
+              <color sid="specular">0.25 0.25 0.25 1</color>
             </specular>
             <shininess>
               <float sid="shininess">50</float>
@@ -48,7 +48,7 @@
     <geometry id="Cube_004-mesh" name="Cube.004">
       <mesh>
         <source id="Cube_004-mesh-positions">
-          <float_array id="Cube_004-mesh-positions-array" count="24">0.45 0.55 0 0.45 0.55 0.09999996 0.55 0.55 0.09999996 0.55 0.55 0 0.45 0.45 0 0.45 0.45 0.0999999 0.55 0.45 0.0999999 0.55 0.45 0</float_array>
+          <float_array id="Cube_004-mesh-positions-array" count="24">-0.05000001 0.05000001 0 -0.05000001 0.05000001 0.09999996 0.05000001 0.05000001 0.09999996 0.05000001 0.05000001 0 -0.05000001 -0.05000001 0 -0.05000001 -0.05000001 0.0999999 0.05000001 -0.05000001 0.0999999 0.05000001 -0.05000001 0</float_array>
           <technique_common>
             <accessor source="#Cube_004-mesh-positions-array" count="8" stride="3">
               <param name="X" type="float"/>
@@ -58,9 +58,9 @@
           </technique_common>
         </source>
         <source id="Cube_004-mesh-normals">
-          <float_array id="Cube_004-mesh-normals-array" count="33">0 1 0 -1 0 0 -1 -7.45058e-7 0 -1 0 0 0 0 1 1 0 0 1 -6.70552e-7 0 1 0 0 0 -1 0 -1 7.45058e-7 0 1 7.45058e-7 0</float_array>
+          <float_array id="Cube_004-mesh-normals-array" count="21">0 1 0 -1 0 0 0 -5.21541e-7 1 1 0 0 0 -1 0 -1 0 0 1 0 0</float_array>
           <technique_common>
-            <accessor source="#Cube_004-mesh-normals-array" count="11" stride="3">
+            <accessor source="#Cube_004-mesh-normals-array" count="7" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
@@ -74,7 +74,7 @@
           <input semantic="VERTEX" source="#Cube_004-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cube_004-mesh-normals" offset="1"/>
           <vcount>3 3 3 3 3 3 3 3 3 3 </vcount>
-          <p>1 0 2 0 3 0 5 1 1 2 0 3 5 4 6 4 2 4 3 5 2 6 6 7 4 8 7 8 6 8 0 0 1 0 3 0 4 9 5 1 0 3 1 4 5 4 2 4 7 10 3 5 6 7 5 8 4 8 6 8</p>
+          <p>1 0 2 0 3 0 5 1 1 1 0 1 5 2 6 2 2 2 3 3 2 3 6 3 4 4 7 4 6 4 0 0 1 0 3 0 4 5 5 5 0 5 1 2 5 2 2 2 7 6 3 6 6 6 5 4 4 4 6 4</p>
         </polylist>
       </mesh>
     </geometry>
