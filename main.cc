@@ -1536,22 +1536,28 @@ struct add_wiring_tool : tool
                     break;
                 }
 
-                /* remove attach from entity lookup */
-                if (hit_entity.id) {
-                    entity_to_attach_lookup[hit_entity].erase(existing_attach);
-                }
-
-                unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
-
                 auto changed = remove_segments_containing(ship, type, existing_attach);
-                if (relocate_single_attach(ship, type,
-                    existing_attach, attach_moving_for_delete)) {
-                    changed = true;
-                }
 
-                /* move attach_moving_for_delete to existing_attach, and trim off the last one. */
-                wire_attachments[existing_attach] = wire_attachments[attach_moving_for_delete];
-                wire_attachments.pop_back();
+                /* only remove the attach itself if it's not baked in to an entity. */
+                if (!wire_attachments[existing_attach].fixed) {
+
+                    /* remove attach from entity lookup */
+                    if (hit_entity.id) {
+                        entity_to_attach_lookup[hit_entity].erase(existing_attach);
+                    }
+
+                    unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
+
+                    if (relocate_single_attach(ship, type,
+                        existing_attach, attach_moving_for_delete)) {
+                        changed = true;
+                    }
+
+                    /* move attach_moving_for_delete to existing_attach, and trim off the last one. */
+                    wire_attachments[existing_attach] = wire_attachments[attach_moving_for_delete];
+                    wire_attachments.pop_back();
+
+                }
 
                 /* if we changed anything, rebuild the topology */
                 if (changed) {
@@ -1611,6 +1617,11 @@ struct add_wiring_tool : tool
 
                     if (existing_attach == invalid_attach) {
                         return;
+                    }
+
+                    /* if this is a hard attach, don't allow the player to remove it. */
+                    if (wire_attachments[existing_attach].fixed) {
+                        break;
                     }
 
                     /* cast ray backwards from attach
