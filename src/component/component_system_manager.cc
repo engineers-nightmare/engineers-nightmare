@@ -125,6 +125,52 @@ tick_gas_producers(ship_space *ship)
 }
 
 void
+set_door_state(ship_space *ship, relative_position_component_manager::instance_data position, surface_type s)
+{
+    auto pos = glm::ivec3(*position.position);
+
+    /* todo: this has no support for rotation whatsoever */
+    for (auto h = 0; h < 2; ++h) {
+        auto ym = glm::ivec3(pos.x, pos.y - 1, pos.z);
+        auto yp = glm::ivec3(pos.x, pos.y + 1, pos.z);
+
+        auto chunk = ship->get_chunk_containing(pos);
+        chunk->render_chunk.valid = false;
+        chunk = ship->get_chunk_containing(ym);
+        chunk->render_chunk.valid = false;
+        chunk = ship->get_chunk_containing(yp);
+        chunk->render_chunk.valid = false;
+
+        /* we'll be calling ensure in set/remove surfaces anyway */
+        auto bl = ship->ensure_block(pos);
+        auto surfs = bl->surfs;
+
+        if (s == surface_none) {
+            if (surfs[surface_yp] == surface_door) {
+                ship->remove_surface(pos, yp, surface_yp);
+            }
+
+            if (surfs[surface_ym] == surface_door) {
+                ship->remove_surface(pos, ym, surface_ym);
+            }
+        }
+        else {
+            if (surfs[surface_yp] == surface_none) {
+                ship->set_surface(pos, yp, surface_yp, s);
+            }
+
+            if (surfs[surface_ym] == surface_none) {
+                ship->set_surface(pos, ym, surface_ym, s);
+            }
+        }
+
+        mark_lightfield_update(pos);
+
+        ++pos.z;
+    }
+}
+
+void
 tick_doors(ship_space *ship)
 {
     for (auto i = 0u; i < door_man.buffer.num; i++) {
@@ -156,49 +202,7 @@ tick_doors(ship_space *ship)
 
         /* did we just enter desired state? */
         if (desired_state == door_man.instance_pool.pos[i] && !in_desired_state) {
-            auto s = desired_state ? surface_none : surface_door;
-
-            auto pos = glm::ivec3(*position.position);
-
-            /* todo: this has no support for rotation whatsoever */
-            for (auto h = 0; h < 2; ++h) {
-                auto ym = glm::ivec3(pos.x, pos.y - 1, pos.z);
-                auto yp = glm::ivec3(pos.x, pos.y + 1, pos.z);
-
-                auto chunk = ship->get_chunk_containing(pos);
-                chunk->render_chunk.valid = false;
-                chunk = ship->get_chunk_containing(ym);
-                chunk->render_chunk.valid = false;
-                chunk = ship->get_chunk_containing(yp);
-                chunk->render_chunk.valid = false;
-
-                /* we'll be calling ensure in set/remove surfaces anyway */
-                auto bl = ship->ensure_block(pos);
-                auto surfs = bl->surfs;
-
-                if (s == surface_none) {
-                    if (surfs[surface_yp] == surface_door) {
-                        ship->remove_surface(pos, yp, surface_yp);
-                    }
-
-                    if (surfs[surface_ym] == surface_door) {
-                        ship->remove_surface(pos, ym, surface_ym);
-                    }
-                }
-                else {
-                    if (surfs[surface_yp] == surface_none) {
-                        ship->set_surface(pos, yp, surface_yp, s);
-                    }
-
-                    if (surfs[surface_ym] == surface_none) {
-                        ship->set_surface(pos, ym, surface_ym, s);
-                    }
-                }
-
-                mark_lightfield_update(pos);
-
-                ++pos.z;
-            }
+            set_door_state(ship, position, desired_state ? surface_none : surface_door);
         }
     }
 }
