@@ -853,6 +853,11 @@ destroy_entity(c_entity e)
         }
     }
 
+    if (door_man.exists(e)) {
+        /* make sure the door is /open/ -- no magic surfaces left lying around. */
+        set_door_state(ship, e, surface_none);
+    }
+
     if (physics_man.exists(e)) {
         auto phys_data = physics_man.get_instance_data(e);
         phys_ent_ref *per = (phys_ent_ref *)(*phys_data.rigid)->getUserPointer();
