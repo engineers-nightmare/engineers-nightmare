@@ -134,12 +134,9 @@ set_door_state(ship_space *ship, relative_position_component_manager::instance_d
         auto ym = glm::ivec3(pos.x, pos.y - 1, pos.z);
         auto yp = glm::ivec3(pos.x, pos.y + 1, pos.z);
 
-        auto chunk = ship->get_chunk_containing(pos);
-        chunk->render_chunk.valid = false;
-        chunk = ship->get_chunk_containing(ym);
-        chunk->render_chunk.valid = false;
-        chunk = ship->get_chunk_containing(yp);
-        chunk->render_chunk.valid = false;
+        ship->get_chunk_containing(pos)->render_chunk.valid = false;
+        ship->get_chunk_containing(ym)->render_chunk.valid = false;
+        ship->get_chunk_containing(yp)->render_chunk.valid = false;
 
         /* we'll be calling ensure in set/remove surfaces anyway */
         auto bl = ship->ensure_block(pos);
