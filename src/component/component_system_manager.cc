@@ -135,10 +135,6 @@ set_door_state(ship_space *ship, c_entity ce, surface_type s)
         auto ym = glm::ivec3(pos.x, pos.y - 1, pos.z);
         auto yp = glm::ivec3(pos.x, pos.y + 1, pos.z);
 
-        ship->get_chunk_containing(pos)->render_chunk.valid = false;
-        ship->get_chunk_containing(ym)->render_chunk.valid = false;
-        ship->get_chunk_containing(yp)->render_chunk.valid = false;
-
         /* we'll be calling ensure in set/remove surfaces anyway */
         auto bl = ship->ensure_block(pos);
         auto surfs = bl->surfs;
