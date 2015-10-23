@@ -457,8 +457,9 @@ place_entity_attaches(raycast_info* rc, int index, c_entity e, unsigned entity_t
         auto wt = (wire_type)wire_index;
         for (auto i = 0u; i < et.sw->num_attach_points[wt]; ++i) {
             auto mat = mat_block_face(rc->p, index ^ 1) * et.sw->attach_points[wt][i];
-            wire_attachment wa = { mat, (unsigned)ship->wire_attachments[wt].size() };
             auto attach_index = (unsigned)ship->wire_attachments[wt].size();
+            wire_attachment wa = { mat, attach_index, 0, true };
+
             ship->wire_attachments[wt].push_back(wa);
             ship->entity_to_attach_lookups[wt][e].insert(attach_index);
         }
@@ -1438,7 +1439,7 @@ struct add_wiring_tool : tool
                 unsigned new_attach;
                 if (existing_attach == invalid_attach) {
                     new_attach = (unsigned)wire_attachments.size();
-                    wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
+                    wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0, false };
                     wire_attachments.push_back(wa);
                 }
                 else {

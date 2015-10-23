@@ -13,6 +13,7 @@ struct wire_attachment {
     glm::mat4 transform;
     unsigned parent;
     unsigned rank;
+    bool fixed;     /* this attachment is baked into an entity and cannot be moved/deleted by the player */
 };
 
 struct wire_segment {
