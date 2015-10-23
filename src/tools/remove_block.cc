@@ -63,6 +63,7 @@ struct remove_block_tool : tool
                     bl->surfs[index] = surface_none;
                     other_side->surfs[index ^ 1] = surface_none;
                     ship->get_chunk_containing(r)->render_chunk.valid = false;
+                    ship->get_chunk_containing(r)->phys_chunk.valid = false;
 
                     /* pop any dependent ents */
                     remove_ents_from_surface(rc->bl, index);
@@ -77,6 +78,7 @@ struct remove_block_tool : tool
 
         /* dirty the chunk */
         ship->get_chunk_containing(rc->bl)->render_chunk.valid = false;
+        ship->get_chunk_containing(rc->bl)->phys_chunk.valid = false;
         mark_lightfield_update(rc->bl);
     }
 
