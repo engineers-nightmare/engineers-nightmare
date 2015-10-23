@@ -47,7 +47,7 @@ struct remove_block_tool : tool
 
         /* strip any orphaned surfaces */
         for (int index = 0; index < 6; index++) {
-            if (bl->surfs[index]) {
+            if (bl->surfs[index] != surface_none && bl->surfs[index] != surface_door) {
 
                 auto s = surface_index_to_normal(index);
 

@@ -28,7 +28,7 @@ struct remove_surface_tool : tool
 
         block *bl = rc->block;
         int index = normal_to_surface_index(rc);
-        return bl && bl->surfs[index] != surface_none;
+        return bl && bl->surfs[index] != surface_none && bl->surfs[index] != surface_door;
     }
 
     void use(raycast_info *rc) override
