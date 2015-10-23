@@ -129,11 +129,12 @@ set_door_state(ship_space *ship, c_entity ce, surface_type s)
 {
     auto position = pos_man.get_instance_data(ce);
     auto pos = glm::ivec3(*position.position);
+    auto door = door_man.get_instance_data(ce);
 
     auto from_surface = s == surface_none ? surface_door : surface_none;
 
     /* todo: this has no support for rotation whatsoever */
-    for (auto h = 0; h < 2; ++h) {
+    for (auto h = 0; h < *door.height; ++h) {
         auto ym = glm::ivec3(pos.x, pos.y - 1, pos.z);
         auto yp = glm::ivec3(pos.x, pos.y + 1, pos.z);
 
