@@ -10,6 +10,7 @@ struct door_component_manager : component_manager {
         hw_mesh * *mesh;
         float *pos;
         float *desired_pos;
+        int *height;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -24,6 +25,7 @@ struct door_component_manager : component_manager {
         d.mesh = instance_pool.mesh + inst.index;
         d.pos = instance_pool.pos + inst.index;
         d.desired_pos = instance_pool.desired_pos + inst.index;
+        d.height = instance_pool.height + inst.index;
 
         return d;
     }
