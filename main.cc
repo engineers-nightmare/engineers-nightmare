@@ -450,8 +450,9 @@ place_entity_attaches(raycast_info* rc, int index, c_entity e, unsigned entity_t
         auto wt = (wire_type)wire_index;
         for (auto i = 0u; i < et.sw->num_attach_points[wt]; ++i) {
             auto mat = mat_block_face(rc->p, index ^ 1) * et.sw->attach_points[wt][i];
-            wire_attachment wa = { mat, (unsigned)ship->wire_attachments[wt].size() };
             auto attach_index = (unsigned)ship->wire_attachments[wt].size();
+            wire_attachment wa = { mat, attach_index, 0, true };
+
             ship->wire_attachments[wt].push_back(wa);
             ship->entity_to_attach_lookups[wt][e].insert(attach_index);
         }
@@ -1201,9 +1202,7 @@ struct add_wiring_tool : tool
         auto & wire_attachments = ship->wire_attachments[type];
 
         for (auto i = 0u; i < wire_attachments.size(); i++) {
-            auto d = glm::vec3(wire_attachments[i].transform[3][0],
-                wire_attachments[i].transform[3][1],
-                wire_attachments[i].transform[3][2]) - pt;
+            auto d = glm::vec3(wire_attachments[i].transform[3]) - pt;
             if (glm::dot(d, d) <= 0.025f * 0.025f) {
                 if (i == ignore) {
                     continue;
@@ -1444,7 +1443,7 @@ struct add_wiring_tool : tool
                 unsigned new_attach;
                 if (existing_attach == invalid_attach) {
                     new_attach = (unsigned)wire_attachments.size();
-                    wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0 };
+                    wire_attachment wa = { mat_rotate_mesh(pt, normal), new_attach, 0, false };
                     wire_attachments.push_back(wa);
                 }
                 else {
@@ -1541,22 +1540,28 @@ struct add_wiring_tool : tool
                     break;
                 }
 
-                /* remove attach from entity lookup */
-                if (hit_entity.id) {
-                    entity_to_attach_lookup[hit_entity].erase(existing_attach);
-                }
-
-                unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
-
                 auto changed = remove_segments_containing(ship, type, existing_attach);
-                if (relocate_single_attach(ship, type,
-                    existing_attach, attach_moving_for_delete)) {
-                    changed = true;
-                }
 
-                /* move attach_moving_for_delete to existing_attach, and trim off the last one. */
-                wire_attachments[existing_attach] = wire_attachments[attach_moving_for_delete];
-                wire_attachments.pop_back();
+                /* only remove the attach itself if it's not baked in to an entity. */
+                if (!wire_attachments[existing_attach].fixed) {
+
+                    /* remove attach from entity lookup */
+                    if (hit_entity.id) {
+                        entity_to_attach_lookup[hit_entity].erase(existing_attach);
+                    }
+
+                    unsigned attach_moving_for_delete = (unsigned)wire_attachments.size() - 1;
+
+                    if (relocate_single_attach(ship, type,
+                        existing_attach, attach_moving_for_delete)) {
+                        changed = true;
+                    }
+
+                    /* move attach_moving_for_delete to existing_attach, and trim off the last one. */
+                    wire_attachments[existing_attach] = wire_attachments[attach_moving_for_delete];
+                    wire_attachments.pop_back();
+
+                }
 
                 /* if we changed anything, rebuild the topology */
                 if (changed) {
@@ -1618,11 +1623,16 @@ struct add_wiring_tool : tool
                         return;
                     }
 
+                    /* if this is a hard attach, don't allow the player to remove it. */
+                    if (wire_attachments[existing_attach].fixed) {
+                        break;
+                    }
+
                     /* cast ray backwards from attach
                      * should find us the entity attach is on
                      */
                     auto att_mat = wire_attachments[existing_attach].transform;
-                    auto att_rot = glm::vec3(att_mat[2][0], att_mat[2][1], att_mat[2][2]);
+                    auto att_rot = glm::vec3(att_mat[2]);
                     auto att_pos = glm::vec3(att_mat[3]);
                     att_rot *= -1.f;
                     get_attach_point(att_pos, att_rot, &pt, &normal, &hit_entity);
