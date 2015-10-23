@@ -1028,8 +1028,7 @@ struct add_surface_entity_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        if (bl->surfs[index] == surface_none ||
-            bl->surfs[index] == surface_door)
+        if (~bl->surfs[index] & surface_phys)
             return false;
 
         block *other_side = ship->get_block(rc->p);

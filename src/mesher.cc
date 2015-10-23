@@ -219,8 +219,7 @@ chunk::prepare_phys(int x, int y, int z)
                 }
 
                 for (int surf = 0; surf < 6; surf++) {
-                    if (b->surfs[surf] != surface_none &&
-                        b->surfs[surf] != surface_door) {
+                    if (b->surfs[surf] & surface_phys) {
                         stamp_at_offset(&verts, &indices, surfs_sw[surf], glm::vec3(i, j, k), 0);
                     }
                 }
