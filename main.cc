@@ -155,27 +155,9 @@ particle_manager *particle_man;
 glm::mat4
 mat_block_face(glm::ivec3 p, int face)
 {
-    glm::vec3 z = glm::vec3(0.0f, 0.0f, 1.0f);
-    auto trans_to_surf = glm::translate(glm::mat4(1), (glm::vec3)p + glm::vec3(0.5f) - 0.5f * -glm::vec3(surface_index_to_normal(face)));
-    auto rot_to_surf = trans_to_surf * mat_rotate_mesh(glm::vec3(), -surface_index_to_normal(face));
-
-    switch (face) {
-    case surface_zp:
-        return rot_to_surf * glm::rotate(glm::mat4(1), -(float)M_PI / 2.0f, z);
-    case surface_zm:
-        return trans_to_surf;
-    case surface_xp:
-        return rot_to_surf;
-    case surface_xm:
-        return rot_to_surf * glm::rotate(glm::mat4(1), (float)M_PI, z);
-    case surface_yp:
-        return rot_to_surf * glm::rotate(glm::mat4(1), (float)M_PI, z);
-    case surface_ym:
-        return rot_to_surf;
-
-    default:
-        return glm::mat4(1);    /* unreachable */
-    }
+    auto norm = glm::vec3(surface_index_to_normal(face));
+    auto pos = glm::vec3(p) + glm::vec3(0.5f) + 0.5f * norm;
+    return mat_rotate_mesh(pos, -norm);
 }
 
 

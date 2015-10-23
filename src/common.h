@@ -35,8 +35,8 @@ clamp(T t, T lower, T upper) {
 static inline glm::mat4
 mat_rotate_mesh(glm::vec3 pt, glm::vec3 dir) {
     auto abs_normal = glm::abs(dir);
-    glm::vec3 temp_up(1, 0, 0);
-    if (abs_normal.x > abs_normal.y && abs_normal.x > abs_normal.z) {
+    glm::vec3 temp_up(0, 0, 1);
+    if (abs_normal.z > abs_normal.y && abs_normal.z > abs_normal.x) {
         /* avoid degeneracy at the `poles` */
         temp_up = glm::vec3(0, 1, 0);
     }
