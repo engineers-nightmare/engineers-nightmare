@@ -1197,9 +1197,7 @@ struct add_wiring_tool : tool
         auto & wire_attachments = ship->wire_attachments[type];
 
         for (auto i = 0u; i < wire_attachments.size(); i++) {
-            auto d = glm::vec3(wire_attachments[i].transform[3][0],
-                wire_attachments[i].transform[3][1],
-                wire_attachments[i].transform[3][2]) - pt;
+            auto d = glm::vec3(wire_attachments[i].transform[3]) - pt;
             if (glm::dot(d, d) <= 0.025f * 0.025f) {
                 if (i == ignore) {
                     continue;
@@ -1618,7 +1616,7 @@ struct add_wiring_tool : tool
                      * should find us the entity attach is on
                      */
                     auto att_mat = wire_attachments[existing_attach].transform;
-                    auto att_rot = glm::vec3(att_mat[2][0], att_mat[2][1], att_mat[2][2]);
+                    auto att_rot = glm::vec3(att_mat[2]);
                     auto att_pos = glm::vec3(att_mat[3]);
                     att_rot *= -1.f;
                     get_attach_point(att_pos, att_rot, &pt, &normal, &hit_entity);
