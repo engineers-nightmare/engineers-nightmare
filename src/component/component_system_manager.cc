@@ -125,8 +125,9 @@ tick_gas_producers(ship_space *ship)
 }
 
 void
-set_door_state(ship_space *ship, relative_position_component_manager::instance_data position, surface_type s)
+set_door_state(ship_space *ship, c_entity ce, surface_type s)
 {
+    auto position = pos_man.get_instance_data(ce);
     auto pos = glm::ivec3(*position.position);
 
     /* todo: this has no support for rotation whatsoever */
@@ -179,7 +180,6 @@ tick_doors(ship_space *ship)
         assert(reader_man.exists(ce) || !"doors must have reader");
 
         auto power = power_man.get_instance_data(ce);
-        auto position = pos_man.get_instance_data(ce);
         auto reader = reader_man.get_instance_data(ce);
 
         /* it's a power door, it's not going /anywhere/ without power */
@@ -199,7 +199,7 @@ tick_doors(ship_space *ship)
 
         /* did we just enter desired state? */
         if (desired_state == door_man.instance_pool.pos[i] && !in_desired_state) {
-            set_door_state(ship, position, desired_state ? surface_none : surface_door);
+            set_door_state(ship, ce, desired_state ? surface_none : surface_door);
         }
     }
 }
