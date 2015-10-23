@@ -621,7 +621,8 @@ prepare_chunks()
             for (int i = ship->mins.x; i <= ship->maxs.x; i++) {
                 chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
                 if (ch) {
-                    ch->prepare_render(i, j, k);
+                    ch->prepare_render();
+                    ch->prepare_phys(i, j, k);
                 }
             }
         }

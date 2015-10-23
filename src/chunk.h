@@ -16,11 +16,13 @@ class btRigidBody;
 struct render_chunk {
     hw_mesh *mesh = nullptr;
     bool valid = false;
+};
 
-
+struct phys_chunk {
     btTriangleMesh *phys_mesh = nullptr;
     btCollisionShape *phys_shape = nullptr;
     btRigidBody *phys_body = nullptr;
+    bool valid = false;
 };
 
 struct topo_info {
@@ -40,11 +42,13 @@ struct chunk {
 
     /* rendering information */
     struct render_chunk render_chunk;
+    struct phys_chunk phys_chunk;
 
     /* entities */
     std::vector<c_entity> entities;
 
-    void prepare_render(int x, int y, int z);
+    void prepare_render();
+    void prepare_phys(int x, int y, int z);
 };
 
 /* must be called once before the mesher can be used */

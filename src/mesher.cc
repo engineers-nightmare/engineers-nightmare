@@ -155,7 +155,7 @@ mesher_init()
 
 
 void
-chunk::prepare_render(int x, int y, int z)
+chunk::prepare_render()
 {
     if (this->render_chunk.valid)
         return;     // nothing to do here.
@@ -196,15 +196,52 @@ chunk::prepare_render(int x, int y, int z)
 
     this->render_chunk.mesh = upload_mesh(&m);
     this->render_chunk.valid = true;
-
-    build_static_physics_mesh(&m,
-                              &this->render_chunk.phys_mesh,
-                              &this->render_chunk.phys_shape);
-
-    build_static_physics_rb(x * CHUNK_SIZE,
-                            y * CHUNK_SIZE,
-                            z * CHUNK_SIZE,
-                            this->render_chunk.phys_shape,
-                            &this->render_chunk.phys_body);
 }
 
+
+void
+chunk::prepare_phys(int x, int y, int z)
+{
+    if (this->phys_chunk.valid)
+        return;     // nothing to do here.
+
+    std::vector<vertex> verts;
+    std::vector<unsigned> indices;
+
+    for (int k = 0; k < CHUNK_SIZE; k++)
+        for (int j = 0; j < CHUNK_SIZE; j++)
+            for (int i = 0; i < CHUNK_SIZE; i++) {
+                block *b = this->blocks.get(i, j, k);
+
+                if (b->type == block_support) {
+                    // TODO: block detail, variants, types, surfaces
+                    stamp_at_offset(&verts, &indices, scaffold_sw, glm::vec3(i, j, k), 1);
+                }
+
+                for (int surf = 0; surf < 6; surf++) {
+                    if (b->surfs[surf] != surface_none &&
+                        b->surfs[surf] != surface_door) {
+                        stamp_at_offset(&verts, &indices, surfs_sw[surf], glm::vec3(i, j, k), 0);
+                    }
+                }
+            }
+
+    /* wrap the vectors in a temporary sw_mesh */
+    sw_mesh m;
+    m.verts = &verts[0];
+    m.indices = &indices[0];
+    m.num_vertices = (unsigned)verts.size();
+    m.num_indices = (unsigned)indices.size();
+
+    this->phys_chunk.valid = true;
+
+    build_static_physics_mesh(&m,
+        &this->phys_chunk.phys_mesh,
+        &this->phys_chunk.phys_shape);
+
+    build_static_physics_rb(x * CHUNK_SIZE,
+        y * CHUNK_SIZE,
+        z * CHUNK_SIZE,
+        this->phys_chunk.phys_shape,
+        &this->phys_chunk.phys_body);
+}

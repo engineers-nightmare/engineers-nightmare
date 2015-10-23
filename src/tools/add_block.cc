@@ -35,6 +35,7 @@ struct add_block_tool : tool
             bl->type = block_support;
             /* dirty the chunk */
             ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
+            ship->get_chunk_containing(rc->p)->phys_chunk.valid = false;
             mark_lightfield_update(rc->p);
         }
     }
