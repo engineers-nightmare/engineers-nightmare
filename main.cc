@@ -1760,6 +1760,8 @@ struct flashlight_tool : tool
             *reader_man.get_instance_data(flashlight).data += 0.25;
             if (*reader_man.get_instance_data(flashlight).data > 1)
                 *reader_man.get_instance_data(flashlight).data -= 1;
+
+            pl.ui_dirty = true;
             update_light();
         }
     }
