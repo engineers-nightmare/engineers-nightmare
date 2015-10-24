@@ -28,7 +28,7 @@ struct remove_surface_tool : tool
 
         block *bl = rc->block;
         int index = normal_to_surface_index(rc);
-        return bl && bl->surfs[index] != surface_none && bl->surfs[index] != surface_door;
+        return bl && bl->surfs[index] & surface_phys;
     }
 
     void use(raycast_info *rc) override
@@ -38,7 +38,7 @@ struct remove_surface_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        ship->remove_surface(rc->bl, rc->p, (surface_index)index);
+        ship->set_surface(rc->bl, rc->p, (surface_index)index, surface_none);
 
         /* remove any ents using the surface */
         remove_ents_from_surface(rc->p, index ^ 1);

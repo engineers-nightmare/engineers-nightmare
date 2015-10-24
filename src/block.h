@@ -7,17 +7,18 @@ enum block_type {
 };
 
 enum surface_type : unsigned char {
+    surface_phys = 0x20,
     surface_blocks_light = 0x40,
     surface_blocks_air = 0x80,
     surface_none = 0,
 
-    surface_wall = surface_blocks_light | surface_blocks_air,
+    surface_wall = surface_phys | surface_blocks_light | surface_blocks_air,
 
-    surface_door,
+    surface_door = surface_blocks_light | surface_blocks_air,
 
-    surface_grate = surface_blocks_light,
+    surface_grate = surface_phys | surface_blocks_light,
 
-    surface_glass = surface_blocks_air,
+    surface_glass = surface_phys | surface_blocks_air,
 };
 
 /* 6 surfaces currently, all axis aligned

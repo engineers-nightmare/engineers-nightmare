@@ -125,7 +125,6 @@ struct ship_space {
 
     void set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index,
         surface_type st);
-    void remove_surface(glm::ivec3 a, glm::ivec3 b, surface_index index);
 };
 
 /* helper */

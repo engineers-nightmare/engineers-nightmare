@@ -739,23 +739,10 @@ ship_space::set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index, surface
     get_chunk_containing(b)->render_chunk.valid = false;
     get_chunk_containing(b)->phys_chunk.valid = false;
 
-    update_topology_for_add_surface(a, b, index);
-}
-
-
-/* todo: we should be able to calculate surface index */
-void
-ship_space::remove_surface(glm::ivec3 a, glm::ivec3 b, surface_index index) {
-    auto block = ensure_block(a);
-    auto other_block = ensure_block(b);
-
-    block->surfs[index] = surface_none;
-    get_chunk_containing(a)->render_chunk.valid = false;
-    get_chunk_containing(a)->phys_chunk.valid = false;
-
-    other_block->surfs[index ^ 1] = surface_none;
-    get_chunk_containing(b)->render_chunk.valid = false;
-    get_chunk_containing(b)->phys_chunk.valid = false;
-
-    update_topology_for_remove_surface(a, b);
+    if (st != surface_none) {
+        update_topology_for_add_surface(a, b, index);
+    }
+    else {
+        update_topology_for_remove_surface(a, b);
+    }
 }

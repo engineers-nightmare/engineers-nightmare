@@ -247,6 +247,7 @@ c_entity spawn_entity(glm::ivec3 p, unsigned type, int face) {
         *door.mesh = door_hw;
         *door.pos = 1.0f;
         *door.desired_pos = 1.0f;
+        *door.height = et->height;
 
         reader_man.assign_entity(ce);
         auto reader = reader_man.get_instance_data(ce);
@@ -1010,8 +1011,7 @@ struct add_surface_entity_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        if (bl->surfs[index] == surface_none ||
-            bl->surfs[index] == surface_door)
+        if (~bl->surfs[index] & surface_phys)
             return false;
 
         block *other_side = ship->get_block(rc->p);
