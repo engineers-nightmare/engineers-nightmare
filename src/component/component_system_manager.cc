@@ -187,6 +187,8 @@ tick_doors(ship_space *ship)
             continue;
         }
 
+        auto old_pos = door_man.instance_pool.pos[i];
+
         door_man.instance_pool.desired_pos[i] = *reader.data > 0 ? 1.0f : 0.0f;
 
         auto desired_state = door_man.instance_pool.desired_pos[i];
@@ -197,9 +199,15 @@ tick_doors(ship_space *ship)
         auto delta = clamp(door_man.instance_pool.pos[i] - desired_state, -0.1f, 0.1f);
         door_man.instance_pool.pos[i] -= delta;
 
-        /* did we just enter desired state? */
-        if (desired_state == door_man.instance_pool.pos[i] && !in_desired_state) {
-            set_door_state(ship, ce, desired_state ? surface_none : surface_door);
+        auto pos = door_man.instance_pool.pos[i];
+
+        if (desired_state == 0 && old_pos != 0 && pos == 0) {
+            /* did we just finish closing? */
+            set_door_state(ship, ce, surface_door);
+        }
+        else if (desired_state == 1 && old_pos == 0 && pos != 0) {
+            /* just started opening? */
+            set_door_state(ship, ce, surface_none);
         }
     }
 }
