@@ -1671,6 +1671,11 @@ struct flashlight_tool : tool
     c_entity flashlight = c_entity();
     glm::ivec3 last_pos;
     bool flashlight_on = false;
+    float brightness = -1.0f;
+
+    float scale_brightness() {
+        return brightness *= 1.0f;
+    }
 
     /* The flashlight is just a light at some location which can be "seen"
      * by the player, move it to where the raycast hit */
@@ -1682,7 +1687,7 @@ struct flashlight_tool : tool
 
         /* FIXME: flashlight shouldn't be at eye, should be mid body */
         auto per = phys_raycast(pl.eye, pl.eye + pl.dir * flashlight_throw,
-                                          phy->ghostObj, phy->dynamicsWorld);
+                                phy->ghostObj, phy->dynamicsWorld);
 
         if (per) {
             /* The raycast hit a mesh which needs no special considerations for
@@ -1718,6 +1723,7 @@ struct flashlight_tool : tool
             new_pos = get_coord_containing(new_pos);
             *power.powered = true;
             *pos_man.get_instance_data(flashlight).position = new_pos;
+            *reader_man.get_instance_data(flashlight).data = scale_brightness();
             mark_lightfield_update(new_pos);
         } else {
             *power.powered = false;
@@ -1749,6 +1755,7 @@ struct flashlight_tool : tool
         if (!flashlight.id) {
             flashlight = spawn_entity(rc->p, 11, surface_xp);
             last_pos = pl.pos;
+            brightness = *reader_man.get_instance_data(flashlight).data;
         }
 
         flashlight_on = !flashlight_on;
@@ -1757,10 +1764,11 @@ struct flashlight_tool : tool
 
     void alt_use(raycast_info *rc) override {
         if (flashlight_on) {
-            *reader_man.get_instance_data(flashlight).data += 0.25;
-            if (*reader_man.get_instance_data(flashlight).data > 1)
-                *reader_man.get_instance_data(flashlight).data -= 1;
+            brightness = brightness + 0.25f;
+            if (brightness > 1)
+                brightness -= 1;
 
+            *reader_man.get_instance_data(flashlight).data = brightness;
             pl.ui_dirty = true;
             update_light();
         }
@@ -1779,8 +1787,7 @@ struct flashlight_tool : tool
 
     void get_description(char *str) override {
         if (flashlight.id) {
-            sprintf(str, "Ghetto flashlight brightness %.0f%%",
-                    *reader_man.get_instance_data(flashlight).data * 100);
+            sprintf(str, "Ghetto flashlight brightness %.0f%%", brightness * 100);
             pl.ui_dirty = true;
         } else
             sprintf(str, "Ghetto flashlight");
