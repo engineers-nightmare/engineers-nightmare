@@ -1673,8 +1673,9 @@ struct flashlight_tool : tool
     bool flashlight_on = false;
     float brightness = -1.0f;
 
-    float scale_brightness() {
-        return brightness *= 1.0f;
+    float scale_brightness(float distance) {
+        float scale = clamp(flashlight_throw / distance * 0.25f, 0.0f, 1.0f);
+        return brightness * scale;
     }
 
     /* The flashlight is just a light at some location which can be "seen"
@@ -1715,6 +1716,10 @@ struct flashlight_tool : tool
         }
 
         if (hit_something && flashlight_on) {
+            *reader_man.get_instance_data(flashlight).data =
+                scale_brightness(glm::length(glm::vec3(new_pos) - pl.pos));
+            mark_lightfield_update(new_pos);
+
             /* To prevent unnecessary processing, we only want to update things
              * if the position changed, or the flashlight status changed */
             if (new_pos == last_pos && *power.powered == true)
@@ -1723,7 +1728,6 @@ struct flashlight_tool : tool
             new_pos = get_coord_containing(new_pos);
             *power.powered = true;
             *pos_man.get_instance_data(flashlight).position = new_pos;
-            *reader_man.get_instance_data(flashlight).data = scale_brightness();
             mark_lightfield_update(new_pos);
         } else {
             *power.powered = false;
