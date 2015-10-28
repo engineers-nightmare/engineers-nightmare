@@ -19,7 +19,7 @@ extern hw_mesh *surfs_hw[6];
 extern ENetPeer *peer;
 
 extern void
-remove_ents_from_surface(glm::ivec3 p, int face);
+remove_ents_from_surface(glm::ivec3 p, int face, physics *phy);
 
 bool
 add_surface_tool::can_use(block *bl, block *other, int index) {

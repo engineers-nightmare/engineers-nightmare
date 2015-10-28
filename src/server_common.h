@@ -1,15 +1,14 @@
-#include "mesh.h"
 #include "chunk.h"
 #include "ship_space.h"
 #include "component/component_system_manager.h"
 #include "physics.h"
 
-extern sw_mesh *door_sw;
-extern hw_mesh *door_hw;
 extern ship_space *ship;
 
-void remove_ents_from_surface(glm::ivec3 b, int face);
+void remove_ents_from_surface(glm::ivec3 b, int face, physics *phy);
 glm::mat4 mat_block_face(glm::ivec3 p, int face);
+c_entity spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy);
+void destroy_entity(c_entity e, physics *phy);
 
 struct entity_type
 {
@@ -42,7 +41,3 @@ static entity_type entity_types[] = {
     { "Proximity Sensor", "mesh/panel_1x1.dae", 3, true, 1 },
     { "Flashlight", "mesh/no_place.dae", 3, true, 1 },
 };
-
-c_entity spawn_entity(glm::ivec3 p, unsigned type, int face);
-
-void destroy_entity(c_entity e);

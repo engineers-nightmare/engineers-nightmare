@@ -1,16 +1,11 @@
 #include <epoxy/gl.h>
 
 #include "chunk.h"
-#include "mesh.h"
 #include "physics.h"
 
 #include <glm/glm.hpp>
 #include <vector>       // HISSSSSSS
 #include <btBulletDynamicsCommon.h>
-
-/* TODO: sensible container for these things, once we have variants */
-extern sw_mesh *frame_sw;
-extern sw_mesh *surfs_sw[6];
 
 
 static void
@@ -33,11 +28,9 @@ stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
 }
 
 
-extern physics *phy;
-
-
 void
-build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBody **rb)
+build_static_physics_rb(int x, int y, int z, physics *phy,
+    btCollisionShape *shape, btRigidBody **rb)
 {
     if (*rb) {
         /* We already have a rigid body set up; just swap out its collision shape. */
@@ -56,7 +49,7 @@ build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBod
 
 
 void
-build_static_physics_rb_mat(glm::mat4 *m, btCollisionShape *shape, btRigidBody **rb)
+build_static_physics_rb_mat(glm::mat4 *m, physics *phy, btCollisionShape *shape, btRigidBody **rb)
 {
     if (*rb) {
         /* We already have a rigid body set up; just swap out its collision shape. */
@@ -117,7 +110,7 @@ build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisio
 
 
 void
-teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb)
+teardown_static_physics_setup(physics *phy, btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb)
 {
     /* cleanly teardown a static physics object such that build_static_physics_setup() will
      * properly reconstruct everything */
@@ -125,17 +118,17 @@ teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, b
     if (rb && *rb) {
         phy->dynamicsWorld->removeRigidBody(*rb);
         delete *rb;
-        *rb = NULL;
+        *rb = nullptr;
     }
 
     if (shape && *shape) {
         delete *shape;
-        *shape = NULL;
+        *shape = nullptr;
     }
 
     if (mesh && *mesh) {
         delete *mesh;
-        *mesh = NULL;
+        *mesh = nullptr;
     }
 }
 
@@ -155,7 +148,7 @@ mesher_init()
 
 
 void
-chunk::prepare_render()
+chunk::prepare_render(sw_mesh *frame_sw, sw_mesh *surfs_sw[6])
 {
     if (this->render_chunk.valid)
         return;     // nothing to do here.
@@ -200,7 +193,7 @@ chunk::prepare_render()
 
 
 void
-chunk::prepare_phys(int x, int y, int z)
+chunk::prepare_phys(int x, int y, int z, physics *phy, sw_mesh *frame_sw, sw_mesh *surfs_sw[6])
 {
     if (this->phys_chunk.valid)
         return;     // nothing to do here.
@@ -238,9 +231,11 @@ chunk::prepare_phys(int x, int y, int z)
         &this->phys_chunk.phys_mesh,
         &this->phys_chunk.phys_shape);
 
+
     build_static_physics_rb(x * CHUNK_SIZE,
         y * CHUNK_SIZE,
         z * CHUNK_SIZE,
+        phy,
         this->phys_chunk.phys_shape,
         &this->phys_chunk.phys_body);
 }

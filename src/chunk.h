@@ -3,6 +3,7 @@
 #include "block.h"
 #include "fixed_cube.h"
 #include "mesh.h"
+#include "physics.h"
 #include "component/c_entity.h"
 
 #include <vector>
@@ -47,8 +48,8 @@ struct chunk {
     /* entities */
     std::vector<c_entity> entities;
 
-    void prepare_render();
-    void prepare_phys(int x, int y, int z);
+    void prepare_render(sw_mesh *frame_sw, sw_mesh *surfs_sw[6]);
+    void prepare_phys(int x, int y, int z, physics *phy, sw_mesh *frame_sw, sw_mesh *surfs_sw[6]);
 };
 
 /* must be called once before the mesher can be used */

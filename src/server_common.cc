@@ -1,7 +1,9 @@
 #include "server_common.h"
 
+extern hw_mesh *door_hw;
+
 void
-remove_ents_from_surface(glm::ivec3 b, int face)
+remove_ents_from_surface(glm::ivec3 b, int face, physics *phy)
 {
     chunk *ch = ship->get_chunk_containing(b);
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
@@ -22,7 +24,7 @@ remove_ents_from_surface(glm::ivec3 b, int face)
         auto type = &entity_types[*type_man.get_instance_data(ce).type];
 
         if (p.x == b.x && p.y == b.y && p.z <= b.z && p.z + type->height > b.z && f == face) {
-            destroy_entity(ce);
+            destroy_entity(ce, phy);
             it = ch->entities.erase(it);
 
             block *bl = ship->get_block(p);
@@ -45,7 +47,8 @@ mat_block_face(glm::ivec3 p, int face)
 }
 
 
-c_entity spawn_entity(glm::ivec3 p, unsigned type, int face) {
+c_entity
+spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy) {
     auto ce = c_entity::spawn();
 
     auto mat = mat_block_face(p, face);
@@ -59,7 +62,7 @@ c_entity spawn_entity(glm::ivec3 p, unsigned type, int face) {
     physics_man.assign_entity(ce);
     auto physics = physics_man.get_instance_data(ce);
     *physics.rigid = nullptr;
-    build_static_physics_rb_mat(&mat, et->phys_shape, physics.rigid);
+    build_static_physics_rb_mat(&mat, phy, et->phys_shape, physics.rigid);
 
     /* so that we can get back to the entity from a phys raycast */
     /* TODO: these should really come from a dense pool rather than the generic allocator */
@@ -253,7 +256,7 @@ c_entity spawn_entity(glm::ivec3 p, unsigned type, int face) {
 
 
 void
-destroy_entity(c_entity e)
+destroy_entity(c_entity e, physics *phy)
 {
     /* removing block influence from this ent */
     /* this should really be componentified */
@@ -289,7 +292,7 @@ destroy_entity(c_entity e)
             delete per;
         }
 
-        teardown_static_physics_setup(nullptr, nullptr, phys_data.rigid);
+        teardown_static_physics_setup(phy, nullptr, nullptr, phys_data.rigid);
     }
 
     comparator_man.destroy_entity_instance(e);

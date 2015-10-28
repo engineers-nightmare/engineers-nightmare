@@ -13,6 +13,24 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\component">
+      <UniqueIdentifier>{826a0c4d-f8e3-4bc0-be7d-73f64bba799f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\component">
+      <UniqueIdentifier>{93505ad9-c477-468a-be88-de157a4d32b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\wiring">
+      <UniqueIdentifier>{0f285ed0-d582-42b8-b109-84be7fcdf888}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\wiring">
+      <UniqueIdentifier>{9dd46970-70e6-4497-8c3c-d519dab33b76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\projectile">
+      <UniqueIdentifier>{99ba4f31-f687-4408-9c0c-dc1375c786ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\projectile">
+      <UniqueIdentifier>{81cbdd1e-7a75-4b83-acbd-b98177d61c71}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ship_space.cc">
@@ -30,7 +48,79 @@
     <ClCompile Include="src\server_common.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\component_system_manager.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\door_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\gas_production_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\light_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\physics_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\power_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\power_provider_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\pressure_sensor_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\proximity_sensor_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\reader_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\relative_position_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\renderable_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\sensor_comparator_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\surface_attachment_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\switch_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\type_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\particle.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wiring\wiring.cc">
+      <Filter>Source Files\wiring</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wiring\wiring_data.cc">
+      <Filter>Source Files\wiring</Filter>
+    </ClCompile>
     <ClCompile Include="src\light_field.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\projectile\projectile.cc">
+      <Filter>Source Files\projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mesh.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\char.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mesher.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -42,6 +132,78 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\server_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\component_manager.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\component_system_manager.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\door_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\gas_production_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\light_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\physics_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\power_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\power_provider_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\pressure_sensor_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\proximity_sensor_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\reader_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\relative_position_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\renderable_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\sensor_comparator_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\surface_attachment_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\switch_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\type_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\particle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wiring\wiring.h">
+      <Filter>Header Files\wiring</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wiring\wiring_data.h">
+      <Filter>Header Files\wiring</Filter>
+    </ClInclude>
+    <ClInclude Include="src\projectile\projectile.h">
+      <Filter>Header Files\projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\char.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

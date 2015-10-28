@@ -1,3 +1,4 @@
+
 #include <enet/enet.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +23,9 @@
 
 static ENetPeer *peers[MAX_SLOTS];
 ship_space *ship;
+
+/* todo: this is a hack. fix */
+hw_mesh *door_hw;
 
 struct peer_info {
     unsigned vsn_str;

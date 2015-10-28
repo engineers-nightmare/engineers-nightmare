@@ -16,8 +16,9 @@ extern ship_space *ship;
 extern hw_mesh *frame_hw;
 
 extern void
-remove_ents_from_surface(glm::ivec3 p, int face);
+remove_ents_from_surface(glm::ivec3 p, int face, physics *phy);
 
+extern physics *phy;
 
 struct remove_block_tool : tool
 {
@@ -38,7 +39,7 @@ struct remove_block_tool : tool
             /* TODO: should this even allow entity removal? This may be nothing more than
              * historical accident.
              */
-            remove_ents_from_surface(rc->bl, surface_zm);
+            remove_ents_from_surface(rc->bl, surface_zm, phy);
             mark_lightfield_update(rc->bl);
             return;
         }
@@ -67,8 +68,8 @@ struct remove_block_tool : tool
                     ship->get_chunk_containing(r)->phys_chunk.valid = false;
 
                     /* pop any dependent ents */
-                    remove_ents_from_surface(rc->bl, index);
-                    remove_ents_from_surface(r, index ^ 1);
+                    remove_ents_from_surface(rc->bl, index, phy);
+                    remove_ents_from_surface(r, index ^ 1, phy);
 
                     mark_lightfield_update(r);
 

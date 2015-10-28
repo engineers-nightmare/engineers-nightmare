@@ -241,8 +241,8 @@ prepare_chunks()
             for (int i = ship->mins.x; i <= ship->maxs.x; i++) {
                 chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
                 if (ch) {
-                    ch->prepare_render();
-                    ch->prepare_phys(i, j, k);
+                    ch->prepare_render(frame_sw, surfs_sw);
+                    ch->prepare_phys(i, j, k, phy, frame_sw, surfs_sw);
                 }
             }
         }
@@ -490,7 +490,7 @@ struct add_block_entity_tool : tool
             return;
 
         chunk *ch = ship->get_chunk_containing(rc->p);
-        auto e = spawn_entity(rc->p, type, surface_zm);
+        auto e = spawn_entity(rc->p, type, surface_zm, phy);
         ch->entities.push_back(e);
 
         for (auto i = 0; i < entity_types[type].height; i++) {
@@ -591,7 +591,7 @@ struct add_surface_entity_tool : tool
          * a surface facing into it */
         assert(ch);
 
-        auto e = spawn_entity(rc->p, type, index ^ 1);
+        auto e = spawn_entity(rc->p, type, index ^ 1, phy);
         ch->entities.push_back(e);
 
         /* take the space. */
@@ -657,7 +657,7 @@ struct remove_surface_entity_tool : tool
             return;
 
         int index = normal_to_surface_index(rc);
-        remove_ents_from_surface(rc->p, index^1);
+        remove_ents_from_surface(rc->p, index^1, phy);
         mark_lightfield_update(rc->p);
     }
 
@@ -1309,7 +1309,7 @@ struct flashlight_tool : tool
 
     void use(raycast_info *rc) override {
         if (!flashlight.id) {
-            flashlight = spawn_entity(rc->p, 11, surface_xp);
+            flashlight = spawn_entity(rc->p, 11, surface_xp, phy);
             last_pos = pl.pos;
             brightness = *reader_man.get_instance_data(flashlight).data;
         }
@@ -1588,7 +1588,7 @@ update()
 
     while (fast_tick_accum.tick()) {
 
-        proj_man.simulate(fast_tick_accum.period);
+        proj_man.simulate(fast_tick_accum.period, phy);
         particle_man->simulate(fast_tick_accum.period);
 
         phy->tick(fast_tick_accum.period);

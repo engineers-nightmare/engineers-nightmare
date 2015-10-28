@@ -62,10 +62,10 @@ struct phys_ent_ref
 
 
 void
-build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBody **rb);
+build_static_physics_rb(int x, int y, int z, physics *phy, btCollisionShape *shape, btRigidBody **rb);
 
 void
-build_static_physics_rb_mat(glm::mat4 *m, btCollisionShape *shape, btRigidBody **rb);
+build_static_physics_rb_mat(glm::mat4 *m, physics *phy, btCollisionShape *shape, btRigidBody **rb);
 
 
 void
@@ -73,7 +73,7 @@ build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisio
 
 
 void
-teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);
+teardown_static_physics_setup(physics *phy, btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);
 
 
 phys_ent_ref *

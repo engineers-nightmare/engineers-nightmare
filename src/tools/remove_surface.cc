@@ -19,7 +19,9 @@ extern ship_space *ship;
 extern hw_mesh *surfs_hw[6];
 
 extern void
-remove_ents_from_surface(glm::ivec3 p, int face);
+remove_ents_from_surface(glm::ivec3 p, int face, physics *phy);
+
+extern physics *phy;
 
 struct remove_surface_tool : tool
 {
@@ -43,8 +45,8 @@ struct remove_surface_tool : tool
         ship->set_surface(rc->bl, rc->p, (surface_index)index, surface_none);
 
         /* remove any ents using the surface */
-        remove_ents_from_surface(rc->p, index ^ 1);
-        remove_ents_from_surface(rc->bl, index);
+        remove_ents_from_surface(rc->p, index ^ 1, phy);
+        remove_ents_from_surface(rc->bl, index, phy);
 
         mark_lightfield_update(rc->bl);
         mark_lightfield_update(rc->p);

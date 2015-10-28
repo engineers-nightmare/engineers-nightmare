@@ -87,7 +87,11 @@ ship_space::get_topo_info(glm::ivec3 block)
     int wb_x, wb_y, wb_z;
     glm::ivec3 ch;
 
-    chunk *c = this->get_chunk(block);
+    split_coord(block.x, &wb_x, &ch.x);
+    split_coord(block.y, &wb_y, &ch.y);
+    split_coord(block.z, &wb_z, &ch.z);
+
+    chunk *c = this->get_chunk(ch);
 
     if (!c) {
         return &this->outside_topo_info;
