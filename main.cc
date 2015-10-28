@@ -1674,7 +1674,7 @@ struct flashlight_tool : tool
     float brightness = -1.0f;
 
     float scale_brightness(float distance) {
-        float scale = clamp(flashlight_throw / distance * 0.25f, 0.0f, 1.0f);
+        float scale = clamp(flashlight_throw / distance * 0.25f, 0.001f, 1.0f);
         return brightness * scale;
     }
 
