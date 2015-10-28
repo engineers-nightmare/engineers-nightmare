@@ -135,7 +135,6 @@ spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy) {
         light_man.assign_entity(ce);
         auto light = light_man.get_instance_data(ce);
         *light.intensity = 1.0f;
-        *light.requested_intensity = 1.0f;
 
         reader_man.assign_entity(ce);
         auto reader = reader_man.get_instance_data(ce);
@@ -155,7 +154,6 @@ spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy) {
         light_man.assign_entity(ce);
         auto light = light_man.get_instance_data(ce);
         *light.intensity = 1.0f;
-        *light.requested_intensity = 1.0f;
 
         reader_man.assign_entity(ce);
         auto reader = reader_man.get_instance_data(ce);
@@ -175,7 +173,6 @@ spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy) {
         light_man.assign_entity(ce);
         auto light = light_man.get_instance_data(ce);
         *light.intensity = 0.15f;
-        *light.requested_intensity = 0.15f;
 
         reader_man.assign_entity(ce);
         auto reader = reader_man.get_instance_data(ce);
@@ -241,7 +238,6 @@ spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy) {
         light_man.assign_entity(ce);
         auto light = light_man.get_instance_data(ce);
         *light.intensity = 0.75f;
-        *light.requested_intensity = 0.75f;
 
         reader_man.assign_entity(ce);
         auto reader = reader_man.get_instance_data(ce);
