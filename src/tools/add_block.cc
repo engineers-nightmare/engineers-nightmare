@@ -1,7 +1,5 @@
 #include "../network.h"
 
-#include <epoxy/gl.h>
-
 #include "../common.h"
 #include "../ship_space.h"
 #include "../mesh.h"
@@ -36,9 +34,9 @@ struct add_block_tool : tool
         /* can only build on the side of an existing frame */
         if (bl && rc->block->type == block_frame) {
             set_block_type(peer, rc->p, block_frame);
-            /* dirty the chunk */
-            ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
-            ship->get_chunk_containing(rc->p)->phys_chunk.valid = false;
+
+            ship->set_block(rc->p, block_frame);
+
             mark_lightfield_update(rc->p);
         }
     }

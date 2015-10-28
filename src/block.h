@@ -1,6 +1,6 @@
 #pragma once
 
-enum block_type {
+enum block_type : unsigned char {
     block_empty,
     block_frame,
     block_entity,

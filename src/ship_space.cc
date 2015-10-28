@@ -144,10 +144,10 @@ ship_space::get_chunk(glm::ivec3 ch)
  * (just in case someone runs the server on a raspi or something)
  */
 std::vector<unsigned char> *
-ship_space::serialize_chunk(int chunk_x, int chunk_y, int chunk_z)
+ship_space::serialize_chunk(glm::ivec3 ch)
 {
     // Ensure we have a chunk
-    chunk *c = this->get_chunk(glm::ivec3(chunk_x, chunk_y, chunk_z));
+    chunk *c = this->get_chunk(ch);
 
     if (!c) {
         return 0;
@@ -194,11 +194,11 @@ ship_space::serialize_chunk(int chunk_x, int chunk_y, int chunk_z)
 }
 
 bool
-ship_space::unserialize_chunk(int chunk_x, int chunk_y, int chunk_z, unsigned char *data, size_t len)
+ship_space::unserialize_chunk(glm::ivec3 ch, unsigned char *data, size_t len)
 {
     // Create a chunk and access it
-    this->ensure_chunk(glm::ivec3(chunk_x, chunk_y, chunk_z));
-    chunk *c = this->get_chunk(glm::ivec3(chunk_x, chunk_y, chunk_z));
+    this->ensure_chunk(ch);
+    chunk *c = this->get_chunk(ch);
     assert( c );
 
     // Prepare buffer range
@@ -854,4 +854,13 @@ ship_space::set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index, surface
     else {
         update_topology_for_remove_surface(a, b);
     }
+}
+
+void
+ship_space::set_block(glm::ivec3 block, block_type type) {
+    auto bl = ensure_block(block);
+
+    bl->type = type;
+    get_chunk_containing(block)->render_chunk.valid = false;
+    get_chunk_containing(block)->phys_chunk.valid = false;
 }

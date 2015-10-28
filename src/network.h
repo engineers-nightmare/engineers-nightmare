@@ -66,16 +66,14 @@ bool send_not_in_slot(ENetPeer *peer);
 
 /* ship messages */
 bool request_whole_ship(ENetPeer *peer);
-bool send_ship_chunk(ENetPeer *peer, ship_space *space, int chunk_x,
-        int chunk_y, int chunk_z);
+bool send_ship_chunk(ENetPeer *peer, ship_space *space, glm::ivec3 ch);
 bool reply_whole_ship(ENetPeer *peer, ship_space *space);
 
 /* update messages */
-bool set_block_type(ENetPeer *peer, glm::ivec3 block, enum block_type type);
-bool set_block_surface(ENetPeer *peer, glm::ivec3 block, glm::ivec3 other_side,
-        uint8_t idx, uint8_t st);
-bool remove_surface(ENetPeer *peer, glm::ivec3 block, glm::ivec3 other_side,
-        uint8_t idx);
+bool set_block_type(ENetPeer *peer, glm::ivec3 block,
+        enum block_type type);
+bool set_block_surface(ENetPeer *peer, glm::ivec3 a, glm::ivec3 b,
+    uint8_t idx, uint8_t st);
 
 /* raw messages */
 bool send_data(ENetPeer *peer, uint8_t *data, size_t size);

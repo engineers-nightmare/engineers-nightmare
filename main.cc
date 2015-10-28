@@ -2087,28 +2087,31 @@ void
 handle_update_message(ENetEvent *event, uint8_t *data)
 {
     int x, y, z, px, py, pz;
-    glm::ivec3 b, p;
-    block *bl, *os;
+
+    glm::ivec3 vec;
+    glm::ivec3 pvec;
 
     switch(*data) {
         case SET_BLOCK_TYPE:
+        {
             printf("set block type!\n");
             px = pack_int(data, 1);
             py = pack_int(data, 5);
             pz = pack_int(data, 9);
-            p = glm::ivec3(px, py, pz);
+
+            pvec = glm::ivec3(px, py, pz);
+            auto type = (enum block_type)data[13];
+
             printf("setting block at %d,%d,%d to %d\n", px, py, pz, data[13]);
-            bl = ship->get_block(p);
-            if(bl) {
-                bl->type = (enum block_type)data[13];
-                ship->get_chunk_containing(p)->render_chunk.valid = false;
-                mark_lightfield_update(p);
-            } else {
-                printf("attempt to set non-existent block(%d, %d, %d)!\n",
-                        px, py, pz);
-            }
+
+            ship->set_block(pvec, type);
+
+            mark_lightfield_update(pvec);
+
             break;
+        }
         case SET_SURFACE_TYPE:
+        {
             printf("set texture type!\n");
             x = pack_int(data, 1);
             y = pack_int(data, 5);
@@ -2116,30 +2119,19 @@ handle_update_message(ENetEvent *event, uint8_t *data)
             px = pack_int(data, 13);
             py = pack_int(data, 17);
             pz = pack_int(data, 21);
-            b = glm::ivec3(x, y, z);
-            p = glm::ivec3(px, py, pz);
+
+            vec = glm::ivec3(x, y, z);
+            pvec = glm::ivec3(px, py, pz);
+
+            auto index = (surface_index)data[25];
+            auto type = (surface_type)data[26];
+
             printf("setting texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
-                    x, y, z, px, py, pz, data[26], data[25]);
-            bl = ship->get_block(b);
-            os = ship->get_block(p);
-            if(bl && os) {
-                ship->ensure_block(b);
-                ship->ensure_block(p);
-                bl->surfs[data[25]] = (enum surface_type)data[26];
-                os->surfs[data[25] ^ 1] = (enum surface_type)data[26];
-                ship->get_chunk_containing(b)->render_chunk.valid = false;
-                ship->get_chunk_containing(p)->render_chunk.valid = false;
-                mark_lightfield_update(b);
-                mark_lightfield_update(p);
-            } else {
-                if(!bl)
-                    printf("attempt to set non-existent block(%d, %d, %d)!\n",
-                            x, y, z);
-                if(!os)
-                    printf("attempt to set non-existent block(%d, %d, %d)!\n",
-                            px, py, pz);
-            }
+                x, y, z, px, py, pz, data[26], data[25]);
+
+            ship->set_surface(vec, pvec, index, type);
             break;
+        }
         default:
             printf("unknown message(0x%02X)\n", *data);
     }
@@ -2392,7 +2384,8 @@ handle_ship_message(ENetEvent *event, uint8_t *data, size_t len)
                 if(y >= 0x8000) y -= 0x10000;
                 if(z >= 0x8000) z -= 0x10000;
 
-                ship->unserialize_chunk(x, y, z, data + 7, len - 7);
+                auto chunk = glm::ivec3(x, y, z);
+                ship->unserialize_chunk(chunk, data + 7, len - 7);
             }
             return false;
     }

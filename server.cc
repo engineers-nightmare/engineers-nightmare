@@ -119,31 +119,35 @@ void
 handle_update_message(ENetEvent *event, uint8_t *data)
 {
     int x, y, z, px, py, pz;
-    glm::ivec3 b, p;
-    block *bl, *os;
+
+    glm::ivec3 vec;
+    glm::ivec3 pvec;
 
     switch(*data) {
         case SET_BLOCK_TYPE:
+        {
             printf("set block type!\n");
             px = pack_int(data, 1);
             py = pack_int(data, 5);
             pz = pack_int(data, 9);
-            p = glm::ivec3(px, py,pz);
-            printf("setting block at %d,%d,%d to %d\n", px, py, pz, data[13]);
-            bl = ship->get_block(p);
-            if(bl) {
-                bl->type = (enum block_type)data[13];
-                for(int i = 0; i < MAX_SLOTS; i++) {
-                    if(peers[i] &&
-                            peers[i]->connectID != event->peer->connectID)
-                        send_data(peers[i], data - 1, 15);
-                }
-            } else {
-                printf("attempt to set non-existent block(%d, %d, %d)!\n",
-                        px, py, pz);
+
+            pvec = glm::ivec3(px, py, pz);
+            auto type = (enum block_type)data[13];
+
+            printf("setting block at %d,%d,%d to %d\n", px, py, pz, type);
+
+            ship->set_block(pvec, type);
+
+            for (int i = 0; i < MAX_SLOTS; i++) {
+                if (peers[i] &&
+                    peers[i]->connectID != event->peer->connectID)
+                    send_data(peers[i], data - 1, 15);
             }
+
             break;
+        }
         case SET_SURFACE_TYPE:
+        {
             printf("set texture type!\n");
             x = pack_int(data, 1);
             y = pack_int(data, 5);
@@ -151,31 +155,26 @@ handle_update_message(ENetEvent *event, uint8_t *data)
             px = pack_int(data, 13);
             py = pack_int(data, 17);
             pz = pack_int(data, 21);
-            b = glm::ivec3(x, y, z);
-            p = glm::ivec3(px, py, pz);
+
+            vec = glm::ivec3(x, y, z);
+            pvec = glm::ivec3(px, py, pz);
+
+            auto index = (surface_index)data[25];
+            auto type = (surface_type)data[26];
+
             printf("setting texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
-                    x, y, z, px, py, pz, data[26], data[25]);
-            bl = ship->get_block(b);
-            os = ship->get_block(p);
-            if(bl && os) {
-                ship->ensure_block(b);
-                ship->ensure_block(p);
-                bl->surfs[data[25]] = (enum surface_type)data[26];
-                os->surfs[data[25] ^ 1] = (enum surface_type)data[26];
-                for(int i = 0; i < MAX_SLOTS; i++) {
-                    if(peers[i] &&
-                            peers[i]->connectID != event->peer->connectID)
-                        send_data(peers[i], data - 1, 28);
-                }
-            } else {
-                if(!bl)
-                    printf("attempt to set non-existent block(%d, %d, %d)!\n",
-                            x, y, z);
-                if(!os)
-                    printf("attempt to set non-existent block(%d, %d, %d)!\n",
-                            px, py, pz);
+                x, y, z, px, py, pz, data[26], data[25]);
+
+            ship->set_surface(vec, pvec, index, type);
+
+
+            for (int i = 0; i < MAX_SLOTS; i++) {
+                if (peers[i] &&
+                    peers[i]->connectID != event->peer->connectID)
+                    send_data(peers[i], data - 1, 28);
             }
             break;
+        }
         default:
             printf("unknown message(0x%02X)\n", *data);
     }

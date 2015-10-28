@@ -2,10 +2,12 @@
 
 #include <epoxy/gl.h>
 
-#include "../common.h"
-#include "../ship_space.h"
-#include "../mesh.h"
+#include "../network.h"
+
 #include "../block.h"
+#include "../common.h"
+#include "../mesh.h"
+#include "../ship_space.h"
 #include "tools.h"
 #include "../light_field.h"
 
@@ -18,6 +20,8 @@ extern ENetPeer *peer;
 extern ship_space *ship;
 
 extern hw_mesh *surfs_hw[6];
+
+extern ENetPeer *peer;
 
 extern void
 remove_ents_from_surface(glm::ivec3 p, int face, physics *phy);
@@ -44,6 +48,7 @@ struct remove_surface_tool : tool
         int index = normal_to_surface_index(rc);
 
         ship->set_surface(rc->bl, rc->p, (surface_index)index, surface_none);
+        set_block_surface(peer, rc->bl, rc->p, (surface_index)index, surface_none);
 
         /* remove any ents using the surface */
         remove_ents_from_surface(rc->p, index ^ 1, phy);
