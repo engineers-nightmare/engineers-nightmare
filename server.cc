@@ -46,6 +46,8 @@ init(void)
         return 0;
     }
 
+    ship->rebuild_topology();
+
     return 1;
 }
 
