@@ -168,7 +168,7 @@ chunk::prepare_render()
             for (int i = 0; i < CHUNK_SIZE; i++) {
                 block *b = this->blocks.get(i, j, k);
 
-                if (b->type == block_support) {
+                if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
                     stamp_at_offset(&verts, &indices, frame_sw, glm::vec3(i, j, k), 1);
                 }
@@ -213,7 +213,7 @@ chunk::prepare_phys(int x, int y, int z)
             for (int i = 0; i < CHUNK_SIZE; i++) {
                 block *b = this->blocks.get(i, j, k);
 
-                if (b->type == block_support) {
+                if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
                     stamp_at_offset(&verts, &indices, frame_sw, glm::vec3(i, j, k), 1);
                 }

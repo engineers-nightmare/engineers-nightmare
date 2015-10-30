@@ -30,11 +30,11 @@ simple(void)
 
     b = space.get_block(glm::ivec3(0, 0, 1));
     assert(b != 0);
-    b->type = block_support;
+    b->type = block_frame;
 
     b = space.get_block(glm::ivec3(0, 8, 0));
     assert(b != 0);
-    b->type = block_support;
+    b->type = block_frame;
 
 
     /* read some data */
@@ -44,11 +44,11 @@ simple(void)
 
     b = space.get_block(glm::ivec3(0, 0, 1));
     assert(b != 0);
-    assert(b->type == block_support);
+    assert(b->type == block_frame);
 
     b = space.get_block(glm::ivec3(0, 8, 0));
     assert(b != 0);
-    assert(b->type == block_support);
+    assert(b->type == block_frame);
 }
 
 void

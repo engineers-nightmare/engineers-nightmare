@@ -31,8 +31,8 @@ struct add_block_tool : tool
         block *bl = ship->get_block(rc->p);
 
         /* can only build on the side of an existing frame */
-        if (bl && rc->block->type == block_support) {
-            bl->type = block_support;
+        if (bl && rc->block->type == block_frame) {
+            bl->type = block_frame;
             /* dirty the chunk */
             ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
             ship->get_chunk_containing(rc->p)->phys_chunk.valid = false;
@@ -54,7 +54,7 @@ struct add_block_tool : tool
         block *bl = ship->get_block(rc->p);
 
         /* can only build on the side of an existing frame */
-        if ((!bl || bl->type == block_empty) && rc->block->type == block_support) {
+        if ((!bl || bl->type == block_empty) && rc->block->type == block_frame) {
             auto mat = frame->alloc_aligned<glm::mat4>(1);
             *mat.ptr = mat_position(rc->p);
             mat.bind(1, frame);

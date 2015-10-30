@@ -916,7 +916,7 @@ struct add_block_entity_tool : tool
             return false;
 
         /* block ents can only be placed in empty space, on a frame */
-        if (!rc->block || rc->block->type != block_support) {
+        if (!rc->block || rc->block->type != block_frame) {
             return false;
         }
 

@@ -57,7 +57,7 @@ struct remove_block_tool : tool
                 if (!other_side) {
                     /* expand: but this should always exist. */
                 }
-                else if (other_side->type != block_support) {
+                else if (other_side->type != block_frame) {
                     /* if the other side has no frame, then there is nothing left to support this
                      * surface pair -- remove it */
                     bl->surfs[index] = surface_none;

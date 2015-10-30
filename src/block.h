@@ -2,7 +2,7 @@
 
 enum block_type {
     block_empty,
-    block_support,
+    block_frame,
     block_entity,
 };
 

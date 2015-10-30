@@ -704,7 +704,7 @@ ship_space::validate()
                             }
 
                             /* 2/ every surface must be supported by framing on at least one side */
-                            if (bl->type != block_support && (!other || other->type != block_support)) {
+                            if (bl->type != block_frame && (!other || other->type != block_frame)) {
                                 printf("validate(): %d %d %d face %d has no supporting frame\n",
                                         other_coord.x - offset.x, other_coord.y - offset.y,
                                         other_coord.z - offset.z, face);
