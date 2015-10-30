@@ -21,7 +21,7 @@ remove_ents_from_surface(glm::ivec3 p, int face);
 bool
 add_surface_tool::can_use(block *bl, block *other, int index) {
     if (bl && bl->surfs[index] != surface_none) return false; /* already a surface here */
-    return (bl && bl->type == block_support) || (other && other->type == block_support);
+    return (bl && bl->type == block_frame) || (other && other->type == block_frame);
 }
 
 void

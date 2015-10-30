@@ -11,7 +11,7 @@ extern GLuint simple_shader;
 
 extern ship_space *ship;
 
-extern hw_mesh *scaffold_hw;
+extern hw_mesh *frame_hw;
 
 
 struct add_block_tool : tool
@@ -30,9 +30,9 @@ struct add_block_tool : tool
 
         block *bl = ship->get_block(rc->p);
 
-        /* can only build on the side of an existing scaffold */
-        if (bl && rc->block->type == block_support) {
-            bl->type = block_support;
+        /* can only build on the side of an existing frame */
+        if (bl && rc->block->type == block_frame) {
+            bl->type = block_frame;
             /* dirty the chunk */
             ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
             ship->get_chunk_containing(rc->p)->phys_chunk.valid = false;
@@ -53,21 +53,21 @@ struct add_block_tool : tool
 
         block *bl = ship->get_block(rc->p);
 
-        /* can only build on the side of an existing scaffold */
-        if ((!bl || bl->type == block_empty) && rc->block->type == block_support) {
+        /* can only build on the side of an existing frame */
+        if ((!bl || bl->type == block_empty) && rc->block->type == block_frame) {
             auto mat = frame->alloc_aligned<glm::mat4>(1);
             *mat.ptr = mat_position(rc->p);
             mat.bind(1, frame);
 
             glUseProgram(add_overlay_shader);
-            draw_mesh(scaffold_hw);
+            draw_mesh(frame_hw);
             glUseProgram(simple_shader);
         }
     }
 
     void get_description(char *str) override
     {
-        strcpy(str, "Place Scaffolding");
+        strcpy(str, "Place Framing");
     }
 };
 

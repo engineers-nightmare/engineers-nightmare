@@ -115,7 +115,7 @@ gl_debug_callback(GLenum source __unused,
 frame_data *frames, *frame;
 unsigned frame_index;
 
-sw_mesh *scaffold_sw;
+sw_mesh *frame_sw;
 sw_mesh *surfs_sw[6];
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader, modelspace_uv_shader;
@@ -127,7 +127,7 @@ physics *phy;
 unsigned char const *keys;
 unsigned int mouse_buttons[input_mouse_buttons_count];
 int mouse_axes[input_mouse_axes_count];
-hw_mesh *scaffold_hw;
+hw_mesh *frame_hw;
 hw_mesh *surfs_hw[6];
 text_renderer *text;
 sprite_renderer *ui_sprites;
@@ -679,7 +679,7 @@ init()
     set_mesh_material(door_sw, 2);  /* TODO: paint a new texture for this one */
     door_hw = upload_mesh(door_sw);
 
-    scaffold_sw = load_mesh("mesh/initial_scaffold.dae");
+    frame_sw = load_mesh("mesh/initial_frame.dae");
 
     surfs_sw[surface_xp] = load_mesh("mesh/x_quad_p.dae");
     surfs_sw[surface_xm] = load_mesh("mesh/x_quad.dae");
@@ -711,13 +711,13 @@ init()
     particle_shader = load_shader("shaders/particle.vert", "shaders/particle.frag");
     modelspace_uv_shader = load_shader("shaders/simple_modelspace_uv.vert", "shaders/simple.frag");
 
-    scaffold_hw = upload_mesh(scaffold_sw);         /* needed for overlay */
+    frame_hw = upload_mesh(frame_sw);         /* needed for overlay */
 
     glUseProgram(simple_shader);
 
     world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
     world_textures->load(0, "textures/white.png");
-    world_textures->load(1, "textures/scaffold.png");
+    world_textures->load(1, "textures/frame.png");
     world_textures->load(2, "textures/plate.png");
     world_textures->load(3, "textures/frobnicator.png");
     world_textures->load(4, "textures/grate.png");
@@ -915,8 +915,8 @@ struct add_block_entity_tool : tool
             rc->p == get_coord_containing(pl.pos))
             return false;
 
-        /* block ents can only be placed in empty space, on a scaffold */
-        if (!rc->block || rc->block->type != block_support) {
+        /* block ents can only be placed in empty space, on a frame */
+        if (!rc->block || rc->block->type != block_frame) {
             return false;
         }
 
@@ -983,7 +983,7 @@ struct add_block_entity_tool : tool
 
         /* draw a block overlay as well around the block */
         glUseProgram(add_overlay_shader);
-        draw_mesh(scaffold_hw);
+        draw_mesh(frame_hw);
         glUseProgram(simple_shader);
     }
 

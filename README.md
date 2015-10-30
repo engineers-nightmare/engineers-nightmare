@@ -10,7 +10,7 @@ Centered on an engineer's point of view, Engineer's Nightmare provides a unique 
 # Current state
 
 So far, have implemented solid player movement, including jumping and crouching, crawling inside blocks, etc; tools for
-placing and removing block scaffolding, surfaces of several types, block-mounted and surface-mounted entities of several
+placing and removing block framing, surfaces of several types, block-mounted and surface-mounted entities of several
 types; Lightfield propagated from certain entities.
 
 ![example](https://raw.githubusercontent.com/engineers-nightmare/engineers-nightmare/master/misc/en-2015-05-18-1.png)

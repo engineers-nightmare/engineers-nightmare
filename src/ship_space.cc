@@ -703,9 +703,9 @@ ship_space::validate()
                                 pass = false;
                             }
 
-                            /* 2/ every surface must be supported by scaffolding on at least one side */
-                            if (bl->type != block_support && (!other || other->type != block_support)) {
-                                printf("validate(): %d %d %d face %d has no supporting scaffold\n",
+                            /* 2/ every surface must be supported by framing on at least one side */
+                            if (bl->type != block_frame && (!other || other->type != block_frame)) {
+                                printf("validate(): %d %d %d face %d has no supporting frame\n",
                                         other_coord.x - offset.x, other_coord.y - offset.y,
                                         other_coord.z - offset.z, face);
                                 pass = false;

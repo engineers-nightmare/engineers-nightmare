@@ -49,7 +49,7 @@ static int block_offsets[4][2] = { { 0, 0 }, { 0, 8 }, { 8, 0 }, { 8, 8 } };
 
 /* returns a pointer to a new ship space
  * this ship space will have 2 x 2 rooms and will be 1 room tall
- * each room will have a floor and 4 walls of scaffolding
+ * each room will have a floor and 4 walls of framing
  * each room will have some doors on all 4 walls
  * there will be a floor of surfaces
  * and will otherwise be empty
@@ -80,7 +80,7 @@ ship_space::mock_ship_space(void)
 
                     if( z == 0 ){
                         /* the floor */
-                        b->type = block_support;
+                        b->type = block_frame;
 
                         /* add surfaces to inside */
                         b->surfs[surface_zp] = (x >= 2 && x < 6 && y >= 2 && y < 6) ? surface_grate : surface_wall;
@@ -92,7 +92,7 @@ ship_space::mock_ship_space(void)
 
                     } else if( z == 7 ){
                         /* the roof */
-                        b->type = block_support;
+                        b->type = block_frame;
 
                         /* add surfaces to outside */
                         b->surfs[surface_zp] = surface_wall;
@@ -104,7 +104,7 @@ ship_space::mock_ship_space(void)
 
                     } else if( y == 0 || y == 7 ){
                         /* a wall */
-                        b->type = block_support;
+                        b->type = block_frame;
 
                         /* add surfaces to one side */
                         b->surfs[surface_yp] = surface_wall;
@@ -116,7 +116,7 @@ ship_space::mock_ship_space(void)
 
                     } else if( x == 0 || x == 7 ){
                         /* a wall */
-                        b->type = block_support;
+                        b->type = block_frame;
 
                         /* add surfaces to one side */
                         b->surfs[surface_xp] = surface_wall;

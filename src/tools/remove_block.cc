@@ -12,7 +12,7 @@ extern GLuint simple_shader;
 
 extern ship_space *ship;
 
-extern hw_mesh *scaffold_hw;
+extern hw_mesh *frame_hw;
 
 extern void
 remove_ents_from_surface(glm::ivec3 p, int face);
@@ -57,8 +57,8 @@ struct remove_block_tool : tool
                 if (!other_side) {
                     /* expand: but this should always exist. */
                 }
-                else if (other_side->type != block_support) {
-                    /* if the other side has no scaffold, then there is nothing left to support this
+                else if (other_side->type != block_frame) {
+                    /* if the other side has no frame, then there is nothing left to support this
                      * surface pair -- remove it */
                     bl->surfs[index] = surface_none;
                     other_side->surfs[index ^ 1] = surface_none;
@@ -101,7 +101,7 @@ struct remove_block_tool : tool
 
             glUseProgram(remove_overlay_shader);
             glEnable(GL_POLYGON_OFFSET_FILL);
-            draw_mesh(scaffold_hw);
+            draw_mesh(frame_hw);
             glDisable(GL_POLYGON_OFFSET_FILL);
             glUseProgram(simple_shader);
         }
@@ -109,7 +109,7 @@ struct remove_block_tool : tool
 
     void get_description(char *str) override
     {
-        strcpy(str, "Remove Scaffolding");
+        strcpy(str, "Remove Framing");
     }
 };
 
