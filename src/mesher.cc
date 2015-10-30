@@ -9,7 +9,7 @@
 #include <btBulletDynamicsCommon.h>
 
 /* TODO: sensible container for these things, once we have variants */
-extern sw_mesh *scaffold_sw;
+extern sw_mesh *frame_sw;
 extern sw_mesh *surfs_sw[6];
 
 
@@ -170,7 +170,7 @@ chunk::prepare_render()
 
                 if (b->type == block_support) {
                     // TODO: block detail, variants, types, surfaces
-                    stamp_at_offset(&verts, &indices, scaffold_sw, glm::vec3(i, j, k), 1);
+                    stamp_at_offset(&verts, &indices, frame_sw, glm::vec3(i, j, k), 1);
                 }
 
                 for (int surf = 0; surf < 6; surf++) {
@@ -215,7 +215,7 @@ chunk::prepare_phys(int x, int y, int z)
 
                 if (b->type == block_support) {
                     // TODO: block detail, variants, types, surfaces
-                    stamp_at_offset(&verts, &indices, scaffold_sw, glm::vec3(i, j, k), 1);
+                    stamp_at_offset(&verts, &indices, frame_sw, glm::vec3(i, j, k), 1);
                 }
 
                 for (int surf = 0; surf < 6; surf++) {

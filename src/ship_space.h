@@ -84,7 +84,7 @@ struct ship_space {
 
     /* returns a pointer to a new ship space
      * this ship space will have 2 x 2 rooms and will be 1 room tall
-     * each room will have a floor and 4 walls of scaffolding
+     * each room will have a floor and 4 walls of framing 
      * each room will have some doors on all 4 walls
      * there will be a floor of surfaces
      * and will otherwise be empty
