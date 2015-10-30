@@ -1,3 +1,6 @@
+#include <glm/gtc/random.hpp>
+
+#include "../light_field.h"
 #include "component_system_manager.h"
 #include "../particle.h"
 
@@ -17,10 +20,8 @@ door_component_manager door_man;
 reader_component_manager reader_man;
 proximity_sensor_component_manager proximity_man;
 
-#include <glm/gtc/random.hpp>
-
-
-extern particle_manager *particle_man;
+projectile_linear_manager proj_man;
+particle_manager *particle_man;
 
 
 /* I have no clue how we're going to actually handle these */
@@ -244,15 +245,16 @@ tick_light_components(ship_space *ship) {
         auto light = light_man.get_instance_data(ce);
         auto reader = reader_man.get_instance_data(ce);
 
-        *(light.requested_intensity) = clamp(*(reader.data), 0.0f, 1.0f);
-
         auto old_intensity = *(light.intensity);
-        auto new_intensity = *power.powered ? *(light.requested_intensity) : 0.0f;
+
+        auto requested_intensity = clamp(*(reader.data), 0.0f, 1.0f);
+
+        auto new_intensity = *power.powered ? requested_intensity : 0.0f;
 
         if (old_intensity != new_intensity) {
 
             *(light.intensity) = new_intensity;
-            *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
+            *(power.required_power) = requested_intensity * *(power.max_required_power);
 
             auto pos = *pos_man.get_instance_data(ce).position;
             auto block_pos = get_coord_containing(pos);

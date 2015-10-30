@@ -7,8 +7,6 @@
 #include "../mesh.h"
 #include "../physics.h"
 
-extern physics *phy;
-
 hw_mesh *projectile_hw;
 sw_mesh *projectile_sw;
 
@@ -70,7 +68,7 @@ projectile_manager::spawn(glm::vec3 pos, glm::vec3 dir) {
     projectile_pool.lifetime[index] = initial_lifetime;
 }
 
-void projectile_linear_manager::simulate(float dt) {
+void projectile_linear_manager::simulate(float dt, physics *phy) {
     for (auto i = 0u; i < buffer.num; ) {
         auto new_pos = projectile_pool.position[i] + projectile_pool.velocity[i] * dt;
 

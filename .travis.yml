@@ -18,6 +18,13 @@ install:
     - sudo dpkg -i libassimp3_3.0~dfsg-2_amd64.deb libassimp-dev_3.0~dfsg-2_amd64.deb libglm-dev_0.9.6.3-1_all.deb
     # taken from http://gearchicken.com/wordpress/?p=105
     - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
+    - wget http://enet.bespin.org/download/enet-1.3.13.tar.gz
+    - tar xfv enet-1.3.13.tar.gz
+    - pushd enet-1.3.13
+    - ./configure
+    - make
+    - sudo make install
+    - popd
 
 script:
     - cmake .

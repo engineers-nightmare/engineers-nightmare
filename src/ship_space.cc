@@ -69,7 +69,7 @@ ship_space::get_block(glm::ivec3 block)
     chunk *c = this->get_chunk(ch);
 
     if( ! c ){
-        return 0;
+        return nullptr;
     }
 
     return c->blocks.get(wb_x, wb_y, wb_z);
@@ -139,6 +139,115 @@ ship_space::get_chunk(glm::ivec3 ch)
     return nullptr;
 }
 
+/* serialization methods for chunks
+ * be explicit with our signing - x86 char is signed, ARM char is unsigned
+ * (just in case someone runs the server on a raspi or something)
+ */
+std::vector<unsigned char> *
+ship_space::serialize_chunk(glm::ivec3 ch)
+{
+    // Ensure we have a chunk
+    chunk *c = this->get_chunk(ch);
+
+    if (!c) {
+        return 0;
+    }
+
+    // Allocate buffer
+    std::vector<unsigned char> *vbuf = new std::vector<unsigned char>();
+
+    // Walk chunk
+    for (int z = 0; z < CHUNK_SIZE; z++) {
+        for (int y = 0; y < CHUNK_SIZE; y++) {
+            for (int x = 0; x < CHUNK_SIZE; x++) {
+
+                // Get block
+                block *b = c->blocks.get(x, y, z);
+
+                // Generate surface mask
+                unsigned char surf_mask = 0;
+                for(int i = 0; i < 6; i++) {
+                    if(b->surfs[i] != surface_none) {
+                        surf_mask |= 1<<i;
+                    }
+                }
+
+                // First 2 bytes per block are type and face mask
+                vbuf->push_back((unsigned char)b->type);
+                vbuf->push_back((unsigned char)surf_mask);
+
+                // Then we produce our up-to-6 faces
+                for(int i = 0; i < 6; i++) {
+                    if(surf_mask & (1<<i)) {
+
+                        // 1 byte for the type
+                        vbuf->push_back((unsigned char)b->surfs[i]);
+                    }
+                }
+
+            }
+        }
+    }
+
+    // Return!
+    return vbuf;
+}
+
+bool
+ship_space::unserialize_chunk(glm::ivec3 ch, unsigned char *data, size_t len)
+{
+    // Create a chunk and access it
+    this->ensure_chunk(ch);
+    chunk *c = this->get_chunk(ch);
+    assert( c );
+
+    // Prepare buffer range
+    unsigned char *data_end = data + len;
+
+    // Read each block
+    for(int z = 0; z < CHUNK_SIZE; z++) {
+        for(int y = 0; y < CHUNK_SIZE; y++) {
+            for(int x = 0; x < CHUNK_SIZE; x++) {
+
+                // Ensure we can read 2 bytes
+                if(data + 2 > data_end) {
+                    fprintf(stderr, "unserialize_chunk: prematurely terminated map chunk\n");
+                    return false;
+                }
+
+                // Get block and clear surfaces
+                block *b = c->blocks.get(x, y, z);
+                for(int i = 0; i < 6; i++) {
+                    b->surfs[i] = surface_none;
+                    b->surf_space[i] = 0;
+                }
+
+                // First 2 bytes per block are type and face mask
+                b->type = (block_type)*(data++);
+                unsigned char surf_mask = *(data++);
+
+                // Then we produce our up-to-6 faces
+                for(int i = 0; i < 6; i++) {
+                    if(surf_mask & (1<<i)) {
+
+                        // Ensure we can read 1 byte
+                        if(data + 1 > data_end) {
+                            fprintf(stderr, "unserialize_chunk: prematurely terminated map chunk\n");
+                            return false;
+                        }
+
+                        // 1 byte for the type
+                        b->surfs[i] = (surface_type)*(data++);
+                    }
+                }
+
+            }
+        }
+    }
+
+    // Return!
+    return true;
+}
 
 
 static float
@@ -745,4 +854,13 @@ ship_space::set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index, surface
     else {
         update_topology_for_remove_surface(a, b);
     }
+}
+
+void
+ship_space::set_block(glm::ivec3 block, block_type type) {
+    auto bl = ensure_block(block);
+
+    bl->type = type;
+    get_chunk_containing(block)->render_chunk.valid = false;
+    get_chunk_containing(block)->phys_chunk.valid = false;
 }

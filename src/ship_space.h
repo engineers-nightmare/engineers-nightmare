@@ -107,6 +107,11 @@ struct ship_space {
      */
     chunk * ensure_chunk(glm::ivec3 chunk);
 
+    /* serialization methods for chunks
+     */
+    std::vector<unsigned char> * serialize_chunk(glm::ivec3 ch);
+    bool unserialize_chunk(glm::ivec3 ch, unsigned char *data, size_t len);
+
     zone_info *get_zone_info(topo_info *t);
     void insert_zone(topo_info *t, zone_info *z);
 
@@ -125,6 +130,8 @@ struct ship_space {
 
     void set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index,
         surface_type st);
+
+    void set_block(glm::ivec3 block, block_type type);
 };
 
 /* helper */

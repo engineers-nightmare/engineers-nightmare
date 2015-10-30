@@ -2,6 +2,8 @@ CMake*
 *.cmake
 Makefile
 nightmare
+nightmare-server
+nightmare-test-client
 *.ninja*
 scratch
 *.out
@@ -228,3 +230,9 @@ configs/user/
 
 # don't ignore meshes
 !mesh/*
+
+# ctags file
+.tags
+
+# vim swap file
+*.swp

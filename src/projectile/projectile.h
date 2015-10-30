@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "../mesh.h"
 #include "../render_data.h"
+#include "../physics.h"
 
 struct projectile_manager {
     struct projectile_instance_data {
@@ -28,7 +29,7 @@ struct projectile_manager {
 
     virtual void destroy_instance(unsigned index);
 
-    virtual void simulate(float dt) = 0;
+    virtual void simulate(float dt, physics *phy) = 0;
 
     virtual void spawn(glm::vec3 pos, glm::vec3 vel);
 
@@ -39,7 +40,7 @@ struct projectile_manager {
 };
 
 struct projectile_linear_manager : projectile_manager {
-    void simulate(float dt) override;
+    void simulate(float dt, physics *phy) override;
 };
 
 

@@ -1,10 +1,14 @@
+#include <enet/enet.h>
 #include <epoxy/gl.h>
+
+#include "../network.h"
 
 #include "../common.h"
 #include "../ship_space.h"
 #include "../mesh.h"
 #include "../block.h"
 #include "tools.h"
+#include "../light_field.h"
 
 
 extern GLuint add_overlay_shader;
@@ -15,8 +19,10 @@ extern ship_space *ship;
 
 extern hw_mesh *surfs_hw[6];
 
+extern ENetPeer *peer;
+
 extern void
-remove_ents_from_surface(glm::ivec3 p, int face);
+remove_ents_from_surface(glm::ivec3 p, int face, physics *phy);
 
 bool
 add_surface_tool::can_use(block *bl, block *other, int index) {
@@ -36,6 +42,7 @@ add_surface_tool::use(raycast_info *rc) {
 
     if (can_use(bl, other_side, index)) {
         ship->set_surface(rc->bl, rc->p, (surface_index)index, st);
+        set_block_surface(peer, rc->bl, rc->p, (surface_index)index, st);
 
         mark_lightfield_update(rc->bl);
         mark_lightfield_update(rc->p);

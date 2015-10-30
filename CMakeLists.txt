@@ -7,6 +7,8 @@ if(UNIX)
 endif()
 
 add_executable(nightmare main.cc)
+add_executable(nightmare-server server.cc)
+add_executable(nightmare-test-client test-client.cc)
 
 # here we compile all of src/*.cc into one library
 # this is used below to link both to our main executable
@@ -20,6 +22,7 @@ PKG_SEARCH_MODULE(EPOXY REQUIRED epoxy)
 PKG_SEARCH_MODULE(ASSIMP REQUIRED assimp)
 PKG_SEARCH_MODULE(SDL2_IMAGE REQUIRED SDL2_image)
 PKG_SEARCH_MODULE(FREETYPE REQUIRED freetype2)
+PKG_SEARCH_MODULE(LIBENET REQUIRED libenet)
 
 find_package(Bullet REQUIRED)
 
@@ -32,7 +35,8 @@ include_directories(${SDL2_INCLUDE_DIRS}
                     ${SDL2_IMAGE_INCLUDE_DIRS}
                     ${BULLET_INCLUDE_DIRS}
                     ${FREETYPE_INCLUDE_DIRS}
-                    ${LIBCONFIG_INCLUDE_DIRS})
+                    ${LIBCONFIG_INCLUDE_DIRS}
+                    ${LIBENET_INCLUDE_DIRS})
 
 target_link_libraries(nightmare
                       ${SDL2_LIBRARIES}
@@ -42,6 +46,23 @@ target_link_libraries(nightmare
                       ${BULLET_LIBRARIES}
                       ${FREETYPE_LIBRARIES}
                       ${LIBCONFIG_LIBRARIES}
+                      ${LIBENET_LIBRARIES}
+                      NIGHTMARE)
+
+target_link_libraries(nightmare-server
+                      ${SDL2_LIBRARIES}
+                      ${EPOXY_LIBRARIES}
+                      ${ASSIMP_LIBRARIES}
+                      ${SDL2_IMAGE_LIBRARIES}
+                      ${BULLET_LIBRARIES}
+                      ${FREETYPE_LIBRARIES}
+                      ${LIBCONFIG_LIBRARIES}
+                      ${LIBENET_LIBRARIES}
+                      NIGHTMARE)
+
+target_link_libraries(nightmare-test-client
+                      ${LIBENET_LIBRARIES}
+                      ${BULLET_LIBRARIES}
                       NIGHTMARE)
 
 # the following is based on
@@ -64,15 +85,17 @@ foreach(test_src ${TESTS_SRCS})
         add_executable(${test_name} ${test_src})
 
         # link to our libs
-        target_link_libraries(${test_name} NIGHTMARE)
+        target_link_libraries(${test_name}
+                      ${BULLET_LIBRARIES}
+                      NIGHTMARE)
 
         # move into test_bin
-        set_target_properties(${test_name} PROPERTIES 
+        set_target_properties(${test_name} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/test_bin)
 
         # add it as a test
         add_test(NAME ${test_name}
-                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test_bin 
+                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test_bin
                  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test_bin/${test_name} )
 
 endforeach(test_src)
