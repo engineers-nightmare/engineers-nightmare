@@ -16,6 +16,7 @@ relative_position_component_manager::create_component_instance_data(unsigned cou
     size_t size = sizeof(c_entity) * count;
     size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
     size = sizeof(glm::mat4) * count + align_size<glm::mat4>(size);
+    size = sizeof(float) * count + align_size<float>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -26,10 +27,12 @@ relative_position_component_manager::create_component_instance_data(unsigned cou
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.position = align_ptr((glm::vec3 *)(new_pool.entity + count));
     new_pool.mat = align_ptr((glm::mat4 *)(new_pool.position + count));
+    new_pool.rotation = align_ptr((float *)(new_pool.mat + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.position, instance_pool.position, buffer.num * sizeof(glm::vec3));
     memcpy(new_pool.mat, instance_pool.mat, buffer.num * sizeof(glm::mat4));
+    memcpy(new_pool.rotation, instance_pool.rotation, buffer.num * sizeof(float));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -46,6 +49,7 @@ relative_position_component_manager::destroy_instance(instance i) {
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
     instance_pool.position[i.index] = instance_pool.position[last_index];
     instance_pool.mat[i.index] = instance_pool.mat[last_index];
+    instance_pool.rotation[i.index] = instance_pool.rotation[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);

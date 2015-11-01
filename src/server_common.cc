@@ -2,6 +2,21 @@
 
 extern hw_mesh *door_hw;
 
+entity_type entity_types[] = {
+    { "Door", "mesh/single_door_frame.dae", 2, false, 2 },
+    { "Frobnicator", "mesh/frobnicator.dae", 3, false, 1 },
+    { "Light", "mesh/panel_4x4.dae", 8, true, 1 },
+    { "Warning Light", "mesh/warning_light.dae", 8, true, 1 },
+    { "Display Panel", "mesh/panel_4x4.dae", 7, true, 1 },
+    { "Switch", "mesh/panel_1x1.dae", 9, true, 1 },
+    { "Plaidnicator", "mesh/frobnicator.dae", 13, false, 1 },
+    { "Pressure Sensor 1", "mesh/panel_1x1.dae", 12, true, 1 },
+    { "Pressure Sensor 2", "mesh/panel_1x1.dae", 14, true, 1 },
+    { "Sensor Comparator", "mesh/panel_1x1.dae", 13, true, 1 },
+    { "Proximity Sensor", "mesh/panel_1x1.dae", 3, true, 1 },
+    { "Flashlight", "mesh/no_place.dae", 3, true, 1 },
+};
+
 void
 remove_ents_from_surface(glm::ivec3 b, int face, physics *phy)
 {
@@ -39,19 +54,26 @@ remove_ents_from_surface(glm::ivec3 b, int face, physics *phy)
 
 
 glm::mat4
-mat_block_face(glm::ivec3 p, int face)
+mat_block_face(glm::ivec3 p, int face, float rotation)
 {
     auto norm = glm::vec3(surface_index_to_normal(face));
     auto pos = glm::vec3(p) + glm::vec3(0.5f) + 0.5f * norm;
-    return mat_rotate_mesh(pos, -norm);
+    return glm::rotate(mat_rotate_mesh(pos, -norm), rotation, glm::vec3(0, 0, 1));
 }
 
 
-c_entity
-spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy) {
+glm::mat4
+mat_block_face(glm::ivec3 p, int face)
+{
+    return mat_block_face(p, face, 0);
+}
+
+
+c_entity 
+spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy, float rotation) {
     auto ce = c_entity::spawn();
 
-    auto mat = mat_block_face(p, face);
+    auto mat = mat_block_face(p, face, rotation);
 
     auto et = &entity_types[type];
 
@@ -79,6 +101,7 @@ spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy) {
     auto pos = pos_man.get_instance_data(ce);
     *pos.position = p;
     *pos.mat = mat;
+    *pos.rotation = rotation;
 
     /* hack to not render a mesh for the flashlight */
     /* todo: handle entities that don't need to be rendered*/
@@ -248,6 +271,12 @@ spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy) {
     }
 
     return ce;
+}
+
+
+c_entity 
+spawn_entity(glm::ivec3 p, unsigned type, int face, physics *phy) {
+    return spawn_entity(p, type, face, phy, 0);
 }
 
 

@@ -188,13 +188,13 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
 
 /* todo: support free-placed entities*/
 void
-place_entity_attaches(raycast_info* rc, int index, c_entity e, unsigned entity_type) {
+place_entity_attaches(raycast_info* rc, int index, c_entity e, unsigned entity_type, float rotation) {
     auto const & et = entity_types[entity_type];
 
     for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
         auto wt = (wire_type)wire_index;
         for (auto i = 0u; i < et.sw->num_attach_points[wt]; ++i) {
-            auto mat = mat_block_face(rc->p, index ^ 1) * et.sw->attach_points[wt][i];
+            auto mat = mat_block_face(rc->p, index ^ 1, rotation) * et.sw->attach_points[wt][i];
             auto attach_index = (unsigned)ship->wire_attachments[wt].size();
             wire_attachment wa = { mat, attach_index, 0, true };
 
@@ -202,6 +202,10 @@ place_entity_attaches(raycast_info* rc, int index, c_entity e, unsigned entity_t
             ship->entity_to_attach_lookups[wt][e].insert(attach_index);
         }
     }
+}
+void
+place_entity_attaches(raycast_info* rc, int index, c_entity e, unsigned entity_type) {
+    place_entity_attaches(rc, index, e, entity_type, 0);
 }
 
 
@@ -456,6 +460,7 @@ resize(int width, int height)
 struct add_block_entity_tool : tool
 {
     unsigned type = 1;
+    float rotation_percent = 0;
 
     bool can_use(raycast_info *rc) {
         if (!rc->hit || rc->inside)
@@ -484,12 +489,17 @@ struct add_block_entity_tool : tool
         return true;
     }
 
+    void select() override {
+        rotation_percent = 0;
+    }
+
     void use(raycast_info *rc) override {
         if (!can_use(rc))
             return;
 
+        float rotation = rotation_percent * 2.0f * (float)M_PI;
         chunk *ch = ship->get_chunk_containing(rc->p);
-        auto e = spawn_entity(rc->p, type, surface_zm, phy);
+        auto e = spawn_entity(rc->p, type, surface_zm, phy, rotation);
         ch->entities.push_back(e);
 
         for (auto i = 0; i < entity_types[type].height; i++) {
@@ -504,10 +514,15 @@ struct add_block_entity_tool : tool
             }
         }
 
-        place_entity_attaches(rc, surface_zp, e, type);
+        place_entity_attaches(rc, surface_zp, e, type, rotation);
     }
 
-    void alt_use(raycast_info *rc) override {}
+    void alt_use(raycast_info *rc) override {
+        rotation_percent += 0.25f;
+        if (rotation_percent >= 1.0f) {
+            rotation_percent -= 1.0f;
+        }
+    }
 
     void long_use(raycast_info *rc) override {}
 
@@ -522,7 +537,9 @@ struct add_block_entity_tool : tool
             return;
 
         auto mat = frame->alloc_aligned<glm::mat4>(1);
-        *mat.ptr = mat_position(glm::vec3(rc->p) + glm::vec3(0.5f, 0.5f, 0.0f));
+
+        float rotation = rotation_percent * 2.0f * (float)M_PI;
+        *mat.ptr = mat_block_face(glm::vec3(rc->p) + glm::vec3(0.5f, 0.5f, 0.0f), surface_zm, rotation);
         mat.bind(1, frame);
 
         auto t = &entity_types[type];
@@ -547,9 +564,14 @@ struct add_block_entity_tool : tool
 
 struct add_surface_entity_tool : tool
 {
+    float rotation_percent = 0;
     unsigned type = 2;  /* bit of a hack -- this is the first with placed_on_surface set. */
                         /* note that we can't cycle_mode() in our ctor as that runs too early,
                            before the entity types are even set up. */
+
+    void select() override {
+        rotation_percent = 0;
+    }
 
     bool can_use(raycast_info *rc) {
         if (!rc->hit)
@@ -590,7 +612,8 @@ struct add_surface_entity_tool : tool
          * a surface facing into it */
         assert(ch);
 
-        auto e = spawn_entity(rc->p, type, index ^ 1, phy);
+        float rotation = rotation_percent * 2.0f * (float)M_PI;
+        auto e = spawn_entity(rc->p, type, index ^ 1, phy, rotation);
         ch->entities.push_back(e);
 
         /* take the space. */
@@ -599,10 +622,15 @@ struct add_surface_entity_tool : tool
         /* mark lighting for rebuild around this point */
         mark_lightfield_update(rc->p);
 
-        place_entity_attaches(rc, index, e, type);
+        place_entity_attaches(rc, index, e, type, rotation);
     }
 
-    void alt_use(raycast_info *rc) override {}
+    void alt_use(raycast_info *rc) override {
+        rotation_percent += 0.25f;
+        if (rotation_percent >= 1.0f) {
+            rotation_percent -= 1.0f;
+        }
+    }
 
     void long_use(raycast_info *rc) override {}
 
@@ -617,9 +645,10 @@ struct add_surface_entity_tool : tool
             return;
 
         int index = normal_to_surface_index(rc);
+        float rotation = rotation_percent * 2.0f * (float)M_PI;
 
         auto mat = frame->alloc_aligned<glm::mat4>(1);
-        *mat.ptr = mat_block_face(rc->p, index ^ 1);
+        *mat.ptr = mat_block_face(rc->p, index ^ 1, rotation);
         mat.bind(1, frame);
 
         auto t = &entity_types[type];
