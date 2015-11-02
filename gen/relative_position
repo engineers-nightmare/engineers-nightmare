@@ -1,2 +1,3 @@
 glm::vec3,position
 glm::mat4,mat
+float,rotation

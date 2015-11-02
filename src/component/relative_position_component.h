@@ -9,6 +9,7 @@ struct relative_position_component_manager : component_manager {
         c_entity *entity;
         glm::vec3 *position;
         glm::mat4 *mat;
+        float *rotation;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -22,6 +23,7 @@ struct relative_position_component_manager : component_manager {
         d.entity = instance_pool.entity + inst.index;
         d.position = instance_pool.position + inst.index;
         d.mat = instance_pool.mat + inst.index;
+        d.rotation = instance_pool.rotation + inst.index;
 
         return d;
     }

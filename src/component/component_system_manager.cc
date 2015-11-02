@@ -131,24 +131,49 @@ set_door_state(ship_space *ship, c_entity ce, surface_type s)
     auto position = pos_man.get_instance_data(ce);
     auto pos = glm::ivec3(*position.position);
     auto door = door_man.get_instance_data(ce);
+    auto rot = *position.rotation;
 
     auto from_surface = s == surface_none ? surface_door : surface_none;
 
-    /* todo: this has no support for rotation whatsoever */
     for (auto h = 0; h < *door.height; ++h) {
-        auto ym = glm::ivec3(pos.x, pos.y - 1, pos.z);
-        auto yp = glm::ivec3(pos.x, pos.y + 1, pos.z);
+        
+        float x_change = glm::round(glm::sin(rot));
+        float y_change = glm::round(glm::cos(rot));
+
+        surface_index surf_plus;
+        surface_index surf_minus;
+
+        if (x_change > 0) {
+            surf_plus = surface_xp;
+            surf_minus = surface_xm;
+        }
+        else if (x_change < 0) {
+            surf_plus = surface_xm;
+            surf_minus = surface_xp;
+        }
+
+        if (y_change > 0) {
+            surf_plus = surface_yp;
+            surf_minus = surface_ym;
+        }
+        else if (y_change < 0) {
+            surf_plus = surface_ym;
+            surf_minus = surface_yp;
+        }
+
+        auto minus = glm::ivec3(pos.x - x_change, pos.y - y_change, pos.z);
+        auto plus = glm::ivec3(pos.x + x_change, pos.y + y_change, pos.z);
 
         /* we'll be calling ensure in set/remove surfaces anyway */
         auto bl = ship->ensure_block(pos);
         auto surfs = bl->surfs;
 
-        if (surfs[surface_yp] == from_surface) {
-            ship->set_surface(pos, yp, surface_yp, s);
+        if (surfs[surf_plus] == from_surface) {
+            ship->set_surface(pos, plus, surf_plus, s);
         }
 
-        if (surfs[surface_ym] == from_surface) {
-            ship->set_surface(pos, ym, surface_ym, s);
+        if (surfs[surf_minus] == from_surface) {
+            ship->set_surface(pos, minus, surf_minus, s);
         }
 
         mark_lightfield_update(pos);
