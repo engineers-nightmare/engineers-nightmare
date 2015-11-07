@@ -131,49 +131,30 @@ set_door_state(ship_space *ship, c_entity ce, surface_type s)
     auto position = pos_man.get_instance_data(ce);
     auto pos = glm::ivec3(*position.position);
     auto door = door_man.get_instance_data(ce);
-    auto rot = *position.rotation;
+    auto transform_mat = *position.mat;
 
     auto from_surface = s == surface_none ? surface_door : surface_none;
 
     for (auto h = 0; h < *door.height; ++h) {
-        
-        float x_change = glm::round(glm::sin(rot));
-        float y_change = glm::round(glm::cos(rot));
+        // determine door normal from transformation matrix
+        glm::ivec3 norm = glm::ivec3(transform_mat[0][1], transform_mat[0][0], 0);
 
-        surface_index surf_plus;
-        surface_index surf_minus;
+        raycast_info rc;
+        rc.n = norm;
 
-        if (x_change > 0) {
-            surf_plus = surface_xp;
-            surf_minus = surface_xm;
-        }
-        else if (x_change < 0) {
-            surf_plus = surface_xm;
-            surf_minus = surface_xp;
-        }
+        // get surfaces that share the door normal
+        surface_index surf_plus = (surface_index)normal_to_surface_index(&rc);
+        surface_index surf_minus = (surface_index)(surf_plus ^ 1);
 
-        if (y_change > 0) {
-            surf_plus = surface_yp;
-            surf_minus = surface_ym;
-        }
-        else if (y_change < 0) {
-            surf_plus = surface_ym;
-            surf_minus = surface_yp;
-        }
-
-        auto minus = glm::ivec3(pos.x - x_change, pos.y - y_change, pos.z);
-        auto plus = glm::ivec3(pos.x + x_change, pos.y + y_change, pos.z);
-
-        /* we'll be calling ensure in set/remove surfaces anyway */
         auto bl = ship->ensure_block(pos);
         auto surfs = bl->surfs;
 
         if (surfs[surf_plus] == from_surface) {
-            ship->set_surface(pos, plus, surf_plus, s);
+            ship->set_surface(pos, pos + norm, surf_plus, s);
         }
 
         if (surfs[surf_minus] == from_surface) {
-            ship->set_surface(pos, minus, surf_minus, s);
+            ship->set_surface(pos, pos - norm, surf_minus, s);
         }
 
         mark_lightfield_update(pos);
