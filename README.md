@@ -23,6 +23,7 @@ types; Lightfield propagated from certain entities.
 
  * assimp
  * bullet
+ * enet
  * freetype6
  * glm
  * libconfig
