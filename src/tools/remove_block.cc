@@ -1,3 +1,5 @@
+#include "../network.h"
+
 #include <epoxy/gl.h>
 
 #include "../common.h"
@@ -19,6 +21,7 @@ extern void
 remove_ents_from_surface(glm::ivec3 p, int face, physics *phy);
 
 extern physics *phy;
+extern ENetPeer *peer;
 
 struct remove_block_tool : tool
 {
@@ -36,8 +39,8 @@ struct remove_block_tool : tool
         /* if there was a block entity here, find and remove it. block
          * ents are "attached" to the zm surface */
         if (bl->type == block_entity) {
-            /* TODO: should this even allow entity removal? This may be nothing more than
-             * historical accident.
+            /* TODO: should this even allow entity removal?
+             * This may be nothing more than historical accident.
              */
             remove_ents_from_surface(rc->bl, surface_zm, phy);
             mark_lightfield_update(rc->bl);
@@ -45,7 +48,8 @@ struct remove_block_tool : tool
         }
 
         /* block removal */
-        bl->type = block_empty;
+        ship->set_block(rc->bl, block_empty);
+        set_block_type(peer, rc->bl, block_empty);
 
         /* strip any orphaned surfaces */
         for (int index = 0; index < 6; index++) {
@@ -60,10 +64,18 @@ struct remove_block_tool : tool
                     /* expand: but this should always exist. */
                 }
                 else if (other_side->type != block_frame) {
-                    /* if the other side has no frame, then there is nothing left to support this
-                     * surface pair -- remove it */
-                    bl->surfs[index] = surface_none;
-                    other_side->surfs[index ^ 1] = surface_none;
+                    /* if the other side has no frame, then there is nothing
+                     * left to support this surface pair -- remove it */
+
+                    auto si = (surface_index)index;
+                    auto oi = (surface_index)(index ^ 1);
+
+                    ship->set_surface(rc->bl, r, si, surface_none);
+                    set_block_surface(peer, rc->bl, r, si, surface_none);
+
+                    ship->set_surface(r, rc->bl, oi, surface_none);
+                    set_block_surface(peer, r, rc->bl, oi, surface_none);
+
                     ship->get_chunk_containing(r)->render_chunk.valid = false;
                     ship->get_chunk_containing(r)->phys_chunk.valid = false;
 
@@ -79,8 +91,6 @@ struct remove_block_tool : tool
         }
 
         /* dirty the chunk */
-        ship->get_chunk_containing(rc->bl)->render_chunk.valid = false;
-        ship->get_chunk_containing(rc->bl)->phys_chunk.valid = false;
         mark_lightfield_update(rc->bl);
     }
 
