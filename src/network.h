@@ -7,31 +7,39 @@
 #include "ship_space.h"
 #include "block.h"
 
-/* message types */
-#define SERVER_MSG          0x00
-#define SHIP_MSG            0x01
-#define UPDATE_MSG          0x02
+enum class message_type : uint8_t {
+    /* message types */
+    server_msg = 0,
+    ship_msg,
+    update_msg,
+};
 
-/* SERVER_MSG subtypes */
-#define SERVER_VSN_MSG      0x00
-#define CLIENT_VSN_MSG      0x01
-#define INCOMPAT_VSN_MSG    0x02
-#define SLOT_REQUEST        0x03
-#define SLOT_GRANTED        0x04
-#define SERVER_FULL         0x05
-#define REGISTER_REQUIRED   0x06
-#define NOT_IN_SLOT         0x07
+enum class message_subtype_server : uint8_t {
+    /* SERVER_MSG subtypes */
+    server_vsn_msg = 0,
+    client_vsn_msg,
+    incompat_vsn_msg,
+    slot_request,
+    slot_granted,
+    server_full,
+    register_required,
+    not_in_slot,
+};
 
-/* SHIP_MSG subtype */
-#define ALL_SHIP_REQUEST    0x00
-#define ALL_SHIP_REPLY      0x01
-#define CHUNK_SHIP_REPLY    0x02
+enum class message_subtype_ship : uint8_t {
+    /* SHIP_MSG subtype */
+    all_ship_request = 0,
+    all_ship_reply,
+    chunk_ship_reply,
+};
 
-/* UPDATE_MSG subtype */
-#define SET_BLOCK_TYPE      0x00
-#define SET_SURFACE_TYPE    0x01
-#define REMOVE_BLOCK        0x02
-#define REMOVE_SURFACE      0x03
+enum class message_subtype_update : uint8_t {
+    /* UPDATE_MSG subtype */
+    set_block_type = 0,
+    set_surface_type,
+    remove_block,
+    remove_surface,
+};
 
 
 /* assumes 4 byte int, obviously not always true */
@@ -66,8 +74,8 @@ bool send_not_in_slot(ENetPeer *peer);
 
 /* ship messages */
 bool request_whole_ship(ENetPeer *peer);
-bool send_ship_chunk(ENetPeer *peer, ship_space *space, glm::ivec3 ch);
-bool reply_whole_ship(ENetPeer *peer, ship_space *space);
+bool send_ship_chunk(ENetPeer *peer, glm::ivec3 ch, std::vector<unsigned char> *vbuf);
+bool reply_whole_ship(ENetPeer *peer);
 
 /* update messages */
 bool set_block_type(ENetPeer *peer, glm::ivec3 block,
