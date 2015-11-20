@@ -43,21 +43,21 @@ void handle_server_message(ENetEvent *event, uint8_t *data,
     message_subtype_server subtype)
 {
     switch(subtype) {
-        case message_subtype_server::server_vsn_msg:
+        case message_subtype_server::server_version:
         {
-            uint8_t major = *(data + 0);
-            uint8_t minor = *(data + 1);
-            uint8_t patch = *(data + 2);
+            uint8_t major = data[0];
+            uint8_t minor = data[1];
+            uint8_t patch = data[2];
 
             printf("server version %d.%d.%d ", major, minor, patch);
             request_slot(event->peer);
             break;
         }
-        case message_subtype_server::incompat_vsn_msg:
+        case message_subtype_server::incompatible_version:
         {
-            uint8_t major = *(data + 0);
-            uint8_t minor = *(data + 1);
-            uint8_t patch = *(data + 2);
+            uint8_t major = data[0];
+            uint8_t minor = data[1];
+            uint8_t patch = data[2];
 
             fprintf(stderr, "You must upgrade your client to at "
                 "least v%d.%d.%d\n", major, minor, patch);
@@ -103,16 +103,16 @@ void handle_message(ENetEvent *event)
     printf("[%x:%u] ", event->peer->address.host, event->peer->address.port);
 
     switch(type) {
-        case message_type::server_msg:
+        case message_type::server:
         {
-            auto subtype = (message_subtype_server)*(data + 1);
+            auto subtype = (message_subtype_server)data[1];
             printf("server message(0x%02X): ", subtype);
             handle_server_message(event, data + 2, subtype);
             break;
         }
-        case message_type::ship_msg:
+        case message_type::ship:
         {
-            auto subtype = (message_subtype_ship)*(data + 1);
+            auto subtype = (message_subtype_ship)data[1];
             printf("ship message(0x%02X): ", subtype);
             handle_ship_message(event, data + 2, subtype);
             break;
