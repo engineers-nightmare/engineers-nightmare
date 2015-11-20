@@ -2108,30 +2108,54 @@ handle_input()
     }
 }
 
-void
-handle_ship_message(ENetEvent *event, uint8_t *data)
-{ }
+
+bool
+handle_ship_message(ENetEvent *event, uint8_t *data, message_subtype_ship subtype)
+{
+    switch (subtype) {
+        case message_subtype_ship::all_ship_reply:
+            return true;
+        case message_subtype_ship::chunk_ship_reply:
+        {
+            // Get chunk coordinates (signed 16-bit x3)
+            // TODO: proper endian-safe integer pack/unpack
+            int x = (((int)data[0])<<8) | ((int)data[1]);
+            int y = (((int)data[2])<<8) | ((int)data[3]);
+            int z = (((int)data[4])<<8) | ((int)data[5]);
+            if(x >= 0x8000) x -= 0x10000;
+            if(y >= 0x8000) y -= 0x10000;
+            if(z >= 0x8000) z -= 0x10000;
+
+            auto chunk = glm::ivec3(x, y, z);
+            auto len = event->packet->dataLength;
+            ship->unserialize_chunk(chunk, data + 6, len - 6);
+        }
+        default:
+        return false;
+    }
+}
+
 
 void
-handle_update_message(ENetEvent *event, uint8_t *data)
+handle_update_message(ENetEvent *event, uint8_t *data, message_subtype_update subtype)
 {
     int x, y, z, px, py, pz;
 
     glm::ivec3 vec;
     glm::ivec3 pvec;
 
-    switch(*data) {
-        case SET_BLOCK_TYPE:
+    switch(subtype) {
+        case message_subtype_update::set_block_type:
         {
             printf("set block type!\n");
-            px = pack_int(data, 1);
-            py = pack_int(data, 5);
-            pz = pack_int(data, 9);
+            px = pack_int(data, 0);
+            py = pack_int(data, 4);
+            pz = pack_int(data, 8);
 
             pvec = glm::ivec3(px, py, pz);
-            auto type = (enum block_type)data[13];
+            auto type = (enum block_type)data[12];
 
-            printf("setting block at %d,%d,%d to %d\n", px, py, pz, data[13]);
+            printf("setting block at %d,%d,%d to %d\n", px, py, pz, type);
 
             ship->set_block(pvec, type);
 
@@ -2139,55 +2163,65 @@ handle_update_message(ENetEvent *event, uint8_t *data)
 
             break;
         }
-        case SET_SURFACE_TYPE:
+        case message_subtype_update::set_surface_type:
         {
             printf("set texture type!\n");
-            x = pack_int(data, 1);
-            y = pack_int(data, 5);
-            z = pack_int(data, 9);
-            px = pack_int(data, 13);
-            py = pack_int(data, 17);
-            pz = pack_int(data, 21);
+            x = pack_int(data, 0);
+            y = pack_int(data, 4);
+            z = pack_int(data, 8);
+            px = pack_int(data, 12);
+            py = pack_int(data, 16);
+            pz = pack_int(data, 20);
 
             vec = glm::ivec3(x, y, z);
             pvec = glm::ivec3(px, py, pz);
 
-            auto index = (surface_index)data[25];
-            auto type = (surface_type)data[26];
+            auto index = (surface_index)data[24];
+            auto type = (surface_type)data[25];
 
             printf("setting texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
-                x, y, z, px, py, pz, data[26], data[25]);
+                x, y, z, px, py, pz, type, index);
 
             ship->set_surface(vec, pvec, index, type);
             break;
         }
         default:
-            printf("unknown message(0x%02X)\n", *data);
+            printf("unknown message(0x%02X)\n", subtype);
     }
 }
 
 void
 handle_run_message(ENetEvent *event)
 {
-    uint8_t *data;
-
     printf("[%x:%u] ", event->peer->address.host, event->peer->address.port);
-    data = event->packet->data;
-    switch(*data) {
-        case SERVER_MSG:
+
+    uint8_t *data = event->packet->data;
+    message_type type = (message_type)*data;
+
+    switch(type) {
+        case message_type::server_msg:
+        {
+            auto subtype = (message_subtype_server)*(data + 1);
             printf("unexpected server message(0x%02x), ignored\n",
-                    *(data + 1));
+                subtype);
             break;
-        case SHIP_MSG:
-            printf("ship message(0x%02x): ", *(data + 1));
-            handle_ship_message(event, data + 1);
+        }
+        case message_type::ship_msg:
+        {
+            auto subtype = (message_subtype_ship)*(data + 1);
+            printf("ship message(0x%02x): ", subtype);
+            handle_ship_message(event, data + 2, subtype);
             break;
-        case UPDATE_MSG:
-            printf ("update message(0x%02x): ", *(data + 1));
-            handle_update_message(event, data + 1);
+        }
+        case message_type::update_msg:
+        {
+            auto subtype = (message_subtype_update)*(data + 1);
+            printf("update message(0x%02x): ", subtype);
+            handle_update_message(event, data + 2, subtype);
             break;
+        }
         default:
-            printf("unknown message(0x%02x)\n", *data);
+            printf("unknown message(0x%02x)\n", type);
     }
 }
 
@@ -2362,61 +2396,49 @@ connect_server(char *host, int port)
 }
 
 bool
-handle_server_message(ENetEvent *event, uint8_t *data, size_t)
+handle_server_message(ENetEvent *event, uint8_t *data,
+    message_subtype_server subtype)
 {
-    switch(*data) {
-        case SERVER_VSN_MSG:
-            printf("server version: %d.%d.%d\n", *(data + 1),
-                    *(data + 2), *(data + 3));
+    switch(subtype) {
+        case message_subtype_server::server_vsn_msg:
+        {
+            uint8_t major = *(data + 0);
+            uint8_t minor = *(data + 1);
+            uint8_t patch = *(data + 2);
+
+            printf("server version %d.%d.%d ", major, minor, patch);
+
             request_slot(event->peer);
             break;
-        case INCOMPAT_VSN_MSG:
+        }
+        case message_subtype_server::incompat_vsn_msg:
+        {
+            uint8_t major = *(data + 0);
+            uint8_t minor = *(data + 1);
+            uint8_t patch = *(data + 2);
+
             fprintf(stderr, "You must upgrade your client to at "
-                    "least v%d.%d.%d\n", *(data + 1), *(data + 2),
-                    *(data + 3));
+                "least v%d.%d.%d\n", major, minor, patch);
             disconnect_peer(event->peer);
             break;
-        case SLOT_GRANTED:
+        }
+        case message_subtype_server::slot_granted:
             request_whole_ship(event->peer);
             break;
-        case SERVER_FULL:
+        case message_subtype_server::server_full:
             fprintf(stderr, "server is full!\n");
             break;
-        case REGISTER_REQUIRED:
+        case message_subtype_server::register_required:
             fprintf(stderr, "failed to join before sending version "
                     "information!\n");
             disconnect_peer(event->peer);
             break;
-        case NOT_IN_SLOT:
+        case message_subtype_server::not_in_slot:
             fprintf(stderr, "had not joined the server before "
                     "requesting game information\n");
             break;
-    }
-
-    return false;
-}
-
-bool
-handle_ship_message(ENetEvent *event, uint8_t *data, size_t len)
-{
-    switch(*data) {
-        case ALL_SHIP_REPLY:
-            return  true;
-        case CHUNK_SHIP_REPLY:
-            {
-                // Get chunk coordinates (signed 16-bit x3)
-                // TODO: proper endian-safe integer pack/unpack
-                int x = (((int)data[1])<<8) | ((int)data[2]);
-                int y = (((int)data[3])<<8) | ((int)data[4]);
-                int z = (((int)data[5])<<8) | ((int)data[6]);
-                if(x >= 0x8000) x -= 0x10000;
-                if(y >= 0x8000) y -= 0x10000;
-                if(z >= 0x8000) z -= 0x10000;
-
-                auto chunk = glm::ivec3(x, y, z);
-                ship->unserialize_chunk(chunk, data + 7, len - 7);
-            }
-            return false;
+        default:
+            break;
     }
 
     return false;
@@ -2424,14 +2446,23 @@ handle_ship_message(ENetEvent *event, uint8_t *data, size_t len)
 
 bool
 handle_message(ENetEvent *event) {
-    uint8_t *data;
+    uint8_t *data = event->packet->data;
 
-    data = event->packet->data;
-    switch(*data) {
-        case SERVER_MSG:
-            return handle_server_message(event, data + 1, event->packet->dataLength - 1);
-        case SHIP_MSG:
-            return handle_ship_message(event, data + 1, event->packet->dataLength - 1);
+    message_type type = (message_type)*data;
+
+    switch(type) {
+        case message_type::server_msg:
+        {
+            auto subtype = (message_subtype_server)*(data + 1);
+            return handle_server_message(event, data + 2, subtype);
+        }
+        case message_type::ship_msg:
+        {
+            auto subtype = (message_subtype_ship)*(data + 1);
+            return handle_ship_message(event, data + 2, subtype);
+        }
+        default:
+            break;
     }
 
     return false;

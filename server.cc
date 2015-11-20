@@ -53,31 +53,38 @@ init(void)
 
 /* handle the submessage of a SERVER_MSG */
 void
-handle_server_message(ENetEvent *event, uint8_t *data)
+handle_server_message(ENetEvent *event, uint8_t *data,
+    message_subtype_server subtype)
 {
     struct peer_info *pi;
     int i;
 
-    switch(*data) {
-        case CLIENT_VSN_MSG:
-            printf("client version %d.%d.%d ", *(data + 1),
-                    *(data + 2), *(data + 3));
-            if(CHECK_VERSION(*(data + 1), *(data + 2), *(data + 3))) {
+    switch(subtype) {
+        case message_subtype_server::client_vsn_msg:
+        {
+            uint8_t major = *(data + 0);
+            uint8_t minor = *(data + 1);
+            uint8_t patch = *(data + 2);
+
+            printf("client version %d.%d.%d ", major, minor, patch);
+
+            if (CHECK_VERSION(major, minor, patch)) {
                 printf("compatible\n");
                 send_server_version(event->peer, VSN_MAJOR, VSN_MINOR,
-                        VSN_PATCH);
+                    VSN_PATCH);
 
                 pi = new struct peer_info;
-                pi->vsn_str = MAKE_VERSION_CHECK(*(data + 1),
-                        *(data + 2), *(data + 3));
+                pi->vsn_str = MAKE_VERSION_CHECK(major, minor, patch);
                 event->peer->data = pi;
-            }else {
+            }
+            else {
                 printf("incompatible!\n");
                 send_incompatible_version(event->peer, MIN_CLIENT_MAJOR,
-                        MIN_CLIENT_MINOR, MIN_CLIENT_PATCH);
+                    MIN_CLIENT_MINOR, MIN_CLIENT_PATCH);
             }
             break;
-        case SLOT_REQUEST:
+        }
+        case message_subtype_server::slot_request:
             if(!event->peer->data)
                 send_register_required(event->peer);
             for(i = 0; i < MAX_SLOTS; i++)
@@ -94,47 +101,64 @@ handle_server_message(ENetEvent *event, uint8_t *data)
 
             break;
         default:
-            printf("unknown message(0x%02X)\n", *data);
+            printf("unknown message(0x%02X)\n", subtype);
     }
 }
 
 /* handle the submessage of a SHIP_MSG */
 void
-handle_ship_message(ENetEvent *event, uint8_t *data)
+handle_ship_message(ENetEvent *event, uint8_t *data,
+    message_subtype_ship subtype)
 {
-    switch(*data) {
-        case ALL_SHIP_REQUEST:
+    switch(subtype) {
+        case message_subtype_ship::all_ship_request:
             printf("ship space requested!\n");
             if(!event->peer->data) {
                 send_not_in_slot(event->peer);
                 return;
             }
-            reply_whole_ship(event->peer, ship);
+
+            // TODO: send more than one chunk
+            for (auto c : ship->chunks) {
+                glm::ivec3 chunk;
+                chunk.x = c.first.x;
+                chunk.y = c.first.y;
+                chunk.z = c.first.z;
+
+                auto vbuf = ship->serialize_chunk(chunk);
+
+                send_ship_chunk(event->peer, chunk, vbuf);
+
+                /* alloced in serialize_chunk() */
+                delete vbuf;
+            }
+            reply_whole_ship(event->peer);
             break;
         default:
-            printf("unknown messages(0x%02X)\n", *data);
+            printf("unknown messages(0x%02X)\n", subtype);
     }
 }
 
 /* handle the submessage of a UPDATE_MSG */
 void
-handle_update_message(ENetEvent *event, uint8_t *data)
+handle_update_message(ENetEvent *event, uint8_t *data,
+    message_subtype_update subtype)
 {
     int x, y, z, px, py, pz;
 
     glm::ivec3 vec;
     glm::ivec3 pvec;
 
-    switch(*data) {
-        case SET_BLOCK_TYPE:
+    switch(subtype) {
+        case message_subtype_update::set_block_type:
         {
             printf("set block type!\n");
-            px = pack_int(data, 1);
-            py = pack_int(data, 5);
-            pz = pack_int(data, 9);
+            px = pack_int(data, 0);
+            py = pack_int(data, 4);
+            pz = pack_int(data, 8);
 
             pvec = glm::ivec3(px, py, pz);
-            auto type = (enum block_type)data[13];
+            auto type = (enum block_type)data[12];
 
             printf("setting block at %d,%d,%d to %d\n", px, py, pz, type);
 
@@ -143,29 +167,29 @@ handle_update_message(ENetEvent *event, uint8_t *data)
             for (int i = 0; i < MAX_SLOTS; i++) {
                 if (peers[i] &&
                     peers[i]->connectID != event->peer->connectID)
-                    send_data(peers[i], data - 1, 15);
+                    send_data(peers[i], event->packet->data, 15);
             }
 
             break;
         }
-        case SET_SURFACE_TYPE:
+        case message_subtype_update::set_surface_type:
         {
             printf("set texture type!\n");
-            x = pack_int(data, 1);
-            y = pack_int(data, 5);
-            z = pack_int(data, 9);
-            px = pack_int(data, 13);
-            py = pack_int(data, 17);
-            pz = pack_int(data, 21);
+            x = pack_int(data, 0);
+            y = pack_int(data, 4);
+            z = pack_int(data, 8);
+            px = pack_int(data, 12);
+            py = pack_int(data, 16);
+            pz = pack_int(data, 20);
 
             vec = glm::ivec3(x, y, z);
             pvec = glm::ivec3(px, py, pz);
 
-            auto index = (surface_index)data[25];
-            auto type = (surface_type)data[26];
+            auto index = (surface_index)data[24];
+            auto type = (surface_type)data[25];
 
             printf("setting texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
-                x, y, z, px, py, pz, data[26], data[25]);
+                x, y, z, px, py, pz, type, index);
 
             ship->set_surface(vec, pvec, index, type);
 
@@ -173,12 +197,12 @@ handle_update_message(ENetEvent *event, uint8_t *data)
             for (int i = 0; i < MAX_SLOTS; i++) {
                 if (peers[i] &&
                     peers[i]->connectID != event->peer->connectID)
-                    send_data(peers[i], data - 1, 28);
+                    send_data(peers[i], event->packet->data, 28);
             }
             break;
         }
         default:
-            printf("unknown message(0x%02X)\n", *data);
+            printf("unknown message(0x%02X)\n", subtype);
     }
 }
 
@@ -186,25 +210,35 @@ handle_update_message(ENetEvent *event, uint8_t *data)
 void
 handle_message(ENetEvent *event)
 {
-    uint8_t *data;
-
     printf("[%x:%u] ", event->peer->address.host, event->peer->address.port);
-    data = event->packet->data;
-    switch(*data) {
-        case SERVER_MSG:
-            printf("server message(0x%02x): ", *(data + 1));
-            handle_server_message(event, data + 1);
+
+    uint8_t *data = event->packet->data;
+    message_type type = (message_type)*data;
+
+    switch(type) {
+        case message_type::server_msg:
+        {
+            auto subtype = (message_subtype_server)*(data + 1);
+            printf("server message(0x%02x): ", subtype);
+            handle_server_message(event, data + 2, subtype);
             break;
-        case SHIP_MSG:
-            printf("ship message(0x%02x): ", *(data + 1));
-            handle_ship_message(event, data + 1);
+        }
+        case message_type::ship_msg:
+        {
+            auto subtype = (message_subtype_ship)*(data + 1);
+            printf("ship message(0x%02x): ", subtype);
+            handle_ship_message(event, data + 2, subtype);
             break;
-        case UPDATE_MSG:
-            printf("update message(0x%02x): ", *(data + 1));
-            handle_update_message(event, data + 1);
+        }
+        case message_type::update_msg:
+        {
+            auto subtype = (message_subtype_update)*(data + 1);
+            printf("update message(0x%02x): ", subtype);
+            handle_update_message(event, data + 2, subtype);
             break;
+        }
         default:
-            printf("unknown message(0x%02x)\n", *data);
+            printf("unknown message(0x%02x)\n", type);
     }
 }
 
@@ -219,7 +253,7 @@ handle_disconnect(ENetEvent *event)
     if(event->peer->data){
         for(i = 0; i < MAX_SLOTS; i++) {
             if(peers[i] && peers[i]->connectID == event->peer->connectID) {
-                peers[i] = NULL;
+                peers[i] = nullptr;
                 break;
             }
         }
@@ -241,7 +275,7 @@ server_loop()
                     printf("A new client connected from %x:%u.\n",
                             event.peer->address.host,
                             event.peer->address.port);
-                    event.peer->data = NULL;
+                    event.peer->data = nullptr;
                     break;
                 case ENET_EVENT_TYPE_DISCONNECT:
                     handle_disconnect(&event);
