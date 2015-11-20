@@ -9,16 +9,16 @@
 
 enum class message_type : uint8_t {
     /* message types */
-    server_msg = 0,
-    ship_msg,
-    update_msg,
+    server = 0,
+    ship,
+    update,
 };
 
 enum class message_subtype_server : uint8_t {
     /* SERVER_MSG subtypes */
-    server_vsn_msg = 0,
-    client_vsn_msg,
-    incompat_vsn_msg,
+    server_version = 0,
+    client_version,
+    incompatible_version,
     slot_request,
     slot_granted,
     server_full,

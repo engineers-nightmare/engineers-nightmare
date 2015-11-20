@@ -2199,21 +2199,21 @@ handle_run_message(ENetEvent *event)
     message_type type = (message_type)*data;
 
     switch(type) {
-        case message_type::server_msg:
+        case message_type::server:
         {
             auto subtype = (message_subtype_server)*(data + 1);
             printf("unexpected server message(0x%02x), ignored\n",
                 subtype);
             break;
         }
-        case message_type::ship_msg:
+        case message_type::ship:
         {
             auto subtype = (message_subtype_ship)*(data + 1);
             printf("ship message(0x%02x): ", subtype);
             handle_ship_message(event, data + 2, subtype);
             break;
         }
-        case message_type::update_msg:
+        case message_type::update:
         {
             auto subtype = (message_subtype_update)*(data + 1);
             printf("update message(0x%02x): ", subtype);
@@ -2368,7 +2368,7 @@ connect_server(char *host, int port)
         return false;
     }
 
-    client = enet_host_create(NULL, /* create a client host */
+    client = enet_host_create(nullptr, /* create a client host */
             1,          /* only allow 1 outgoing connection */
             2,          /* allow up 2 channels to be used, 0 and 1 */
             57600/8,    /* 56K modem with 56 Kbps downstream bandwidth */
@@ -2400,7 +2400,7 @@ handle_server_message(ENetEvent *event, uint8_t *data,
     message_subtype_server subtype)
 {
     switch(subtype) {
-        case message_subtype_server::server_vsn_msg:
+        case message_subtype_server::server_version:
         {
             uint8_t major = *(data + 0);
             uint8_t minor = *(data + 1);
@@ -2411,7 +2411,7 @@ handle_server_message(ENetEvent *event, uint8_t *data,
             request_slot(event->peer);
             break;
         }
-        case message_subtype_server::incompat_vsn_msg:
+        case message_subtype_server::incompatible_version:
         {
             uint8_t major = *(data + 0);
             uint8_t minor = *(data + 1);
@@ -2451,12 +2451,12 @@ handle_message(ENetEvent *event) {
     message_type type = (message_type)*data;
 
     switch(type) {
-        case message_type::server_msg:
+        case message_type::server:
         {
             auto subtype = (message_subtype_server)*(data + 1);
             return handle_server_message(event, data + 2, subtype);
         }
-        case message_type::ship_msg:
+        case message_type::ship:
         {
             auto subtype = (message_subtype_ship)*(data + 1);
             return handle_ship_message(event, data + 2, subtype);

@@ -60,7 +60,7 @@ handle_server_message(ENetEvent *event, uint8_t *data,
     int i;
 
     switch(subtype) {
-        case message_subtype_server::client_vsn_msg:
+        case message_subtype_server::client_version:
         {
             uint8_t major = *(data + 0);
             uint8_t minor = *(data + 1);
@@ -216,21 +216,21 @@ handle_message(ENetEvent *event)
     message_type type = (message_type)*data;
 
     switch(type) {
-        case message_type::server_msg:
+        case message_type::server:
         {
             auto subtype = (message_subtype_server)*(data + 1);
             printf("server message(0x%02x): ", subtype);
             handle_server_message(event, data + 2, subtype);
             break;
         }
-        case message_type::ship_msg:
+        case message_type::ship:
         {
             auto subtype = (message_subtype_ship)*(data + 1);
             printf("ship message(0x%02x): ", subtype);
             handle_ship_message(event, data + 2, subtype);
             break;
         }
-        case message_type::update_msg:
+        case message_type::update:
         {
             auto subtype = (message_subtype_update)*(data + 1);
             printf("update message(0x%02x): ", subtype);

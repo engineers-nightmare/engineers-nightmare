@@ -30,7 +30,7 @@ static bool send_version_message(ENetPeer *peer, message_subtype_server subtype,
 {
     assert(peer);
 
-    uint8_t data[5] = {(uint8_t)message_type::server_msg,
+    uint8_t data[5] = {(uint8_t)message_type::server,
         (uint8_t)subtype, major, minor, patch };
     auto packet = enet_packet_create(data, 5, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
@@ -39,21 +39,21 @@ static bool send_version_message(ENetPeer *peer, message_subtype_server subtype,
 bool send_client_version(ENetPeer *peer, uint8_t major, uint8_t minor,
         uint8_t patch)
 {
-    return send_version_message(peer, message_subtype_server::client_vsn_msg,
+    return send_version_message(peer, message_subtype_server::client_version,
         major, minor, patch);
 }
 
 bool send_server_version(ENetPeer *peer, uint8_t major, uint8_t minor,
         uint8_t patch)
 {
-    return send_version_message(peer, message_subtype_server::server_vsn_msg,
+    return send_version_message(peer, message_subtype_server::server_version,
         major, minor, patch);
 }
 
 bool send_incompatible_version(ENetPeer *peer, uint8_t major, uint8_t minor,
         uint8_t patch)
 {
-    return send_version_message(peer,message_subtype_server::incompat_vsn_msg,
+    return send_version_message(peer,message_subtype_server::incompatible_version,
         major, minor, patch);
 }
 
@@ -61,7 +61,7 @@ bool basic_server_message(ENetPeer *peer, message_subtype_server subtype)
 {
     assert(peer);
 
-    uint8_t data[2] = {(uint8_t)message_type::server_msg, (uint8_t)subtype};
+    uint8_t data[2] = {(uint8_t)message_type::server, (uint8_t)subtype};
     auto packet = enet_packet_create(data, 2, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
 }
@@ -95,7 +95,7 @@ bool basic_ship_message(ENetPeer *peer, message_subtype_ship subtype)
 {
     assert(peer);
 
-    uint8_t data[2] = { (uint8_t)message_type::ship_msg, (uint8_t)subtype};
+    uint8_t data[2] = { (uint8_t)message_type::ship, (uint8_t)subtype};
     auto packet = enet_packet_create(data, 2, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
 }
@@ -118,7 +118,7 @@ send_ship_chunk(ENetPeer *peer, glm::ivec3 ch, std::vector<unsigned char> *vbuf)
     assert( packet );
 
     // Add in standard header
-    packet->data[0] = (uint8_t)message_type::ship_msg;
+    packet->data[0] = (uint8_t)message_type::ship;
     packet->data[1] = (uint8_t)message_subtype_ship::chunk_ship_reply;
 
     // Add in chunk coordinates
@@ -141,7 +141,7 @@ bool reply_whole_ship(ENetPeer *peer) {
     ENetPacket *packet;
     assert(peer);
 
-    uint8_t data[2] = { (uint8_t)message_type::ship_msg,
+    uint8_t data[2] = { (uint8_t)message_type::ship,
         (uint8_t)message_subtype_ship::all_ship_reply};
     packet = enet_packet_create(data, 2, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
@@ -155,7 +155,7 @@ set_block_type(ENetPeer *peer, glm::ivec3 block, enum block_type type)
     assert(peer);
 
     printf("set chunk at %d,%d,%d to %d\n", block.x, block.y, block.z, type);
-    uint8_t data[15] = { (uint8_t)message_type::update_msg,
+    uint8_t data[15] = { (uint8_t)message_type::update,
         (uint8_t)message_subtype_update::set_block_type,
         unpack_static_int(block.x),
         unpack_static_int(block.y),
@@ -176,7 +176,7 @@ set_block_surface(ENetPeer *peer, glm::ivec3 a, glm::ivec3 b,
 
     printf("set texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
             a.x, a.y, a.z, b.x, b.y, b.z, st, idx);
-    uint8_t data[28] = {(uint8_t)message_type::update_msg,
+    uint8_t data[28] = {(uint8_t)message_type::update,
         (uint8_t)message_subtype_update::set_surface_type,
         unpack_static_int(a.x),
         unpack_static_int(a.y),
