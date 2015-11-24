@@ -123,6 +123,12 @@
     <ClCompile Include="src\mesher.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\packet_writer.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\packet_reader.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ship_space.h">
@@ -204,6 +210,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\char.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\packet_reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\packet_writer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

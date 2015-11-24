@@ -171,6 +171,15 @@
     <ClCompile Include="src\light_field.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\packet_reader.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\packet_writer.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serialize.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -318,6 +327,15 @@
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\server_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\packet_reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\packet_writer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialize.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

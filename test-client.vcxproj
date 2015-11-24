@@ -20,10 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\network.cc" />
+    <ClCompile Include="src\packet_reader.cc" />
+    <ClCompile Include="src\packet_writer.cc" />
     <ClCompile Include="test-client.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\network.h" />
+    <ClInclude Include="src\packet_reader.h" />
+    <ClInclude Include="src\packet_writer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AA7A6D17-3280-4562-99E9-D242F04D0A2B}</ProjectGuid>
