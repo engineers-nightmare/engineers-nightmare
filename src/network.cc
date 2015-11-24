@@ -4,11 +4,16 @@
 #include <stdio.h>
 
 #include "ship_space.h"
+#include "packet_writer.h"
 
 extern ship_space *ship;
 
 extern void
 remove_ents_from_surface(int x, int y, int z, int face);
+
+static void destroy_packet_callback(ENetPacket *packet) {
+    delete packet->data;
+}
 
 static bool send_packet(ENetPeer *peer, ENetPacket *packet)
 {
@@ -30,9 +35,16 @@ static bool send_version_message(ENetPeer *peer, message_subtype_server subtype,
 {
     assert(peer);
 
-    uint8_t data[5] = {(uint8_t)message_type::server,
-        (uint8_t)subtype, major, minor, patch };
-    auto packet = enet_packet_create(data, 5, ENET_PACKET_FLAG_RELIABLE);
+    uint8_t data[5];
+    packet_writer pw(data, 5);
+
+    pw.put(message_type::server);
+    pw.put(subtype);
+    pw.put(major);
+    pw.put(minor);
+    pw.put(patch);
+
+    auto packet = enet_packet_create(pw.buf, pw.len, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
 }
 
@@ -61,8 +73,13 @@ bool basic_server_message(ENetPeer *peer, message_subtype_server subtype)
 {
     assert(peer);
 
-    uint8_t data[2] = {(uint8_t)message_type::server, (uint8_t)subtype};
-    auto packet = enet_packet_create(data, 2, ENET_PACKET_FLAG_RELIABLE);
+    uint8_t data[2];
+    packet_writer pw(data, 2);
+
+    pw.put(message_type::server);
+    pw.put(subtype);
+
+    auto packet = enet_packet_create(pw.buf, pw.len, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
 }
 
@@ -95,8 +112,12 @@ bool basic_ship_message(ENetPeer *peer, message_subtype_ship subtype)
 {
     assert(peer);
 
-    uint8_t data[2] = { (uint8_t)message_type::ship, (uint8_t)subtype};
-    auto packet = enet_packet_create(data, 2, ENET_PACKET_FLAG_RELIABLE);
+    uint8_t buf[2];
+    packet_writer pw(&buf[0], 2);
+    pw.put(message_type::ship);
+    pw.put(subtype);
+
+    auto packet = enet_packet_create(pw.buf, pw.len, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
 }
 
@@ -113,56 +134,55 @@ send_ship_chunk(ENetPeer *peer, glm::ivec3 ch, std::vector<unsigned char> *vbuf)
     }
 
     // Allocate packet
+    auto *buffer = new uint8_t[4 * 1024];
+    packet_writer pw(buffer, 4 * 1024);
+
+    pw.put(message_type::ship);
+    pw.put(message_subtype_ship::chunk_ship_reply);
+    pw.put(ch);
+
+    for (auto d : *vbuf) {
+        pw.put(d);
+    }
+    
     ENetPacket *packet =
-        enet_packet_create(nullptr, vbuf->size() + 8, ENET_PACKET_FLAG_RELIABLE);
-    assert( packet );
-
-    // Add in standard header
-    packet->data[0] = (uint8_t)message_type::ship;
-    packet->data[1] = (uint8_t)message_subtype_ship::chunk_ship_reply;
-
-    // Add in chunk coordinates
-    // TODO: proper endian-safe integer pack/unpack
-    packet->data[2+0] = (uint8_t)(ch.x>>8);
-    packet->data[2+1] = (uint8_t)(ch.x);
-    packet->data[2+2] = (uint8_t)(ch.y>>8);
-    packet->data[2+3] = (uint8_t)(ch.y);
-    packet->data[2+4] = (uint8_t)(ch.z>>8);
-    packet->data[2+5] = (uint8_t)(ch.z);
-
-    // Add in data
-    memcpy(packet->data + 8, vbuf->data(), vbuf->size());
+        enet_packet_create(pw.buf, pw.len, ENET_PACKET_FLAG_RELIABLE | ENET_PACKET_FLAG_NO_ALLOCATE);
+    packet->freeCallback = destroy_packet_callback;
+    assert(packet);
 
     // Send and return!
     return send_packet(peer, packet);
 }
 
 bool reply_whole_ship(ENetPeer *peer) {
-    ENetPacket *packet;
     assert(peer);
 
-    uint8_t data[2] = { (uint8_t)message_type::ship,
-        (uint8_t)message_subtype_ship::all_ship_reply};
-    packet = enet_packet_create(data, 2, ENET_PACKET_FLAG_RELIABLE);
+    uint8_t data[2];
+    packet_writer pw(data, 2);
+
+    pw.put(message_type::ship);
+    pw.put(message_subtype_ship::all_ship_reply);
+
+    auto packet = enet_packet_create(pw.buf, pw.len, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
 }
 
 bool
 set_block_type(ENetPeer *peer, glm::ivec3 block, enum block_type type)
 {
-    ENetPacket *packet;
-
     assert(peer);
 
     printf("set chunk at %d,%d,%d to %d\n", block.x, block.y, block.z, type);
-    uint8_t data[15] = { (uint8_t)message_type::update,
-        (uint8_t)message_subtype_update::set_block_type,
-        unpack_static_int(block.x),
-        unpack_static_int(block.y),
-        unpack_static_int(block.z),
-        type
-    };
-    packet = enet_packet_create(data, sizeof(data), ENET_PACKET_FLAG_RELIABLE);
+
+    uint8_t data[15];
+    packet_writer pw(data, 15);
+
+    pw.put(message_type::update);
+    pw.put(message_subtype_update::set_block_type);
+    pw.put(block);
+    pw.put(type);
+
+    auto packet = enet_packet_create(pw.buf, pw.len, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
 }
 
@@ -170,23 +190,22 @@ bool
 set_block_surface(ENetPeer *peer, glm::ivec3 a, glm::ivec3 b,
         uint8_t idx, uint8_t st)
 {
-    ENetPacket *packet;
-
     assert(peer);
 
     printf("set texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
             a.x, a.y, a.z, b.x, b.y, b.z, st, idx);
-    uint8_t data[28] = {(uint8_t)message_type::update,
-        (uint8_t)message_subtype_update::set_surface_type,
-        unpack_static_int(a.x),
-        unpack_static_int(a.y),
-        unpack_static_int(a.z),
-        unpack_static_int(b.x),
-        unpack_static_int(b.y),
-        unpack_static_int(b.z),
-        idx, st
-    };
-    packet = enet_packet_create(data, sizeof(data), ENET_PACKET_FLAG_RELIABLE);
+    
+    uint8_t data[28];
+    packet_writer pw(data, 28);
+
+    pw.put(message_type::update);
+    pw.put(message_subtype_update::set_surface_type);
+    pw.put(a);
+    pw.put(b);
+    pw.put(idx);
+    pw.put(st);
+
+    auto packet = enet_packet_create(pw.buf, pw.len, ENET_PACKET_FLAG_RELIABLE);
     return send_packet(peer, packet);
 }
 

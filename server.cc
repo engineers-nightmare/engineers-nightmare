@@ -3,6 +3,7 @@
 
 #include "src/network.h"
 #include "src/ship_space.h"
+#include "src/packet_reader.h"
 
 #define MAX_SLOTS 5
 
@@ -53,7 +54,7 @@ init(void)
 
 /* handle the submessage of a SERVER_MSG */
 void
-handle_server_message(ENetEvent *event, uint8_t *data,
+handle_server_message(ENetEvent *event, packet_reader &pr,
     message_subtype_server subtype)
 {
     struct peer_info *pi;
@@ -62,9 +63,11 @@ handle_server_message(ENetEvent *event, uint8_t *data,
     switch(subtype) {
         case message_subtype_server::client_version:
         {
-            uint8_t major = data[0];
-            uint8_t minor = data[1];
-            uint8_t patch = data[2];
+            uint8_t major;
+            uint8_t minor;
+            uint8_t patch;
+
+            pr.get(major).get(minor).get(patch);
 
             printf("client version %d.%d.%d ", major, minor, patch);
 
@@ -107,8 +110,7 @@ handle_server_message(ENetEvent *event, uint8_t *data,
 
 /* handle the submessage of a SHIP_MSG */
 void
-handle_ship_message(ENetEvent *event, uint8_t *data,
-    message_subtype_ship subtype)
+handle_ship_message(ENetEvent *event, packet_reader &pr, message_subtype_ship subtype)
 {
     switch(subtype) {
         case message_subtype_ship::all_ship_request:
@@ -120,14 +122,10 @@ handle_ship_message(ENetEvent *event, uint8_t *data,
 
             // TODO: send more than one chunk
             for (auto c : ship->chunks) {
-                glm::ivec3 chunk;
-                chunk.x = c.first.x;
-                chunk.y = c.first.y;
-                chunk.z = c.first.z;
 
-                auto vbuf = ship->serialize_chunk(chunk);
+                auto vbuf = ship->serialize_chunk(c.first);
 
-                send_ship_chunk(event->peer, chunk, vbuf);
+                send_ship_chunk(event->peer, c.first, vbuf);
 
                 /* alloced in serialize_chunk() */
                 delete vbuf;
@@ -141,11 +139,9 @@ handle_ship_message(ENetEvent *event, uint8_t *data,
 
 /* handle the submessage of a UPDATE_MSG */
 void
-handle_update_message(ENetEvent *event, uint8_t *data,
+handle_update_message(ENetEvent *event, packet_reader &pr,
     message_subtype_update subtype)
 {
-    int x, y, z, px, py, pz;
-
     glm::ivec3 vec;
     glm::ivec3 pvec;
 
@@ -153,14 +149,13 @@ handle_update_message(ENetEvent *event, uint8_t *data,
         case message_subtype_update::set_block_type:
         {
             printf("set block type!\n");
-            px = pack_int(data, 0);
-            py = pack_int(data, 4);
-            pz = pack_int(data, 8);
+            
+            block_type type;
 
-            pvec = glm::ivec3(px, py, pz);
-            auto type = (enum block_type)data[12];
+            pr.get(vec);
+            pr.get(type);
 
-            printf("setting block at %d,%d,%d to %d\n", px, py, pz, type);
+            printf("setting block at %d,%d,%d to %d\n", vec.x, vec.y, vec.z, type);
 
             ship->set_block(pvec, type);
 
@@ -175,21 +170,17 @@ handle_update_message(ENetEvent *event, uint8_t *data,
         case message_subtype_update::set_surface_type:
         {
             printf("set texture type!\n");
-            x = pack_int(data, 0);
-            y = pack_int(data, 4);
-            z = pack_int(data, 8);
-            px = pack_int(data, 12);
-            py = pack_int(data, 16);
-            pz = pack_int(data, 20);
 
-            vec = glm::ivec3(x, y, z);
-            pvec = glm::ivec3(px, py, pz);
+            surface_index index;
+            surface_type type;
 
-            auto index = (surface_index)data[24];
-            auto type = (surface_type)data[25];
+            pr.get(vec);
+            pr.get(pvec);
+            pr.get(index);
+            pr.get(type);
 
             printf("setting texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
-                x, y, z, px, py, pz, type, index);
+                vec.x, vec.y, vec.z, pvec.x, pvec.y, pvec.z, type, index);
 
             ship->set_surface(vec, pvec, index, type);
 
@@ -212,29 +203,34 @@ handle_message(ENetEvent *event)
 {
     printf("[%x:%u] ", event->peer->address.host, event->peer->address.port);
 
-    uint8_t *data = event->packet->data;
-    message_type type = (message_type)*data;
+    packet_reader pr(event->packet->data, event->packet->dataLength);
+
+    message_type type;
+    pr.get(type);
 
     switch(type) {
         case message_type::server:
         {
-            auto subtype = (message_subtype_server)data[1];
+            message_subtype_server subtype;
+            pr.get(subtype);
             printf("server message(0x%02x): ", subtype);
-            handle_server_message(event, data + 2, subtype);
+            handle_server_message(event, pr, subtype);
             break;
         }
         case message_type::ship:
         {
-            auto subtype = (message_subtype_ship)data[1];
+            message_subtype_ship subtype;
+            pr.get(subtype);
             printf("ship message(0x%02x): ", subtype);
-            handle_ship_message(event, data + 2, subtype);
+            handle_ship_message(event, pr, subtype);
             break;
         }
         case message_type::update:
         {
-            auto subtype = (message_subtype_update)data[1];
+            message_subtype_update subtype;
+            pr.get(subtype);
             printf("update message(0x%02x): ", subtype);
-            handle_update_message(event, data + 2, subtype);
+            handle_update_message(event, pr, subtype);
             break;
         }
         default:
