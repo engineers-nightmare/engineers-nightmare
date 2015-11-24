@@ -21,14 +21,16 @@ struct packet_writer {
     bit-exact, expected to provide an overload.
     */
     template<typename T>
-    void put(T const &t) {
+    packet_writer & put(T const &t) {
         /* caller promised the buffer was large enough */
         assert(ofs + sizeof(T) <= len);
         memcpy(buf + ofs, &t, sizeof(T));
         ofs += sizeof(T);
+
+        return *this;
     }
 
     /* abomination though it is: an example, a length-prefixed string */
     /* simple, but not particularly good. */
-    void put(std::string const &t);
+    packet_writer & put(std::string const &t);
 };

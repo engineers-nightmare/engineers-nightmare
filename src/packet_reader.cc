@@ -6,7 +6,7 @@
 
 #include "packet_reader.h"
 
-void
+packet_reader &
 packet_reader::get(std::string &str) {
     /* abomination though it is: an example, a length-prefixed string */
     /* simple, but not particularly good. */
@@ -15,4 +15,6 @@ packet_reader::get(std::string &str) {
     get(size);
     memcpy((void*)str.data(), buf + ofs, size);
     ofs += size;
+
+    return *this;
 }

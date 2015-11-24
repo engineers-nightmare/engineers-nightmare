@@ -15,11 +15,13 @@ struct packet_reader {
     bit-exact, expected to provide an overload.
     */
     template<typename T>
-    void get(T& value) {
+    packet_reader & get(T& value) {
         assert(ofs + sizeof(T) <= len);
         memcpy(&value, buf + ofs, sizeof(T));
         ofs += sizeof(T);
+
+        return *this;
     }
 
-    void get(std::string &str);
+    packet_reader & get(std::string &str);
 };
