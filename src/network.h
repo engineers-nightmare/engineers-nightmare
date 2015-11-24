@@ -41,22 +41,6 @@ enum class message_subtype_update : uint8_t {
     remove_surface,
 };
 
-
-/* assumes 4 byte int, obviously not always true */
-/* FIXME: need a 4 byte integer vector */
-#define unpack_static_int(x)            \
-    (uint8_t)(((int)x & 0xFF000000) >> 6),   \
-    (uint8_t)(((int)x & 0x00FF0000) >> 4),   \
-    (uint8_t)(((int)x & 0x0000FF00) >> 2),   \
-    (uint8_t)((int)x & 0x000000FF)
-
-#define pack_int(arr, idx)      \
-    ((((int)arr[idx]  ) << 6) | \
-     (((int)arr[idx+1]) << 4) | \
-     (((int)arr[idx+2]) << 2) | \
-     (((int)arr[idx+3])))
-
-
 /* version messages */
 bool send_client_version(ENetPeer *peer, uint8_t major, uint8_t minor,
         uint8_t patch);

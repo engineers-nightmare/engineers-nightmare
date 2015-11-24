@@ -2,7 +2,6 @@
 #include "src/network.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #define VSN_MAJOR 0
 #define VSN_MINOR 1
@@ -49,7 +48,7 @@ void handle_server_message(ENetEvent *event, uint8_t *data,
             uint8_t minor = data[1];
             uint8_t patch = data[2];
 
-            printf("server version %d.%d.%d ", major, minor, patch);
+            printf("server version %d.%d.%d\n", major, minor, patch);
             request_slot(event->peer);
             break;
         }

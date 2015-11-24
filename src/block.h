@@ -1,12 +1,14 @@
 #pragma once
 
-enum block_type : unsigned char {
+#include <stdint.h>
+
+enum block_type : uint8_t {
     block_empty,
     block_frame,
     block_entity,
 };
 
-enum surface_type : unsigned char {
+enum surface_type : uint8_t {
     surface_phys = 0x20,
     surface_blocks_light = 0x40,
     surface_blocks_air = 0x80,
@@ -28,7 +30,7 @@ enum surface_type : unsigned char {
  * so ym is the surface corresponding to the face
  *  on this block 'facing' down the +y axis
  */
-enum surface_index {
+enum surface_index : uint8_t {
     surface_xp,
     surface_xm,
     surface_yp,

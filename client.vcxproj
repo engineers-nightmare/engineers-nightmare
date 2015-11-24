@@ -252,6 +252,8 @@
     <ClCompile Include="src\mesh.cc" />
     <ClCompile Include="src\mesher.cc" />
     <ClCompile Include="src\mock_ship_junk.cc" />
+    <ClCompile Include="src\packet_reader.cc" />
+    <ClCompile Include="src\packet_writer.cc" />
     <ClCompile Include="src\particle.cc" />
     <ClCompile Include="src\network.cc" />
     <ClCompile Include="src\physics.cc" />
@@ -302,6 +304,8 @@
     <ClInclude Include="src\light_field.h" />
     <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\mesh.h" />
+    <ClInclude Include="src\packet_reader.h" />
+    <ClInclude Include="src\packet_writer.h" />
     <ClInclude Include="src\particle.h" />
     <ClInclude Include="src\network.h" />
     <ClInclude Include="src\physics.h" />
