@@ -172,7 +172,7 @@ set_block_type(ENetPeer *peer, glm::ivec3 block, enum block_type type)
 {
     assert(peer);
 
-    printf("set chunk at %d,%d,%d to %d\n", block.x, block.y, block.z, type);
+    printf("set block at %d,%d,%d to %d\n", block.x, block.y, block.z, type);
 
     uint8_t data[15];
     packet_writer pw(data, 15);
