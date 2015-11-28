@@ -33,11 +33,8 @@ struct add_block_tool : tool
 
         /* can only build on the side of an existing frame */
         if (bl && rc->block->type == block_frame) {
+            /* tell server we want this block */
             set_block_type(peer, rc->p, block_frame);
-
-            ship->set_block(rc->p, block_frame);
-
-            mark_lightfield_update(rc->p);
         }
     }
 

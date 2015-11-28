@@ -2166,11 +2166,12 @@ handle_update_message(ENetEvent *event, packet_reader &pr, message_subtype_updat
             pr.get(index);
             pr.get(type);
 
-
             printf("setting texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
                 vec.x, vec.y, vec.z, pvec.x, pvec.y, pvec.z, type, index);
 
             ship->set_surface(vec, pvec, index, type);
+            mark_lightfield_update(vec);
+
             break;
         }
         default:

@@ -41,11 +41,8 @@ add_surface_tool::use(raycast_info *rc) {
     block *other_side = ship->get_block(rc->p);
 
     if (can_use(bl, other_side, index)) {
-        ship->set_surface(rc->bl, rc->p, (surface_index)index, st);
+        /* ask server to set surface */
         set_block_surface(peer, rc->bl, rc->p, (surface_index)index, st);
-
-        mark_lightfield_update(rc->bl);
-        mark_lightfield_update(rc->p);
     }
 }
 

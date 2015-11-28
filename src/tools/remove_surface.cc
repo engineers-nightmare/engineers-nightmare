@@ -47,15 +47,12 @@ struct remove_surface_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        ship->set_surface(rc->bl, rc->p, (surface_index)index, surface_none);
+        /* request server to remove surface */
         set_block_surface(peer, rc->bl, rc->p, (surface_index)index, surface_none);
 
         /* remove any ents using the surface */
         remove_ents_from_surface(rc->p, index ^ 1, phy);
         remove_ents_from_surface(rc->bl, index, phy);
-
-        mark_lightfield_update(rc->bl);
-        mark_lightfield_update(rc->p);
     }
 
     void alt_use(raycast_info *rc) override {}

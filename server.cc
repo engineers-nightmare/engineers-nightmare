@@ -157,12 +157,13 @@ handle_update_message(ENetEvent *event, packet_reader &pr,
 
             printf("setting block at %d,%d,%d to %d\n", vec.x, vec.y, vec.z, type);
 
+            /* todo: verify block can be set */
             ship->set_block(pvec, type);
 
             for (int i = 0; i < MAX_SLOTS; i++) {
-                if (peers[i] &&
-                    peers[i]->connectID != event->peer->connectID)
-                    send_data(peers[i], event->packet->data, 15);
+                if (peers[i]) {
+                    send_data(peers[i], event->packet->data, event->packet->dataLength);
+                }
             }
 
             break;
@@ -179,15 +180,13 @@ handle_update_message(ENetEvent *event, packet_reader &pr,
             pr.get(index);
             pr.get(type);
 
-            printf("setting texture at %d,%d,%d|%d,%d,%d to %d on %d\n",
+            printf("setting surface at %d,%d,%d|%d,%d,%d to %d on %d\n",
                 vec.x, vec.y, vec.z, pvec.x, pvec.y, pvec.z, type, index);
 
             ship->set_surface(vec, pvec, index, type);
 
-
             for (int i = 0; i < MAX_SLOTS; i++) {
-                if (peers[i] &&
-                    peers[i]->connectID != event->peer->connectID)
+                if (peers[i])
                     send_data(peers[i], event->packet->data, 28);
             }
             break;
