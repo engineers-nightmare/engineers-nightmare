@@ -161,9 +161,9 @@ handle_update_message(ENetEvent *event, packet_reader &pr,
             ship->set_block(pvec, type);
 
             for (int i = 0; i < MAX_SLOTS; i++) {
-                if (peers[i] &&
-                    peers[i]->connectID != event->peer->connectID)
-                    send_data(peers[i], event->packet->data, 15);
+                if (peers[i]) {
+                    send_data(peers[i], event->packet->data, event->packet->dataLength);
+                }
             }
 
             break;
