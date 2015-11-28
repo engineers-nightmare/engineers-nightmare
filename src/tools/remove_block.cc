@@ -41,6 +41,7 @@ struct remove_block_tool : tool
         if (bl->type == block_entity) {
             /* TODO: should this even allow entity removal?
              * This may be nothing more than historical accident.
+             * TODO: server needs to know about entity removal
              */
             remove_ents_from_surface(rc->bl, surface_zm, phy);
             mark_lightfield_update(rc->bl);
@@ -48,7 +49,7 @@ struct remove_block_tool : tool
         }
 
         /* block removal */
-        ship->set_block(rc->bl, block_empty);
+        /* send block removal to server */
         set_block_type(peer, rc->bl, block_empty);
 
         /* strip any orphaned surfaces */
@@ -70,28 +71,18 @@ struct remove_block_tool : tool
                     auto si = (surface_index)index;
                     auto oi = (surface_index)(index ^ 1);
 
-                    ship->set_surface(rc->bl, r, si, surface_none);
+                    /* send surface update to server
+                     * todo: batch these together
+                     */
                     set_block_surface(peer, rc->bl, r, si, surface_none);
-
-                    ship->set_surface(r, rc->bl, oi, surface_none);
                     set_block_surface(peer, r, rc->bl, oi, surface_none);
-
-                    ship->get_chunk_containing(r)->render_chunk.valid = false;
-                    ship->get_chunk_containing(r)->phys_chunk.valid = false;
 
                     /* pop any dependent ents */
                     remove_ents_from_surface(rc->bl, index, phy);
                     remove_ents_from_surface(r, index ^ 1, phy);
-
-                    mark_lightfield_update(r);
-
-                    ship->update_topology_for_remove_surface(rc->bl, r);
                 }
             }
         }
-
-        /* dirty the chunk */
-        mark_lightfield_update(rc->bl);
     }
 
     void alt_use(raycast_info *rc) override {}
