@@ -157,6 +157,7 @@ handle_update_message(ENetEvent *event, packet_reader &pr,
 
             printf("setting block at %d,%d,%d to %d\n", vec.x, vec.y, vec.z, type);
 
+            /* todo: verify block can be set */
             ship->set_block(pvec, type);
 
             for (int i = 0; i < MAX_SLOTS; i++) {
