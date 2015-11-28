@@ -185,7 +185,6 @@ handle_update_message(ENetEvent *event, packet_reader &pr,
 
             ship->set_surface(vec, pvec, index, type);
 
-
             for (int i = 0; i < MAX_SLOTS; i++) {
                 if (peers[i])
                     send_data(peers[i], event->packet->data, 28);
