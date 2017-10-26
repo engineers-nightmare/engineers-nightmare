@@ -783,7 +783,7 @@ init()
     pl.angle = 0;
     pl.elev = 0;
     pl.pos = glm::vec3(3,2,2);
-    pl.selected_slot = 1;
+    pl.active_tool_slot = 0;
     pl.ui_dirty = true;
     pl.disable_gravity = false;
 
@@ -1816,8 +1816,8 @@ struct flashlight_tool : tool
 };
 
 
-tool *tools[] = {
-    tool::create_fire_projectile_tool(&pl),
+std::array<tool*, 8> tools {
+    //tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
     tool::create_remove_block_tool(),
     new add_surface_tool(),
@@ -1826,7 +1826,7 @@ tool *tools[] = {
     new add_surface_entity_tool(),
     new remove_surface_entity_tool(),
     new add_wiring_tool(),
-    new flashlight_tool()
+    //new flashlight_tool()
 };
 
 
@@ -2082,7 +2082,7 @@ struct play_state : game_state {
 
         {
             /* Tool name down the bottom */
-            tool *t = tools[pl.selected_slot];
+            tool *t = tools[pl.active_tool_slot];
 
             if (t) {
                 t->get_description(buf);
@@ -2151,10 +2151,9 @@ struct play_state : game_state {
             add_text_with_outline(buf2, -w/2, -150);
         }
 
-        unsigned num_tools = sizeof(tools) / sizeof(tools[0]);
-        for (unsigned i = 0; i < num_tools; i++) {
-            ui_sprites->add(pl.selected_slot == i ? &lit_ui_slot_sprite : &unlit_ui_slot_sprite,
-                    (i - num_tools/2.0f) * 34, -220);
+        for (unsigned i = 0; i < tools.size(); i++) {
+            ui_sprites->add(pl.active_tool_slot == i ? &lit_ui_slot_sprite : &unlit_ui_slot_sprite,
+                    (i - tools.size() / 2.0f) * 34, -220);
         }
     }
 
@@ -2168,7 +2167,7 @@ struct play_state : game_state {
         }
 
 
-        auto *t = tools[pl.selected_slot];
+        auto *t = tools[pl.active_tool_slot];
 
         if (t) {
             /* both tool use and overlays need the raycast itself */
@@ -2220,7 +2219,7 @@ struct play_state : game_state {
     }
 
     void render(frame_data *frame) override {
-        auto *t = tools[pl.selected_slot];
+        auto *t = tools[pl.active_tool_slot];
 
         if (t == nullptr) {
             return;
@@ -2237,23 +2236,22 @@ struct play_state : game_state {
         /* note: all the number keys are bound, but we may not have 10 toolbelt slots.
          * just drop bogus slot requests on the floor.
          */
-        if (slot < sizeof(tools) / sizeof(tools[0]) && slot != pl.selected_slot) {
-
-            auto *old_tool = tools[pl.selected_slot];
+        if (slot < tools.size() && slot != pl.active_tool_slot) {
+            auto *old_tool = tools[pl.active_tool_slot];
             if (old_tool) {
                 old_tool->unselect();
             }
 
             tools[slot]->select();
 
-            pl.selected_slot = slot;
+            pl.active_tool_slot = slot;
             pl.ui_dirty = true;
         }
     }
 
     void cycle_slot(int d) {
-        unsigned num_tools = sizeof(tools) / sizeof(tools[0]);
-        unsigned int cur_slot = pl.selected_slot;
+        unsigned num_tools = tools.size();
+        unsigned int cur_slot = pl.active_tool_slot;
         cur_slot = (cur_slot + num_tools + d) % num_tools;
 
         set_slot(cur_slot);
@@ -2277,16 +2275,16 @@ struct play_state : game_state {
         auto reset      = get_input(action_reset)->just_active;
         auto use        = get_input(action_use)->just_active;
         auto cycle_mode = get_input(action_cycle_mode)->just_active;
-        auto slot1      = get_input(action_slot1)->just_active;
-        auto slot2      = get_input(action_slot2)->just_active;
-        auto slot3      = get_input(action_slot3)->just_active;
-        auto slot4      = get_input(action_slot4)->just_active;
-        auto slot5      = get_input(action_slot5)->just_active;
-        auto slot6      = get_input(action_slot6)->just_active;
-        auto slot7      = get_input(action_slot7)->just_active;
-        auto slot8      = get_input(action_slot8)->just_active;
-        auto slot9      = get_input(action_slot9)->just_active;
-        auto slot0      = get_input(action_slot0)->just_active;
+        auto slot0      = get_input(action_slot1)->just_active;
+        auto slot1      = get_input(action_slot2)->just_active;
+        auto slot2      = get_input(action_slot3)->just_active;
+        auto slot3      = get_input(action_slot4)->just_active;
+        auto slot4      = get_input(action_slot5)->just_active;
+        auto slot5      = get_input(action_slot6)->just_active;
+        auto slot6      = get_input(action_slot7)->just_active;
+        auto slot7      = get_input(action_slot8)->just_active;
+        auto slot8      = get_input(action_slot9)->just_active;
+        auto slot9      = get_input(action_slot0)->just_active;
         auto gravity    = get_input(action_gravity)->just_active;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;

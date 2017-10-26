@@ -19,7 +19,7 @@ struct player {
 
     float height;   /* filled by physics */
 
-    unsigned int selected_slot;
+    unsigned int active_tool_slot;
 
     bool jump;
 
