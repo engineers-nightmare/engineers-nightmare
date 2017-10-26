@@ -1,18 +1,64 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.5)
 project(nightmare)
 
 # from http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
 if(UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -DGLM_FORCE_RADIANS")
+    SET(CMAKE_CXX_FLAGS "-Wall -DGLM_FORCE_RADIANS")
 endif()
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(nightmare main.cc)
 
-# here we compile all of src/*.cc into one library
+# here we compile all of our source files into one library
 # this is used below to link both to our main executable
 # as well as to link to each of our tests
-file(GLOB SOURCE src/*.cc src/**/*.cc)
-add_library(NIGHTMARE ${SOURCE})
+set(EN_SOURCES
+        src/atlas.cc
+        src/blob.cc
+        src/char.cc
+        src/component/component_system_manager.cc
+        src/component/door_component.cc
+        src/component/gas_production_component.cc
+        src/component/light_component.cc
+        src/component/physics_component.cc
+        src/component/power_component.cc
+        src/component/power_provider_component.cc
+        src/component/pressure_sensor_component.cc
+        src/component/proximity_sensor_component.cc
+        src/component/reader_component.cc
+        src/component/relative_position_component.cc
+        src/component/renderable_component.cc
+        src/component/sensor_comparator_component.cc
+        src/component/surface_attachment_component.cc
+        src/component/switch_component.cc
+        src/component/type_component.cc
+        src/config.cc
+        src/input.cc
+        src/mesh.cc
+        src/mesher.cc
+        src/mock_ship_junk.cc
+        src/particle.cc
+        src/physics.cc
+        src/projectile/projectile.cc
+        src/settings.cc
+        src/shader.cc
+        src/ship_space.cc
+        src/sprites.cc
+        src/text.cc
+        src/textureset.cc
+        src/tools/add_block.cc
+        src/tools/add_surface.cc
+        src/tools/fire_projectile.cc
+        src/tools/remove_block.cc
+        src/tools/remove_surface.cc
+        src/wiring/wiring.cc
+        src/wiring/wiring_data.cc
+        )
+
+add_library(NIGHTMARE ${EN_SOURCES})
 
 include(FindPkgConfig)
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
