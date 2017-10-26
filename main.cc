@@ -494,6 +494,23 @@ mark_lightfield_update(glm::ivec3 center)
     }
 }
 
+void
+fullbright_lightfield()
+{
+    if (!need_lightfield_update) {
+        /* nothing to do here */
+        return;
+    }
+
+    for (int k = lightfield_update_mins.z; k <= lightfield_update_maxs.z; k++)
+        for (int j = lightfield_update_mins.y; j <= lightfield_update_maxs.y; j++)
+            for (int i = lightfield_update_mins.x; i <= lightfield_update_maxs.x; i++)
+                set_light_level(i, j, k, 255);
+
+    /* All done. */
+    light->upload();
+    need_lightfield_update = false;
+}
 
 void
 update_lightfield()
@@ -786,12 +803,12 @@ init()
     light = new light_field();
     light->bind(1);
 
-    /* put some crap in the lightfield */
-    memset(light->data, 0, sizeof(light->data));
-    light->upload();
-
     /* prepare the chunks -- this populates the physics data */
     prepare_chunks();
+
+    /* put some crap in the lightfield */
+    mark_lightfield_update(pl.pos);
+    fullbright_lightfield();
 }
 
 
@@ -1995,7 +2012,7 @@ update()
         tick_doors(ship);
 
         /* rebuild lighting if needed */
-        update_lightfield();
+        fullbright_lightfield();
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);
