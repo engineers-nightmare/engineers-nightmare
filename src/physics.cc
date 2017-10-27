@@ -4,10 +4,6 @@
 #include "player.h"
 #include "physics.h"
 
-#define PLAYER_START_X 11.0f
-#define PLAYER_START_Y 11.0f
-#define PLAYER_START_Z 1.5f
-
 #define MOVE_SPEED  0.07f
 #define CROUCH_FACTOR 0.4f
 #define AIR_CONTROL_FACTOR 0.25f
@@ -46,12 +42,12 @@ physics::physics(player *p)
     this->dynamicsWorld->setGravity(btVector3(0, 0, -10));
 
     /* store a pointer to our player so physics can drive his position */
-    this->pl= p;
+    this->pl = p;
 
     /* set player height to physics height */
-    pl->pos.x = PLAYER_START_X;
-    pl->pos.y = PLAYER_START_Y;
-    pl->pos.z = PLAYER_START_Z;
+//    pl->pos.x = PLAYER_START_X;
+//    pl->pos.y = PLAYER_START_Y;
+//    pl->pos.z = PLAYER_START_Z;
 
 
     /* setup player rigid body */
@@ -145,7 +141,7 @@ physics::tick_controller(float dt)
 
     if (pl->reset) {
         /* reset position (for debug) */
-        this->controller->warp(btVector3(PLAYER_START_X, PLAYER_START_Y, PLAYER_START_Z));
+        this->controller->warp(btVector3(0, 0, 0));
     }
 
     if (pl->crouch) {

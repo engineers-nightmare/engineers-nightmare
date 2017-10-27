@@ -153,15 +153,6 @@ sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 projectile_linear_manager proj_man;
 particle_manager *particle_man;
 
-glm::mat4
-mat_block_face(glm::ivec3 p, int face)
-{
-    auto norm = glm::vec3(surface_index_to_normal(face));
-    auto pos = glm::vec3(p) + glm::vec3(0.5f) + 0.5f * norm;
-    return mat_rotate_mesh(pos, -norm);
-}
-
-
 struct entity_type
 {
     /* static */
@@ -709,8 +700,8 @@ init()
     for (int i = 0; i < 6; i++)
         surfs_hw[i] = upload_mesh(surfs_sw[i]);
 
-    for (auto i = 0u; i < sizeof(entity_types) / sizeof(entity_types[0]); i++) {
-        auto t = &entity_types[i];
+    for (auto &entity_type : entity_types) {
+        auto t = &entity_type;
         t->sw = load_mesh(t->mesh);
         set_mesh_material(t->sw, t->material);
         t->hw = upload_mesh(t->sw);
@@ -760,7 +751,7 @@ init()
     skybox->load(4, "textures/sky_front5.png");
     skybox->load(5, "textures/sky_back6.png");
 
-    ship = ship_space::mock_ship_space();
+    ship = ship_space::mock_ship_space_2();
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
 
@@ -1817,7 +1808,7 @@ struct flashlight_tool : tool
 };
 
 
-std::array<tool*, 8> tools {
+std::array<tool*, 9> tools {
     //tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
     tool::create_remove_block_tool(),
@@ -1828,6 +1819,7 @@ std::array<tool*, 8> tools {
     new remove_surface_entity_tool(),
     new add_wiring_tool(),
     //new flashlight_tool()
+    new add_room_tool(),
 };
 
 
@@ -2555,8 +2547,8 @@ run()
         mouse_buttons[EN_MOUSE_BUTTON(input_mouse_right)]     = sdl_buttons & EN_SDL_BUTTON(input_mouse_right);
         mouse_buttons[EN_MOUSE_BUTTON(input_mouse_thumb1)]    = sdl_buttons & EN_SDL_BUTTON(input_mouse_thumb1);
         mouse_buttons[EN_MOUSE_BUTTON(input_mouse_thumb2)]    = sdl_buttons & EN_SDL_BUTTON(input_mouse_thumb2);
-        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheeldown)] = false;
-        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheelup)]   = false;
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheeldown)] = 0;
+        mouse_buttons[EN_MOUSE_BUTTON(input_mouse_wheelup)]   = 0;
 
         mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] = 0;
         mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] = 0;

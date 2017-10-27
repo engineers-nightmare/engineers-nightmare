@@ -3,6 +3,10 @@
 #include "../src/common.h"
 #include "../src/ship_space.h"
 
+// stub
+void remove_ents_from_surface(glm::ivec3 b, int face) {}
+void mark_lightfield_update(glm::ivec3 center) {}
+
 void
 simple(void)
 {

@@ -32,6 +32,45 @@ clamp(T t, T lower, T upper) {
     return t;
 }
 
+struct raycast_info {
+    bool hit;
+    bool inside;
+    glm::ivec3 bl;          /* the block we hit */
+    glm::ivec3 n;           /* the face normal we hit */
+    glm::ivec3 p;           /* the block along the normal */
+    struct block *block;
+};
+
+static inline int
+normal_to_surface_index(raycast_info const *rc)
+{
+    if (rc->n.x == 1) return 0;
+    if (rc->n.x == -1) return 1;
+    if (rc->n.y == 1) return 2;
+    if (rc->n.y == -1) return 3;
+    if (rc->n.z == 1) return 4;
+    if (rc->n.z == -1) return 5;
+
+    return 0;   /* unreachable */
+}
+
+static inline glm::ivec3
+surface_index_to_normal(int index)
+{
+    glm::ivec3 n(0, 0, 0);
+
+    switch (index) {
+        case 0: n.x = 1; break;
+        case 1: n.x = -1; break;
+        case 2: n.y = 1; break;
+        case 3: n.y = -1; break;
+        case 4: n.z = 1; break;
+        case 5: n.z = -1; break;
+    }
+
+    return n;
+}
+
 static inline glm::mat4
 mat_rotate_mesh(glm::vec3 pt, glm::vec3 dir) {
     auto abs_normal = glm::abs(dir);
@@ -48,6 +87,14 @@ mat_rotate_mesh(glm::vec3 pt, glm::vec3 dir) {
     m[1][3] = 0;
     m[2][3] = 0;
     return m;
+}
+
+static inline glm::mat4
+mat_block_face(glm::ivec3 p, int face)
+{
+    auto norm = glm::vec3(surface_index_to_normal(face));
+    auto pos = glm::vec3(p) + glm::vec3(0.5f) + 0.5f * norm;
+    return mat_rotate_mesh(pos, -norm);
 }
 
 static inline glm::mat4

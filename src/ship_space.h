@@ -5,11 +5,14 @@
 #include <unordered_map>
 
 #include "block.h"
+#include "common.h"
 #include "component/component_manager.h"
 #include "chunk.h"
 #include "wiring/wiring.h"
 #include "wiring/wiring_data.h"
 #include <unordered_set>
+
+extern void remove_ents_from_surface(glm::ivec3 b, int face);
 
 struct ivec3_hash {
   size_t operator()(const glm::ivec3 &v) const {
@@ -19,15 +22,6 @@ struct ivec3_hash {
       hh = hh>>6 ^ hh<<2 ^ h(v.z);
       return hh;
   }
-};
-
-struct raycast_info {
-    bool hit;
-    bool inside;
-    glm::ivec3 bl;          /* the block we hit */
-    glm::ivec3 n;           /* the face normal we hit */
-    glm::ivec3 p;           /* the block along the normal */
-    struct block *block;
 };
 
 struct zone_info {
@@ -92,6 +86,7 @@ struct ship_space {
      * returns 0 on error
      */
     static ship_space * mock_ship_space(void);
+    static ship_space * mock_ship_space_2(void);
 
     void raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc);
 
@@ -125,40 +120,79 @@ struct ship_space {
 
     void set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index,
         surface_type st);
+
+    bool find_next_block(glm::ivec3 start, glm::ivec3 dir, unsigned limit, glm::ivec3 *found);
+
+    /* returns the neighbor of a block along a given surface's normal
+     * finds the block at the position (x,y,z) within
+     * the whole ship_space
+     * will move across chunks
+     * will call ensure_block if needed
+     */
+    block *get_block_neighbor(glm::ivec3 block, enum surface_index si);
+
+
+    void remove_block(glm::ivec3 p) {
+        block *bl = get_block(p);
+
+        /* if there was a block entity here, find and remove it. block
+         * ents are "attached" to the zm surface */
+        if (bl->type == block_entity) {
+            /* TODO: should this even allow entity removal? This may be nothing more than
+             * historical accident.
+             */
+            remove_ents_from_surface(p, surface_zm);
+            mark_lightfield_update(p);
+            return;
+        }
+
+        /* block removal */
+        bl->type = block_empty;
+
+        /* strip any orphaned surfaces */
+        for (int index = 0; index < 6; index++) {
+            if (bl->surfs[index] & surface_phys) {
+
+                auto s = surface_index_to_normal(index);
+
+                auto r = p + s;
+                block *other_side = get_block(r);
+
+                if (!other_side) {
+                    /* expand: but this should always exist. */
+                }
+                else if (other_side->type != block_frame) {
+                    /* if the other side has no frame, then there is nothing left to support this
+                    * surface pair -- remove it */
+                    bl->surfs[index] = surface_none;
+                    other_side->surfs[index ^ 1] = surface_none;
+                    get_chunk_containing(r)->render_chunk.valid = false;
+                    get_chunk_containing(r)->phys_chunk.valid = false;
+
+                    /* pop any dependent ents */
+                    remove_ents_from_surface(p, index);
+                    remove_ents_from_surface(r, index ^ 1);
+
+                    mark_lightfield_update(r);
+
+                    update_topology_for_remove_surface(p, r);
+                }
+            }
+        }
+
+        /* dirty the chunk */
+        get_chunk_containing(p)->render_chunk.valid = false;
+        get_chunk_containing(p)->phys_chunk.valid = false;
+        mark_lightfield_update(p);
+    }
+
+    /* removes a cuboid defined by min and max extents
+     * set border surfaces where block present to {type}
+     */
+    void cut_out_cuboid(glm::ivec3 mins, glm::ivec3 maxs, surface_type type);
 };
 
 /* helper */
 topo_info *
 topo_find(topo_info *p);
 
-
-static inline int
-normal_to_surface_index(raycast_info const *rc)
-{
-    if (rc->n.x == 1) return 0;
-    if (rc->n.x == -1) return 1;
-    if (rc->n.y == 1) return 2;
-    if (rc->n.y == -1) return 3;
-    if (rc->n.z == 1) return 4;
-    if (rc->n.z == -1) return 5;
-
-    return 0;   /* unreachable */
-}
-
-
-static inline glm::ivec3
-surface_index_to_normal(int index)
-{
-    glm::ivec3 n(0, 0, 0);
-
-    switch (index) {
-        case 0: n.x = 1; break;
-        case 1: n.x = -1; break;
-        case 2: n.y = 1; break;
-        case 3: n.y = -1; break;
-        case 4: n.z = 1; break;
-        case 5: n.z = -1; break;
-    }
-
-    return n;
-}

@@ -44,7 +44,7 @@ enum surface_index {
  * for more information see docs/ships-space.md
  */
 struct block {
-    block_type type;
+    block_type type = block_frame;
 
     surface_type surfs[face_count];
     unsigned short surf_space[face_count];

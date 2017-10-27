@@ -14,10 +14,6 @@ extern ship_space *ship;
 
 extern hw_mesh *frame_hw;
 
-extern void
-remove_ents_from_surface(glm::ivec3 p, int face);
-
-
 struct remove_block_tool : tool
 {
     bool can_use(raycast_info *rc) {
@@ -29,57 +25,7 @@ struct remove_block_tool : tool
         if (!can_use(rc))
             return;
 
-        block *bl = rc->block;
-
-        /* if there was a block entity here, find and remove it. block
-         * ents are "attached" to the zm surface */
-        if (bl->type == block_entity) {
-            /* TODO: should this even allow entity removal? This may be nothing more than
-             * historical accident.
-             */
-            remove_ents_from_surface(rc->bl, surface_zm);
-            mark_lightfield_update(rc->bl);
-            return;
-        }
-
-        /* block removal */
-        bl->type = block_empty;
-
-        /* strip any orphaned surfaces */
-        for (int index = 0; index < 6; index++) {
-            if (bl->surfs[index] & surface_phys) {
-
-                auto s = surface_index_to_normal(index);
-
-                auto r = rc->bl + s;
-                block *other_side = ship->get_block(r);
-
-                if (!other_side) {
-                    /* expand: but this should always exist. */
-                }
-                else if (other_side->type != block_frame) {
-                    /* if the other side has no frame, then there is nothing left to support this
-                     * surface pair -- remove it */
-                    bl->surfs[index] = surface_none;
-                    other_side->surfs[index ^ 1] = surface_none;
-                    ship->get_chunk_containing(r)->render_chunk.valid = false;
-                    ship->get_chunk_containing(r)->phys_chunk.valid = false;
-
-                    /* pop any dependent ents */
-                    remove_ents_from_surface(rc->bl, index);
-                    remove_ents_from_surface(r, index ^ 1);
-
-                    mark_lightfield_update(r);
-
-                    ship->update_topology_for_remove_surface(rc->bl, r);
-                }
-            }
-        }
-
-        /* dirty the chunk */
-        ship->get_chunk_containing(rc->bl)->render_chunk.valid = false;
-        ship->get_chunk_containing(rc->bl)->phys_chunk.valid = false;
-        mark_lightfield_update(rc->bl);
+        ship->remove_block(rc->bl);
     }
 
     void alt_use(raycast_info *rc) override {}

@@ -26,7 +26,7 @@ struct fixed_cube {
 
     fixed_cube()
     {
-        memset(contents, 0, sizeof(contents));
+//        memset(contents, 0, sizeof(contents));
     }
     /* contents of grid
      * 3d array of T
