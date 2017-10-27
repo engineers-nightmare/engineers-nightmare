@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <SDL.h>
 #include <unordered_map>
+#include <array>
 
 #include "src/common.h"
 #include "src/component/component_system_manager.h"
@@ -2250,7 +2251,7 @@ struct play_state : game_state {
     }
 
     void cycle_slot(int d) {
-        unsigned num_tools = tools.size();
+        unsigned num_tools = unsigned(tools.size());
         unsigned int cur_slot = pl.active_tool_slot;
         cur_slot = (cur_slot + num_tools + d) % num_tools;
 
