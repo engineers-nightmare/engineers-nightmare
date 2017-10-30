@@ -257,3 +257,14 @@ paint_surface_tool::get_description(char *str) {
     auto m = mode == replace_mode::all ? "all" : "matching";
     sprintf(str, "Paint surface type %d replacing %s\n", (int)replace_type, m);
 }
+
+void
+paint_surface_tool::select() {
+    state = paint_state::idle;
+}
+
+
+void
+paint_surface_tool::unselect() {
+    state = paint_state::idle;
+}

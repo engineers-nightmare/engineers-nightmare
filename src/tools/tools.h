@@ -102,4 +102,7 @@ struct paint_surface_tool : tool
     void preview(raycast_info *rc, frame_data *frame) override;
 
     void get_description(char *str) override;
+
+    void select() override;
+    void unselect() override;
 };
