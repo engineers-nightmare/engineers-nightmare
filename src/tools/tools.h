@@ -66,3 +66,40 @@ struct add_surface_tool : tool
 
     void get_description(char *str) override;
 };
+
+struct paint_surface_tool : tool
+{
+    surface_type select_type;
+    surface_type replace_type;
+
+    glm::ivec3 start_block;
+    surface_index start_index;
+
+    enum class replace_mode {
+        all,
+        match,
+    } mode = replace_mode::match;
+
+    enum class paint_state {
+        started,
+        idle,
+    } state = paint_state::idle;
+
+    paint_surface_tool() : select_type(surface_wall), replace_type(surface_wall) {}
+
+    bool can_use(const raycast_info *rc) const;
+
+    void use(raycast_info *rc) override;
+
+    void finish_paint(glm::ivec3 end);
+
+    void alt_use(raycast_info *rc) override;
+
+    void long_use(raycast_info *rc) override;
+
+    void cycle_mode() override;
+
+    void preview(raycast_info *rc, frame_data *frame) override;
+
+    void get_description(char *str) override;
+};

@@ -1808,12 +1808,13 @@ struct flashlight_tool : tool
 };
 
 
-std::array<tool*, 9> tools {
+std::array<tool*, 10> tools {
     //tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
     tool::create_remove_block_tool(),
     new add_surface_tool(),
     tool::create_remove_surface_tool(),
+    new paint_surface_tool(),
     new add_block_entity_tool(),
     new add_surface_entity_tool(),
     new remove_surface_entity_tool(),
