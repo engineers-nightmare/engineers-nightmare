@@ -38,12 +38,12 @@ paint_surface_tool::can_use(const raycast_info *rc) const {
                 break;
             case surface_yp:
             case surface_ym:
-                if (start_block.y != bl.x && start_index != si)
+                if (start_block.y != bl.y && start_index != si)
                     return false;
                 break;
             case surface_zp:
             case surface_zm:
-                if (start_block.z != bl.x && start_index != si)
+                if (start_block.z != bl.z && start_index != si)
                     return false;
                 break;
             case face_count:
