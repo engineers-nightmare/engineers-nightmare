@@ -15,9 +15,6 @@ extern ship_space *ship;
 
 extern hw_mesh *surfs_hw[6];
 
-extern void
-remove_ents_from_surface(glm::ivec3 p, int face);
-
 bool
 add_surface_tool::can_use(block *bl, block *other, int index) {
     if (bl && bl->surfs[index] != surface_none) return false; /* already a surface here */
