@@ -1,4 +1,4 @@
-#include <epoxy/gl.h>
+﻿#include <epoxy/gl.h>
 #include <glm/ext.hpp>
 
 #include "../common.h"
@@ -121,9 +121,6 @@ paint_surface_tool::finish_paint(glm::ivec3 end) {
 
             auto o = cur + surface_index_to_normal(start_index);
             ship->set_surface(cur, o, start_index, replace_type);
-
-            mark_lightfield_update(cur);
-            mark_lightfield_update(o);
         }
     }
 }

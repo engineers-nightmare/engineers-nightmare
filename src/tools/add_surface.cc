@@ -1,4 +1,4 @@
-#include <epoxy/gl.h>
+﻿#include <epoxy/gl.h>
 
 #include "../common.h"
 #include "../ship_space.h"
@@ -33,9 +33,6 @@ add_surface_tool::use(raycast_info *rc) {
 
     if (can_use(bl, other_side, index)) {
         ship->set_surface(rc->bl, rc->p, (surface_index)index, st);
-
-        mark_lightfield_update(rc->bl);
-        mark_lightfield_update(rc->p);
     }
 }
 

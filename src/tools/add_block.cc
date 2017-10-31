@@ -1,4 +1,4 @@
-#include <epoxy/gl.h>
+﻿#include <epoxy/gl.h>
 
 #include "../common.h"
 #include "../ship_space.h"
@@ -36,7 +36,6 @@ struct add_block_tool : tool
             /* dirty the chunk */
             ship->get_chunk_containing(rc->p)->render_chunk.valid = false;
             ship->get_chunk_containing(rc->p)->phys_chunk.valid = false;
-            mark_lightfield_update(rc->p);
         }
     }
 

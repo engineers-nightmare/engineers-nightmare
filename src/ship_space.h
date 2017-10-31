@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <glm/glm.hpp> /* ivec3 */
 #include <set>
@@ -142,7 +142,6 @@ struct ship_space {
              * historical accident.
              */
             remove_ents_from_surface(p, surface_zm);
-            mark_lightfield_update(p);
             return;
         }
 
@@ -173,8 +172,6 @@ struct ship_space {
                     remove_ents_from_surface(p, index);
                     remove_ents_from_surface(r, index ^ 1);
 
-                    mark_lightfield_update(r);
-
                     update_topology_for_remove_surface(p, r);
                 }
             }
@@ -183,7 +180,6 @@ struct ship_space {
         /* dirty the chunk */
         get_chunk_containing(p)->render_chunk.valid = false;
         get_chunk_containing(p)->phys_chunk.valid = false;
-        mark_lightfield_update(p);
     }
 
     /* removes a cuboid defined by min and max extents

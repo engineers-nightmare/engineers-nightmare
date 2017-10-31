@@ -1,4 +1,4 @@
-#include "component_system_manager.h"
+﻿#include "component_system_manager.h"
 #include "../particle.h"
 
 sensor_comparator_component_manager comparator_man;
@@ -150,8 +150,6 @@ set_door_state(ship_space *ship, c_entity ce, surface_type s)
             ship->set_surface(pos, ym, surface_ym, s);
         }
 
-        mark_lightfield_update(pos);
-
         ++pos.z;
     }
 }
@@ -256,7 +254,6 @@ tick_light_components(ship_space *ship) {
 
             auto pos = *pos_man.get_instance_data(ce).position;
             auto block_pos = get_coord_containing(pos);
-            mark_lightfield_update(block_pos);
         }
     }
 }

@@ -1,4 +1,4 @@
-#include <epoxy/gl.h>
+﻿#include <epoxy/gl.h>
 
 #include "../common.h"
 #include "../ship_space.h"
@@ -43,9 +43,6 @@ struct remove_surface_tool : tool
         /* remove any ents using the surface */
         remove_ents_from_surface(rc->p, index ^ 1);
         remove_ents_from_surface(rc->bl, index);
-
-        mark_lightfield_update(rc->bl);
-        mark_lightfield_update(rc->p);
     }
 
     void alt_use(raycast_info *rc) override {}

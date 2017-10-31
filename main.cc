@@ -1,4 +1,4 @@
-#ifndef _WIN32
+﻿#ifndef _WIN32
 #include <err.h> /* errx */
 #else
 #include "src/winerr.h"
@@ -17,7 +17,6 @@
 #include "src/component/component_system_manager.h"
 #include "src/config.h"
 #include "src/input.h"
-#include "src/light_field.h"
 #include "src/mesh.h"
 #include "src/physics.h"
 #include "src/player.h"
@@ -132,7 +131,6 @@ hw_mesh *frame_hw;
 hw_mesh *surfs_hw[6];
 text_renderer *text;
 sprite_renderer *ui_sprites;
-light_field *light;
 
 sw_mesh *door_sw;
 hw_mesh *door_hw;
@@ -435,143 +433,6 @@ place_entity_attaches(raycast_info* rc, int index, c_entity e, unsigned entity_t
 }
 
 
-void
-set_light_level(int x, int y, int z, int level)
-{
-    if (x < 0 || x >= 128) return;
-    if (y < 0 || y >= 128) return;
-    if (z < 0 || z >= 128) return;
-
-    int p = x + y * 128 + z * 128 * 128;
-    if (level < 0) level = 0;
-    if (level > 255) level = 255;
-    light->data[p] = level;
-}
-
-
-unsigned char
-get_light_level(int x, int y, int z)
-{
-    if (x < 0 || x >= 128) return 0;
-    if (y < 0 || y >= 128) return 0;
-    if (z < 0 || z >= 128) return 0;
-
-    return light->data[x + y*128 + z*128*128];
-}
-
-
-const int light_atten = 50;
-/* as far as we can ever light from a light source */
-const int max_light_prop = (255 + light_atten - 1) / light_atten;
-
-bool need_lightfield_update = false;
-glm::ivec3 lightfield_update_mins;
-glm::ivec3 lightfield_update_maxs;
-
-
-void
-mark_lightfield_update(glm::ivec3 center)
-{
-    glm::ivec3 half_extent = glm::ivec3(max_light_prop, max_light_prop, max_light_prop);
-    if (need_lightfield_update) {
-        lightfield_update_mins = center - half_extent;
-        lightfield_update_maxs = center + half_extent;
-    }
-    else {
-        lightfield_update_mins = glm::min(lightfield_update_mins,
-                center - half_extent);
-        lightfield_update_maxs = glm::max(lightfield_update_maxs,
-                center + half_extent);
-        need_lightfield_update = true;
-    }
-}
-
-void
-fullbright_lightfield()
-{
-    if (!need_lightfield_update) {
-        /* nothing to do here */
-        return;
-    }
-
-    for (int k = lightfield_update_mins.z; k <= lightfield_update_maxs.z; k++)
-        for (int j = lightfield_update_mins.y; j <= lightfield_update_maxs.y; j++)
-            for (int i = lightfield_update_mins.x; i <= lightfield_update_maxs.x; i++)
-                set_light_level(i, j, k, 255);
-
-    /* All done. */
-    light->upload();
-    need_lightfield_update = false;
-}
-
-void
-update_lightfield()
-{
-    if (!need_lightfield_update) {
-        /* nothing to do here */
-        return;
-    }
-
-    /* TODO: opt for case where we're JUST adding light -- no need to clear & rebuild */
-    /* This is general enough to cope with occluders & lights being added and removed. */
-
-    /* 1. remove all existing light in the box */
-    for (int k = lightfield_update_mins.z; k <= lightfield_update_maxs.z; k++)
-        for (int j = lightfield_update_mins.y; j <= lightfield_update_maxs.y; j++)
-            for (int i = lightfield_update_mins.x; i <= lightfield_update_maxs.x; i++)
-                set_light_level(i, j, k, 0);
-
-    /* 2. inject sources. the box is guaranteed to be big enough for max propagation
-     * for all sources we'll add here. */
-    for (auto i = 0u; i < light_man.buffer.num; i++) {
-        auto ce = light_man.instance_pool.entity[i];
-        auto pos = get_coord_containing(*pos_man.get_instance_data(ce).position);
-        auto powered = *power_man.get_instance_data(ce).powered;
-        if (powered) {
-            set_light_level(pos.x, pos.y, pos.z, std::max(
-                        (int)get_light_level(pos.x, pos.y, pos.z), (int)(255 * light_man.instance_pool.intensity[i])));
-        }
-    }
-
-    /* 3. propagate max_light_prop times. this is guaranteed to be enough to cover
-     * the sources' area of influence. */
-    for (int pass = 0; pass < max_light_prop; pass++) {
-        for (int k = lightfield_update_mins.z; k <= lightfield_update_maxs.z; k++) {
-            for (int j = lightfield_update_mins.y; j <= lightfield_update_maxs.y; j++) {
-                for (int i = lightfield_update_mins.x; i <= lightfield_update_maxs.x; i++) {
-                    int level = get_light_level(i, j, k);
-
-                    block *b = ship->get_block(glm::ivec3(i, j, k));
-                    if (!b)
-                        continue;
-
-                    if (light_permeable(b->surfs[surface_xm]))
-                        level = std::max(level, get_light_level(i - 1, j, k) - light_atten);
-                    if (light_permeable(b->surfs[surface_xp]))
-                        level = std::max(level, get_light_level(i + 1, j, k) - light_atten);
-
-                    if (light_permeable(b->surfs[surface_ym]))
-                        level = std::max(level, get_light_level(i, j - 1, k) - light_atten);
-                    if (light_permeable(b->surfs[surface_yp]))
-                        level = std::max(level, get_light_level(i, j + 1, k) - light_atten);
-
-                    if (light_permeable(b->surfs[surface_zm]))
-                        level = std::max(level, get_light_level(i, j, k - 1) - light_atten);
-                    if (light_permeable(b->surfs[surface_zp]))
-                        level = std::max(level, get_light_level(i, j, k + 1) - light_atten);
-
-                    set_light_level(i, j, k, level);
-                }
-            }
-        }
-    }
-
-    /* All done. */
-    light->upload();
-    need_lightfield_update = false;
-}
-
-
 struct game_state {
     virtual ~game_state() {}
 
@@ -792,15 +653,8 @@ init()
 
     printf("World vertex size: %zu bytes\n", sizeof(vertex));
 
-    light = new light_field();
-    light->bind(1);
-
     /* prepare the chunks -- this populates the physics data */
     prepare_chunks();
-
-    /* put some crap in the lightfield */
-    mark_lightfield_update(pl.pos);
-    fullbright_lightfield();
 }
 
 
@@ -1054,9 +908,6 @@ struct add_surface_entity_tool : tool
         /* take the space. */
         other_side->surf_space[index ^ 1] |= required_space;
 
-        /* mark lighting for rebuild around this point */
-        mark_lightfield_update(rc->p);
-
         place_entity_attaches(rc, index, e, type);
     }
 
@@ -1115,7 +966,6 @@ struct remove_surface_entity_tool : tool
 
         int index = normal_to_surface_index(rc);
         remove_ents_from_surface(rc->p, index^1);
-        mark_lightfield_update(rc->p);
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -1671,143 +1521,6 @@ struct add_wiring_tool : tool
     }
 };
 
-
-struct flashlight_tool : tool
-{
-    /* A good flashlight can throw pretty far. 10m is chosen as an average
-     * midrange [nice] flashlight / 10. */
-    const float flashlight_throw = 10.0f;
-    c_entity flashlight = c_entity();
-    glm::ivec3 last_pos;
-    bool flashlight_on = false;
-    float brightness = -1.0f;
-
-    float scale_brightness(float distance) {
-        float scale = clamp(flashlight_throw / distance * 0.25f, 0.001f, 1.0f);
-        return brightness * scale;
-    }
-
-    /* The flashlight is just a light at some location which can be "seen"
-     * by the player, move it to where the raycast hit */
-    void update_light() {
-        glm::ivec3 new_pos;
-        bool hit_something = false;
-        power_component_manager::instance_data power =
-            power_man.get_instance_data(flashlight);
-
-        /* FIXME: flashlight shouldn't be at eye, should be mid body */
-        auto per = phys_raycast(pl.eye, pl.eye + pl.dir * flashlight_throw,
-                                phy->ghostObj, phy->dynamicsWorld);
-
-        if (per) {
-            /* The raycast hit a mesh which needs no special considerations for
-             * lighting. */
-            new_pos = *pos_man.get_instance_data(per->ce).position;
-            hit_something = true;
-        } else {
-            generic_raycast_info hit = phys_raycast_generic(pl.eye,
-                                                            pl.eye + pl.dir * flashlight_throw,
-                                                            phy->ghostObj, phy->dynamicsWorld);
-
-            if (hit.hit) {
-                assert(ship->get_block(hit.hitCoord)); /* must be a block */
-
-                /* The goal is to not place the lighting within the block. The
-                 * perfect solution would put the light exactly on the
-                 * containing block of the hit. This is not necessary. If this
-                 * is a block, there must be a direct line of sight, and we
-                 * should be able to simply "back out" a reasonable amount,
-                 * provided it isn't behind the player
-                 */
-                new_pos = hit.hitCoord + hit.hitNormal * 0.5f;
-                hit_something = true;
-            }
-        }
-
-        if (hit_something && flashlight_on) {
-            *reader_man.get_instance_data(flashlight).data =
-                scale_brightness(glm::length(glm::vec3(new_pos) - pl.pos));
-            mark_lightfield_update(new_pos);
-
-            /* To prevent unnecessary processing, we only want to update things
-             * if the position changed, or the flashlight status changed */
-            if (new_pos == last_pos && *power.powered == true)
-                return;
-
-            new_pos = get_coord_containing(new_pos);
-            *power.powered = true;
-            *pos_man.get_instance_data(flashlight).position = new_pos;
-            mark_lightfield_update(new_pos);
-        } else {
-            *power.powered = false;
-        }
-
-        mark_lightfield_update(last_pos);
-        last_pos = new_pos;
-    }
-
-    void unselect() override {
-        if (flashlight.id) {
-            power_component_manager::instance_data power =
-                power_man.get_instance_data(flashlight);
-            *power.powered = false;
-            mark_lightfield_update(last_pos);
-        }
-    }
-
-    void select() override {
-        if (flashlight.id) {
-            power_component_manager::instance_data power =
-                power_man.get_instance_data(flashlight);
-            *power.powered = flashlight_on;
-            mark_lightfield_update(last_pos);
-        }
-    }
-
-    void use(raycast_info *rc) override {
-        if (!flashlight.id) {
-            flashlight = spawn_entity(rc->p, 11, surface_xp);
-            last_pos = pl.pos;
-            brightness = *reader_man.get_instance_data(flashlight).data;
-        }
-
-        flashlight_on = !flashlight_on;
-        update_light();
-    }
-
-    void alt_use(raycast_info *rc) override {
-        if (flashlight_on) {
-            brightness = brightness + 0.25f;
-            if (brightness > 1)
-                brightness -= 1;
-
-            *reader_man.get_instance_data(flashlight).data = brightness;
-            pl.ui_dirty = true;
-            update_light();
-        }
-    }
-
-    void long_use(raycast_info *rc) override { }
-
-    void cycle_mode() override {
-        /* different flashlight focal lengths */
-    }
-
-    void preview(raycast_info *rc, frame_data *frame) override {
-        if (flashlight.id)
-            update_light();
-    }
-
-    void get_description(char *str) override {
-        if (flashlight.id) {
-            sprintf(str, "Ghetto flashlight brightness %.0f%%", brightness * 100);
-            pl.ui_dirty = true;
-        } else
-            sprintf(str, "Ghetto flashlight");
-    }
-};
-
-
 std::array<tool*, 10> tools {
     //tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
@@ -1819,7 +1532,6 @@ std::array<tool*, 10> tools {
     new add_surface_entity_tool(),
     new remove_surface_entity_tool(),
     new add_wiring_tool(),
-    //new flashlight_tool()
     new add_room_tool(),
 };
 
@@ -2004,9 +1716,6 @@ update()
         tick_sensor_comparators(ship);
         tick_proximity_sensors(ship, &pl);
         tick_doors(ship);
-
-        /* rebuild lighting if needed */
-        fullbright_lightfield();
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);
