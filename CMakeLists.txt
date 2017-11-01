@@ -58,9 +58,58 @@ set(EN_SOURCES
         src/tools/remove_surface.cc
         src/wiring/wiring.cc
         src/wiring/wiring_data.cc
-        )
+    )
 
-add_library(NIGHTMARE ${EN_SOURCES})
+set(EN_HEADERS
+        src/blob.h
+        src/block.h
+        src/char.h
+        src/chunk.h
+        src/common.h
+        src/component/c_entity.h
+        src/component/component_manager.h
+        src/component/component_system_manager.h
+        src/component/door_component.h
+        src/component/gas_production_component.h
+        src/component/light_component.h
+        src/component/physics_component.h
+        src/component/power_component.h
+        src/component/power_provider_component.h
+        src/component/pressure_sensor_component.h
+        src/component/proximity_sensor_component.h
+        src/component/reader_component.h
+        src/component/relative_position_component.h
+        src/component/renderable_component.h
+        src/component/sensor_comparator_component.h
+        src/component/surface_attachment_component.h
+        src/component/switch_component.h
+        src/component/type_component.h
+        src/config.h
+        src/fixed_cube.h
+        src/input.h
+        src/libconfig_shim.h
+        src/memory.h
+        src/mesh.h
+        src/particle.h
+        src/physics.h
+        src/player.h
+        src/projectile/projectile.h
+        src/render_data.h
+        src/scopetimer.h
+        src/settings.h
+        src/shader.h
+        src/ship_space.h
+        src/text.h
+        src/textureset.h
+        src/timer.h
+        src/tools/tools.h
+        src/winerr.h
+        src/winunistd.h
+        src/wiring/wiring_data.h
+        src/wiring/wiring.h
+    )
+
+add_library(NIGHTMARE ${EN_SOURCES} ${EN_HEADERS})
 
 include(FindPkgConfig)
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
