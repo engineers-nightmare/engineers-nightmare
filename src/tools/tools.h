@@ -29,8 +29,7 @@ struct tool
 };
 
 struct add_room_tool : tool {
-
-    int room_size = 0;
+    unsigned room_size = 0;
 
     bool can_use(const raycast_info *rc);
 

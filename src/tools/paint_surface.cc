@@ -210,8 +210,6 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
                     for (auto k = s[i[1]]; k <= e[i[1]]; k++) {
                         c[i[0]] = j;
                         c[i[1]] = k;
-                        auto o = cur + surface_index_to_normal(start_index);
-
                         auto block = ship->get_block(cur);
                         if (mode == replace_mode::match && block->surfs[start_index] != select_type) {
                             continue;
