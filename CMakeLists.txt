@@ -57,7 +57,8 @@ set(EN_SOURCES
         src/tools/remove_surface.cc
         src/wiring/wiring.cc
         src/wiring/wiring_data.cc
-    )
+        src/component/component_manager.cc
+        )
 
 set(EN_HEADERS
         src/blob.h
@@ -106,6 +107,7 @@ set(EN_HEADERS
         src/winunistd.h
         src/wiring/wiring_data.h
         src/wiring/wiring.h
+        src/tinydir.h
     )
 
 add_library(NIGHTMARE ${EN_SOURCES} ${EN_HEADERS})
