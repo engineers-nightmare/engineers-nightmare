@@ -12,6 +12,10 @@
 #include <SDL.h>
 #include <unordered_map>
 #include <array>
+#include <libconfig.h>
+#include <iostream>
+
+#include "src/tinydir.h"
 
 #include "src/common.h"
 #include "src/component/component_system_manager.h"
@@ -32,11 +36,9 @@
 #include "src/wiring/wiring.h"
 #include "src/wiring/wiring_data.h"
 
-
 #define APP_NAME        "Engineer's Nightmare"
 #define DEFAULT_WIDTH   1024
 #define DEFAULT_HEIGHT  768
-
 
 #define WORLD_TEXTURE_DIMENSION     32
 #define MAX_WORLD_TEXTURES          64
@@ -183,6 +185,76 @@ entity_type entity_types[] = {
     { "Flashlight", "mesh/no_place.dae", 3, true, 1 },
 };
 
+struct entity_data {
+    std::string name;
+
+};
+
+extern std::unordered_map<std::string, std::function<component_stub(config_setting_t *)>> component_stub_generators;
+
+bool load_entities() {
+    std::vector<std::string> files;
+
+    tinydir_dir dir;
+    tinydir_open(&dir, "entities");
+
+    while (dir.has_next)
+    {
+        tinydir_file file{};
+        tinydir_readfile(&dir, &file);
+
+        tinydir_next(&dir);
+
+        if (file.is_dir || strcmp(file.extension, "cmp") != 0) {
+            continue;
+        }
+
+        files.emplace_back(file.path);
+    }
+
+    tinydir_close(&dir);
+
+    for (auto &f : files) {
+        config_t cfg{};
+        config_setting_t *entity_config_setting = nullptr;
+        config_init(&cfg);
+
+        if (!config_read_file(&cfg, f.c_str())) {
+            printf("%s:%d - %s reading %s\n", config_error_file(&cfg),
+            config_error_line(&cfg), config_error_text(&cfg), f.c_str());
+
+            config_destroy(&cfg);
+
+            assert(false);
+            return false;
+        }
+
+        entity_config_setting = config_lookup(&cfg, "entity");
+        if (entity_config_setting != nullptr) {
+            /* http://www.hyperrealm.com/libconfig/libconfig_manual.html
+             * states
+             *  > int config_setting_length (const config_setting_t * setting)
+             *  > This function returns the number of settings in a group,
+             *  > or the number of elements in a list or array.
+             *  > For other types of settings, it returns 0.
+             *
+             * so the count can only ever be positive, despite the return type being int
+             */
+            auto components = config_setting_lookup(entity_config_setting, "components");
+            auto components_count = (unsigned)config_setting_length(components);
+
+            for (unsigned i = 0; i < components_count; ++i) {
+                auto component = config_setting_get_elem(components, i);
+                printf("Component: %s\n", component->name);
+
+                if (component->name[0] == 'l'/* ight */) {
+                    auto gen = component_stub_generators[component->name];
+                    light_component_stub ls = gen(component);
+                }
+            }
+        }
+    }
+}
 
 c_entity spawn_entity(glm::ivec3 p, unsigned type, int face) {
     auto ce = c_entity::spawn();
@@ -493,6 +565,22 @@ init()
     reader_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     proximity_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
+    sensor_comparator_component_stub::register_generator();
+    gas_production_component_stub::register_generator();
+    light_component_stub::register_generator();
+    physics_component_stub::register_generator();
+    relative_position_component_stub::register_generator();
+    power_component_stub::register_generator();
+    power_provider_component_stub::register_generator();
+    pressure_sensor_component_stub::register_generator();
+    renderable_component_stub::register_generator();
+    surface_attachment_component_stub::register_generator();
+    switch_component_stub::register_generator();
+    type_component_stub::register_generator();
+    door_component_stub::register_generator();
+    reader_component_stub::register_generator();
+    proximity_sensor_component_stub::register_generator();
+
     proj_man.create_projectile_data(1000);
 
     printf("%s starting up.\n", APP_NAME);
@@ -518,6 +606,9 @@ init()
     glPolygonOffset(-0.1f, -0.1f);
 
     mesher_init();
+
+    printf("Loading entities\n");
+    load_entities();
 
     particle_man = new particle_manager();
     particle_man->create_particle_data(1000);
