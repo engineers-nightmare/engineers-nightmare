@@ -19,6 +19,16 @@ load_stage(GLenum stage, char const *filename)
     GLint len = (GLint)content.len;
     glShaderSource(shader, 1, (GLchar const **) &content.data, &len);
     glCompileShader(shader);
+
+    GLint compiled;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) {
+        GLchar error[255];
+        GLsizei len;
+        glGetShaderInfoLog(shader, 255, &len, error);
+        printf("Shader %s failed with --\n  %s\n", filename, error);
+    }
+
     return shader;
 }
 
@@ -33,6 +43,15 @@ GLuint load_shader(char const *vs, char const *fs)
     glAttachShader(prog, fs_obj);
 
     glLinkProgram(prog);
+
+    GLint compiled;
+    glGetShaderiv(prog, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) {
+        GLchar error[255];
+        GLsizei len;
+        glGetProgramInfoLog(prog, 255, &len, error);
+        printf("Program of %s : %s failed with --\n  %s\n", vs, fs, error);
+    }
 
     glDetachShader(prog, vs_obj);
     glDeleteShader(vs_obj);
