@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../block.h"
 
@@ -32,26 +32,6 @@ struct add_room_tool : tool {
     unsigned room_size = 0;
 
     bool can_use(const raycast_info *rc);
-
-    void use(raycast_info *rc) override;
-
-    void alt_use(raycast_info *rc) override;
-
-    void long_use(raycast_info *rc) override;
-
-    void cycle_mode() override;
-
-    void preview(raycast_info *rc, frame_data *frame) override;
-
-    void get_description(char *str) override;
-};
-
-struct add_surface_tool : tool
-{
-    surface_type st;
-    add_surface_tool() : st(surface_wall) {}
-
-    bool can_use(block *bl, block *other, int index);
 
     void use(raycast_info *rc) override;
 

@@ -257,7 +257,6 @@
     <ClCompile Include="src\textureset.cc" />
     <ClCompile Include="src\tools\add_block.cc" />
     <ClCompile Include="src\tools\add_room.cc" />
-    <ClCompile Include="src\tools\add_surface.cc" />
     <ClCompile Include="src\tools\paint_surface.cc" />
     <ClCompile Include="src\tools\fire_projectile.cc" />
     <ClCompile Include="src\tools\remove_block.cc" />

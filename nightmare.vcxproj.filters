@@ -81,9 +81,6 @@
     <ClCompile Include="src\tools\add_block.cc">
       <Filter>Source Files\tools</Filter>
     </ClCompile>
-    <ClCompile Include="src\tools\add_surface.cc">
-      <Filter>Source Files\tools</Filter>
-    </ClCompile>
     <ClCompile Include="src\tools\remove_block.cc">
       <Filter>Source Files\tools</Filter>
     </ClCompile>
@@ -164,6 +161,9 @@
     </ClCompile>
     <ClCompile Include="src\tools\add_room.cc">
       <Filter>Source Files\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tools\paint_surface.cc">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
