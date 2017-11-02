@@ -1,3 +1,5 @@
-float,required_power
-bool,powered
-float,max_required_power
+stub,float,float,required_power
+stub,float,float,max_required_power
+body,float,required_power
+body,bool,powered
+body,float,max_required_power

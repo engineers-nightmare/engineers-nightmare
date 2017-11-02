@@ -1,2 +1,2 @@
-glm::ivec3,block
-int,face
+body,glm::ivec3,block
+body,int,face

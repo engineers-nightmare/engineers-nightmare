@@ -1,2 +1,2 @@
-glm::vec3,position
-glm::mat4,mat
+body,glm::vec3,position
+body,glm::mat4,mat

@@ -1,4 +1,6 @@
-char const *,name
-c_entity,source
-char const *,desc
-float,data
+stub,std::string,string,name
+stub,std::string,string,desc
+body,char const *,name
+body,c_entity,source
+body,char const *,desc
+body,float,data

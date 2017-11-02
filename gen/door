@@ -1,4 +1,4 @@
-hw_mesh *,mesh
-float,pos
-float,desired_pos
-int,height
+body,hw_mesh *,mesh
+body,float,pos
+body,float,desired_pos
+body,int,height

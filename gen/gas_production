@@ -1,4 +1,7 @@
-unsigned,gas_type
-float,flow_rate
-float,max_pressure
-bool,enabled
+stub,unsigned,int,gas_type
+stub,float,float,flow_rate
+stub,float,float,max_pressure
+body,unsigned,gas_type
+body,float,flow_rate
+body,float,max_pressure
+body,bool,enabled

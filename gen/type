@@ -1,1 +1,3 @@
-unsigned,type
+stub,std::string,string,name
+body,unsigned,type
+body,char const *,name

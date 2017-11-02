@@ -1,2 +1,3 @@
-float,compare_result
-float,compare_epsilon
+stub,float,float,compare_epsilon
+body,float,compare_result
+body,float,compare_epsilon

@@ -1,2 +1,3 @@
-float,range
-bool,is_detected
+stub,float,float,range
+body,float,range
+body,bool,is_detected
