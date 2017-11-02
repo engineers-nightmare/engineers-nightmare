@@ -1,7 +1,9 @@
 #pragma once
 
 #include <unordered_map>
+#include <functional>
 #include <glm/glm.hpp>
+#include <libconfig.h>
 
 #include "c_entity.h"
 #include "../mesh.h"
@@ -17,6 +19,10 @@ namespace std {
         }
     };
 }
+
+struct component_stub {
+    virtual ~component_stub() {}
+};
 
 struct component_manager {
     struct instance {
