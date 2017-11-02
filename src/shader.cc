@@ -6,6 +6,7 @@
 
 #include <epoxy/gl.h>
 #include <stdio.h>
+#include <string>
 
 #include "shader.h"
 #include "blob.h"
@@ -23,10 +24,11 @@ load_stage(GLenum stage, char const *filename)
     GLint compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
     if (!compiled) {
-        GLchar error[255];
-        GLsizei len;
-        glGetShaderInfoLog(shader, 255, &len, error);
-        printf("Shader %s failed with --\n  %s\n", filename, error);
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+        std::string error;
+        error.resize((unsigned)len);
+        glGetProgramInfoLog(shader, 255, &len, &error[0]);
+        printf("Shader %s failed with --\n  %s\n", filename, error.c_str());
     }
 
     return shader;
@@ -44,13 +46,15 @@ GLuint load_shader(char const *vs, char const *fs)
 
     glLinkProgram(prog);
 
-    GLint compiled;
-    glGetShaderiv(prog, GL_COMPILE_STATUS, &compiled);
-    if (!compiled) {
-        GLchar error[255];
-        GLsizei len;
-        glGetProgramInfoLog(prog, 255, &len, error);
-        printf("Program of %s : %s failed with --\n  %s\n", vs, fs, error);
+    GLint linked;
+    glGetShaderiv(prog, GL_LINK_STATUS, &linked);
+    if (!linked) {
+        GLint len;
+        glGetShaderiv(prog, GL_INFO_LOG_LENGTH, &len);
+        std::string error;
+        error.resize((unsigned)len);
+        glGetProgramInfoLog(prog, 255, &len, &error[0]);
+        printf("Program of %s : %s failed with --\n  %s\n", vs, fs, error.c_str());
     }
 
     glDetachShader(prog, vs_obj);
