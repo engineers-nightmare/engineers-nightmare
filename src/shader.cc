@@ -21,13 +21,13 @@ load_stage(GLenum stage, char const *filename)
     glShaderSource(shader, 1, (GLchar const **) &content.data, &len);
     glCompileShader(shader);
 
-    GLint compiled;
+    GLint compiled = 0;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
     if (!compiled) {
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
         std::string error;
         error.resize((unsigned)len);
-        glGetProgramInfoLog(shader, 255, &len, &error[0]);
+        glGetShaderInfoLog(shader, len, &len, &error[0]);
         printf("Shader %s failed with --\n  %s\n", filename, error.c_str());
     }
 
@@ -46,14 +46,14 @@ GLuint load_shader(char const *vs, char const *fs)
 
     glLinkProgram(prog);
 
-    GLint linked;
-    glGetShaderiv(prog, GL_LINK_STATUS, &linked);
+    GLint linked = 0;
+    glGetProgramiv(prog, GL_LINK_STATUS, &linked);
     if (!linked) {
         GLint len;
         glGetShaderiv(prog, GL_INFO_LOG_LENGTH, &len);
         std::string error;
         error.resize((unsigned)len);
-        glGetProgramInfoLog(prog, 255, &len, &error[0]);
+        glGetProgramInfoLog(prog, len, &len, &error[0]);
         printf("Program of %s : %s failed with --\n  %s\n", vs, fs, error.c_str());
     }
 
