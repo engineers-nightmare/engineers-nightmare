@@ -196,7 +196,7 @@ extern std::unordered_map<std::string, std::function<std::shared_ptr<component_s
 bool load_entities() {
     std::vector<std::string> files;
 
-    tinydir_dir dir;
+    tinydir_dir dir{};
     tinydir_open(&dir, "entities");
 
     while (dir.has_next)
