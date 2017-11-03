@@ -21,7 +21,7 @@ set(EN_SOURCES
         src/char.cc
         src/component/component_system_manager.cc
         src/component/door_component.cc
-        src/component/gas_production_component.cc
+        src/component/gas_producer_component.cc
         src/component/light_component.cc
         src/component/physics_component.cc
         src/component/power_component.cc
@@ -70,7 +70,7 @@ set(EN_HEADERS
         src/component/component_manager.h
         src/component/component_system_manager.h
         src/component/door_component.h
-        src/component/gas_production_component.h
+        src/component/gas_producer_component.h
         src/component/light_component.h
         src/component/physics_component.h
         src/component/power_component.h

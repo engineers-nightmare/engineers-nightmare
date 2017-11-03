@@ -6,7 +6,7 @@
 
 #include "component_manager.h"
 
-struct gas_production_component_stub : component_stub {
+struct gas_producer_component_stub : component_stub {
     unsigned gas_type;
 
     float flow_rate;
@@ -16,7 +16,7 @@ struct gas_production_component_stub : component_stub {
     static void register_generator();
 };
 
-struct gas_production_component_manager : component_manager {
+struct gas_producer_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
         unsigned *gas_type;

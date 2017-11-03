@@ -7,7 +7,7 @@
 #include "../ship_space.h"
 #include "../player.h"
 #include "sensor_comparator_component.h"
-#include "gas_production_component.h"
+#include "gas_producer_component.h"
 #include "light_component.h"
 #include "physics_component.h"
 #include "power_component.h"
@@ -23,7 +23,7 @@
 #include "proximity_sensor_component.h"
 
 extern sensor_comparator_component_manager comparator_man;
-extern gas_production_component_manager gas_man;
+extern gas_producer_component_manager gas_man;
 extern light_component_manager light_man;
 extern physics_component_manager physics_man;
 extern relative_position_component_manager pos_man;

@@ -640,7 +640,7 @@ init()
     proximity_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 
     sensor_comparator_component_stub::register_generator();
-    gas_production_component_stub::register_generator();
+    gas_producer_component_stub::register_generator();
     light_component_stub::register_generator();
     physics_component_stub::register_generator();
     relative_position_component_stub::register_generator();

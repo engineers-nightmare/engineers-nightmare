@@ -2,7 +2,7 @@
 #include "../particle.h"
 
 sensor_comparator_component_manager comparator_man;
-gas_production_component_manager gas_man;
+gas_producer_component_manager gas_man;
 light_component_manager light_man;
 physics_component_manager physics_man;
 relative_position_component_manager pos_man;
