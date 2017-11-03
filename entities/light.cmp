@@ -8,6 +8,10 @@ entity: {
         },
         relative_position: {
         },
+        physics: {
+        },
+        surface_attachment: {
+        },
         power: {
             required_power: 6,
             max_required_power: 6,
@@ -18,10 +22,6 @@ entity: {
         reader: {
             name: "light brightness",
             desc: "",
-        },
-        physics: {
-        },
-        surface_attachment: {
         },
     };
 };
