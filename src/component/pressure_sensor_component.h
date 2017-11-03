@@ -7,8 +7,6 @@
 #include "component_manager.h"
 
 struct pressure_sensor_component_stub : component_stub {
-    float pressure;
-
     unsigned type;
 
     static void register_generator();

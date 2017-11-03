@@ -1,4 +1,3 @@
-stub,float,float,pressure
 stub,unsigned,int,type
 body,float,pressure
 body,unsigned,type

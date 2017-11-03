@@ -14,9 +14,6 @@ power_provider_stub_from_config(const config_setting_t *power_provider_config) {
     auto max_provided_member = config_setting_get_member(power_provider_config, "max_provided");
     power_provider_stub->max_provided = config_setting_get_float(max_provided_member);
 
-    auto provided_member = config_setting_get_member(power_provider_config, "provided");
-    power_provider_stub->provided = config_setting_get_float(provided_member);
-
     return power_provider_stub;
 };
 

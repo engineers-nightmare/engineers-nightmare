@@ -9,8 +9,6 @@
 struct power_provider_component_stub : component_stub {
     float max_provided;
 
-    float provided;
-
     static void register_generator();
 };
 
