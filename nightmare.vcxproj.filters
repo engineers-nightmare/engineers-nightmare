@@ -37,6 +37,12 @@
     <Filter Include="Header Files\tools">
       <UniqueIdentifier>{b604ea93-9d24-4477-9bb4-5d14c8b98071}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gen">
+      <UniqueIdentifier>{9f4400b4-3ce4-46cb-8511-8e3f84ad5aa9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\entities">
+      <UniqueIdentifier>{1e54a95e-32c7-4662-aadc-f28ca9574a28}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\blob.cc">
@@ -230,9 +236,6 @@
     <ClInclude Include="src\projectile\projectile.h">
       <Filter>Header Files\projectile</Filter>
     </ClInclude>
-    <ClInclude Include="src\light_field.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\component\component_manager.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
@@ -308,5 +311,85 @@
     <ClInclude Include="src\component\gas_producer_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gen\door">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\gas_producer">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\light">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\physics">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\power">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\power_provider">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\pressure_sensor">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\proximity_sensor">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\reader">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\relative_position">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\renderable">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\sensor_comparator">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\surface_attachment">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\switch">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="gen\type">
+      <Filter>gen</Filter>
+    </None>
+    <None Include="entities\display.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
+    <None Include="entities\door.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
+    <None Include="entities\frobnicator.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
+    <None Include="entities\light.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
+    <None Include="entities\plaidnicator.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
+    <None Include="entities\pressure_sensor_1.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
+    <None Include="entities\pressure_sensor_2.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
+    <None Include="entities\proximity_sensor.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
+    <None Include="entities\sensor_comparator.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
+    <None Include="entities\switch.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
+    <None Include="entities\warning_light.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
   </ItemGroup>
 </Project>
