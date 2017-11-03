@@ -159,7 +159,9 @@ struct mesh_data {
     btTriangleMesh *phys_mesh = nullptr;
     btCollisionShape *phys_shape = nullptr;
 
-    mesh_data(std::string mesh) : mesh(mesh) {
+    mesh_data() = default;
+
+    explicit mesh_data(const std::string &mesh) : mesh(mesh) {
         sw = load_mesh(mesh.c_str());
     }
 
@@ -224,11 +226,12 @@ namespace std {
     };
 }
 
+std::vector<std::string> entity_names;
 std::unordered_map<std::string, entity_data> entity_stubs{};
 
 extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
 
-bool load_entities() {
+void load_entities() {
     std::vector<std::string> files;
 
     tinydir_dir dir{};
@@ -262,7 +265,6 @@ bool load_entities() {
             config_destroy(&cfg);
 
             assert(false);
-            return false;
         }
 
         entity_data entity{};
@@ -342,11 +344,13 @@ bool load_entities() {
         }
     }
 
-    return true;
+    for (auto &entity : entity_stubs) {
+        entity_names.push_back(entity.first);
+    }
 }
 
 c_entity
-spawn_entity(std::string name, glm::ivec3 p, int face) {
+spawn_entity(const std::string &name, glm::ivec3 p, int face) {
     auto ce = c_entity::spawn();
 
     auto mat = mat_block_face(p, face);
@@ -363,7 +367,8 @@ spawn_entity(std::string name, glm::ivec3 p, int face) {
 
     auto physics = physics_man->get_instance_data(ce);
     *physics.rigid = nullptr;
-    auto &phys_mesh = meshes[*physics.mesh];
+    std::string m = *physics.mesh;
+    auto const &phys_mesh = meshes[m];
     build_static_physics_rb_mat(&mat, phys_mesh.phys_shape, physics.rigid);    
     /* so that we can get back to the entity from a phys raycast */
     /* TODO: these should really come from a dense pool rather than the generic allocator */
@@ -778,8 +783,6 @@ init()
     particle_shader = load_shader("shaders/particle.vert", "shaders/particle.frag");
     modelspace_uv_shader = load_shader("shaders/simple_modelspace_uv.vert", "shaders/simple.frag");
 
-    frame_hw = upload_mesh(frame_sw);         /* needed for overlay */
-
     glUseProgram(simple_shader);
 
     world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
@@ -960,7 +963,7 @@ remove_ents_from_surface(glm::ivec3 b, int face)
 
 struct add_block_entity_tool : tool
 {
-    unsigned type = 1;
+    unsigned type = 0;
 
     bool can_use(raycast_info *rc) {
         if (!rc->hit || rc->inside)
@@ -976,12 +979,14 @@ struct add_block_entity_tool : tool
             return false;
         }
 
-        for (auto i = 0; i < entity_types[type].height; i++) {
+        // todo: 1 is a hack here. It represents placeable item height.
+        // This should be on a component, probably
+        for (auto i = 0; i < 1; i++) {
             block *bl = ship->get_block(rc->p + glm::ivec3(0, 0, i));
             if (bl) {
                 /* check for surface ents that would conflict */
-                for (int face = 0; face < face_count; face++)
-                    if (bl->surf_space[face])
+                for (unsigned short face : bl->surf_space)
+                    if (face)
                         return false;
             }
         }
@@ -993,8 +998,9 @@ struct add_block_entity_tool : tool
         if (!can_use(rc))
             return;
 
+        auto name = entity_names[type];
         chunk *ch = ship->get_chunk_containing(rc->p);
-        auto e = spawn_entity(rc->p, type, surface_zm);
+        auto e = spawn_entity(name, rc->p, surface_zm);
         ch->entities.push_back(e);
 
         for (auto i = 0; i < entity_types[type].height; i++) {
@@ -1017,9 +1023,12 @@ struct add_block_entity_tool : tool
     void long_use(raycast_info *rc) override {}
 
     void cycle_mode() override {
-        do {
-            type = (type + 1) % (sizeof(entity_types) / sizeof(*entity_types));
-        } while (entity_types[type].placed_on_surface);
+        if (type++ >= entity_names.size()) {
+            type = 0;
+        }
+//        do {
+//            type = (type + 1) % (sizeof(entity_types) / sizeof(*entity_types));
+//        } while (entity_types[type].placed_on_surface);
     }
 
     void preview(raycast_info *rc, frame_data *frame) override {
@@ -1052,9 +1061,15 @@ struct add_block_entity_tool : tool
 
 struct add_surface_entity_tool : tool
 {
-    unsigned type = 2;  /* bit of a hack -- this is the first with placed_on_surface set. */
-                        /* note that we can't cycle_mode() in our ctor as that runs too early,
-                           before the entity types are even set up. */
+    unsigned type = std::numeric_limits<unsigned>::max();
+
+    void select() override {
+        if (type == std::numeric_limits<unsigned>::max()) {
+            // todo: this might want to check which entities are surface placeable
+            // as is, this tool is going to be very similar add_block_entity_tool
+            type = 0;
+        }
+    }
 
     bool can_use(raycast_info *rc) {
         if (!rc->hit)
@@ -1095,7 +1110,8 @@ struct add_surface_entity_tool : tool
          * a surface facing into it */
         assert(ch);
 
-        auto e = spawn_entity(rc->p, type, index ^ 1);
+        auto name = entity_names[type];
+        auto e = spawn_entity(name, rc->p, index ^ 1);
         ch->entities.push_back(e);
 
         /* take the space. */
@@ -1109,9 +1125,12 @@ struct add_surface_entity_tool : tool
     void long_use(raycast_info *rc) override {}
 
     void cycle_mode() override {
-        do {
-            type = (type + 1) % (sizeof(entity_types) / sizeof(*entity_types));
-        } while (!entity_types[type].placed_on_surface);
+        if (type++ >= entity_names.size()) {
+            type = 0;
+        }
+//        do {
+//            type = (type + 1) % (sizeof(entity_types) / sizeof(*entity_types));
+//        } while (!entity_types[type].placed_on_surface);
     }
 
     void preview(raycast_info *rc, frame_data *frame) override {
