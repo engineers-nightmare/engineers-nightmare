@@ -14,6 +14,7 @@
 #include <array>
 #include <libconfig.h>
 #include <iostream>
+#include <memory>
 
 #include "src/tinydir.h"
 
@@ -190,7 +191,7 @@ struct entity_data {
 
 };
 
-extern std::unordered_map<std::string, std::function<component_stub(config_setting_t *)>> component_stub_generators;
+extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
 
 bool load_entities() {
     std::vector<std::string> files;
@@ -249,7 +250,8 @@ bool load_entities() {
 
                 if (component->name[0] == 'l'/* ight */) {
                     auto gen = component_stub_generators[component->name];
-                    light_component_stub ls = gen(component);
+                    auto ls = std::dynamic_pointer_cast<light_component_stub>(gen(component));
+                    printf("Intensity: %f\n", ls->intensity);
                 }
             }
         }
