@@ -1,0 +1,19 @@
+entity: {
+    components: {
+        type: {
+            name: "plaidnicator",
+        },
+        renderable: {
+            mesh: "mesh/frobnicator.dae"
+        },
+        relative_position: {
+        },
+        physics: {
+        },
+        surface_attachment: {
+        },
+        power_provider: {
+            max_provided: 6,
+        },
+    };
+};

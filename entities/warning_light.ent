@@ -1,0 +1,27 @@
+entity: {
+    components: {
+        type: {
+            name: "warning light",
+        },
+        renderable: {
+            mesh: "mesh/warning_light.dae"
+        },
+        relative_position: {
+        },
+        physics: {
+        },
+        surface_attachment: {
+        },
+        power: {
+            required_power: 6,
+            max_required_power: 6,
+        },
+        light: {
+            intensity: 1.0,
+        },
+        reader: {
+            name: "light brightness",
+            desc: "sensor_comparison_state",
+        },
+    };
+};

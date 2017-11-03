@@ -1,0 +1,19 @@
+entity: {
+    components: {
+        type: {
+            name: "pressure sensor 1",
+        },
+        renderable: {
+            mesh: "mesh/panel_1x1.dae"
+        },
+        relative_position: {
+        },
+        physics: {
+        },
+        surface_attachment: {
+        },
+        pressure_sensor: {
+            type: 2,
+        },
+    };
+};

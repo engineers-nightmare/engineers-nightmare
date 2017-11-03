@@ -1,0 +1,26 @@
+entity: {
+    components: {
+        type: {
+            name: "door",
+        },
+        renderable: {
+            mesh: "mesh/door_frame.dae"
+        },
+        relative_position: {
+        },
+        physics: {
+        },
+        surface_attachment: {
+        },
+        power: {
+            required_power: 8,
+            max_required_power: 8,
+        },
+        door: {
+        },
+        reader: {
+            name: "desired state",
+            desc: "",
+        },
+    };
+};

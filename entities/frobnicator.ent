@@ -1,0 +1,25 @@
+entity: {
+    components: {
+        type: {
+            name: "frobnicator",
+        },
+        renderable: {
+            mesh: "mesh/frobnicator.dae"
+        },
+        relative_position: {
+        },
+        physics: {
+        },
+        surface_attachment: {
+        },
+        power: {
+            required_power: 6,
+            max_required_power: 6,
+        },
+        gas_producer: {
+            gas_type: 1.0,
+            flow_rate: 0.1,
+            max_pressure: 1.0,
+        },
+    };
+};
