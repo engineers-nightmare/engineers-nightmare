@@ -2,7 +2,9 @@
 
 #include <unordered_map>
 #include <functional>
+#include <memory>
 #include <glm/glm.hpp>
+#include <utility>
 #include <libconfig.h>
 
 #include "c_entity.h"
@@ -21,7 +23,13 @@ namespace std {
 }
 
 struct component_stub {
-    virtual ~component_stub() {}
+    std::string name;
+
+    explicit component_stub(const std::string &name) : name(std::move(name)) {}
+
+    virtual void assign_component_to_entity(c_entity) = 0;
+
+    virtual ~component_stub() = default;
 };
 
 struct component_manager {
@@ -33,9 +41,9 @@ struct component_manager {
         unsigned num;
         unsigned allocated;
         void *buffer;
-    } buffer;
+    } buffer{};
 
-    std::unordered_map<c_entity, unsigned> entity_instance_map;
+    std::unordered_map<c_entity, unsigned> entity_instance_map{};
 
     virtual void create_component_instance_data(unsigned count) = 0;
 
@@ -47,6 +55,8 @@ struct component_manager {
     }
 
     virtual void entity(c_entity e) = 0;
+
+    virtual void register_stub_generator() = 0;
 
     bool exists(c_entity  e) {
         return entity_instance_map.find(e) != entity_instance_map.end();
@@ -75,3 +85,5 @@ struct component_manager {
         buffer.buffer = nullptr;
     }
 };
+
+extern std::unordered_map<std::string, std::unique_ptr<component_manager>> component_managers;
