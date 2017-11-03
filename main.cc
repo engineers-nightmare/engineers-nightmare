@@ -116,8 +116,6 @@ gl_debug_callback(GLenum source __unused,
 frame_data *frames, *frame;
 unsigned frame_index;
 
-sw_mesh *frame_sw;
-sw_mesh *surfs_sw[6];
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader, modelspace_uv_shader;
 texture_set *world_textures;
@@ -128,24 +126,8 @@ physics *phy;
 unsigned char const *keys;
 unsigned int mouse_buttons[input_mouse_buttons_count];
 int mouse_axes[input_mouse_axes_count];
-hw_mesh *frame_hw;
-hw_mesh *surfs_hw[6];
 text_renderer *text;
 sprite_renderer *ui_sprites;
-
-sw_mesh *door_sw;
-hw_mesh *door_hw;
-
-extern hw_mesh *projectile_hw;
-extern sw_mesh *projectile_sw;
-
-extern hw_mesh *attachment_hw;
-extern sw_mesh *attachment_sw;
-
-extern hw_mesh *no_placement_hw;
-extern sw_mesh *no_placement_sw;
-
-extern hw_mesh *wire_hw_meshes[num_wire_types];
 
 sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 
@@ -1046,9 +1028,11 @@ struct add_block_entity_tool : tool
         *mat_overlay.ptr = mat_position(glm::vec3(rc->p) );
         mat_overlay.bind(1, frame);
 
+        auto &frame_mesh = meshes["initial_frame.dae"];
+
         /* draw a block overlay as well around the block */
         glUseProgram(add_overlay_shader);
-        draw_mesh(frame_hw);
+        draw_mesh(frame_mesh.hw);
         glUseProgram(simple_shader);
     }
 
@@ -1152,9 +1136,20 @@ struct add_surface_entity_tool : tool
         *mat.ptr = mat_position(rc->bl);
         mat.bind(1, frame);
 
+        const std::array<std::string, 6> surf_names{
+            "x_quad.dae",
+            "x_quad_p.dae",
+            "y_quad.dae",
+            "y_quad_p.dae",
+            "z_quad.dae",
+            "z_quad_p.dae",
+        };
+
+        auto surf_mesh = meshes[surf_names[index]];
+
         glUseProgram(add_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        draw_mesh(surfs_hw[index]);
+        draw_mesh(surf_mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }
@@ -1201,9 +1196,20 @@ struct remove_surface_entity_tool : tool
         *mat.ptr = mat_position(rc->bl);
         mat.bind(1, frame);
 
+        const std::array<std::string, 6> surf_names{
+            "x_quad.dae",
+            "x_quad_p.dae",
+            "y_quad.dae",
+            "y_quad_p.dae",
+            "z_quad.dae",
+            "z_quad_p.dae",
+        };
+
+        auto surf_mesh = meshes[surf_names[index]];
+
         glUseProgram(remove_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        draw_mesh(surfs_hw[index]);
+        draw_mesh(surf_mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }
@@ -1450,8 +1456,10 @@ struct add_wiring_tool : tool
         *mat.ptr = a2.transform;
         mat.bind(1, frame);
 
+        auto mesh = allow_placement ? meshes["attach.dae"] : meshes["no_place.dae"];
+
         glUseProgram(unlit_shader);
-        draw_mesh(allow_placement ? attachment_hw : no_placement_hw);
+        draw_mesh(mesh.hw);
         glUseProgram(simple_shader);
 
         if (current_attach == invalid_attach)
@@ -1464,7 +1472,7 @@ struct add_wiring_tool : tool
             mat.bind(1, frame);
 
             glUseProgram(unlit_shader);
-            draw_mesh(wire_hw_meshes[type]);
+            draw_mesh(meshes["wire.dae"].hw);
             glUseProgram(simple_shader);
         }
     }
