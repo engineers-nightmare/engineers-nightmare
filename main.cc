@@ -1,4 +1,4 @@
-﻿#ifndef _WIN32
+#ifndef _WIN32
 #include <err.h> /* errx */
 #else
 #include "src/winerr.h"
@@ -152,6 +152,32 @@ sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 projectile_linear_manager proj_man;
 particle_manager *particle_man;
 
+struct mesh_data {
+    std::string mesh;
+    sw_mesh *sw = nullptr;
+    hw_mesh *hw = nullptr;
+    btTriangleMesh *phys_mesh = nullptr;
+    btCollisionShape *phys_shape = nullptr;
+
+    mesh_data(std::string mesh) : mesh(mesh) {
+        sw = load_mesh(mesh.c_str());
+    }
+
+    void upload_mesh() {
+        assert(sw);
+
+        hw = ::upload_mesh(sw);
+    }
+
+    void load_physics() {
+        assert(sw);
+
+        build_static_physics_mesh(sw, &phys_mesh, &phys_shape);
+    }
+};
+
+std::unordered_map<std::string, mesh_data> meshes{};
+
 struct entity_type
 {
     /* static */
@@ -162,10 +188,10 @@ struct entity_type
     int height;
 
     /* loader loop does these */
-    sw_mesh *sw;
-    hw_mesh *hw;
-    btTriangleMesh *phys_mesh;
-    btCollisionShape *phys_shape;
+    sw_mesh *sw = nullptr;
+    hw_mesh *hw = nullptr;
+    btTriangleMesh *phys_mesh = nullptr;
+    btCollisionShape *phys_shape = nullptr;
 };
 
 
@@ -320,7 +346,7 @@ bool load_entities() {
 }
 
 c_entity
-spawn_entity_stub_version(std::string name, glm::ivec3 p, int face) {
+spawn_entity(std::string name, glm::ivec3 p, int face) {
     auto ce = c_entity::spawn();
 
     auto mat = mat_block_face(p, face);
@@ -330,6 +356,28 @@ spawn_entity_stub_version(std::string name, glm::ivec3 p, int face) {
     for (auto &comp : entity->components) {
         comp->assign_component_to_entity(ce);
     }
+
+    auto pos_man = relative_position_component_manager::get_manager();
+    auto physics_man = physics_component_manager::get_manager();
+    auto surface_man = surface_attachment_component_manager::get_manager();
+
+    auto physics = physics_man->get_instance_data(ce);
+    *physics.rigid = nullptr;
+    auto &phys_mesh = meshes[*physics.mesh];
+    build_static_physics_rb_mat(&mat, phys_mesh.phys_shape, physics.rigid);    
+    /* so that we can get back to the entity from a phys raycast */
+    /* TODO: these should really come from a dense pool rather than the generic allocator */
+    auto per = new phys_ent_ref;
+    per->ce = ce;
+    (*physics.rigid)->setUserPointer(per);
+
+    auto surface = surface_man->get_instance_data(ce);
+    *surface.block = p;
+    *surface.face = face;
+
+    auto pos = pos_man->get_instance_data(ce);
+    *pos.position = p;
+    *pos.mat = mat;
 
     return ce;
 }
@@ -632,6 +680,54 @@ prepare_chunks()
 }
 
 void
+load_meshes() {
+
+    std::vector<tinydir_file> files;
+
+    tinydir_dir dir{};
+    tinydir_open(&dir, "mesh");
+
+    while (dir.has_next)
+    {
+        tinydir_file file{};
+        tinydir_readfile(&dir, &file);
+
+        tinydir_next(&dir);
+
+        if (file.is_dir || strcmp(file.extension, "dae") != 0) {
+            continue;
+        }
+
+        files.emplace_back(file);
+    }
+
+    tinydir_close(&dir);
+
+    for (auto &f : files) {
+        meshes.emplace(f.name, mesh_data{ f.path }).second;
+    }
+
+    auto proj_mesh = meshes["sphere.dae"];
+    for (auto i = 0u; i < proj_mesh.sw->num_vertices; ++i) {
+        proj_mesh.sw->verts[i].x *= 0.01f;
+        proj_mesh.sw->verts[i].y *= 0.01f;
+        proj_mesh.sw->verts[i].z *= 0.01f;
+    }
+    set_mesh_material(proj_mesh.sw, 11);
+
+    set_mesh_material(meshes["attach.dae"].sw, 10);
+    set_mesh_material(meshes["no_place.dae"].sw, 11);
+    set_mesh_material(meshes["wire.dae"].sw, 12);
+    set_mesh_material(meshes["single_door.dae"].sw, 2);
+    set_mesh_material(meshes["wire.dae"].sw, 12);
+
+    for (auto &mesh : meshes) {
+        mesh.second.upload_mesh();
+        mesh.second.load_physics();
+    }
+}
+
+void
 init()
 {
     initialize_component_managers();
@@ -668,52 +764,7 @@ init()
     particle_man = new particle_manager();
     particle_man->create_particle_data(1000);
 
-    projectile_sw = load_mesh("mesh/sphere.dae");
-    for (auto i = 0u; i < projectile_sw->num_vertices; ++i) {
-        projectile_sw->verts[i].x *= 0.01f;
-        projectile_sw->verts[i].y *= 0.01f;
-        projectile_sw->verts[i].z *= 0.01f;
-    }
-    set_mesh_material(projectile_sw, 11);
-    projectile_hw = upload_mesh(projectile_sw);
-
-    attachment_sw = load_mesh("mesh/attach.dae");
-    set_mesh_material(attachment_sw, 10);
-    attachment_hw = upload_mesh(attachment_sw);
-
-    no_placement_sw = load_mesh("mesh/no_place.dae");
-    set_mesh_material(no_placement_sw, 11);
-    no_placement_hw = upload_mesh(no_placement_sw);
-
-    auto wire_sw = load_mesh("mesh/wire.dae");
-    set_mesh_material(wire_sw, 12);
-    wire_hw_meshes[wire_type_power] = upload_mesh(wire_sw);
-    set_mesh_material(wire_sw, 14);
-    wire_hw_meshes[wire_type_comms] = upload_mesh(wire_sw);
-
-    door_sw = load_mesh("mesh/single_door.dae");
-    set_mesh_material(door_sw, 2);  /* TODO: paint a new texture for this one */
-    door_hw = upload_mesh(door_sw);
-
-    frame_sw = load_mesh("mesh/initial_frame.dae");
-
-    surfs_sw[surface_xp] = load_mesh("mesh/x_quad_p.dae");
-    surfs_sw[surface_xm] = load_mesh("mesh/x_quad.dae");
-    surfs_sw[surface_yp] = load_mesh("mesh/y_quad_p.dae");
-    surfs_sw[surface_ym] = load_mesh("mesh/y_quad.dae");
-    surfs_sw[surface_zp] = load_mesh("mesh/z_quad_p.dae");
-    surfs_sw[surface_zm] = load_mesh("mesh/z_quad.dae");
-
-    for (int i = 0; i < 6; i++)
-        surfs_hw[i] = upload_mesh(surfs_sw[i]);
-
-    for (auto &entity_type : entity_types) {
-        auto t = &entity_type;
-        t->sw = load_mesh(t->mesh);
-        set_mesh_material(t->sw, t->material);
-        t->hw = upload_mesh(t->sw);
-        build_static_physics_mesh(t->sw, &t->phys_mesh, &t->phys_shape);
-    }
+    load_meshes();
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
