@@ -1,3 +1,3 @@
-stub,float,float,intensity
-body,float,intensity
-body,float,requested_intensity
+stub,float,float,intensity,
+body,float,intensity,1
+body,float,requested_intensity,1

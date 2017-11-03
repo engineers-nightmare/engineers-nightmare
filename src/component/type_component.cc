@@ -20,17 +20,12 @@ type_stub_from_config(const config_setting_t *type_config) {
 extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
 
 void
-type_component_stub::register_generator() {
-    component_stub_generators["type"] = type_stub_from_config;
-}
-
-void
 type_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
         return;
 
-    component_buffer new_buffer;
-    instance_data new_pool;
+    component_buffer new_buffer{};
+    instance_data new_pool{};
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(unsigned) * count + align_size<unsigned>(size);
@@ -82,4 +77,9 @@ type_component_manager::entity(c_entity e) {
     auto inst = lookup(e);
 
     instance_pool.entity[inst.index] = e;
+}
+
+void
+type_component_manager::register_stub_generator() {
+    component_stub_generators["type"] = type_stub_from_config;
 }

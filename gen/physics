@@ -1,1 +1,1 @@
-body,btRigidBody *,rigid
+body,btRigidBody *,rigid,nullptr

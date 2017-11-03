@@ -23,17 +23,12 @@ power_stub_from_config(const config_setting_t *power_config) {
 extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
 
 void
-power_component_stub::register_generator() {
-    component_stub_generators["power"] = power_stub_from_config;
-}
-
-void
 power_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
         return;
 
-    component_buffer new_buffer;
-    instance_data new_pool;
+    component_buffer new_buffer{};
+    instance_data new_pool{};
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(float) * count + align_size<float>(size);
@@ -89,4 +84,9 @@ power_component_manager::entity(c_entity e) {
     auto inst = lookup(e);
 
     instance_pool.entity[inst.index] = e;
+}
+
+void
+power_component_manager::register_stub_generator() {
+    component_stub_generators["power"] = power_stub_from_config;
 }

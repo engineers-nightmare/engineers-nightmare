@@ -1,6 +1,6 @@
-stub,std::string,string,name
-stub,std::string,string,desc
-body,char const *,name
-body,c_entity,source
-body,char const *,desc
-body,float,data
+stub,std::string,string,name,.c_str()
+stub,std::string,string,desc,.c_str()
+body,char const *,name,""
+body,c_entity,source,{}
+body,char const *,desc,""
+body,float,data,0

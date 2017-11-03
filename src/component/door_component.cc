@@ -17,17 +17,12 @@ door_stub_from_config(const config_setting_t *door_config) {
 extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
 
 void
-door_component_stub::register_generator() {
-    component_stub_generators["door"] = door_stub_from_config;
-}
-
-void
 door_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
         return;
 
-    component_buffer new_buffer;
-    instance_data new_pool;
+    component_buffer new_buffer{};
+    instance_data new_pool{};
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(hw_mesh *) * count + align_size<hw_mesh *>(size);
@@ -87,4 +82,9 @@ door_component_manager::entity(c_entity e) {
     auto inst = lookup(e);
 
     instance_pool.entity[inst.index] = e;
+}
+
+void
+door_component_manager::register_stub_generator() {
+    component_stub_generators["door"] = door_stub_from_config;
 }

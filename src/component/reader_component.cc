@@ -23,17 +23,12 @@ reader_stub_from_config(const config_setting_t *reader_config) {
 extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
 
 void
-reader_component_stub::register_generator() {
-    component_stub_generators["reader"] = reader_stub_from_config;
-}
-
-void
 reader_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
         return;
 
-    component_buffer new_buffer;
-    instance_data new_pool;
+    component_buffer new_buffer{};
+    instance_data new_pool{};
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(char const *) * count + align_size<char const *>(size);
@@ -93,4 +88,9 @@ reader_component_manager::entity(c_entity e) {
     auto inst = lookup(e);
 
     instance_pool.entity[inst.index] = e;
+}
+
+void
+reader_component_manager::register_stub_generator() {
+    component_stub_generators["reader"] = reader_stub_from_config;
 }

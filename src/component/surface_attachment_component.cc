@@ -17,17 +17,12 @@ surface_attachment_stub_from_config(const config_setting_t *surface_attachment_c
 extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
 
 void
-surface_attachment_component_stub::register_generator() {
-    component_stub_generators["surface_attachment"] = surface_attachment_stub_from_config;
-}
-
-void
 surface_attachment_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
         return;
 
-    component_buffer new_buffer;
-    instance_data new_pool;
+    component_buffer new_buffer{};
+    instance_data new_pool{};
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(glm::ivec3) * count + align_size<glm::ivec3>(size);
@@ -79,4 +74,9 @@ surface_attachment_component_manager::entity(c_entity e) {
     auto inst = lookup(e);
 
     instance_pool.entity[inst.index] = e;
+}
+
+void
+surface_attachment_component_manager::register_stub_generator() {
+    component_stub_generators["surface_attachment"] = surface_attachment_stub_from_config;
 }
