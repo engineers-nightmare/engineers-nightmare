@@ -233,13 +233,26 @@ bool load_entities() {
 
         if (!config_read_file(&cfg, f.c_str())) {
             printf("%s:%d - %s reading %s\n", config_error_file(&cfg),
-            config_error_line(&cfg), config_error_text(&cfg), f.c_str());
+                   config_error_line(&cfg), config_error_text(&cfg), f.c_str());
 
             config_destroy(&cfg);
 
             assert(false);
             return false;
         }
+
+        entity_data entity{};
+
+        // required to be a valid entity
+        std::unordered_map<std::string, bool> found {
+            {"type",               false},
+            {"renderable",         false},
+            {"physics",            false},
+            {"relative_position",  false},
+            {"surface_attachment", false},
+        };
+
+        printf("Loading entity from %s\n", f.c_str());
 
         entity_config_setting = config_lookup(&cfg, "entity");
         if (entity_config_setting != nullptr) {
@@ -253,17 +266,54 @@ bool load_entities() {
              * so the count can only ever be positive, despite the return type being int
              */
             auto components = config_setting_lookup(entity_config_setting, "components");
-            auto components_count = (unsigned)config_setting_length(components);
+            auto components_count = (unsigned) config_setting_length(components);
 
             for (unsigned i = 0; i < components_count; ++i) {
                 auto component = config_setting_get_elem(components, i);
-                printf("Component: %s\n", component->name);
+                printf("  Component: %s\n", component->name);
 
-                if (component->name[0] == 'l'/* ight */) {
-                    auto gen = component_stub_generators[component->name];
-                    auto ls = std::dynamic_pointer_cast<light_component_stub>(gen(component));
-                    printf("Intensity: %f\n", ls->intensity);
+                auto gen = component_stub_generators[component->name];
+                auto stub = gen(component);
+                entity.components.push_back(stub);
+
+                auto type_stub = std::dynamic_pointer_cast<type_component_stub>(stub);
+                if (type_stub) {
+                    entity.name = type_stub->name;
+
+                    found[component->name] = true;
                 }
+
+                auto render_stub = std::dynamic_pointer_cast<renderable_component_stub>(stub);
+                if (render_stub) {
+                    found[component->name] = true;
+                }
+
+                auto pos_stub = std::dynamic_pointer_cast<relative_position_component_stub>(stub);
+                if (pos_stub) {
+                    found[component->name] = true;
+                }
+
+                auto physics_stub = std::dynamic_pointer_cast<physics_component_stub>(stub);
+                if (physics_stub) {
+                    found[component->name] = true;
+                }
+
+                auto surf_stub = std::dynamic_pointer_cast<surface_attachment_component_stub>(stub);
+                if (surf_stub) {
+                    found[component->name] = true;
+                }
+            }
+
+            auto valid = true;
+            for (auto &find : found) {
+                if (!find.second) {
+                    printf("!! Entity %s in %s missing %s component\n", f.c_str(), entity.name.c_str(), find.first.c_str());
+                    valid = false;
+                }
+            }
+
+            if (valid) {
+                entity_stubs[entity.name] = entity;
             }
         }
     }
@@ -271,7 +321,16 @@ bool load_entities() {
     return true;
 }
 
-c_entity spawn_entity(glm::ivec3 p, unsigned type, int face) {
+c_entity
+spawn_entity_stub_version(std::string name) {
+    auto ce = c_entity::spawn();
+
+
+    return ce;
+}
+
+c_entity
+spawn_entity(glm::ivec3 p, unsigned type, int face) {
     auto ce = c_entity::spawn();
 
     auto mat = mat_block_face(p, face);
