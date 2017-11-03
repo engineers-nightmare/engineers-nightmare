@@ -22,28 +22,15 @@
 #include "reader_component.h"
 #include "proximity_sensor_component.h"
 
-extern sensor_comparator_component_manager comparator_man;
-extern gas_producer_component_manager gas_man;
-extern light_component_manager light_man;
-extern physics_component_manager physics_man;
-extern relative_position_component_manager pos_man;
-extern power_component_manager power_man;
-extern power_provider_component_manager power_provider_man;
-extern pressure_sensor_component_manager pressure_man;
-extern renderable_component_manager render_man;
-extern surface_attachment_component_manager surface_man;
-extern switch_component_manager switch_man;
-extern type_component_manager type_man;
-extern door_component_manager door_man;
-extern reader_component_manager reader_man;
-extern proximity_sensor_component_manager proximity_man;
+void initialize_component_managers();
+
+extern std::unordered_map<std::string, std::unique_ptr<component_manager>> component_managers;
 
 extern const char *comms_msg_type_switch_state;
 extern const char *comms_msg_type_pressure_sensor_1_state;
 extern const char *comms_msg_type_pressure_sensor_2_state;
 extern const char *comms_msg_type_sensor_comparison_state;
 extern const char *comms_msg_type_proximity_sensor_state;
-
 
 void
 tick_gas_producers(ship_space *ship);
