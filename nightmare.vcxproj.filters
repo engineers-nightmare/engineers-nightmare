@@ -105,9 +105,6 @@
     <ClCompile Include="src\component\door_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
-    <ClCompile Include="src\component\gas_production_component.cc">
-      <Filter>Source Files\component</Filter>
-    </ClCompile>
     <ClCompile Include="src\component\light_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
@@ -164,6 +161,9 @@
     </ClCompile>
     <ClCompile Include="src\tools\paint_surface.cc">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\gas_producer_component.cc">
+      <Filter>Source Files\component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -239,9 +239,6 @@
     <ClInclude Include="src\component\door_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
-    <ClInclude Include="src\component\gas_production_component.h">
-      <Filter>Header Files\component</Filter>
-    </ClInclude>
     <ClInclude Include="src\component\light_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
@@ -306,6 +303,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\component\proximity_sensor_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\gas_producer_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
