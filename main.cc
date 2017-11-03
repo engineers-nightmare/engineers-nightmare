@@ -188,8 +188,19 @@ entity_type entity_types[] = {
 
 struct entity_data {
     std::string name;
-
+    std::vector<std::shared_ptr<component_stub>> components;
 };
+
+namespace std {
+    template<>
+    struct hash<entity_data> {
+        size_t operator()(entity_data e) const {
+            return hash<std::string>()(e.name);
+        }
+    };
+}
+
+std::unordered_map<std::string, entity_data> entity_stubs{};
 
 extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
 
