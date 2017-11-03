@@ -49,7 +49,7 @@ struct light_component_stub : component_stub {
         man->assign_entity(entity);
         auto data = man->get_instance_data(entity);        
 
-        *data.intensity = 1;
+        *data.intensity = 0;
 
         *data.requested_intensity = 1;
 

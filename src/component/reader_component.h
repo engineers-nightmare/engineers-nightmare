@@ -55,11 +55,11 @@ struct reader_component_stub : component_stub {
         man->assign_entity(entity);
         auto data = man->get_instance_data(entity);        
 
-        *data.name = "";
+        *data.name = nullptr;
 
         *data.source = {};
 
-        *data.desc = "";
+        *data.desc = nullptr;
 
         *data.data = 0;
 

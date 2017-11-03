@@ -11,6 +11,9 @@ std::shared_ptr<component_stub>
 physics_stub_from_config(const config_setting_t *physics_config) {
     auto physics_stub = std::make_shared<physics_component_stub>();
 
+    auto mesh_member = config_setting_get_member(physics_config, "mesh");
+    physics_stub->mesh = config_setting_get_string(mesh_member);
+
     return physics_stub;
 };
 
@@ -25,6 +28,7 @@ physics_component_manager::create_component_instance_data(unsigned count) {
     instance_data new_pool{};
 
     size_t size = sizeof(c_entity) * count;
+    size = sizeof(const char*) * count + align_size<const char*>(size);
     size = sizeof(btRigidBody *) * count + align_size<btRigidBody *>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
@@ -34,9 +38,11 @@ physics_component_manager::create_component_instance_data(unsigned count) {
     memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
-    new_pool.rigid = align_ptr((btRigidBody * *)(new_pool.entity + count));
+    new_pool.mesh = align_ptr((const char* *)(new_pool.entity + count));
+    new_pool.rigid = align_ptr((btRigidBody * *)(new_pool.mesh + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
+    memcpy(new_pool.mesh, instance_pool.mesh, buffer.num * sizeof(const char*));
     memcpy(new_pool.rigid, instance_pool.rigid, buffer.num * sizeof(btRigidBody *));
 
     free(buffer.buffer);
@@ -52,6 +58,7 @@ physics_component_manager::destroy_instance(instance i) {
     auto current_entity = instance_pool.entity[i.index];
 
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
+    instance_pool.mesh[i.index] = instance_pool.mesh[last_index];
     instance_pool.rigid[i.index] = instance_pool.rigid[last_index];
 
     entity_instance_map[last_entity] = i.index;

@@ -59,11 +59,11 @@ struct gas_producer_component_stub : component_stub {
 
         *data.gas_type = 0;
 
-        *data.flow_rate = 0;
+        *data.flow_rate = 0.1;
 
-        *data.max_pressure = 0;
+        *data.max_pressure = 1.0;
 
-        *data.enabled = false;
+        *data.enabled = true;
 
         *data.gas_type = gas_type;
 

@@ -10,6 +10,7 @@
 struct physics_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
+        const char* *mesh;
         btRigidBody * *rigid;
     } instance_pool;
 
@@ -24,6 +25,7 @@ struct physics_component_manager : component_manager {
         auto inst = lookup(e);
 
         d.entity = instance_pool.entity + inst.index;
+        d.mesh = instance_pool.mesh + inst.index;
         d.rigid = instance_pool.rigid + inst.index;
 
         return d;
@@ -37,6 +39,8 @@ struct physics_component_manager : component_manager {
 struct physics_component_stub : component_stub {
     physics_component_stub() : component_stub("physics") {}
 
+    const char* mesh{};
+
     void
     assign_component_to_entity(c_entity entity) {
         std::shared_ptr<component_manager> m = std::move(component_managers[name]);
@@ -45,6 +49,10 @@ struct physics_component_stub : component_stub {
         man->assign_entity(entity);
         auto data = man->get_instance_data(entity);        
 
+        *data.mesh = nullptr;
+
         *data.rigid = nullptr;
+
+        *data.mesh = mesh;
   };
 };

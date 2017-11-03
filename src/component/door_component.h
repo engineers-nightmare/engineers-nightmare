@@ -53,10 +53,10 @@ struct door_component_stub : component_stub {
 
         *data.mesh = nullptr;
 
-        *data.pos = 0;
+        *data.pos = 1;
 
-        *data.desired_pos = 0;
+        *data.desired_pos = 1;
 
-        *data.height = 0;
+        *data.height = 2;
   };
 };
