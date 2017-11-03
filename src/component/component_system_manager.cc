@@ -252,8 +252,8 @@ tick_light_components(ship_space *ship) {
             *(light.intensity) = new_intensity;
             *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
 
-            auto pos = *pos_man.get_instance_data(ce).position;
-            auto block_pos = get_coord_containing(pos);
+//            auto pos = *pos_man.get_instance_data(ce).position;
+//            auto block_pos = get_coord_containing(pos);
         }
     }
 }
