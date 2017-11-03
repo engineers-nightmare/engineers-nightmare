@@ -12,8 +12,6 @@ struct proximity_sensor_component_stub : component_stub {
     static void register_generator();
 };
 
-proximity_sensor_component_stub proximity_sensor_stub_from_config(const config_setting_t *proximity_sensor_config);
-
 struct proximity_sensor_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;

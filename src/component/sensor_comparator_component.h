@@ -12,8 +12,6 @@ struct sensor_comparator_component_stub : component_stub {
     static void register_generator();
 };
 
-sensor_comparator_component_stub sensor_comparator_stub_from_config(const config_setting_t *sensor_comparator_config);
-
 struct sensor_comparator_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;

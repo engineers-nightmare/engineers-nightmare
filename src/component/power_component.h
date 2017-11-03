@@ -14,8 +14,6 @@ struct power_component_stub : component_stub {
     static void register_generator();
 };
 
-power_component_stub power_stub_from_config(const config_setting_t *power_config);
-
 struct power_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;

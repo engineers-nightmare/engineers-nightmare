@@ -12,8 +12,6 @@ struct light_component_stub : component_stub {
     static void register_generator();
 };
 
-light_component_stub light_stub_from_config(const config_setting_t *light_config);
-
 struct light_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;

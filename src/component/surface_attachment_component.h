@@ -10,8 +10,6 @@ struct surface_attachment_component_stub : component_stub {
     static void register_generator();
 };
 
-surface_attachment_component_stub surface_attachment_stub_from_config(const config_setting_t *surface_attachment_config);
-
 struct surface_attachment_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;

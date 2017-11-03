@@ -10,8 +10,6 @@ struct physics_component_stub : component_stub {
     static void register_generator();
 };
 
-physics_component_stub physics_stub_from_config(const config_setting_t *physics_config);
-
 struct physics_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;

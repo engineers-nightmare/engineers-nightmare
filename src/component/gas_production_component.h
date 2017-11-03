@@ -16,8 +16,6 @@ struct gas_production_component_stub : component_stub {
     static void register_generator();
 };
 
-gas_production_component_stub gas_production_stub_from_config(const config_setting_t *gas_production_config);
-
 struct gas_production_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;

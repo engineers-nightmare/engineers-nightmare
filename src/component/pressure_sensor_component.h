@@ -14,8 +14,6 @@ struct pressure_sensor_component_stub : component_stub {
     static void register_generator();
 };
 
-pressure_sensor_component_stub pressure_sensor_stub_from_config(const config_setting_t *pressure_sensor_config);
-
 struct pressure_sensor_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;

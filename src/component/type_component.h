@@ -12,8 +12,6 @@ struct type_component_stub : component_stub {
     static void register_generator();
 };
 
-type_component_stub type_stub_from_config(const config_setting_t *type_config);
-
 struct type_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;

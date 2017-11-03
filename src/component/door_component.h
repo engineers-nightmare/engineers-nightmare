@@ -10,8 +10,6 @@ struct door_component_stub : component_stub {
     static void register_generator();
 };
 
-door_component_stub door_stub_from_config(const config_setting_t *door_config);
-
 struct door_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;

@@ -10,8 +10,6 @@ struct renderable_component_stub : component_stub {
     static void register_generator();
 };
 
-renderable_component_stub renderable_stub_from_config(const config_setting_t *renderable_config);
-
 struct renderable_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
