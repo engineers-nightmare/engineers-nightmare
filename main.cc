@@ -256,6 +256,8 @@ bool load_entities() {
             }
         }
     }
+
+    return true;
 }
 
 c_entity spawn_entity(glm::ivec3 p, unsigned type, int face) {
