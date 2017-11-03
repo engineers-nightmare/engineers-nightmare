@@ -4,11 +4,12 @@ entity: {
             name: "frobnicator",
         },
         renderable: {
-            mesh: "mesh/frobnicator.dae"
+            mesh: "frobnicator.dae",
         },
         relative_position: {
         },
         physics: {
+            mesh: "frobnicator.dae",
         },
         surface_attachment: {
         },

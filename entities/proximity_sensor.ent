@@ -4,11 +4,12 @@ entity: {
             name: "proximity sensor",
         },
         renderable: {
-            mesh: "mesh/panel_1x1.dae"
+            mesh: "panel_1x1.dae",
         },
         relative_position: {
         },
         physics: {
+            mesh: "panel_1x1.dae",
         },
         surface_attachment: {
         },

@@ -4,11 +4,12 @@ entity: {
             name: "warning light",
         },
         renderable: {
-            mesh: "mesh/warning_light.dae"
+            mesh: "warning_light.dae",
         },
         relative_position: {
         },
         physics: {
+            mesh: "warning_light.dae",
         },
         surface_attachment: {
         },

@@ -4,11 +4,12 @@ entity: {
             name: "light",
         },
         renderable: {
-            mesh: "mesh/panel_4x4.dae"
+            mesh: "panel_4x4.dae",
         },
         relative_position: {
         },
         physics: {
+            mesh: "panel_4x4.dae",
         },
         surface_attachment: {
         },
