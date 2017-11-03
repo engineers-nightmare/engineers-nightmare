@@ -206,7 +206,7 @@ bool load_entities() {
 
         tinydir_next(&dir);
 
-        if (file.is_dir || strcmp(file.extension, "cmp") != 0) {
+        if (file.is_dir || strcmp(file.extension, "ent") != 0) {
             continue;
         }
 
