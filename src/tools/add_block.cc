@@ -11,8 +11,7 @@ extern GLuint simple_shader;
 
 extern ship_space *ship;
 
-extern hw_mesh *frame_hw;
-
+extern std::unordered_map<std::string, ::mesh_data> meshes;
 
 struct add_block_tool : tool
 {
@@ -58,8 +57,10 @@ struct add_block_tool : tool
             *mat.ptr = mat_position(rc->p);
             mat.bind(1, frame);
 
+            auto mesh = meshes["initial_frame.dae"];
+
             glUseProgram(add_overlay_shader);
-            draw_mesh(frame_hw);
+            draw_mesh(mesh.hw);
             glUseProgram(simple_shader);
         }
     }

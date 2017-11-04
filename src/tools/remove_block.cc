@@ -12,7 +12,7 @@ extern GLuint simple_shader;
 
 extern ship_space *ship;
 
-extern hw_mesh *frame_hw;
+extern std::unordered_map<std::string, ::mesh_data> meshes;
 
 struct remove_block_tool : tool
 {
@@ -45,9 +45,11 @@ struct remove_block_tool : tool
             *mat.ptr = mat_position(rc->bl);
             mat.bind(1, frame);
 
+            auto mesh = meshes["initial_frame.dae"];
+
             glUseProgram(remove_overlay_shader);
             glEnable(GL_POLYGON_OFFSET_FILL);
-            draw_mesh(frame_hw);
+            draw_mesh(mesh.hw);
             glDisable(GL_POLYGON_OFFSET_FILL);
             glUseProgram(simple_shader);
         }

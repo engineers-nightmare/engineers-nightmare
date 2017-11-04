@@ -134,70 +134,50 @@ sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 projectile_linear_manager proj_man;
 particle_manager *particle_man;
 
-struct mesh_data {
-    std::string mesh;
-    sw_mesh *sw = nullptr;
-    hw_mesh *hw = nullptr;
-    btTriangleMesh *phys_mesh = nullptr;
-    btCollisionShape *phys_shape = nullptr;
-
-    mesh_data() = default;
-
-    explicit mesh_data(const std::string &mesh) : mesh(mesh) {
-        sw = load_mesh(mesh.c_str());
-    }
-
-    void upload_mesh() {
-        assert(sw);
-
-        hw = ::upload_mesh(sw);
-    }
-
-    void load_physics() {
-        assert(sw);
-
-        build_static_physics_mesh(sw, &phys_mesh, &phys_shape);
-    }
-};
-
-std::unordered_map<std::string, mesh_data> meshes{};
-
-struct entity_type
-{
-    /* static */
-    char const *name;
-    char const *mesh;
-    int material;
-    bool placed_on_surface;
-    int height;
-
-    /* loader loop does these */
-    sw_mesh *sw = nullptr;
-    hw_mesh *hw = nullptr;
-    btTriangleMesh *phys_mesh = nullptr;
-    btCollisionShape *phys_shape = nullptr;
-};
-
-
-entity_type entity_types[] = {
-    { "Door", "mesh/single_door_frame.dae", 2, false, 2 },
-    { "Frobnicator", "mesh/frobnicator.dae", 3, false, 1 },
-    { "Light", "mesh/panel_4x4.dae", 8, true, 1 },
-    { "Warning Light", "mesh/warning_light.dae", 8, true, 1 },
-    { "Display Panel", "mesh/panel_4x4.dae", 7, true, 1 },
-    { "Switch", "mesh/panel_1x1.dae", 9, true, 1 },
-    { "Plaidnicator", "mesh/frobnicator.dae", 13, false, 1 },
-    { "Pressure Sensor 1", "mesh/panel_1x1.dae", 12, true, 1 },
-    { "Pressure Sensor 2", "mesh/panel_1x1.dae", 14, true, 1 },
-    { "Sensor Comparator", "mesh/panel_1x1.dae", 13, true, 1 },
-    { "Proximity Sensor", "mesh/panel_1x1.dae", 3, true, 1 },
-    { "Flashlight", "mesh/no_place.dae", 3, true, 1 },
-};
-
 struct entity_data {
     std::string name;
     std::vector<std::shared_ptr<component_stub>> components;
 };
+
+static std::vector<std::string> entity_names;
+std::unordered_map<std::string, entity_data> entity_stubs{};
+
+extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
+
+extern std::array<std::string, face_count> surface_index_to_mesh;
+extern std::unordered_map<std::string, ::mesh_data> meshes;
+
+//struct entity_type
+//{
+//    /* static */
+//    char const *name;
+//    char const *mesh;
+//    int material;
+//    bool placed_on_surface;
+//    int height;
+//
+//    /* loader loop does these */
+//    sw_mesh *sw = nullptr;
+//    hw_mesh *hw = nullptr;
+//    btTriangleMesh *phys_mesh = nullptr;
+//    btCollisionShape *phys_shape = nullptr;
+//};
+
+
+//entity_type entity_types[] = {
+//    { "Door", "mesh/single_door_frame.dae", 2, false, 2 },
+//    { "Frobnicator", "mesh/frobnicator.dae", 3, false, 1 },
+//    { "Light", "mesh/panel_4x4.dae", 8, true, 1 },
+//    { "Warning Light", "mesh/warning_light.dae", 8, true, 1 },
+//    { "Display Panel", "mesh/panel_4x4.dae", 7, true, 1 },
+//    { "Switch", "mesh/panel_1x1.dae", 9, true, 1 },
+//    { "Plaidnicator", "mesh/frobnicator.dae", 13, false, 1 },
+//    { "Pressure Sensor 1", "mesh/panel_1x1.dae", 12, true, 1 },
+//    { "Pressure Sensor 2", "mesh/panel_1x1.dae", 14, true, 1 },
+//    { "Sensor Comparator", "mesh/panel_1x1.dae", 13, true, 1 },
+//    { "Proximity Sensor", "mesh/panel_1x1.dae", 3, true, 1 },
+//    { "Flashlight", "mesh/no_place.dae", 3, true, 1 },
+//};
 
 namespace std {
     template<>
@@ -207,11 +187,6 @@ namespace std {
         }
     };
 }
-
-std::vector<std::string> entity_names;
-std::unordered_map<std::string, entity_data> entity_stubs{};
-
-extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
 
 void load_entities() {
     std::vector<std::string> files;
@@ -327,7 +302,8 @@ void load_entities() {
     }
 
     for (auto &entity : entity_stubs) {
-        entity_names.push_back(entity.first);
+        std::string name = entity.first;
+        entity_names.push_back(name);
     }
 }
 
@@ -587,9 +563,9 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
     assert(pos_man->exists(ce) || !"All [usable] entities probably need position");
 
     auto pos = *pos_man->get_instance_data(ce).position;
-    auto type = &entity_types[*type_man->get_instance_data(ce).type];
+    auto type = *type_man->get_instance_data(ce).name;
     printf("player using the %s at %f %f %f\n",
-            type->name, pos.x, pos.y, pos.z);
+            type, pos.x, pos.y, pos.z);
 
     if (switch_man->exists(ce)) {
         /* publish new state on all attached comms wires */
@@ -606,13 +582,16 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
 
 /* todo: support free-placed entities*/
 void
-place_entity_attaches(raycast_info* rc, int index, c_entity e, unsigned entity_type) {
-    auto const & et = entity_types[entity_type];
+place_entity_attaches(raycast_info* rc, int index, c_entity e) {
+    auto render_man = renderable_component_manager::get_manager();
+
+    auto mesh_name = *render_man->get_instance_data(e).mesh;
+    auto sw = ::meshes[mesh_name].sw;
 
     for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
         auto wt = (wire_type)wire_index;
-        for (auto i = 0u; i < et.sw->num_attach_points[wt]; ++i) {
-            auto mat = mat_block_face(rc->p, index ^ 1) * et.sw->attach_points[wt][i];
+        for (auto i = 0u; i < sw->num_attach_points[wt]; ++i) {
+            auto mat = mat_block_face(rc->p, index ^ 1) * sw->attach_points[wt][i];
             auto attach_index = (unsigned)ship->wire_attachments[wt].size();
             wire_attachment wa = { mat, attach_index, 0, true };
 
@@ -666,53 +645,7 @@ prepare_chunks()
     }
 }
 
-void
-load_meshes() {
-
-    std::vector<tinydir_file> files;
-
-    tinydir_dir dir{};
-    tinydir_open(&dir, "mesh");
-
-    while (dir.has_next)
-    {
-        tinydir_file file{};
-        tinydir_readfile(&dir, &file);
-
-        tinydir_next(&dir);
-
-        if (file.is_dir || strcmp(file.extension, "dae") != 0) {
-            continue;
-        }
-
-        files.emplace_back(file);
-    }
-
-    tinydir_close(&dir);
-
-    for (auto &f : files) {
-        meshes.emplace(f.name, mesh_data{ f.path }).second;
-    }
-
-    auto proj_mesh = meshes["sphere.dae"];
-    for (auto i = 0u; i < proj_mesh.sw->num_vertices; ++i) {
-        proj_mesh.sw->verts[i].x *= 0.01f;
-        proj_mesh.sw->verts[i].y *= 0.01f;
-        proj_mesh.sw->verts[i].z *= 0.01f;
-    }
-    set_mesh_material(proj_mesh.sw, 11);
-
-    set_mesh_material(meshes["attach.dae"].sw, 10);
-    set_mesh_material(meshes["no_place.dae"].sw, 11);
-    set_mesh_material(meshes["wire.dae"].sw, 12);
-    set_mesh_material(meshes["single_door.dae"].sw, 2);
-    set_mesh_material(meshes["wire.dae"].sw, 12);
-
-    for (auto &mesh : meshes) {
-        mesh.second.upload_mesh();
-        mesh.second.load_physics();
-    }
-}
+extern void load_meshes();
 
 void
 init()
@@ -857,15 +790,15 @@ destroy_entity(c_entity e)
     auto surface_man = surface_attachment_component_manager::get_manager();
     auto door_man = door_component_manager::get_manager();
     auto physics_man = physics_component_manager::get_manager();
-    auto type_man = type_component_manager::get_manager();
 
     /* removing block influence from this ent */
     /* this should really be componentified */
     if (surface_man->exists(e)) {
         auto b = *surface_man->get_instance_data(e).block;
-        auto type = &entity_types[*type_man->get_instance_data(e).type];
 
-        for (auto i = 0; i < type->height; i++) {
+        //todo: fix height here. hardcoded is wrong
+        auto height = 1;
+        for (auto i = 0; i < height; i++) {
             auto p = b + glm::ivec3(0, 0, i);
             block *bl = ship->get_block(p);
             assert(bl);
@@ -896,7 +829,7 @@ destroy_entity(c_entity e)
         teardown_static_physics_setup(nullptr, nullptr, phys_data.rigid);
     }
 
-    for (auto &man : component_managers) {
+    for (auto &man : ::component_managers) {
         man.second->destroy_entity_instance(e);
     }
 
@@ -908,7 +841,6 @@ void
 remove_ents_from_surface(glm::ivec3 b, int face)
 {
     auto surface_man = surface_attachment_component_manager::get_manager();
-    auto type_man = type_component_manager::get_manager();
 
     chunk *ch = ship->get_chunk_containing(b);
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
@@ -926,9 +858,9 @@ remove_ents_from_surface(glm::ivec3 b, int face)
         auto p = *surface.block;
         auto f = *surface.face;
 
-        auto type = &entity_types[*type_man->get_instance_data(ce).type];
-
-        if (p.x == b.x && p.y == b.y && p.z <= b.z && p.z + type->height > b.z && f == face) {
+        //todo: fix height here. hardcoded is wrong
+        auto height = 1;
+        if (p.x == b.x && p.y == b.y && p.z <= b.z && p.z + height > b.z && f == face) {
             destroy_entity(ce);
             it = ch->entities.erase(it);
 
@@ -961,9 +893,9 @@ struct add_block_entity_tool : tool
             return false;
         }
 
-        // todo: 1 is a hack here. It represents placeable item height.
-        // This should be on a component, probably
-        for (auto i = 0; i < 1; i++) {
+        //todo: fix height here. hardcoded is wrong
+        auto height = 1;
+        for (auto i = 0; i < height; i++) {
             block *bl = ship->get_block(rc->p + glm::ivec3(0, 0, i));
             if (bl) {
                 /* check for surface ents that would conflict */
@@ -985,7 +917,9 @@ struct add_block_entity_tool : tool
         auto e = spawn_entity(name, rc->p, surface_zm);
         ch->entities.push_back(e);
 
-        for (auto i = 0; i < entity_types[type].height; i++) {
+        //todo: fix height here. hardcoded is wrong
+        auto height = 1;
+        for (auto i = 0; i < height; i++) {
             auto p = rc->p + glm::ivec3(0, 0, i);
             block *bl = ship->ensure_block(p);
             bl->type = block_entity;
@@ -997,7 +931,7 @@ struct add_block_entity_tool : tool
             }
         }
 
-        place_entity_attaches(rc, surface_zp, e, type);
+        place_entity_attaches(rc, surface_zp, e);
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -1021,8 +955,19 @@ struct add_block_entity_tool : tool
         *mat.ptr = mat_position(glm::vec3(rc->p) + glm::vec3(0.5f, 0.5f, 0.0f));
         mat.bind(1, frame);
 
-        auto t = &entity_types[type];
-        draw_mesh(t->hw);
+        auto &stub = entity_stubs[entity_names[type]];
+        std::string mesh_name{};
+        for (auto &comp: stub.components) {
+            auto render = std::dynamic_pointer_cast<renderable_component_stub>(comp);
+            if (render) {
+                mesh_name = render->mesh;
+                break;
+            }
+        }
+        assert(!mesh_name.empty());
+
+        auto mesh = meshes[mesh_name];
+        draw_mesh(mesh.hw);
 
         auto mat_overlay = frame->alloc_aligned<glm::mat4>(1);
         *mat_overlay.ptr = mat_position(glm::vec3(rc->p) );
@@ -1037,8 +982,8 @@ struct add_block_entity_tool : tool
     }
 
     void get_description(char *str) override {
-        auto t = &entity_types[type];
-        sprintf(str, "Place %s", t->name);
+        auto name = entity_names[type];
+        sprintf(str, "Place %s", name.c_str());
     }
 };
 
@@ -1101,7 +1046,7 @@ struct add_surface_entity_tool : tool
         /* take the space. */
         other_side->surf_space[index ^ 1] |= required_space;
 
-        place_entity_attaches(rc, index, e, type);
+        place_entity_attaches(rc, index, e);
     }
 
     void alt_use(raycast_info *rc) override {}
@@ -1109,7 +1054,8 @@ struct add_surface_entity_tool : tool
     void long_use(raycast_info *rc) override {}
 
     void cycle_mode() override {
-        if (type++ >= entity_names.size()) {
+        type++;
+        if (type >= entity_names.size()) {
             type = 0;
         }
 //        do {
@@ -1127,8 +1073,19 @@ struct add_surface_entity_tool : tool
         *mat.ptr = mat_block_face(rc->p, index ^ 1);
         mat.bind(1, frame);
 
-        auto t = &entity_types[type];
-        draw_mesh(t->hw);
+        auto &stub = entity_stubs[entity_names[type]];
+        std::string mesh_name{};
+        for (auto &comp: stub.components) {
+            auto render = std::dynamic_pointer_cast<renderable_component_stub>(comp);
+            if (render) {
+                mesh_name = render->mesh;
+                break;
+            }
+        }
+        assert(!mesh_name.empty());
+
+        auto mesh = meshes[mesh_name];
+        draw_mesh(mesh.hw);
 
         /* draw a surface overlay here too */
         /* TODO: sub-block placement granularity -- will need a different overlay */
@@ -1136,16 +1093,7 @@ struct add_surface_entity_tool : tool
         *mat.ptr = mat_position(rc->bl);
         mat.bind(1, frame);
 
-        const std::array<std::string, 6> surf_names{
-            "x_quad.dae",
-            "x_quad_p.dae",
-            "y_quad.dae",
-            "y_quad_p.dae",
-            "z_quad.dae",
-            "z_quad_p.dae",
-        };
-
-        auto surf_mesh = meshes[surf_names[index]];
+        auto surf_mesh = meshes[surface_index_to_mesh[index]];
 
         glUseProgram(add_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -1155,8 +1103,8 @@ struct add_surface_entity_tool : tool
     }
 
     void get_description(char *str) override {
-        auto t = &entity_types[type];
-        sprintf(str, "Place %s on surface", t->name);
+        auto name = entity_names[type];
+        sprintf(str, "Place %s on surface", name.c_str());
     }
 };
 
@@ -1196,16 +1144,7 @@ struct remove_surface_entity_tool : tool
         *mat.ptr = mat_position(rc->bl);
         mat.bind(1, frame);
 
-        const std::array<std::string, 6> surf_names{
-            "x_quad.dae",
-            "x_quad_p.dae",
-            "y_quad.dae",
-            "y_quad_p.dae",
-            "z_quad.dae",
-            "z_quad_p.dae",
-        };
-
-        auto surf_mesh = meshes[surf_names[index]];
+        auto surf_mesh = meshes[surface_index_to_mesh[index]];
 
         glUseProgram(remove_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -2037,8 +1976,8 @@ struct play_state : game_state {
         bind = game_settings.bindings.bindings.find(action_use);
         key = lookup_key((*bind).second.binds.inputs[0]);
         if (use_entity) {
-            auto type = &entity_types[*type_man->get_instance_data(use_entity->ce).type];
-            sprintf(buf2, "%s Use the %s", key, type->name);
+            auto name = *type_man->get_instance_data(use_entity->ce).name;
+            sprintf(buf2, "%s Use the %s", key, name);
             w = 0; h = 0;
             text->measure(buf2, &w, &h);
             add_text_with_outline(buf2, -w/2, -200);

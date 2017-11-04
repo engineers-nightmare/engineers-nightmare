@@ -6,17 +6,13 @@
 #include "../ship_space.h"
 #include "../component/component_system_manager.h"
 
-sw_mesh *attachment_sw;
-hw_mesh *attachment_hw;
-sw_mesh *no_placement_sw;
-hw_mesh *no_placement_hw;
-
-hw_mesh *wire_hw_meshes[num_wire_types];
-
+extern std::unordered_map<std::string, ::mesh_data> meshes;
 
 void
 draw_attachments(ship_space *ship, frame_data *frame)
 {
+    auto &attach_mesh = ::meshes["attach.dae"];
+
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];
         auto count = wire_attachments.size();
@@ -41,7 +37,7 @@ draw_attachments(ship_space *ship, frame_data *frame)
             }
 
             attachment_matrices.bind(1, frame);
-            draw_mesh_instanced(attachment_hw, drawn_attaches);
+            draw_mesh_instanced(attach_mesh.hw, drawn_attaches);
         }
     }
 }
@@ -50,6 +46,8 @@ draw_attachments(ship_space *ship, frame_data *frame)
 void
 draw_attachments_on_active_wire(ship_space *ship, frame_data *frame)
 {
+    auto &attach_mesh = ::meshes["attach.dae"];
+
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];
         auto count = wire_attachments.size();
@@ -74,7 +72,7 @@ draw_attachments_on_active_wire(ship_space *ship, frame_data *frame)
             }
 
             attachment_matrices.bind(1, frame);
-            draw_mesh_instanced(attachment_hw, drawn_attaches);
+            draw_mesh_instanced(attach_mesh.hw, drawn_attaches);
         }
     }
 }
@@ -104,6 +102,8 @@ calc_segment_matrix(const wire_attachment &start, const wire_attachment &end) {
 
 void
 draw_segments(ship_space *ship, frame_data *frame) {
+    auto &wire_mesh = ::meshes["wire.dae"];
+
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];
         auto const & wire_segments = ship->wire_segments[type];
@@ -134,7 +134,7 @@ draw_segments(ship_space *ship, frame_data *frame) {
             }
 
             segment_matrices.bind(1, frame);
-            draw_mesh_instanced(wire_hw_meshes[type], drawn_segments);
+            draw_mesh_instanced(wire_mesh.hw, drawn_segments);
         }
     }
 }
@@ -142,6 +142,8 @@ draw_segments(ship_space *ship, frame_data *frame) {
 
 void
 draw_active_segments(ship_space *ship, frame_data *frame) {
+    auto &wire_mesh = ::meshes["wire.dae"];
+
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];
         auto const & wire_segments = ship->wire_segments[type];
@@ -176,7 +178,7 @@ draw_active_segments(ship_space *ship, frame_data *frame) {
             }
 
             segment_matrices.bind(1, frame);
-            draw_mesh_instanced(wire_hw_meshes[type], drawn_segments);
+            draw_mesh_instanced(wire_mesh.hw, drawn_segments);
         }
     }
 }

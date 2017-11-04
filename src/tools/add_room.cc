@@ -15,7 +15,7 @@ extern GLuint simple_shader;
 
 extern ship_space *ship;
 
-extern hw_mesh *frame_hw;
+extern std::unordered_map<std::string, ::mesh_data> meshes;
 
 const static std::array<glm::ivec3, 3> room_sizes{glm::ivec3(3, 3, 3),
                                                   glm::ivec3(5, 5, 3),
@@ -130,9 +130,11 @@ add_room_tool::preview(raycast_info *rc, frame_data *frame) {
             *mat.ptr = mat_position(door);
             mat.bind(1, frame);
 
+            auto mesh = meshes["initial_frame.dae"];
+
             glUseProgram(remove_overlay_shader);
             glEnable(GL_POLYGON_OFFSET_FILL);
-            draw_mesh(frame_hw);
+            draw_mesh(mesh.hw);
             glDisable(GL_POLYGON_OFFSET_FILL);
             glUseProgram(simple_shader);
         }

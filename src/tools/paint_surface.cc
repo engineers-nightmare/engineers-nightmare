@@ -14,7 +14,8 @@ extern GLuint simple_shader;
 
 extern ship_space *ship;
 
-extern hw_mesh *surfs_hw[6];
+extern std::unordered_map<std::string, ::mesh_data> meshes;
+extern std::array<std::string, face_count> surface_index_to_mesh;
 
 bool
 paint_surface_tool::can_use(const raycast_info *rc) const {
@@ -173,9 +174,11 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
         *mat.ptr = mat_position(start_block);
         mat.bind(1, frame);
 
+        auto mesh = meshes[surface_index_to_mesh[index]];
+
         glUseProgram(remove_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        draw_mesh(surfs_hw[index]);
+        draw_mesh(mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }
@@ -219,9 +222,11 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
                         *mat.ptr = mat_position(cur);
                         mat.bind(1, frame);
 
+                        auto mesh = meshes[surface_index_to_mesh[index]];
+
                         glUseProgram(remove_overlay_shader);
                         glEnable(GL_POLYGON_OFFSET_FILL);
-                        draw_mesh(surfs_hw[index]);
+                        draw_mesh(mesh.hw);
                         glDisable(GL_POLYGON_OFFSET_FILL);
                         glUseProgram(simple_shader);
                     }
@@ -234,9 +239,11 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
                 *mat.ptr = mat_position(rc->bl);
                 mat.bind(1, frame);
 
+                auto mesh = meshes[surface_index_to_mesh[index]];
+
                 glUseProgram(add_overlay_shader);
                 glEnable(GL_POLYGON_OFFSET_FILL);
-                draw_mesh(surfs_hw[index]);
+                draw_mesh(mesh.hw);
                 glDisable(GL_POLYGON_OFFSET_FILL);
                 glUseProgram(simple_shader);
 
