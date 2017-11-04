@@ -1,7 +1,7 @@
 entity: {
     components: {
         type: {
-            name: "pressure sensor 1",
+            name: "pressure sensor 2",
         },
         renderable: {
             mesh: "panel_1x1.dae",

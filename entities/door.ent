@@ -4,12 +4,12 @@ entity: {
             name: "door",
         },
         renderable: {
-            mesh: "door_frame.dae",
+            mesh: "single_door_frame.dae",
         },
         relative_position: {
         },
         physics: {
-            mesh: "door_frame.dae",
+            mesh: "single_door_frame.dae",
         },
         surface_attachment: {
         },

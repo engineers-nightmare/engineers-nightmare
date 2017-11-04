@@ -1,7 +1,7 @@
 entity: {
     components: {
         type: {
-            name: "light",
+            name: "switch",
         },
         renderable: {
             mesh: "panel_4x4.dae",
