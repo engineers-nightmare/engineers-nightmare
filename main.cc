@@ -939,7 +939,8 @@ struct add_block_entity_tool : tool
     void long_use(raycast_info *rc) override {}
 
     void cycle_mode() override {
-        if (type++ >= entity_names.size()) {
+        type++;
+        if (type >= entity_names.size()) {
             type = 0;
         }
 //        do {
