@@ -36,7 +36,7 @@ struct door_component_manager : component_manager {
     }
 
     static door_component_manager* get_manager() {
-        return dynamic_cast<door_component_manager*>(component_managers["door"].get());
+        return dynamic_cast<door_component_manager*>(::component_managers["door"].get());
     }
 };
 
@@ -44,9 +44,8 @@ struct door_component_stub : component_stub {
     door_component_stub() : component_stub("door") {}
 
     void
-    assign_component_to_entity(c_entity entity) {
-        std::shared_ptr<component_manager> m = std::move(component_managers[name]);
-        std::shared_ptr<door_component_manager> man = std::dynamic_pointer_cast<door_component_manager>(m);
+    assign_component_to_entity(c_entity entity) override {
+        auto man = dynamic_cast<door_component_manager*>(std::move(::component_managers[component_name]).get());
 
         man->assign_entity(entity);
         auto data = man->get_instance_data(entity);        

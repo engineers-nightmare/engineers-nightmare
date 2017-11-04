@@ -32,7 +32,7 @@ struct physics_component_manager : component_manager {
     }
 
     static physics_component_manager* get_manager() {
-        return dynamic_cast<physics_component_manager*>(component_managers["physics"].get());
+        return dynamic_cast<physics_component_manager*>(::component_managers["physics"].get());
     }
 };
 
@@ -42,9 +42,8 @@ struct physics_component_stub : component_stub {
     const char* mesh{};
 
     void
-    assign_component_to_entity(c_entity entity) {
-        std::shared_ptr<component_manager> m = std::move(component_managers[name]);
-        std::shared_ptr<physics_component_manager> man = std::dynamic_pointer_cast<physics_component_manager>(m);
+    assign_component_to_entity(c_entity entity) override {
+        auto man = dynamic_cast<physics_component_manager*>(std::move(::component_managers[component_name]).get());
 
         man->assign_entity(entity);
         auto data = man->get_instance_data(entity);        

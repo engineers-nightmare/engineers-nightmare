@@ -51,7 +51,7 @@ header_template_7="""
     }
 
     static %s_component_manager* get_manager() {
-        return dynamic_cast<%s_component_manager*>(component_managers["%s"].get());
+        return dynamic_cast<%s_component_manager*>(::component_managers["%s"].get());
     }
 };
 """
@@ -67,9 +67,8 @@ header_template_9="""
 
 header_template_10="""
     void
-    assign_component_to_entity(c_entity entity) {
-        std::shared_ptr<component_manager> m = std::move(component_managers[name]);
-        std::shared_ptr<%s_component_manager> man = std::dynamic_pointer_cast<%s_component_manager>(m);
+    assign_component_to_entity(c_entity entity) override {
+        auto man = dynamic_cast<%s_component_manager*>(std::move(::component_managers[component_name]).get());
 
         man->assign_entity(entity);
         auto data = man->get_instance_data(entity);        
@@ -229,7 +228,7 @@ def main():
             g.write(header_template_8 % (component_name, component_name, component_name))
             for fi in stub_fields:
                 g.write(header_template_9 % fi)
-            g.write(header_template_10 % (component_name, component_name))
+            g.write(header_template_10 % (component_name))
             for fi in body_fields:
                 g.write(header_template_101 % fi)
             for fi in stub_fields:

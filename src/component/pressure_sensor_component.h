@@ -32,7 +32,7 @@ struct pressure_sensor_component_manager : component_manager {
     }
 
     static pressure_sensor_component_manager* get_manager() {
-        return dynamic_cast<pressure_sensor_component_manager*>(component_managers["pressure_sensor"].get());
+        return dynamic_cast<pressure_sensor_component_manager*>(::component_managers["pressure_sensor"].get());
     }
 };
 
@@ -42,9 +42,8 @@ struct pressure_sensor_component_stub : component_stub {
     unsigned type{};
 
     void
-    assign_component_to_entity(c_entity entity) {
-        std::shared_ptr<component_manager> m = std::move(component_managers[name]);
-        std::shared_ptr<pressure_sensor_component_manager> man = std::dynamic_pointer_cast<pressure_sensor_component_manager>(m);
+    assign_component_to_entity(c_entity entity) override {
+        auto man = dynamic_cast<pressure_sensor_component_manager*>(std::move(::component_managers[component_name]).get());
 
         man->assign_entity(entity);
         auto data = man->get_instance_data(entity);        

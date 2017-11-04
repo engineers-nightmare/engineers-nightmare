@@ -11,6 +11,9 @@ std::shared_ptr<component_stub>
 renderable_stub_from_config(const config_setting_t *renderable_config) {
     auto renderable_stub = std::make_shared<renderable_component_stub>();
 
+    auto mesh_member = config_setting_get_member(renderable_config, "mesh");
+    renderable_stub->mesh = config_setting_get_string(mesh_member);
+
     return renderable_stub;
 };
 
@@ -25,7 +28,7 @@ renderable_component_manager::create_component_instance_data(unsigned count) {
     instance_data new_pool{};
 
     size_t size = sizeof(c_entity) * count;
-    size = sizeof(hw_mesh *) * count + align_size<hw_mesh *>(size);
+    size = sizeof(const char*) * count + align_size<const char*>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -34,10 +37,10 @@ renderable_component_manager::create_component_instance_data(unsigned count) {
     memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
-    new_pool.mesh = align_ptr((hw_mesh * *)(new_pool.entity + count));
+    new_pool.mesh = align_ptr((const char* *)(new_pool.entity + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
-    memcpy(new_pool.mesh, instance_pool.mesh, buffer.num * sizeof(hw_mesh *));
+    memcpy(new_pool.mesh, instance_pool.mesh, buffer.num * sizeof(const char*));
 
     free(buffer.buffer);
     buffer = new_buffer;

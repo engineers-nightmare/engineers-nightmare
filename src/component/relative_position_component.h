@@ -32,7 +32,7 @@ struct relative_position_component_manager : component_manager {
     }
 
     static relative_position_component_manager* get_manager() {
-        return dynamic_cast<relative_position_component_manager*>(component_managers["relative_position"].get());
+        return dynamic_cast<relative_position_component_manager*>(::component_managers["relative_position"].get());
     }
 };
 
@@ -40,9 +40,8 @@ struct relative_position_component_stub : component_stub {
     relative_position_component_stub() : component_stub("relative_position") {}
 
     void
-    assign_component_to_entity(c_entity entity) {
-        std::shared_ptr<component_manager> m = std::move(component_managers[name]);
-        std::shared_ptr<relative_position_component_manager> man = std::dynamic_pointer_cast<relative_position_component_manager>(m);
+    assign_component_to_entity(c_entity entity) override {
+        auto man = dynamic_cast<relative_position_component_manager*>(std::move(::component_managers[component_name]).get());
 
         man->assign_entity(entity);
         auto data = man->get_instance_data(entity);        

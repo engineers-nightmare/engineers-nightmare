@@ -10,7 +10,7 @@
 struct renderable_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
-        hw_mesh * *mesh;
+        const char* *mesh;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -30,21 +30,24 @@ struct renderable_component_manager : component_manager {
     }
 
     static renderable_component_manager* get_manager() {
-        return dynamic_cast<renderable_component_manager*>(component_managers["renderable"].get());
+        return dynamic_cast<renderable_component_manager*>(::component_managers["renderable"].get());
     }
 };
 
 struct renderable_component_stub : component_stub {
     renderable_component_stub() : component_stub("renderable") {}
 
+    const char* mesh{};
+
     void
-    assign_component_to_entity(c_entity entity) {
-        std::shared_ptr<component_manager> m = std::move(component_managers[name]);
-        std::shared_ptr<renderable_component_manager> man = std::dynamic_pointer_cast<renderable_component_manager>(m);
+    assign_component_to_entity(c_entity entity) override {
+        auto man = dynamic_cast<renderable_component_manager*>(std::move(::component_managers[component_name]).get());
 
         man->assign_entity(entity);
         auto data = man->get_instance_data(entity);        
 
         *data.mesh = nullptr;
+
+        *data.mesh = mesh;
   };
 };
