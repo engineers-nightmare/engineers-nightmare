@@ -25,7 +25,7 @@ door_component_manager::create_component_instance_data(unsigned count) {
     instance_data new_pool{};
 
     size_t size = sizeof(c_entity) * count;
-    size = sizeof(hw_mesh *) * count + align_size<hw_mesh *>(size);
+    size = sizeof(const char*) * count + align_size<const char*>(size);
     size = sizeof(float) * count + align_size<float>(size);
     size = sizeof(float) * count + align_size<float>(size);
     size = sizeof(int) * count + align_size<int>(size);
@@ -37,13 +37,13 @@ door_component_manager::create_component_instance_data(unsigned count) {
     memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
-    new_pool.mesh = align_ptr((hw_mesh * *)(new_pool.entity + count));
+    new_pool.mesh = align_ptr((const char* *)(new_pool.entity + count));
     new_pool.pos = align_ptr((float *)(new_pool.mesh + count));
     new_pool.desired_pos = align_ptr((float *)(new_pool.pos + count));
     new_pool.height = align_ptr((int *)(new_pool.desired_pos + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
-    memcpy(new_pool.mesh, instance_pool.mesh, buffer.num * sizeof(hw_mesh *));
+    memcpy(new_pool.mesh, instance_pool.mesh, buffer.num * sizeof(const char*));
     memcpy(new_pool.pos, instance_pool.pos, buffer.num * sizeof(float));
     memcpy(new_pool.desired_pos, instance_pool.desired_pos, buffer.num * sizeof(float));
     memcpy(new_pool.height, instance_pool.height, buffer.num * sizeof(int));

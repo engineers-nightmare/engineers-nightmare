@@ -10,7 +10,7 @@
 struct door_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
-        hw_mesh * *mesh;
+        const char* *mesh;
         float *pos;
         float *desired_pos;
         int *height;
