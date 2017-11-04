@@ -551,7 +551,14 @@ draw_doors(frame_data *frame)
 
     for (auto i = 0u; i < door_man->buffer.num; i++) {
         auto ce = door_man->instance_pool.entity[i];
-        auto & mesh = door_man->instance_pool.mesh[i];
+        auto & mesh_name = door_man->instance_pool.mesh[i];
+
+        if (!mesh_name) {
+            continue;
+        }
+
+        auto & mesh = ::meshes[mesh_name];
+
         glm::mat4 mat = *pos_man->get_instance_data(ce).mat;
 
         auto pos = door_man->instance_pool.pos[i];
@@ -564,6 +571,6 @@ draw_doors(frame_data *frame)
         *entity_matrix.ptr = mat;
         entity_matrix.bind(1, frame);
 
-        draw_mesh(mesh);
+        draw_mesh(mesh.hw);
     }
 }
