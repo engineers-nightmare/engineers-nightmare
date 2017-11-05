@@ -58,7 +58,6 @@ set(EN_SOURCES
     src/tools/remove_surface.cc
     src/wiring/wiring.cc
     src/wiring/wiring_data.cc
-    src/component/component_manager.cc
 )
 
 set(EN_HEADERS
