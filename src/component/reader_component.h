@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct reader_component_manager : component_manager {
     struct instance_data {
@@ -38,29 +35,12 @@ struct reader_component_manager : component_manager {
 };
 
 struct reader_component_stub : component_stub {
-    reader_component_stub() : component_stub("reader") {}
+    reader_component_stub() = default;
 
     std::string name{};
 
     std::string desc{};
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.reader_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.name = nullptr;
-
-        *data.source = {};
-
-        *data.desc = nullptr;
-
-        *data.data = 0;
-
-        *data.name = name.c_str();
-
-        *data.desc = desc.c_str();
-  };
+    assign_component_to_entity(c_entity entity) override;
 };

@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct surface_attachment_component_manager : component_manager {
     struct instance_data {
@@ -34,17 +31,8 @@ struct surface_attachment_component_manager : component_manager {
 };
 
 struct surface_attachment_component_stub : component_stub {
-    surface_attachment_component_stub() : component_stub("surface_attachment") {}
+    surface_attachment_component_stub() = default;
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.surface_attachment_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.block = glm::ivec3(0);
-
-        *data.face = 0;
-  };
+    assign_component_to_entity(c_entity entity) override;
 };

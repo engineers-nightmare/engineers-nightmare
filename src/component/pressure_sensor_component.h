@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct pressure_sensor_component_manager : component_manager {
     struct instance_data {
@@ -34,21 +31,10 @@ struct pressure_sensor_component_manager : component_manager {
 };
 
 struct pressure_sensor_component_stub : component_stub {
-    pressure_sensor_component_stub() : component_stub("pressure_sensor") {}
+    pressure_sensor_component_stub() = default;
 
     unsigned type{};
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.pressure_sensor_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.pressure = 0;
-
-        *data.type = 0;
-
-        *data.type = type;
-  };
+    assign_component_to_entity(c_entity entity) override;
 };

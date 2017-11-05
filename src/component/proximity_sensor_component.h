@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct proximity_sensor_component_manager : component_manager {
     struct instance_data {
@@ -34,21 +31,10 @@ struct proximity_sensor_component_manager : component_manager {
 };
 
 struct proximity_sensor_component_stub : component_stub {
-    proximity_sensor_component_stub() : component_stub("proximity_sensor") {}
+    proximity_sensor_component_stub() = default;
 
     float range{};
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.proximity_sensor_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.range = 0;
-
-        *data.is_detected = false;
-
-        *data.range = range;
-  };
+    assign_component_to_entity(c_entity entity) override;
 };

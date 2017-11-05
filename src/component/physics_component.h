@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct physics_component_manager : component_manager {
     struct instance_data {
@@ -34,21 +31,10 @@ struct physics_component_manager : component_manager {
 };
 
 struct physics_component_stub : component_stub {
-    physics_component_stub() : component_stub("physics") {}
+    physics_component_stub() = default;
 
     const char* mesh{};
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.physics_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.mesh = nullptr;
-
-        *data.rigid = nullptr;
-
-        *data.mesh = mesh;
-  };
+    assign_component_to_entity(c_entity entity) override;
 };

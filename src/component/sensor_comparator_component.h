@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct sensor_comparator_component_manager : component_manager {
     struct instance_data {
@@ -34,21 +31,10 @@ struct sensor_comparator_component_manager : component_manager {
 };
 
 struct sensor_comparator_component_stub : component_stub {
-    sensor_comparator_component_stub() : component_stub("sensor_comparator") {}
+    sensor_comparator_component_stub() = default;
 
     float compare_epsilon{};
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.sensor_comparator_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.compare_result = 0;
-
-        *data.compare_epsilon = 0;
-
-        *data.compare_epsilon = compare_epsilon;
-  };
+    assign_component_to_entity(c_entity entity) override;
 };

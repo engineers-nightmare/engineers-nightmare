@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct door_component_manager : component_manager {
     struct instance_data {
@@ -38,21 +35,8 @@ struct door_component_manager : component_manager {
 };
 
 struct door_component_stub : component_stub {
-    door_component_stub() : component_stub("door") {}
+    door_component_stub() = default;
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.door_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.mesh = nullptr;
-
-        *data.pos = 1;
-
-        *data.desired_pos = 1;
-
-        *data.height = 2;
-  };
+    assign_component_to_entity(c_entity entity) override;
 };

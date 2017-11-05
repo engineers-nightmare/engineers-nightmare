@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct gas_producer_component_manager : component_manager {
     struct instance_data {
@@ -38,7 +35,7 @@ struct gas_producer_component_manager : component_manager {
 };
 
 struct gas_producer_component_stub : component_stub {
-    gas_producer_component_stub() : component_stub("gas_producer") {}
+    gas_producer_component_stub() = default;
 
     unsigned gas_type{};
 
@@ -47,24 +44,5 @@ struct gas_producer_component_stub : component_stub {
     float max_pressure{};
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.gas_producer_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.gas_type = 0;
-
-        *data.flow_rate = 0.1;
-
-        *data.max_pressure = 1.0;
-
-        *data.enabled = true;
-
-        *data.gas_type = gas_type;
-
-        *data.flow_rate = flow_rate;
-
-        *data.max_pressure = max_pressure;
-  };
+    assign_component_to_entity(c_entity entity) override;
 };

@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct switch_component_manager : component_manager {
     struct instance_data {
@@ -32,15 +29,8 @@ struct switch_component_manager : component_manager {
 };
 
 struct switch_component_stub : component_stub {
-    switch_component_stub() : component_stub("switch") {}
+    switch_component_stub() = default;
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.switch_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.enabled = false;
-  };
+    assign_component_to_entity(c_entity entity) override;
 };

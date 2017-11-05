@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct light_component_manager : component_manager {
     struct instance_data {
@@ -34,21 +31,10 @@ struct light_component_manager : component_manager {
 };
 
 struct light_component_stub : component_stub {
-    light_component_stub() : component_stub("light") {}
+    light_component_stub() = default;
 
     float intensity{};
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.light_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.intensity = 0;
-
-        *data.requested_intensity = 1;
-
-        *data.intensity = intensity;
-  };
+    assign_component_to_entity(c_entity entity) override;
 };

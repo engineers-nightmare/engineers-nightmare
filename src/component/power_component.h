@@ -6,9 +6,6 @@
 #include <memory>
 
 #include "component_manager.h"
-#include "component_system_manager.h"
-
-extern component12_system_manager component_system_man;
 
 struct power_component_manager : component_manager {
     struct instance_data {
@@ -36,27 +33,12 @@ struct power_component_manager : component_manager {
 };
 
 struct power_component_stub : component_stub {
-    power_component_stub() : component_stub("power") {}
+    power_component_stub() = default;
 
     float required_power{};
 
     float max_required_power{};
 
     void
-    assign_component_to_entity(c_entity entity) override {
-        auto &man = component_system_man.managers.power_component_man;
-
-        man.assign_entity(entity);
-        auto data = man.get_instance_data(entity);        
-
-        *data.required_power = 0;
-
-        *data.powered = false;
-
-        *data.max_required_power = 0;
-
-        *data.required_power = required_power;
-
-        *data.max_required_power = max_required_power;
-  };
+    assign_component_to_entity(c_entity entity) override;
 };
