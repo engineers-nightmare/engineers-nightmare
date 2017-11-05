@@ -146,8 +146,6 @@ struct entity_data {
 static std::vector<std::string> entity_names;
 std::unordered_map<std::string, entity_data> entity_stubs{};
 
-extern std::unordered_map<std::string, std::function<std::unique_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
-
 //struct entity_type
 //{
 //    /* static */
@@ -256,9 +254,7 @@ void load_entities() {
                 auto component = config_setting_get_elem(components, i);
                 printf("  Component: %s\n", component->name);
 
-                auto gen = component_stub_generators[component->name];
-                auto stub = gen(component);
-                auto stub_ptr = stub.release();
+                auto stub_ptr = component_system_man.managers.get_stub(component->name, component).release();
 
                 entity.components.emplace_back(stub_ptr);
 

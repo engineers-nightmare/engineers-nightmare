@@ -6,8 +6,6 @@
 #include "../particle.h"
 #include "../mesh.h"
 
-#define INITIAL_MAX_COMPONENTS 20
-
 extern asset_manager asset_man;
 extern component_system_manager component_system_man;
 
@@ -203,7 +201,7 @@ tick_doors(ship_space *ship)
 
 void
 tick_power_consumers(ship_space *ship) {
-    auto power_man = component_system_man.managers.power_component_man;
+    auto &power_man = component_system_man.managers.power_component_man;
 
     for (auto i = 0u; i < power_man.buffer.num; i++) {
         auto ce = power_man.instance_pool.entity[i];
