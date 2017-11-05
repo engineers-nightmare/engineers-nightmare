@@ -136,13 +136,13 @@ particle_manager *particle_man;
 
 struct entity_data {
     std::string name;
-    std::vector<std::shared_ptr<component_stub>> components;
+    std::vector<std::unique_ptr<component_stub>> components;
 };
 
 static std::vector<std::string> entity_names;
 std::unordered_map<std::string, entity_data> entity_stubs{};
 
-extern std::unordered_map<std::string, std::function<std::shared_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
+extern std::unordered_map<std::string, std::function<std::unique_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
 
 extern std::array<std::string, face_count> surface_index_to_mesh;
 extern std::unordered_map<std::string, ::mesh_data> meshes;
@@ -257,31 +257,33 @@ void load_entities() {
 
                 auto gen = component_stub_generators[component->name];
                 auto stub = gen(component);
-                entity.components.push_back(stub);
+                auto stub_ptr = stub.release();
 
-                auto type_stub = std::dynamic_pointer_cast<type_component_stub>(stub);
+                entity.components.emplace_back(stub_ptr);
+
+                auto type_stub = dynamic_cast<type_component_stub*>(stub_ptr);
                 if (type_stub) {
                     entity.name = type_stub->name;
 
                     found[component->name] = true;
                 }
 
-                auto render_stub = std::dynamic_pointer_cast<renderable_component_stub>(stub);
+                auto render_stub = dynamic_cast<renderable_component_stub*>(stub_ptr);
                 if (render_stub) {
                     found[component->name] = true;
                 }
 
-                auto pos_stub = std::dynamic_pointer_cast<relative_position_component_stub>(stub);
+                auto pos_stub = dynamic_cast<relative_position_component_stub*>(stub_ptr);
                 if (pos_stub) {
                     found[component->name] = true;
                 }
 
-                auto physics_stub = std::dynamic_pointer_cast<physics_component_stub>(stub);
+                auto physics_stub = dynamic_cast<physics_component_stub*>(stub_ptr);
                 if (physics_stub) {
                     found[component->name] = true;
                 }
 
-                auto surf_stub = std::dynamic_pointer_cast<surface_attachment_component_stub>(stub);
+                auto surf_stub = dynamic_cast<surface_attachment_component_stub*>(stub_ptr);
                 if (surf_stub) {
                     found[component->name] = true;
                 }
@@ -959,7 +961,7 @@ struct add_block_entity_tool : tool
         auto &stub = entity_stubs[entity_names[type]];
         std::string mesh_name{};
         for (auto &comp: stub.components) {
-            auto render = std::dynamic_pointer_cast<renderable_component_stub>(comp);
+            auto render = dynamic_cast<renderable_component_stub*>(comp.get());
             if (render) {
                 mesh_name = render->mesh;
                 break;
@@ -1077,7 +1079,7 @@ struct add_surface_entity_tool : tool
         auto &stub = entity_stubs[entity_names[type]];
         std::string mesh_name{};
         for (auto &comp: stub.components) {
-            auto render = std::dynamic_pointer_cast<renderable_component_stub>(comp);
+            auto render = dynamic_cast<renderable_component_stub*>(comp.get());
             if (render) {
                 mesh_name = render->mesh;
                 break;
