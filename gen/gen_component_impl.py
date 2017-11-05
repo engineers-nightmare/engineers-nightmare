@@ -245,7 +245,7 @@ def main():
 
     files = [f for f in glob.glob('gen/*') if not f.endswith('.py')]
 
-    comp_names = [f.replace('gen/', '') for f in files]
+    comp_names = sorted([f.replace('gen/', '').replace('gen\\', '') for f in files])
     print "  header: src/component/component_managers.h"
     with open("src/component/component_managers.h", "w") as g:
             g.write(man_header_1)
