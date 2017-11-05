@@ -1,5 +1,6 @@
-﻿#include <epoxy/gl.h>
+#include <epoxy/gl.h>
 
+#include "../asset_manager.h"
 #include "../common.h"
 #include "../ship_space.h"
 #include "../mesh.h"
@@ -11,7 +12,7 @@ extern GLuint simple_shader;
 
 extern ship_space *ship;
 
-extern std::unordered_map<std::string, ::mesh_data> meshes;
+extern asset_manager asset_man;
 
 struct add_block_tool : tool
 {
@@ -57,7 +58,7 @@ struct add_block_tool : tool
             *mat.ptr = mat_position(rc->p);
             mat.bind(1, frame);
 
-            auto mesh = meshes["initial_frame.dae"];
+            auto mesh = asset_man.meshes["initial_frame.dae"];
 
             glUseProgram(add_overlay_shader);
             draw_mesh(mesh.hw);

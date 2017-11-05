@@ -1,11 +1,14 @@
-﻿#include <glm/gtc/random.hpp>
+#include <glm/gtc/random.hpp>
 #include <memory>
 
 #include "component_system_manager.h"
+#include "../asset_manager.h"
 #include "../particle.h"
 #include "../mesh.h"
 
 #define INITIAL_MAX_COMPONENTS 20
+
+extern asset_manager asset_man;
 
 std::unordered_map<std::string, std::unique_ptr<component_manager>> component_managers;
 
@@ -520,8 +523,6 @@ tick_readers(ship_space *ship) {
     }
 }
 
-extern std::unordered_map<std::string, mesh_data> meshes;
-
 void
 draw_renderables(frame_data *frame)
 {
@@ -531,7 +532,7 @@ draw_renderables(frame_data *frame)
     for (auto i = 0u; i < render_man->buffer.num; i++) {
         auto ce = render_man->instance_pool.entity[i];
         auto & mesh_name = render_man->instance_pool.mesh[i];
-        auto & mesh = meshes[mesh_name];
+        auto & mesh = asset_man.meshes[mesh_name];
         auto & mat = *pos_man->get_instance_data(ce).mat;
 
         auto entity_matrix = frame->alloc_aligned<glm::mat4>(1);
@@ -557,7 +558,7 @@ draw_doors(frame_data *frame)
             continue;
         }
 
-        auto & mesh = ::meshes[mesh_name];
+        auto & mesh = asset_man.meshes[mesh_name];
 
         glm::mat4 mat = *pos_man->get_instance_data(ce).mat;
 

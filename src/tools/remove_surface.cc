@@ -1,5 +1,6 @@
-﻿#include <epoxy/gl.h>
+#include <epoxy/gl.h>
 
+#include "../asset_manager.h"
 #include "../common.h"
 #include "../ship_space.h"
 #include "../mesh.h"
@@ -13,8 +14,7 @@ extern GLuint simple_shader;
 
 extern ship_space *ship;
 
-extern std::array<std::string, face_count> surface_index_to_mesh;
-extern std::unordered_map<std::string, mesh_data> meshes;
+extern asset_manager asset_man;
 
 struct remove_surface_tool : tool
 {
@@ -58,7 +58,7 @@ struct remove_surface_tool : tool
         *mat.ptr = mat_position(rc->bl);
         mat.bind(1, frame);
 
-        auto mesh = meshes[surface_index_to_mesh[index]];
+        auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
 
         glUseProgram(remove_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);

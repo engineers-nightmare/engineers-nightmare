@@ -1,17 +1,18 @@
 #include <unordered_set>
 
+#include "../asset_manager.h"
 #include "../common.h"
 #include "wiring.h"
 #include "../mesh.h"
 #include "../ship_space.h"
 #include "../component/component_system_manager.h"
 
-extern std::unordered_map<std::string, ::mesh_data> meshes;
+extern asset_manager asset_man;
 
 void
 draw_attachments(ship_space *ship, frame_data *frame)
 {
-    auto &attach_mesh = ::meshes["attach.dae"];
+    auto &attach_mesh = asset_man.meshes["attach.dae"];
 
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];
@@ -46,7 +47,7 @@ draw_attachments(ship_space *ship, frame_data *frame)
 void
 draw_attachments_on_active_wire(ship_space *ship, frame_data *frame)
 {
-    auto &attach_mesh = ::meshes["attach.dae"];
+    auto &attach_mesh = asset_man.meshes["attach.dae"];
 
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];
@@ -102,7 +103,7 @@ calc_segment_matrix(const wire_attachment &start, const wire_attachment &end) {
 
 void
 draw_segments(ship_space *ship, frame_data *frame) {
-    auto &wire_mesh = ::meshes["wire.dae"];
+    auto &wire_mesh = asset_man.meshes["wire.dae"];
 
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];
@@ -142,7 +143,7 @@ draw_segments(ship_space *ship, frame_data *frame) {
 
 void
 draw_active_segments(ship_space *ship, frame_data *frame) {
-    auto &wire_mesh = ::meshes["wire.dae"];
+    auto &wire_mesh = asset_man.meshes["wire.dae"];
 
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];

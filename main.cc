@@ -1,3 +1,5 @@
+#include "src/tinydir.h"
+
 #ifndef _WIN32
 #include <err.h> /* errx */
 #else
@@ -16,8 +18,7 @@
 #include <iostream>
 #include <memory>
 
-#include "src/tinydir.h"
-
+#include "src/asset_manager.h"
 #include "src/common.h"
 #include "src/component/component_system_manager.h"
 #include "src/config.h"
@@ -134,6 +135,8 @@ sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
 projectile_linear_manager proj_man;
 particle_manager *particle_man;
 
+asset_manager asset_man;
+
 struct entity_data {
     std::string name;
     std::vector<std::unique_ptr<component_stub>> components;
@@ -143,9 +146,6 @@ static std::vector<std::string> entity_names;
 std::unordered_map<std::string, entity_data> entity_stubs{};
 
 extern std::unordered_map<std::string, std::function<std::unique_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
-
-extern std::array<std::string, face_count> surface_index_to_mesh;
-extern std::unordered_map<std::string, ::mesh_data> meshes;
 
 //struct entity_type
 //{
@@ -328,7 +328,7 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
     auto physics = physics_man->get_instance_data(ce);
     *physics.rigid = nullptr;
     std::string m = *physics.mesh;
-    auto const &phys_mesh = meshes[m];
+    auto const &phys_mesh = asset_man.meshes[m];
     build_static_physics_rb_mat(&mat, phys_mesh.phys_shape, physics.rigid);    
     /* so that we can get back to the entity from a phys raycast */
     /* TODO: these should really come from a dense pool rather than the generic allocator */
@@ -588,7 +588,7 @@ place_entity_attaches(raycast_info* rc, int index, c_entity e) {
     auto render_man = renderable_component_manager::get_manager();
 
     auto mesh_name = *render_man->get_instance_data(e).mesh;
-    auto sw = ::meshes[mesh_name].sw;
+    auto sw = asset_man.meshes[mesh_name].sw;
 
     for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
         auto wt = (wire_type)wire_index;
@@ -647,8 +647,6 @@ prepare_chunks()
     }
 }
 
-extern void load_meshes();
-
 void
 init()
 {
@@ -686,7 +684,7 @@ init()
     particle_man = new particle_manager();
     particle_man->create_particle_data(1000);
 
-    load_meshes();
+    asset_man.load_meshes();
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
@@ -969,14 +967,14 @@ struct add_block_entity_tool : tool
         }
         assert(!mesh_name.empty());
 
-        auto mesh = meshes[mesh_name];
+        auto mesh = asset_man.meshes[mesh_name];
         draw_mesh(mesh.hw);
 
         auto mat_overlay = frame->alloc_aligned<glm::mat4>(1);
         *mat_overlay.ptr = mat_position(glm::vec3(rc->p) );
         mat_overlay.bind(1, frame);
 
-        auto &frame_mesh = meshes["initial_frame.dae"];
+        auto &frame_mesh = asset_man.meshes["initial_frame.dae"];
 
         /* draw a block overlay as well around the block */
         glUseProgram(add_overlay_shader);
@@ -1087,7 +1085,7 @@ struct add_surface_entity_tool : tool
         }
         assert(!mesh_name.empty());
 
-        auto mesh = meshes[mesh_name];
+        auto mesh = asset_man.meshes[mesh_name];
         draw_mesh(mesh.hw);
 
         /* draw a surface overlay here too */
@@ -1096,7 +1094,7 @@ struct add_surface_entity_tool : tool
         *mat.ptr = mat_position(rc->bl);
         mat.bind(1, frame);
 
-        auto surf_mesh = meshes[surface_index_to_mesh[index]];
+        auto surf_mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
 
         glUseProgram(add_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -1147,7 +1145,7 @@ struct remove_surface_entity_tool : tool
         *mat.ptr = mat_position(rc->bl);
         mat.bind(1, frame);
 
-        auto surf_mesh = meshes[surface_index_to_mesh[index]];
+        auto surf_mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
 
         glUseProgram(remove_overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -1398,7 +1396,7 @@ struct add_wiring_tool : tool
         *mat.ptr = a2.transform;
         mat.bind(1, frame);
 
-        auto mesh = allow_placement ? meshes["attach.dae"] : meshes["no_place.dae"];
+        auto mesh = allow_placement ? asset_man.meshes["attach.dae"] : asset_man.meshes["no_place.dae"];
 
         glUseProgram(unlit_shader);
         draw_mesh(mesh.hw);
@@ -1414,7 +1412,7 @@ struct add_wiring_tool : tool
             mat.bind(1, frame);
 
             glUseProgram(unlit_shader);
-            draw_mesh(meshes["wire.dae"].hw);
+            draw_mesh(asset_man.meshes["wire.dae"].hw);
             glUseProgram(simple_shader);
         }
     }

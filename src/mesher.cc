@@ -1,3 +1,5 @@
+#include "tinydir.h"
+
 #include <epoxy/gl.h>
 #include <string>
 
@@ -7,10 +9,12 @@
 #include <unordered_map>
 #include <array>
 
+#include "asset_manager.h"
 #include "chunk.h"
 #include "mesh.h"
 #include "physics.h"
-#include "tinydir.h"
+
+extern asset_manager asset_man;
 
 static void
 stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
@@ -140,57 +144,6 @@ teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, b
 
 static int surface_type_to_material[256];
 
-std::array<std::string, face_count> surface_index_to_mesh{};
-std::unordered_map<std::string, mesh_data> meshes{};
-
-void
-load_meshes() {
-    std::vector<tinydir_file> files;
-
-    tinydir_dir dir{};
-    tinydir_open(&dir, "mesh");
-
-    while (dir.has_next)
-    {
-        tinydir_file file{};
-        tinydir_readfile(&dir, &file);
-
-        tinydir_next(&dir);
-
-        if (file.is_dir || strcmp(file.extension, "dae") != 0) {
-            continue;
-        }
-
-        files.emplace_back(file);
-    }
-
-    tinydir_close(&dir);
-
-    printf("Loading meshes\n");
-    for (auto &f : files) {
-        meshes.emplace(f.name, mesh_data{ f.path }).second;
-    }
-
-    auto proj_mesh = meshes["sphere.dae"];
-    for (auto i = 0u; i < proj_mesh.sw->num_vertices; ++i) {
-        proj_mesh.sw->verts[i].x *= 0.01f;
-        proj_mesh.sw->verts[i].y *= 0.01f;
-        proj_mesh.sw->verts[i].z *= 0.01f;
-    }
-    set_mesh_material(proj_mesh.sw, 11);
-
-    set_mesh_material(meshes["attach.dae"].sw, 10);
-    set_mesh_material(meshes["no_place.dae"].sw, 11);
-    set_mesh_material(meshes["wire.dae"].sw, 12);
-    set_mesh_material(meshes["single_door.dae"].sw, 2);
-    set_mesh_material(meshes["wire.dae"].sw, 12);
-
-    for (auto &mesh : meshes) {
-        mesh.second.upload_mesh();
-        mesh.second.load_physics();
-    }
-}
-
 void
 mesher_init()
 {
@@ -200,15 +153,7 @@ mesher_init()
     surface_type_to_material[surface_grate] = 4;
     surface_type_to_material[surface_glass] = 6;
     surface_type_to_material[surface_door] = 16;
-
-    surface_index_to_mesh[surface_xm] = "x_quad.dae";
-    surface_index_to_mesh[surface_xp] = "x_quad_p.dae";
-    surface_index_to_mesh[surface_ym] = "y_quad.dae";
-    surface_index_to_mesh[surface_yp] = "y_quad_p.dae";
-    surface_index_to_mesh[surface_zm] = "z_quad.dae";
-    surface_index_to_mesh[surface_zp] = "z_quad_p.dae";
 }
-
 
 void
 chunk::prepare_render()
@@ -226,13 +171,13 @@ chunk::prepare_render()
 
                 if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
-                    auto mesh = meshes["initial_frame.dae"];
+                    auto mesh = asset_man.meshes["initial_frame.dae"];
                     stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), 1);
                 }
 
                 for (int surf = 0; surf < 6; surf++) {
                     if (b->surfs[surf] != surface_none) {
-                        auto mesh = meshes[surface_index_to_mesh[surf]];
+                        auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[surf]];
                         stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k),
                                 surface_type_to_material[b->surfs[surf]]);
                     }
@@ -273,13 +218,13 @@ chunk::prepare_phys(int x, int y, int z)
 
                 if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
-                    auto mesh = meshes["initial_frame.dae"];
+                    auto mesh = asset_man.meshes["initial_frame.dae"];
                     stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), 1);
                 }
 
                 for (int surf = 0; surf < 6; surf++) {
                     if (b->surfs[surf] & surface_phys) {
-                        auto mesh = meshes[surface_index_to_mesh[surf]];
+                        auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[surf]];
                         stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), 0);
                     }
                 }
