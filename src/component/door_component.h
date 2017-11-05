@@ -6,6 +6,9 @@
 #include <memory>
 
 #include "component_manager.h"
+#include "component_system_manager.h"
+
+extern component12_system_manager component_system_man;
 
 struct door_component_manager : component_manager {
     struct instance_data {
@@ -20,8 +23,6 @@ struct door_component_manager : component_manager {
     void destroy_instance(instance i) override;
     void entity(c_entity e) override;
 
-    void register_stub_generator();
-
     instance_data get_instance_data(c_entity e) {
         instance_data d{};
         auto inst = lookup(e);
@@ -34,10 +35,6 @@ struct door_component_manager : component_manager {
 
         return d;
     }
-
-    static door_component_manager* get_manager() {
-        return dynamic_cast<door_component_manager*>(::component_managers["door"].get());
-    }
 };
 
 struct door_component_stub : component_stub {
@@ -45,10 +42,10 @@ struct door_component_stub : component_stub {
 
     void
     assign_component_to_entity(c_entity entity) override {
-        auto man = dynamic_cast<door_component_manager*>(std::move(::component_managers[component_name]).get());
+        auto &man = component_system_man.managers.door_component_man;
 
-        man->assign_entity(entity);
-        auto data = man->get_instance_data(entity);        
+        man.assign_entity(entity);
+        auto data = man.get_instance_data(entity);        
 
         *data.mesh = nullptr;
 

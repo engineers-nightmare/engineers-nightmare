@@ -56,8 +56,6 @@ struct component_manager {
 
     virtual void entity(c_entity e) = 0;
 
-    virtual void register_stub_generator() = 0;
-
     bool exists(c_entity  e) {
         return entity_instance_map.find(e) != entity_instance_map.end();
     }
@@ -86,4 +84,3 @@ struct component_manager {
     }
 };
 
-extern std::unordered_map<std::string, std::unique_ptr<component_manager>> component_managers;

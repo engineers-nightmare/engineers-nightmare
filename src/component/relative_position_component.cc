@@ -14,8 +14,6 @@ relative_position_stub_from_config(const config_setting_t *relative_position_con
     return relative_position_stub;
 };
 
-extern std::unordered_map<std::string, std::function<std::unique_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
-
 void
 relative_position_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
@@ -65,18 +63,13 @@ relative_position_component_manager::destroy_instance(instance i) {
 }
 
 void
-relative_position_component_manager::entity(c_entity e) {
+%s_component_manager::entity(c_entity e) {
     if (buffer.num >= buffer.allocated) {
-        printf("Increasing size of relative_position buffer. Please adjust\n");
+        printf("Increasing size of %s buffer. Please adjust\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);
     }
 
     auto inst = lookup(e);
 
     instance_pool.entity[inst.index] = e;
-}
-
-void
-relative_position_component_manager::register_stub_generator() {
-    component_stub_generators["relative_position"] = relative_position_stub_from_config;
 }

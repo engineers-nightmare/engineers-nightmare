@@ -10,31 +10,6 @@
 
 extern asset_manager asset_man;
 
-std::unordered_map<std::string, std::unique_ptr<component_manager>> component_managers;
-
-void initialize_component_managers() {
-    ::component_managers.emplace("sensor_comparator",  std::make_unique<sensor_comparator_component_manager>());
-    ::component_managers.emplace("gas_producer",       std::make_unique<gas_producer_component_manager>());
-    ::component_managers.emplace("light",              std::make_unique<light_component_manager>());
-    ::component_managers.emplace("physics",            std::make_unique<physics_component_manager>());
-    ::component_managers.emplace("relative_position",  std::make_unique<relative_position_component_manager>());
-    ::component_managers.emplace("power",              std::make_unique<power_component_manager>());
-    ::component_managers.emplace("power_provider",     std::make_unique<power_provider_component_manager>());
-    ::component_managers.emplace("pressure_sensor",    std::make_unique<pressure_sensor_component_manager>());
-    ::component_managers.emplace("renderable",         std::make_unique<renderable_component_manager>());
-    ::component_managers.emplace("surface_attachment", std::make_unique<surface_attachment_component_manager>());
-    ::component_managers.emplace("switch",             std::make_unique<switch_component_manager>());
-    ::component_managers.emplace("type",               std::make_unique<type_component_manager>());
-    ::component_managers.emplace("door",               std::make_unique<door_component_manager>());
-    ::component_managers.emplace("reader",             std::make_unique<reader_component_manager>());
-    ::component_managers.emplace("proximity_sensor",   std::make_unique<proximity_sensor_component_manager>());
-
-    for (auto &man: component_managers) {
-        man.second->create_component_instance_data(INITIAL_MAX_COMPONENTS);
-        man.second->register_stub_generator();
-    }
-}
-
 extern particle_manager *particle_man;
 
 /* I have no clue how we're going to actually handle these */

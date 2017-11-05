@@ -6,6 +6,9 @@
 #include <memory>
 
 #include "component_manager.h"
+#include "component_system_manager.h"
+
+extern component12_system_manager component_system_man;
 
 struct gas_producer_component_manager : component_manager {
     struct instance_data {
@@ -20,8 +23,6 @@ struct gas_producer_component_manager : component_manager {
     void destroy_instance(instance i) override;
     void entity(c_entity e) override;
 
-    void register_stub_generator();
-
     instance_data get_instance_data(c_entity e) {
         instance_data d{};
         auto inst = lookup(e);
@@ -33,10 +34,6 @@ struct gas_producer_component_manager : component_manager {
         d.enabled = instance_pool.enabled + inst.index;
 
         return d;
-    }
-
-    static gas_producer_component_manager* get_manager() {
-        return dynamic_cast<gas_producer_component_manager*>(::component_managers["gas_producer"].get());
     }
 };
 
@@ -51,10 +48,10 @@ struct gas_producer_component_stub : component_stub {
 
     void
     assign_component_to_entity(c_entity entity) override {
-        auto man = dynamic_cast<gas_producer_component_manager*>(std::move(::component_managers[component_name]).get());
+        auto &man = component_system_man.managers.gas_producer_component_man;
 
-        man->assign_entity(entity);
-        auto data = man->get_instance_data(entity);        
+        man.assign_entity(entity);
+        auto data = man.get_instance_data(entity);        
 
         *data.gas_type = 0;
 

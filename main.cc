@@ -136,6 +136,7 @@ projectile_linear_manager proj_man;
 particle_manager *particle_man;
 
 asset_manager asset_man;
+component12_system_manager component_system_man;
 
 struct entity_data {
     std::string name;

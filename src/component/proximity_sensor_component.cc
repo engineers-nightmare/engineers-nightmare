@@ -17,8 +17,6 @@ proximity_sensor_stub_from_config(const config_setting_t *proximity_sensor_confi
     return proximity_sensor_stub;
 };
 
-extern std::unordered_map<std::string, std::function<std::unique_ptr<component_stub>(config_setting_t *)>> component_stub_generators;
-
 void
 proximity_sensor_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
@@ -68,18 +66,13 @@ proximity_sensor_component_manager::destroy_instance(instance i) {
 }
 
 void
-proximity_sensor_component_manager::entity(c_entity e) {
+%s_component_manager::entity(c_entity e) {
     if (buffer.num >= buffer.allocated) {
-        printf("Increasing size of proximity_sensor buffer. Please adjust\n");
+        printf("Increasing size of %s buffer. Please adjust\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);
     }
 
     auto inst = lookup(e);
 
     instance_pool.entity[inst.index] = e;
-}
-
-void
-proximity_sensor_component_manager::register_stub_generator() {
-    component_stub_generators["proximity_sensor"] = proximity_sensor_stub_from_config;
 }

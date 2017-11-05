@@ -6,25 +6,16 @@
 #include "../render_data.h"
 #include "../ship_space.h"
 #include "../player.h"
-#include "sensor_comparator_component.h"
-#include "gas_producer_component.h"
-#include "light_component.h"
-#include "physics_component.h"
-#include "power_component.h"
-#include "power_provider_component.h"
-#include "pressure_sensor_component.h"
-#include "relative_position_component.h"
-#include "renderable_component.h"
-#include "surface_attachment_component.h"
-#include "switch_component.h"
-#include "type_component.h"
-#include "door_component.h"
-#include "reader_component.h"
-#include "proximity_sensor_component.h"
 
-void initialize_component_managers();
+#include "component_managers.h"
 
-extern std::unordered_map<std::string, std::unique_ptr<component_manager>> component_managers;
+struct component12_system_manager {
+    component12_system_manager() = default;
+
+    virtual ~component12_system_manager() = default;
+
+    component_managers managers{};
+};
 
 extern const char *comms_msg_type_switch_state;
 extern const char *comms_msg_type_pressure_sensor_1_state;

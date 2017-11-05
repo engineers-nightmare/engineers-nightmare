@@ -317,6 +317,9 @@
     <ClInclude Include="src\asset_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\component\component_managers.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="gen\door">
