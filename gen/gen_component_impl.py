@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 #
 # Quick & dirty component impl generator.
 # From the root of the EN tree, run:
@@ -236,7 +238,6 @@ impl_template_12="""};
 """
 
 
-
 import os
 import sys
 import glob
@@ -246,7 +247,7 @@ def main():
     files = [f for f in glob.glob('gen/*') if not f.endswith('.py')]
 
     comp_names = sorted([f.replace('gen/', '').replace('gen\\', '') for f in files])
-    print "  header: src/component/component_managers.h"
+    print("  header: src/component/component_managers.h")
     with open("src/component/component_managers.h", "w") as g:
             g.write(man_header_1)
             for comp_name in comp_names:
@@ -266,7 +267,7 @@ def main():
             g.write(man_header_11)
 
     for fl in files:
-        print "Genning from %s to " % fl
+        print("Genning from %s to " % fl)
         stub_fields = []
         body_fields = []
         component_name = fl.split(os.sep)[-1]
@@ -280,7 +281,7 @@ def main():
                 elif parts[0] == 'stub':
                     stub_fields.append({'otype': parts[1], 'type': parts[2], 'name': parts[3], 'extra': parts[4], 'comp_name': component_name})
 
-        print "  header: src/component/%s_component.h" % component_name
+        print("  header: src/component/%s_component.h" % component_name)
         with open("src/component/%s_component.h" % component_name, "w") as g:
             g.write(header_template_1 % component_name)
             for fi in body_fields:
@@ -297,7 +298,7 @@ def main():
                 g.write(header_template_9_each_stub % fi)
             g.write(header_template_10 % component_name)
 
-        print "  source: src/component/%s_component.cc" % component_name
+        print("  source: src/component/%s_component.cc" % component_name)
         with open("src/component/%s_component.cc" % component_name, "w") as g:
             g.write(impl_template_1 % (component_name, component_name))
             for fi in body_fields:
