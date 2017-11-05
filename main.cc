@@ -136,7 +136,7 @@ projectile_linear_manager proj_man;
 particle_manager *particle_man;
 
 asset_manager asset_man;
-component12_system_manager component_system_man;
+component_system_manager component_system_man;
 
 struct entity_data {
     std::string name;
@@ -322,11 +322,11 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
         comp->assign_component_to_entity(ce);
     }
 
-    auto pos_man = relative_position_component_manager::get_manager();
-    auto physics_man = physics_component_manager::get_manager();
-    auto surface_man = surface_attachment_component_manager::get_manager();
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &physics_man = component_system_man.managers.physics_component_man;
+    auto &surface_man = component_system_man.managers.surface_attachment_component_man;
 
-    auto physics = physics_man->get_instance_data(ce);
+    auto physics = physics_man.get_instance_data(ce);
     *physics.rigid = nullptr;
     std::string m = *physics.mesh;
     auto const &phys_mesh = asset_man.meshes[m];
@@ -337,11 +337,11 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
     per->ce = ce;
     (*physics.rigid)->setUserPointer(per);
 
-    auto surface = surface_man->get_instance_data(ce);
+    auto surface = surface_man.get_instance_data(ce);
     *surface.block = p;
     *surface.face = face;
 
-    auto pos = pos_man->get_instance_data(ce);
+    auto pos = pos_man.get_instance_data(ce);
     *pos.position = p;
     *pos.mat = mat;
 
@@ -356,12 +356,12 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
 //
 //    auto et = &entity_types[type];
 //
-//    type_man->assign_entity(ce);
-//    auto type_comp = type_man->get_instance_data(ce);
+//    type_man.assign_entity(ce);
+//    auto type_comp = type_man.get_instance_data(ce);
 //    *type_comp.type = type;
 //
-//    physics_man->assign_entity(ce);
-//    auto physics = physics_man->get_instance_data(ce);
+//    physics_man.assign_entity(ce);
+//    auto physics = physics_man.get_instance_data(ce);
 //    *physics.rigid = nullptr;
 //    build_static_physics_rb_mat(&mat, et->phys_shape, physics.rigid);
 //
@@ -371,41 +371,41 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
 //    per->ce = ce;
 //    (*physics.rigid)->setUserPointer(per);
 //
-//    surface_man->assign_entity(ce);
-//    auto surface = surface_man->get_instance_data(ce);
+//    surface_man.assign_entity(ce);
+//    auto surface = surface_man.get_instance_data(ce);
 //    *surface.block = p;
 //    *surface.face = face;
 //
-//    pos_man->assign_entity(ce);
-//    auto pos = pos_man->get_instance_data(ce);
+//    pos_man.assign_entity(ce);
+//    auto pos = pos_man.get_instance_data(ce);
 //    *pos.position = p;
 //    *pos.mat = mat;
 //
 //    /* hack to not render a mesh for the flashlight */
 //    /* todo: handle entities that don't need to be rendered*/
 //    if (type != 11) {
-//        render_man->assign_entity(ce);
-//        auto render = render_man->get_instance_data(ce);
+//        render_man.assign_entity(ce);
+//        auto render = render_man.get_instance_data(ce);
 //        *render.mesh = et->hw;
 //    }
 //
 //    // door
 //    if (type == 0) {
-//        power_man->assign_entity(ce);
-//        auto power = power_man->get_instance_data(ce);
+//        power_man.assign_entity(ce);
+//        auto power = power_man.get_instance_data(ce);
 //        *power.powered = false;
 //        *power.required_power = 8;
 //        *power.max_required_power = 8;
 //
-//        door_man->assign_entity(ce);
-//        auto door = door_man->get_instance_data(ce);
+//        door_man.assign_entity(ce);
+//        auto door = door_man.get_instance_data(ce);
 //        *door.mesh = door_hw;
 //        *door.pos = 1.0f;
 //        *door.desired_pos = 1.0f;
 //        *door.height = et->height;
 //
-//        reader_man->assign_entity(ce);
-//        auto reader = reader_man->get_instance_data(ce);
+//        reader_man.assign_entity(ce);
+//        auto reader = reader_man.get_instance_data(ce);
 //        *reader.name = "desired state";
 //        reader.source->id = 0;
 //        *reader.desc = nullptr;
@@ -413,33 +413,33 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
 //    }
 //    // frobnicator
 //    else if (type == 1) {
-//        power_man->assign_entity(ce);
-//        auto power = power_man->get_instance_data(ce);
+//        power_man.assign_entity(ce);
+//        auto power = power_man.get_instance_data(ce);
 //        *power.powered = false;
 //        *power.required_power = 12;
 //        *power.max_required_power = 12;
 //
-//        gas_man->assign_entity(ce);
-//        auto gas = gas_man->get_instance_data(ce);
+//        gas_man.assign_entity(ce);
+//        auto gas = gas_man.get_instance_data(ce);
 //        *gas.flow_rate = 0.1f;
 //        *gas.max_pressure = 1.0f;
 //        *gas.enabled = true;
 //    }
 //    // light
 //    else if (type == 2) {
-//        power_man->assign_entity(ce);
-//        auto power = power_man->get_instance_data(ce);
+//        power_man.assign_entity(ce);
+//        auto power = power_man.get_instance_data(ce);
 //        *power.powered = false;
 //        *power.required_power = 6;
 //        *power.max_required_power = 6;
 //
-//        light_man->assign_entity(ce);
-//        auto light = light_man->get_instance_data(ce);
+//        light_man.assign_entity(ce);
+//        auto light = light_man.get_instance_data(ce);
 //        *light.intensity = 1.0f;
 //        *light.requested_intensity = 1.0f;
 //
-//        reader_man->assign_entity(ce);
-//        auto reader = reader_man->get_instance_data(ce);
+//        reader_man.assign_entity(ce);
+//        auto reader = reader_man.get_instance_data(ce);
 //        *reader.name = "light brightness";
 //        reader.source->id = 0;
 //        *reader.desc = nullptr;
@@ -447,19 +447,19 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
 //    }
 //    // warning light
 //    else if (type == 3) {
-//        power_man->assign_entity(ce);
-//        auto power = power_man->get_instance_data(ce);
+//        power_man.assign_entity(ce);
+//        auto power = power_man.get_instance_data(ce);
 //        *power.powered = false;
 //        *power.required_power = 6;
 //        *power.max_required_power = 6;
 //
-//        light_man->assign_entity(ce);
-//        auto light = light_man->get_instance_data(ce);
+//        light_man.assign_entity(ce);
+//        auto light = light_man.get_instance_data(ce);
 //        *light.intensity = 1.0f;
 //        *light.requested_intensity = 1.0f;
 //
-//        reader_man->assign_entity(ce);
-//        auto reader = reader_man->get_instance_data(ce);
+//        reader_man.assign_entity(ce);
+//        auto reader = reader_man.get_instance_data(ce);
 //        *reader.name = "light brightness";
 //        reader.source->id = 0;
 //        *reader.desc = comms_msg_type_sensor_comparison_state;      // temp until we have discriminator tool
@@ -467,19 +467,19 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
 //    }
 //    // display panel
 //    else if (type == 4) {
-//        power_man->assign_entity(ce);
-//        auto power = power_man->get_instance_data(ce);
+//        power_man.assign_entity(ce);
+//        auto power = power_man.get_instance_data(ce);
 //        *power.powered = false;
 //        *power.required_power = 4;
 //        *power.max_required_power = 4;
 //
-//        light_man->assign_entity(ce);
-//        auto light = light_man->get_instance_data(ce);
+//        light_man.assign_entity(ce);
+//        auto light = light_man.get_instance_data(ce);
 //        *light.intensity = 0.15f;
 //        *light.requested_intensity = 0.15f;
 //
-//        reader_man->assign_entity(ce);
-//        auto reader = reader_man->get_instance_data(ce);
+//        reader_man.assign_entity(ce);
+//        auto reader = reader_man.get_instance_data(ce);
 //        *reader.name = "light brightness";
 //        reader.source->id = 0;
 //        *reader.desc = nullptr;
@@ -487,65 +487,65 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
 //    }
 //    // switch
 //    else if (type == 5) {
-//        switch_man->assign_entity(ce);
-//        auto sw = switch_man->get_instance_data(ce);
+//        switch_man.assign_entity(ce);
+//        auto sw = switch_man.get_instance_data(ce);
 //        *sw.enabled = true;
 //    }
 //    // plaidnicator
 //    else if (type == 6) {
-//        power_provider_man->assign_entity(ce);
-//        auto power_provider = power_provider_man->get_instance_data(ce);
+//        power_provider_man.assign_entity(ce);
+//        auto power_provider = power_provider_man.get_instance_data(ce);
 //        *power_provider.max_provided = 12;
 //        *power_provider.provided = 12;
 //    }
 //    // pressure sensor 1
 //    else if (type == 7) {
-//        pressure_man->assign_entity(ce);
-//        auto pressure = pressure_man->get_instance_data(ce);
+//        pressure_man.assign_entity(ce);
+//        auto pressure = pressure_man.get_instance_data(ce);
 //        *pressure.pressure = 0.0f;
 //        *pressure.type = 1;
 //    }
 //    // pressure sensor 2
 //    else if (type == 8) {
-//        pressure_man->assign_entity(ce);
-//        auto pressure = pressure_man->get_instance_data(ce);
+//        pressure_man.assign_entity(ce);
+//        auto pressure = pressure_man.get_instance_data(ce);
 //        *pressure.pressure = 0.0f;
 //        *pressure.type = 2;
 //    }
 //    // sensor comparator
 //    else if (type == 9) {
-//        comparator_man->assign_entity(ce);
-//        auto comparator = comparator_man->get_instance_data(ce);
+//        comparator_man.assign_entity(ce);
+//        auto comparator = comparator_man.get_instance_data(ce);
 //        *comparator.compare_epsilon = 0.0001f;
 //    }
 //    // proximity sensor
 //    else if (type == 10) {
-//        power_man->assign_entity(ce);
-//        auto power = power_man->get_instance_data(ce);
+//        power_man.assign_entity(ce);
+//        auto power = power_man.get_instance_data(ce);
 //        *power.powered = false;
 //        *power.required_power = 1;
 //        *power.max_required_power = 1;
 //
-//        proximity_man->assign_entity(ce);
-//        auto proximity_sensor = proximity_man->get_instance_data(ce);
+//        proximity_man.assign_entity(ce);
+//        auto proximity_sensor = proximity_man.get_instance_data(ce);
 //        *proximity_sensor.range = 5;
 //        *proximity_sensor.is_detected = false;
 //    }
 //    // flashlight
 //    else if (type == 11) {
-//        power_man->assign_entity(ce);
-//        auto power = power_man->get_instance_data(ce);
+//        power_man.assign_entity(ce);
+//        auto power = power_man.get_instance_data(ce);
 //        *power.powered = false; /* Flashlight starts off */
 //        *power.required_power = 0;
 //        *power.max_required_power = 0;
 //
-//        light_man->assign_entity(ce);
-//        auto light = light_man->get_instance_data(ce);
+//        light_man.assign_entity(ce);
+//        auto light = light_man.get_instance_data(ce);
 //        *light.intensity = 0.75f;
 //        *light.requested_intensity = 0.75f;
 //
-//        reader_man->assign_entity(ce);
-//        auto reader = reader_man->get_instance_data(ce);
+//        reader_man.assign_entity(ce);
+//        auto reader = reader_man.get_instance_data(ce);
 //        *reader.name = "flashlight brightness";
 //        reader.source->id = 0;
 //        *reader.desc = nullptr;
@@ -558,21 +558,21 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
 
 void
 use_action_on_entity(ship_space *ship, c_entity ce) {
-    auto pos_man = relative_position_component_manager::get_manager();
-    auto switch_man = switch_component_manager::get_manager();
-    auto type_man = type_component_manager::get_manager();
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &switch_man = component_system_man.managers.switch_component_man;
+    auto &type_man = component_system_man.managers.type_component_man;
 
     /* used by the player */
-    assert(pos_man->exists(ce) || !"All [usable] entities probably need position");
+    assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
 
-    auto pos = *pos_man->get_instance_data(ce).position;
-    auto type = *type_man->get_instance_data(ce).name;
+    auto pos = *pos_man.get_instance_data(ce).position;
+    auto type = *type_man.get_instance_data(ce).name;
     printf("player using the %s at %f %f %f\n",
             type, pos.x, pos.y, pos.z);
 
-    if (switch_man->exists(ce)) {
+    if (switch_man.exists(ce)) {
         /* publish new state on all attached comms wires */
-        auto & enabled = *switch_man->get_instance_data(ce).enabled;
+        auto & enabled = *switch_man.get_instance_data(ce).enabled;
         enabled ^= true;
 
         comms_msg msg;
@@ -586,9 +586,9 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
 /* todo: support free-placed entities*/
 void
 place_entity_attaches(raycast_info* rc, int index, c_entity e) {
-    auto render_man = renderable_component_manager::get_manager();
+    auto &render_man = component_system_man.managers.renderable_component_man;
 
-    auto mesh_name = *render_man->get_instance_data(e).mesh;
+    auto mesh_name = *render_man.get_instance_data(e).mesh;
     auto sw = asset_man.meshes[mesh_name].sw;
 
     for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
@@ -651,8 +651,6 @@ prepare_chunks()
 void
 init()
 {
-    initialize_component_managers();
-
     proj_man.create_projectile_data(1000);
 
     printf("%s starting up.\n", APP_NAME);
@@ -788,14 +786,14 @@ resize(int width, int height)
 void
 destroy_entity(c_entity e)
 {
-    auto surface_man = surface_attachment_component_manager::get_manager();
-    auto door_man = door_component_manager::get_manager();
-    auto physics_man = physics_component_manager::get_manager();
+    auto &surface_man = component_system_man.managers.surface_attachment_component_man;
+    auto &door_man = component_system_man.managers.door_component_man;
+    auto &physics_man = component_system_man.managers.physics_component_man;
 
     /* removing block influence from this ent */
     /* this should really be componentified */
-    if (surface_man->exists(e)) {
-        auto b = *surface_man->get_instance_data(e).block;
+    if (surface_man.exists(e)) {
+        auto b = *surface_man.get_instance_data(e).block;
 
         //todo: fix height here. hardcoded is wrong
         auto height = 1;
@@ -815,13 +813,13 @@ destroy_entity(c_entity e)
         }
     }
 
-    if (door_man->exists(e)) {
+    if (door_man.exists(e)) {
         /* make sure the door is /open/ -- no magic surfaces left lying around. */
         set_door_state(ship, e, surface_none);
     }
 
-    if (physics_man->exists(e)) {
-        auto phys_data = physics_man->get_instance_data(e);
+    if (physics_man.exists(e)) {
+        auto phys_data = physics_man.get_instance_data(e);
         phys_ent_ref *per = (phys_ent_ref *)(*phys_data.rigid)->getUserPointer();
         if (per) {
             delete per;
@@ -830,9 +828,7 @@ destroy_entity(c_entity e)
         teardown_static_physics_setup(nullptr, nullptr, phys_data.rigid);
     }
 
-    for (auto &man : ::component_managers) {
-        man.second->destroy_entity_instance(e);
-    }
+    component_system_man.managers.destroy_entity_instance(e);
 
     remove_attaches_for_entity(ship, e);
 }
@@ -841,7 +837,7 @@ destroy_entity(c_entity e)
 void
 remove_ents_from_surface(glm::ivec3 b, int face)
 {
-    auto surface_man = surface_attachment_component_manager::get_manager();
+    auto &surface_man = component_system_man.managers.surface_attachment_component_man;
 
     chunk *ch = ship->get_chunk_containing(b);
     for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
@@ -850,12 +846,12 @@ remove_ents_from_surface(glm::ivec3 b, int face)
         /* entities may have been inserted in this chunk which don't have
          * placement on a surface. don't corrupt everything if we hit one.
          */
-        if (!surface_man->exists(ce)) {
+        if (!surface_man.exists(ce)) {
             ++it;
             continue;
         }
 
-        auto surface = surface_man->get_instance_data(ce);
+        auto surface = surface_man.get_instance_data(ce);
         auto p = *surface.block;
         auto f = *surface.face;
 
@@ -1938,7 +1934,7 @@ struct play_state : game_state {
     }
 
     void rebuild_ui() override {
-        auto type_man = type_component_manager::get_manager();
+        auto &type_man = component_system_man.managers.type_component_man;
 
         float w = 0;
         float h = 0;
@@ -1978,7 +1974,7 @@ struct play_state : game_state {
         bind = game_settings.bindings.bindings.find(action_use);
         key = lookup_key((*bind).second.binds.inputs[0]);
         if (use_entity) {
-            auto name = *type_man->get_instance_data(use_entity->ce).name;
+            auto name = *type_man.get_instance_data(use_entity->ce).name;
             sprintf(buf2, "%s Use the %s", key, name);
             w = 0; h = 0;
             text->measure(buf2, &w, &h);
@@ -2023,7 +2019,7 @@ struct play_state : game_state {
     }
 
     void update(float dt) override {
-        auto switch_man = switch_component_manager::get_manager();
+        auto &switch_man = component_system_man.managers.switch_component_man;
 
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_FALSE) {
             SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -2071,7 +2067,7 @@ struct play_state : game_state {
         /* can only interact with entities which have
          * the switch component
          */
-        if (hit_ent && !switch_man->exists(hit_ent->ce)) {
+        if (hit_ent && !switch_man.exists(hit_ent->ce)) {
             hit_ent = nullptr;
         }
 

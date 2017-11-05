@@ -9,10 +9,10 @@
 
 #include "component_managers.h"
 
-struct component12_system_manager {
-    component12_system_manager() = default;
+struct component_system_manager {
+    component_system_manager() = default;
 
-    virtual ~component12_system_manager() = default;
+    virtual ~component_system_manager() = default;
 
     component_managers managers{};
 };

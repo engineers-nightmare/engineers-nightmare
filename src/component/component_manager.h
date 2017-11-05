@@ -23,9 +23,7 @@ namespace std {
 }
 
 struct component_stub {
-    std::string component_name;
-
-    explicit component_stub(const std::string &name) : component_name(std::move(name)) {}
+    explicit component_stub() {}
 
     virtual void assign_component_to_entity(c_entity) = 0;
 

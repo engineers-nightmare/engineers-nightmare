@@ -8,6 +8,7 @@
 #include "../component/component_system_manager.h"
 
 extern asset_manager asset_man;
+extern component_system_manager component_system_man;
 
 void
 draw_attachments(ship_space *ship, frame_data *frame)
@@ -408,8 +409,8 @@ attach_topo_rebuild(ship_space *ship, wire_type type) {
  */
 void
 calculate_power_wires(ship_space *ship) {
-    auto power_man = power_component_manager::get_manager();
-    auto power_provider_man = power_provider_component_manager::get_manager();
+    auto &power_man = component_system_man.managers.power_component_man;
+    auto &power_provider_man = component_system_man.managers.power_provider_component_man;
 
     ship->power_wires.clear();
     const auto type = wire_type_power;
@@ -418,8 +419,8 @@ calculate_power_wires(ship_space *ship) {
 
     /* walk power consumers */
     /* invariant: at most /one/ power wire is attached. */
-    for (auto i = 0u; i < power_man->buffer.num; i++) {
-        auto ce = power_man->instance_pool.entity[i];
+    for (auto i = 0u; i < power_man.buffer.num; i++) {
+        auto ce = power_man.instance_pool.entity[i];
         auto attaches = ship->entity_to_attach_lookups[type].find(ce);
         if (attaches != ship->entity_to_attach_lookups[type].end()) {
             for (auto attach : attaches->second) {
@@ -427,23 +428,23 @@ calculate_power_wires(ship_space *ship) {
                 auto & power_data = ship->power_wires[wire];
 
                 power_data.num_consumers++;
-                power_data.peak_draw += power_man->instance_pool.max_required_power[i];
-                power_data.total_draw += power_man->instance_pool.required_power[i];
+                power_data.peak_draw += power_man.instance_pool.max_required_power[i];
+                power_data.total_draw += power_man.instance_pool.required_power[i];
             }
         }
     }
 
     /* walk power producers */
     /* invariant: at most /one/ power wire is attached. */
-    for (auto i = 0u; i < power_provider_man->buffer.num; i++) {
-        auto ce = power_provider_man->instance_pool.entity[i];
+    for (auto i = 0u; i < power_provider_man.buffer.num; i++) {
+        auto ce = power_provider_man.instance_pool.entity[i];
         auto attaches = ship->entity_to_attach_lookups[type].find(ce);
         if (attaches != ship->entity_to_attach_lookups[type].end()) {
             for (auto attach : attaches->second) {
                 auto wire = attach_topo_find(ship, type, attach);
                 auto & power_data = ship->power_wires[wire];
 
-                power_data.total_power += power_provider_man->instance_pool.provided[i];
+                power_data.total_power += power_provider_man.instance_pool.provided[i];
                 power_data.num_providers++;
             }
         }

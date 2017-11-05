@@ -9,6 +9,7 @@
 #define INITIAL_MAX_COMPONENTS 20
 
 extern asset_manager asset_man;
+extern component_system_manager component_system_man;
 
 extern particle_manager *particle_man;
 
@@ -23,19 +24,19 @@ const char *comms_msg_type_proximity_sensor_state = "proximity_sensor_state";
 void
 tick_gas_producers(ship_space *ship)
 {
-    auto gas_man = gas_producer_component_manager::get_manager();
-    auto power_man = power_component_manager::get_manager();
-    auto pos_man = relative_position_component_manager::get_manager();
+    auto &gas_man = component_system_man.managers.gas_producer_component_man;
+    auto &power_man = component_system_man.managers.power_component_man;
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
 
-    for (auto i = 0u; i < gas_man->buffer.num; i++) {
-        auto ce = gas_man->instance_pool.entity[i];
+    for (auto i = 0u; i < gas_man.buffer.num; i++) {
+        auto ce = gas_man.instance_pool.entity[i];
 
         /* gas producers require: power */
-        assert(power_man->exists(ce) || !"gas producer must be powerable");
-        assert(pos_man->exists(ce) || !"gas producer must have position");
+        assert(power_man.exists(ce) || !"gas producer must be powerable");
+        assert(pos_man.exists(ce) || !"gas producer must have position");
 
-        auto power = power_man->get_instance_data(ce);
-        auto position = pos_man->get_instance_data(ce);
+        auto power = power_man.get_instance_data(ce);
+        auto position = pos_man.get_instance_data(ce);
 
         /* don't do anything if we aren't powered and turned on */
         if (!*power.powered) {
@@ -64,7 +65,7 @@ tick_gas_producers(ship_space *ship)
                     if (msg.desc == comms_msg_type_switch_state) {
 
                         auto data = clamp(msg.data, 0.0f, 1.0f);
-                        gas_man->instance_pool.enabled[i] = data > 0;
+                        gas_man.instance_pool.enabled[i] = data > 0;
                         *power.required_power = data > 0 ? *power.max_required_power : 0.0f;
                     }
                 }
@@ -72,7 +73,7 @@ tick_gas_producers(ship_space *ship)
         }
 
         /* we are powered if we get here. check if turned on */
-        if (!gas_man->instance_pool.enabled[i]) {
+        if (!gas_man.instance_pool.enabled[i]) {
             continue;
         }
 
@@ -87,9 +88,9 @@ tick_gas_producers(ship_space *ship)
         }
 
         /* add some gas if we can, up to our pressure limit */
-        float max_gas = gas_man->instance_pool.max_pressure[i] * t->size;
+        float max_gas = gas_man.instance_pool.max_pressure[i] * t->size;
         if (z->air_amount < max_gas) {
-            z->air_amount = std::min(max_gas, z->air_amount + gas_man->instance_pool.flow_rate[i]);
+            z->air_amount = std::min(max_gas, z->air_amount + gas_man.instance_pool.flow_rate[i]);
 
             /* particle visibility is based on condensation/deposition process
              * as the gas enters a /much/ lower pressure environment.
@@ -120,12 +121,12 @@ tick_gas_producers(ship_space *ship)
 void
 set_door_state(ship_space *ship, c_entity ce, surface_type s)
 {
-    auto door_man = door_component_manager::get_manager();
-    auto pos_man = relative_position_component_manager::get_manager();
+    auto &door_man = component_system_man.managers.door_component_man;
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
 
-    auto position = pos_man->get_instance_data(ce);
+    auto position = pos_man.get_instance_data(ce);
     auto pos = glm::ivec3(*position.position);
-    auto door = door_man->get_instance_data(ce);
+    auto door = door_man.get_instance_data(ce);
 
     auto from_surface = s == surface_none ? surface_door : surface_none;
 
@@ -153,40 +154,40 @@ set_door_state(ship_space *ship, c_entity ce, surface_type s)
 void
 tick_doors(ship_space *ship)
 {
-    auto door_man = door_component_manager::get_manager();
-    auto pos_man = relative_position_component_manager::get_manager();
-    auto reader_man = reader_component_manager::get_manager();
-    auto power_man = power_component_manager::get_manager();
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &door_man = component_system_man.managers.door_component_man;
+    auto &reader_man = component_system_man.managers.reader_component_man;
+    auto &power_man = component_system_man.managers.power_component_man;
 
-    for (auto i = 0u; i < door_man->buffer.num; i++) {
-        auto ce = door_man->instance_pool.entity[i];
+    for (auto i = 0u; i < door_man.buffer.num; i++) {
+        auto ce = door_man.instance_pool.entity[i];
 
         /* doors require: powered */
-        assert(power_man->exists(ce) || !"doors must be powerable");
-        assert(pos_man->exists(ce) || !"doors must be positioned");
-        assert(reader_man->exists(ce) || !"doors must have reader");
+        assert(power_man.exists(ce) || !"doors must be powerable");
+        assert(pos_man.exists(ce) || !"doors must be positioned");
+        assert(reader_man.exists(ce) || !"doors must have reader");
 
-        auto power = power_man->get_instance_data(ce);
-        auto reader = reader_man->get_instance_data(ce);
+        auto power = power_man.get_instance_data(ce);
+        auto reader = reader_man.get_instance_data(ce);
 
         /* it's a power door, it's not going /anywhere/ without power */
         if (!*power.powered) {
             continue;
         }
 
-        auto old_pos = door_man->instance_pool.pos[i];
+        auto old_pos = door_man.instance_pool.pos[i];
 
-        door_man->instance_pool.desired_pos[i] = *reader.data > 0 ? 1.0f : 0.0f;
+        door_man.instance_pool.desired_pos[i] = *reader.data > 0 ? 1.0f : 0.0f;
 
-        auto desired_state = door_man->instance_pool.desired_pos[i];
-        auto in_desired_state = door_man->instance_pool.pos[i] == desired_state;
+        auto desired_state = door_man.instance_pool.desired_pos[i];
+        auto in_desired_state = door_man.instance_pool.pos[i] == desired_state;
         /* TODO: magic number for quiescent power */
         *power.required_power = in_desired_state ? 1 : *power.max_required_power;
 
-        auto delta = clamp(door_man->instance_pool.pos[i] - desired_state, -0.1f, 0.1f);
-        door_man->instance_pool.pos[i] -= delta;
+        auto delta = clamp(door_man.instance_pool.pos[i] - desired_state, -0.1f, 0.1f);
+        door_man.instance_pool.pos[i] -= delta;
 
-        auto pos = door_man->instance_pool.pos[i];
+        auto pos = door_man.instance_pool.pos[i];
 
         if (desired_state == 0 && old_pos != 0 && pos == 0) {
             /* did we just finish closing? */
@@ -202,15 +203,15 @@ tick_doors(ship_space *ship)
 
 void
 tick_power_consumers(ship_space *ship) {
-    auto power_man = power_component_manager::get_manager();
+    auto power_man = component_system_man.managers.power_component_man;
 
-    for (auto i = 0u; i < power_man->buffer.num; i++) {
-        auto ce = power_man->instance_pool.entity[i];
+    for (auto i = 0u; i < power_man.buffer.num; i++) {
+        auto ce = power_man.instance_pool.entity[i];
 
-        if (power_man->instance_pool.max_required_power[i] == 0 &&
-            power_man->instance_pool.required_power[i] == 0)
+        if (power_man.instance_pool.max_required_power[i] == 0 &&
+            power_man.instance_pool.required_power[i] == 0)
             continue;
-        power_man->instance_pool.powered[i] = false;
+        power_man.instance_pool.powered[i] = false;
 
         auto & power_attaches = ship->entity_to_attach_lookups[wire_type_power];
         auto attaches = power_attaches.find(ce);
@@ -224,7 +225,7 @@ tick_power_consumers(ship_space *ship) {
             auto const & wire = ship->power_wires[wire_index];
 
             if (wire.total_power >= wire.total_draw && wire.total_power > 0) {
-                power_man->instance_pool.powered[i] = true;
+                power_man.instance_pool.powered[i] = true;
             }
         }
     }
@@ -233,22 +234,22 @@ tick_power_consumers(ship_space *ship) {
 
 void
 tick_light_components(ship_space *ship) {
-    auto light_man = light_component_manager::get_manager();
-    auto pos_man = relative_position_component_manager::get_manager();
-    auto reader_man = reader_component_manager::get_manager();
-    auto power_man = power_component_manager::get_manager();
+    auto &light_man = component_system_man.managers.light_component_man;
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &reader_man = component_system_man.managers.reader_component_man;
+    auto &power_man = component_system_man.managers.power_component_man;
 
-    for (auto i = 0u; i < light_man->buffer.num; i++) {
-        auto ce = light_man->instance_pool.entity[i];
+    for (auto i = 0u; i < light_man.buffer.num; i++) {
+        auto ce = light_man.instance_pool.entity[i];
 
         /* all lights currently require: position, power, reader */
-        assert(pos_man->exists(ce) || !"lights must have a position");
-        assert(power_man->exists(ce) || !"lights must have power");
-        assert(reader_man->exists(ce) || !"lights must have reader");
+        assert(pos_man.exists(ce) || !"lights must have a position");
+        assert(power_man.exists(ce) || !"lights must have power");
+        assert(reader_man.exists(ce) || !"lights must have reader");
 
-        auto power = power_man->get_instance_data(ce);
-        auto light = light_man->get_instance_data(ce);
-        auto reader = reader_man->get_instance_data(ce);
+        auto power = power_man.get_instance_data(ce);
+        auto light = light_man.get_instance_data(ce);
+        auto reader = reader_man.get_instance_data(ce);
 
         *(light.requested_intensity) = clamp(*(reader.data), 0.0f, 1.0f);
 
@@ -260,7 +261,7 @@ tick_light_components(ship_space *ship) {
             *(light.intensity) = new_intensity;
             *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
 
-//            auto pos = *pos_man->get_instance_data(ce).position;
+//            auto pos = *pos_man.get_instance_data(ce).position;
 //            auto block_pos = get_coord_containing(pos);
         }
     }
@@ -269,16 +270,16 @@ tick_light_components(ship_space *ship) {
 
 void
 tick_pressure_sensors(ship_space* ship) {
-    auto pressure_man = pressure_sensor_component_manager::get_manager();
-    auto pos_man = relative_position_component_manager::get_manager();
+    auto &pressure_man = component_system_man.managers.pressure_sensor_component_man;
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
 
-    for (auto i = 0u; i < pressure_man->buffer.num; i++) {
-        auto ce = pressure_man->instance_pool.entity[i];
+    for (auto i = 0u; i < pressure_man.buffer.num; i++) {
+        auto ce = pressure_man.instance_pool.entity[i];
 
         /* all pressure sensors currently require: position */
-        assert(pos_man->exists(ce) || !"pressure sensors must have a position");
+        assert(pos_man.exists(ce) || !"pressure sensors must have a position");
 
-        auto pos = *pos_man->get_instance_data(ce).position;
+        auto pos = *pos_man.get_instance_data(ce).position;
 
         glm::ivec3 pos_block = get_coord_containing(pos);
 
@@ -286,7 +287,7 @@ tick_pressure_sensors(ship_space* ship) {
         zone_info *z = ship->get_zone_info(t);
         float pressure = z ? (z->air_amount / t->size) : 0.0f;
 
-        auto which_sensor = pressure_man->instance_pool.type[i];
+        auto which_sensor = pressure_man.instance_pool.type[i];
         auto desc = comms_msg_type_pressure_sensor_1_state;
         if (which_sensor == 2) {
             desc = comms_msg_type_pressure_sensor_2_state;
@@ -304,15 +305,15 @@ tick_pressure_sensors(ship_space* ship) {
 
 void
 tick_sensor_comparators(ship_space *ship) {
-    auto comparator_man = sensor_comparator_component_manager::get_manager();
+    auto &comparator_man = component_system_man.managers.sensor_comparator_component_man;
 
-    for (auto i = 0u; i < comparator_man->buffer.num; i++) {
-        auto ce = comparator_man->instance_pool.entity[i];
+    for (auto i = 0u; i < comparator_man.buffer.num; i++) {
+        auto ce = comparator_man.instance_pool.entity[i];
         auto type = wire_type_comms;
         auto sensor_1 = FLT_MAX;
         auto sensor_2 = FLT_MAX;
-        auto epsilon = comparator_man->instance_pool.compare_epsilon[i];
-        auto & difference = comparator_man->instance_pool.compare_result[i];
+        auto epsilon = comparator_man.instance_pool.compare_epsilon[i];
+        auto & difference = comparator_man.instance_pool.compare_result[i];
         difference = 0.f;
 
         /* read pressure sensors from wire
@@ -373,29 +374,29 @@ tick_sensor_comparators(ship_space *ship) {
 
 void
 tick_proximity_sensors(ship_space *ship, player *pl) {
-    auto proximity_man = proximity_sensor_component_manager::get_manager();
-    auto pos_man = relative_position_component_manager::get_manager();
-    auto surface_man = surface_attachment_component_manager::get_manager();
-    auto power_man = power_component_manager::get_manager();
+    auto &proximity_man = component_system_man.managers.proximity_sensor_component_man;
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &surface_man = component_system_man.managers.surface_attachment_component_man;
+    auto &power_man = component_system_man.managers.power_component_man;
 
-    for (auto i = 0u; i < proximity_man->buffer.num; i++) {
-        auto ce = proximity_man->instance_pool.entity[i];
+    for (auto i = 0u; i < proximity_man.buffer.num; i++) {
+        auto ce = proximity_man.instance_pool.entity[i];
 
         /* all proximity sensors currently require: position and power */
-        assert(pos_man->exists(ce) || !"proximity sensors must have a position");
-        assert(surface_man->exists(ce) || !"proximity sensors must have a surface");
-        assert(power_man->exists(ce) || !"proximity sensors must have power");
+        assert(pos_man.exists(ce) || !"proximity sensors must have a position");
+        assert(surface_man.exists(ce) || !"proximity sensors must have a surface");
+        assert(power_man.exists(ce) || !"proximity sensors must have power");
 
         // Cannot detect or generate messages if the sensor isn't powered
-        if (!*power_man->get_instance_data(ce).powered) {
+        if (!*power_man.get_instance_data(ce).powered) {
             continue;
         }
 
-        auto proximity = proximity_man->get_instance_data(ce);
-        auto surface = surface_man->get_instance_data(ce);
+        auto proximity = proximity_man.get_instance_data(ce);
+        auto surface = surface_man.get_instance_data(ce);
         bool was_detected = *(proximity.is_detected);
 
-        auto pos = *pos_man->get_instance_data(ce).position;
+        auto pos = *pos_man.get_instance_data(ce).position;
         glm::ivec3 sensor_pos_block = get_coord_containing(pos);
         glm::ivec3 player_pos_block = get_coord_containing(pl->pos);
 
@@ -461,10 +462,10 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
 
 void
 tick_readers(ship_space *ship) {
-    auto reader_man = reader_component_manager::get_manager();
+    auto &reader_man = component_system_man.managers.reader_component_man;
 
-    for (auto i = 0u; i < reader_man->buffer.num; i++) {
-        auto ce = reader_man->instance_pool.entity[i];
+    for (auto i = 0u; i < reader_man.buffer.num; i++) {
+        auto ce = reader_man.instance_pool.entity[i];
 
         auto & comms_attaches = ship->entity_to_attach_lookups[wire_type_comms];
         auto attaches = comms_attaches.find(ce);
@@ -478,19 +479,19 @@ tick_readers(ship_space *ship) {
 
             for (auto msg : wire.read_buffer) {
                 /* if we're filtering by source, and missed -- skip this one. */
-                if (reader_man->instance_pool.source[i].id &&
-                    reader_man->instance_pool.source[i].id != msg.originator.id) {
+                if (reader_man.instance_pool.source[i].id &&
+                    reader_man.instance_pool.source[i].id != msg.originator.id) {
                     continue;
                 }
 
                 /* if we're filtering by desc, and missed -- skip */
                 /* we /assume/ that everyone here has their strings interned. */
-                if (reader_man->instance_pool.desc[i] &&
-                    reader_man->instance_pool.desc[i] != msg.desc) {
+                if (reader_man.instance_pool.desc[i] &&
+                    reader_man.instance_pool.desc[i] != msg.desc) {
                     continue;
                 }
 
-                reader_man->instance_pool.data[i] = msg.data;
+                reader_man.instance_pool.data[i] = msg.data;
 
                 /* TODO: record /when/ we last got a matching packet */
             }
@@ -501,14 +502,14 @@ tick_readers(ship_space *ship) {
 void
 draw_renderables(frame_data *frame)
 {
-    auto render_man = renderable_component_manager::get_manager();
-    auto pos_man = relative_position_component_manager::get_manager();
+    auto &render_man = component_system_man.managers.renderable_component_man;
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
 
-    for (auto i = 0u; i < render_man->buffer.num; i++) {
-        auto ce = render_man->instance_pool.entity[i];
-        auto & mesh_name = render_man->instance_pool.mesh[i];
+    for (auto i = 0u; i < render_man.buffer.num; i++) {
+        auto ce = render_man.instance_pool.entity[i];
+        auto & mesh_name = render_man.instance_pool.mesh[i];
         auto & mesh = asset_man.meshes[mesh_name];
-        auto & mat = *pos_man->get_instance_data(ce).mat;
+        auto & mat = *pos_man.get_instance_data(ce).mat;
 
         auto entity_matrix = frame->alloc_aligned<glm::mat4>(1);
         *entity_matrix.ptr = mat;
@@ -522,12 +523,12 @@ draw_renderables(frame_data *frame)
 void
 draw_doors(frame_data *frame)
 {
-    auto door_man = door_component_manager::get_manager();
-    auto pos_man = relative_position_component_manager::get_manager();
+    auto &door_man = component_system_man.managers.door_component_man;
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
 
-    for (auto i = 0u; i < door_man->buffer.num; i++) {
-        auto ce = door_man->instance_pool.entity[i];
-        auto & mesh_name = door_man->instance_pool.mesh[i];
+    for (auto i = 0u; i < door_man.buffer.num; i++) {
+        auto ce = door_man.instance_pool.entity[i];
+        auto & mesh_name = door_man.instance_pool.mesh[i];
 
         if (!mesh_name) {
             continue;
@@ -535,9 +536,9 @@ draw_doors(frame_data *frame)
 
         auto & mesh = asset_man.meshes[mesh_name];
 
-        glm::mat4 mat = *pos_man->get_instance_data(ce).mat;
+        glm::mat4 mat = *pos_man.get_instance_data(ce).mat;
 
-        auto pos = door_man->instance_pool.pos[i];
+        auto pos = door_man.instance_pool.pos[i];
 
         mat[3][0] += pos * mat[0][0];
         mat[3][1] += pos * mat[0][1];
