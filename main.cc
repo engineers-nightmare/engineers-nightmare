@@ -298,7 +298,7 @@ void load_entities() {
             }
 
             if (valid) {
-                entity_stubs[entity.name] = entity;
+                entity_stubs[entity.name] = std::move(entity);
             }
         }
     }
