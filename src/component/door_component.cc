@@ -10,13 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-door_stub_from_config(const config_setting_t *door_config) {
-    auto door_stub = std::make_unique<door_component_stub>();
-
-    return door_stub;
-};
-
 void
 door_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

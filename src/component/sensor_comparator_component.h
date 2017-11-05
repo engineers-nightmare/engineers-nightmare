@@ -24,6 +24,7 @@ struct sensor_comparator_component_manager : component_manager {
 
         d.entity = instance_pool.entity + inst.index;
         d.compare_result = instance_pool.compare_result + inst.index;
+
         d.compare_epsilon = instance_pool.compare_epsilon + inst.index;
 
         return d;
@@ -37,4 +38,15 @@ struct sensor_comparator_component_stub : component_stub {
 
     void
     assign_component_to_entity(c_entity entity) override;
+
+    static
+    std::unique_ptr<component_stub>
+    from_config(const config_setting_t *sensor_comparator_config) {
+        auto sensor_comparator_stub = std::make_unique<sensor_comparator_component_stub>();
+
+        auto compare_epsilon_member = config_setting_get_member(sensor_comparator_config, "compare_epsilon");
+        sensor_comparator_stub->compare_epsilon = config_setting_get_float(compare_epsilon_member);
+
+        return std::move(sensor_comparator_stub);
+    }
 };

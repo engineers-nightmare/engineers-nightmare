@@ -26,8 +26,11 @@ struct door_component_manager : component_manager {
 
         d.entity = instance_pool.entity + inst.index;
         d.mesh = instance_pool.mesh + inst.index;
+
         d.pos = instance_pool.pos + inst.index;
+
         d.desired_pos = instance_pool.desired_pos + inst.index;
+
         d.height = instance_pool.height + inst.index;
 
         return d;
@@ -39,4 +42,12 @@ struct door_component_stub : component_stub {
 
     void
     assign_component_to_entity(c_entity entity) override;
+
+    static
+    std::unique_ptr<component_stub>
+    from_config(const config_setting_t *door_config) {
+        auto door_stub = std::make_unique<door_component_stub>();
+
+        return std::move(door_stub);
+    }
 };

@@ -24,6 +24,7 @@ struct relative_position_component_manager : component_manager {
 
         d.entity = instance_pool.entity + inst.index;
         d.position = instance_pool.position + inst.index;
+
         d.mat = instance_pool.mat + inst.index;
 
         return d;
@@ -35,4 +36,12 @@ struct relative_position_component_stub : component_stub {
 
     void
     assign_component_to_entity(c_entity entity) override;
+
+    static
+    std::unique_ptr<component_stub>
+    from_config(const config_setting_t *relative_position_config) {
+        auto relative_position_stub = std::make_unique<relative_position_component_stub>();
+
+        return std::move(relative_position_stub);
+    }
 };

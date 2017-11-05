@@ -10,13 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-switch_stub_from_config(const config_setting_t *switch_config) {
-    auto switch_stub = std::make_unique<switch_component_stub>();
-
-    return switch_stub;
-};
-
 void
 switch_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

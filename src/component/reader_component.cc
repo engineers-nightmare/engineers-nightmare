@@ -10,19 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-reader_stub_from_config(const config_setting_t *reader_config) {
-    auto reader_stub = std::make_unique<reader_component_stub>();
-
-    auto name_member = config_setting_get_member(reader_config, "name");
-    reader_stub->name = config_setting_get_string(name_member);
-
-    auto desc_member = config_setting_get_member(reader_config, "desc");
-    reader_stub->desc = config_setting_get_string(desc_member);
-
-    return reader_stub;
-};
-
 void
 reader_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

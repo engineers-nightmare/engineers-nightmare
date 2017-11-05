@@ -10,16 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-renderable_stub_from_config(const config_setting_t *renderable_config) {
-    auto renderable_stub = std::make_unique<renderable_component_stub>();
-
-    auto mesh_member = config_setting_get_member(renderable_config, "mesh");
-    renderable_stub->mesh = config_setting_get_string(mesh_member);
-
-    return renderable_stub;
-};
-
 void
 renderable_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

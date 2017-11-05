@@ -10,22 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-gas_producer_stub_from_config(const config_setting_t *gas_producer_config) {
-    auto gas_producer_stub = std::make_unique<gas_producer_component_stub>();
-
-    auto gas_type_member = config_setting_get_member(gas_producer_config, "gas_type");
-    gas_producer_stub->gas_type = config_setting_get_int(gas_type_member);
-
-    auto flow_rate_member = config_setting_get_member(gas_producer_config, "flow_rate");
-    gas_producer_stub->flow_rate = config_setting_get_float(flow_rate_member);
-
-    auto max_pressure_member = config_setting_get_member(gas_producer_config, "max_pressure");
-    gas_producer_stub->max_pressure = config_setting_get_float(max_pressure_member);
-
-    return gas_producer_stub;
-};
-
 void
 gas_producer_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

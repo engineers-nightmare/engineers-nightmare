@@ -26,8 +26,11 @@ struct gas_producer_component_manager : component_manager {
 
         d.entity = instance_pool.entity + inst.index;
         d.gas_type = instance_pool.gas_type + inst.index;
+
         d.flow_rate = instance_pool.flow_rate + inst.index;
+
         d.max_pressure = instance_pool.max_pressure + inst.index;
+
         d.enabled = instance_pool.enabled + inst.index;
 
         return d;
@@ -45,4 +48,21 @@ struct gas_producer_component_stub : component_stub {
 
     void
     assign_component_to_entity(c_entity entity) override;
+
+    static
+    std::unique_ptr<component_stub>
+    from_config(const config_setting_t *gas_producer_config) {
+        auto gas_producer_stub = std::make_unique<gas_producer_component_stub>();
+
+        auto gas_type_member = config_setting_get_member(gas_producer_config, "gas_type");
+        gas_producer_stub->gas_type = config_setting_get_int(gas_type_member);
+
+        auto flow_rate_member = config_setting_get_member(gas_producer_config, "flow_rate");
+        gas_producer_stub->flow_rate = config_setting_get_float(flow_rate_member);
+
+        auto max_pressure_member = config_setting_get_member(gas_producer_config, "max_pressure");
+        gas_producer_stub->max_pressure = config_setting_get_float(max_pressure_member);
+
+        return std::move(gas_producer_stub);
+    }
 };

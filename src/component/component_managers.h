@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "component_manager.h"
+
 #include "door_component.h"
 #include "sensor_comparator_component.h"
 #include "surface_attachment_component.h"
@@ -22,8 +23,26 @@
 #include "type_component.h"
 #include "proximity_sensor_component.h"
 
+#define INITIAL_MAX_COMPONENTS 20
+
 struct component_managers {
-    component_managers() = default;
+    component_managers() {
+        door_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        sensor_comparator_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        surface_attachment_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        power_provider_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        light_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        renderable_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        reader_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        gas_producer_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        power_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        relative_position_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        switch_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        pressure_sensor_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        physics_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        type_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        proximity_sensor_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+    }
 
     door_component_manager door_component_man{};
     sensor_comparator_component_manager sensor_comparator_component_man{};
@@ -40,6 +59,56 @@ struct component_managers {
     physics_component_manager physics_component_man{};
     type_component_manager type_component_man{};
     proximity_sensor_component_manager proximity_sensor_component_man{};
+
+    std::unique_ptr<component_stub> get_stub(const char*comp_name, const config_setting_t *config) {
+        if (strcmp(comp_name, "door") == 0) {
+            return door_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "sensor_comparator") == 0) {
+            return sensor_comparator_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "surface_attachment") == 0) {
+            return surface_attachment_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "power_provider") == 0) {
+            return power_provider_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "light") == 0) {
+            return light_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "renderable") == 0) {
+            return renderable_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "reader") == 0) {
+            return reader_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "gas_producer") == 0) {
+            return gas_producer_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "power") == 0) {
+            return power_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "relative_position") == 0) {
+            return relative_position_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "switch") == 0) {
+            return switch_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "pressure_sensor") == 0) {
+            return pressure_sensor_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "physics") == 0) {
+            return physics_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "type") == 0) {
+            return type_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "proximity_sensor") == 0) {
+            return proximity_sensor_component_stub::from_config(config);
+        }
+        assert(false);
+        return nullptr;
+    }
 
     void destroy_entity_instance(c_entity ce) {
         door_component_man.destroy_entity_instance(ce);

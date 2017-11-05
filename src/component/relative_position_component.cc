@@ -10,13 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-relative_position_stub_from_config(const config_setting_t *relative_position_config) {
-    auto relative_position_stub = std::make_unique<relative_position_component_stub>();
-
-    return relative_position_stub;
-};
-
 void
 relative_position_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

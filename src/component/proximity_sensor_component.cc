@@ -10,16 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-proximity_sensor_stub_from_config(const config_setting_t *proximity_sensor_config) {
-    auto proximity_sensor_stub = std::make_unique<proximity_sensor_component_stub>();
-
-    auto range_member = config_setting_get_member(proximity_sensor_config, "range");
-    proximity_sensor_stub->range = config_setting_get_float(range_member);
-
-    return proximity_sensor_stub;
-};
-
 void
 proximity_sensor_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

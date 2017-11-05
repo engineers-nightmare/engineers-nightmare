@@ -24,6 +24,7 @@ struct pressure_sensor_component_manager : component_manager {
 
         d.entity = instance_pool.entity + inst.index;
         d.pressure = instance_pool.pressure + inst.index;
+
         d.type = instance_pool.type + inst.index;
 
         return d;
@@ -37,4 +38,15 @@ struct pressure_sensor_component_stub : component_stub {
 
     void
     assign_component_to_entity(c_entity entity) override;
+
+    static
+    std::unique_ptr<component_stub>
+    from_config(const config_setting_t *pressure_sensor_config) {
+        auto pressure_sensor_stub = std::make_unique<pressure_sensor_component_stub>();
+
+        auto type_member = config_setting_get_member(pressure_sensor_config, "type");
+        pressure_sensor_stub->type = config_setting_get_int(type_member);
+
+        return std::move(pressure_sensor_stub);
+    }
 };

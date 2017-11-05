@@ -10,16 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-type_stub_from_config(const config_setting_t *type_config) {
-    auto type_stub = std::make_unique<type_component_stub>();
-
-    auto name_member = config_setting_get_member(type_config, "name");
-    type_stub->name = config_setting_get_string(name_member);
-
-    return type_stub;
-};
-
 void
 type_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

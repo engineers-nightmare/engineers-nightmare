@@ -10,16 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-sensor_comparator_stub_from_config(const config_setting_t *sensor_comparator_config) {
-    auto sensor_comparator_stub = std::make_unique<sensor_comparator_component_stub>();
-
-    auto compare_epsilon_member = config_setting_get_member(sensor_comparator_config, "compare_epsilon");
-    sensor_comparator_stub->compare_epsilon = config_setting_get_float(compare_epsilon_member);
-
-    return sensor_comparator_stub;
-};
-
 void
 sensor_comparator_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

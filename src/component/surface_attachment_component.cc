@@ -10,13 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-surface_attachment_stub_from_config(const config_setting_t *surface_attachment_config) {
-    auto surface_attachment_stub = std::make_unique<surface_attachment_component_stub>();
-
-    return surface_attachment_stub;
-};
-
 void
 surface_attachment_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

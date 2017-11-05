@@ -24,6 +24,7 @@ struct light_component_manager : component_manager {
 
         d.entity = instance_pool.entity + inst.index;
         d.intensity = instance_pool.intensity + inst.index;
+
         d.requested_intensity = instance_pool.requested_intensity + inst.index;
 
         return d;
@@ -37,4 +38,15 @@ struct light_component_stub : component_stub {
 
     void
     assign_component_to_entity(c_entity entity) override;
+
+    static
+    std::unique_ptr<component_stub>
+    from_config(const config_setting_t *light_config) {
+        auto light_stub = std::make_unique<light_component_stub>();
+
+        auto intensity_member = config_setting_get_member(light_config, "intensity");
+        light_stub->intensity = config_setting_get_float(intensity_member);
+
+        return std::move(light_stub);
+    }
 };

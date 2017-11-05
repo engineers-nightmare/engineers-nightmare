@@ -10,16 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-power_provider_stub_from_config(const config_setting_t *power_provider_config) {
-    auto power_provider_stub = std::make_unique<power_provider_component_stub>();
-
-    auto max_provided_member = config_setting_get_member(power_provider_config, "max_provided");
-    power_provider_stub->max_provided = config_setting_get_float(max_provided_member);
-
-    return power_provider_stub;
-};
-
 void
 power_provider_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

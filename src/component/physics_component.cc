@@ -10,16 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-physics_stub_from_config(const config_setting_t *physics_config) {
-    auto physics_stub = std::make_unique<physics_component_stub>();
-
-    auto mesh_member = config_setting_get_member(physics_config, "mesh");
-    physics_stub->mesh = config_setting_get_string(mesh_member);
-
-    return physics_stub;
-};
-
 void
 physics_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

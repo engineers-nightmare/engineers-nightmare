@@ -10,16 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-pressure_sensor_stub_from_config(const config_setting_t *pressure_sensor_config) {
-    auto pressure_sensor_stub = std::make_unique<pressure_sensor_component_stub>();
-
-    auto type_member = config_setting_get_member(pressure_sensor_config, "type");
-    pressure_sensor_stub->type = config_setting_get_int(type_member);
-
-    return pressure_sensor_stub;
-};
-
 void
 pressure_sensor_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)

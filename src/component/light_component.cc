@@ -10,16 +10,6 @@
 
 extern component_system_manager component_system_man;
 
-std::unique_ptr<component_stub>
-light_stub_from_config(const config_setting_t *light_config) {
-    auto light_stub = std::make_unique<light_component_stub>();
-
-    auto intensity_member = config_setting_get_member(light_config, "intensity");
-    light_stub->intensity = config_setting_get_float(intensity_member);
-
-    return light_stub;
-};
-
 void
 light_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
