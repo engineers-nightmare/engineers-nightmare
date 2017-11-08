@@ -42,9 +42,6 @@
 #define DEFAULT_WIDTH   1024
 #define DEFAULT_HEIGHT  768
 
-#define WORLD_TEXTURE_DIMENSION     32
-#define MAX_WORLD_TEXTURES          64
-
 #define MOUSE_Y_LIMIT      1.54f
 #define MAX_AXIS_PER_EVENT 128
 
@@ -119,8 +116,6 @@ unsigned frame_index;
 
 GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader, modelspace_uv_shader;
-texture_set *world_textures;
-texture_set *skybox;
 ship_space *ship;
 player pl;
 physics *phy;
@@ -314,13 +309,19 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
 
     auto entity = &entity_stubs[name];
 
+    renderable_component_stub * render_stub = nullptr;
     for (auto &comp : entity->components) {
         comp->assign_component_to_entity(ce);
+        if (!render_stub) {
+            render_stub = dynamic_cast<renderable_component_stub*>(comp.get());
+        }
     }
+    assert(render_stub);
 
     auto &pos_man = component_system_man.managers.relative_position_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
     auto &surface_man = component_system_man.managers.surface_attachment_component_man;
+    auto &render_man = component_system_man.managers.renderable_component_man;
 
     auto physics = physics_man.get_instance_data(ce);
     *physics.rigid = nullptr;
@@ -340,6 +341,9 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
     auto pos = pos_man.get_instance_data(ce);
     *pos.position = p;
     *pos.mat = mat;
+
+    auto render = render_man.get_instance_data(ce);
+    *render.material = asset_man.get_texture_index(render_stub->material);
 
     return ce;
 }
@@ -680,6 +684,7 @@ init()
     particle_man->create_particle_data(1000);
 
     asset_man.load_meshes();
+    asset_man.load_textures();
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
@@ -694,33 +699,6 @@ init()
     modelspace_uv_shader = load_shader("shaders/simple_modelspace_uv.vert", "shaders/simple.frag");
 
     glUseProgram(simple_shader);
-
-    world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
-    world_textures->load(0, "textures/white.png");
-    world_textures->load(1, "textures/frame.png");
-    world_textures->load(2, "textures/plate.png");
-    world_textures->load(3, "textures/frobnicator.png");
-    world_textures->load(4, "textures/grate.png");
-    world_textures->load(5, "textures/red.png");
-    world_textures->load(6, "textures/glass.png");
-    world_textures->load(7, "textures/display.png");
-    world_textures->load(8, "textures/light.png");
-    world_textures->load(9, "textures/switch.png");
-    world_textures->load(10, "textures/attach.png");
-    world_textures->load(11, "textures/no_place.png");
-    world_textures->load(12, "textures/wire.png");
-    world_textures->load(13, "textures/plaidnicator.png");
-    world_textures->load(14, "textures/comms_wire.png");
-    world_textures->load(15, "textures/particle.png");
-    world_textures->load(16, "textures/transparent_block.png");
-
-    skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
-    skybox->load(0, "textures/sky_right1.png");
-    skybox->load(1, "textures/sky_left2.png");
-    skybox->load(2, "textures/sky_top3.png");
-    skybox->load(3, "textures/sky_bottom4.png");
-    skybox->load(4, "textures/sky_front5.png");
-    skybox->load(5, "textures/sky_back6.png");
 
     ship = ship_space::mock_ship_space_2();
     if( ! ship )
@@ -1757,7 +1735,7 @@ void render() {
     camera_params.ptr->aspect = (float)wnd.width / wnd.height;
     camera_params.bind(0, frame);
 
-    world_textures->bind(0);
+    asset_man.world_textures->bind(0);
 
     prepare_chunks();
 
@@ -1794,7 +1772,7 @@ void render() {
 
     /* draw the sky */
     glUseProgram(sky_shader);
-    skybox->bind(0);
+    asset_man.skybox->bind(0);
     glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
     glDrawArrays(GL_TRIANGLES, 0, 3);
