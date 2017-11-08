@@ -1,2 +1,4 @@
-stub,const char*,string,mesh,
+stub,const char*,string,,mesh,
+stub,const char*,string,0;//,material,
 body,const char*,mesh,nullptr
+body,unsigned,material,0

@@ -231,7 +231,7 @@ impl_template_10_each_body="""
 """
 
 impl_template_11_each_stub="""
-    *data.%(name)s = %(name)s%(extra)s;
+    *data.%(name)s = %(pre)s%(name)s%(extra)s;
 """
 
 impl_template_12="""};
@@ -279,7 +279,7 @@ def main():
                     body_fields.append({'type': parts[1], 'name': parts[2], 'default': parts[3], 'prev': prev, 'comp_name': component_name})
                     prev = parts[2]
                 elif parts[0] == 'stub':
-                    stub_fields.append({'otype': parts[1], 'type': parts[2], 'name': parts[3], 'extra': parts[4], 'comp_name': component_name})
+                    stub_fields.append({'otype': parts[1], 'type': parts[2], 'pre': parts[3], 'name': parts[4], 'extra': parts[5], 'comp_name': component_name})
 
         print("  header: src/component/%s_component.h" % component_name)
         with open("src/component/%s_component.h" % component_name, "w") as g:
@@ -314,6 +314,7 @@ def main():
                 g.write(impl_template_8_each_body % fi)
             g.write(impl_template_9 % (component_name, component_name, component_name, component_name))
             for fi in body_fields:
+                print (body_fields)
                 g.write(impl_template_10_each_body % fi)
             for fi in stub_fields:
                 g.write(impl_template_11_each_stub % fi)

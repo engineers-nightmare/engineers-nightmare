@@ -1,3 +1,3 @@
-stub,float,float,range,
+stub,float,float,,range,
 body,float,range,0
 body,bool,is_detected,false
