@@ -5,6 +5,7 @@ entity: {
         },
         renderable: {
             mesh: "single_door_frame.dae",
+            material: "frame.png",
         },
         relative_position: {
         },

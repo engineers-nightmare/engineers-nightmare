@@ -5,6 +5,7 @@ entity: {
         },
         renderable: {
             mesh: "frobnicator.dae",
+            material: "plaidnicator.png",
         },
         relative_position: {
         },

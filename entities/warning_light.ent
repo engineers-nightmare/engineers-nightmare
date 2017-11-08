@@ -5,6 +5,7 @@ entity: {
         },
         renderable: {
             mesh: "warning_light.dae",
+            material: "port.png",
         },
         relative_position: {
         },
