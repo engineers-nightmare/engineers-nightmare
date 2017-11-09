@@ -497,6 +497,8 @@ tick_readers(ship_space *ship) {
     }
 }
 
+extern GLuint simple_shader;
+
 void
 draw_renderables(frame_data *frame)
 {
@@ -505,6 +507,7 @@ draw_renderables(frame_data *frame)
 
     for (auto i = 0u; i < render_man.buffer.num; i++) {
         auto ce = render_man.instance_pool.entity[i];
+        auto & material = render_man.instance_pool.material[i];
         auto & mesh_name = render_man.instance_pool.mesh[i];
         auto & mesh = asset_man.meshes[mesh_name];
         auto & mat = *pos_man.get_instance_data(ce).mat;
@@ -512,6 +515,9 @@ draw_renderables(frame_data *frame)
         auto entity_matrix = frame->alloc_aligned<glm::mat4>(1);
         *entity_matrix.ptr = mat;
         entity_matrix.bind(1, frame);
+
+        auto loc = glGetUniformLocation(simple_shader, "mat");
+        glUniform1i(loc, material);
 
         draw_mesh(mesh.hw);
     }
