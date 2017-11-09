@@ -148,11 +148,11 @@ void
 mesher_init()
 {
     memset(surface_type_to_material, 0, sizeof(surface_type_to_material));
-    surface_type_to_material[surface_none] = 0;
-    surface_type_to_material[surface_wall] = 2;
-    surface_type_to_material[surface_grate] = 4;
-    surface_type_to_material[surface_glass] = 6;
-    surface_type_to_material[surface_door] = 16;
+    surface_type_to_material[surface_none] = asset_man.get_texture_index("white.png");
+    surface_type_to_material[surface_wall] = asset_man.get_texture_index("plate.png");
+    surface_type_to_material[surface_grate] = asset_man.get_texture_index("grate.png");
+    surface_type_to_material[surface_glass] = asset_man.get_texture_index("glass.png");
+    surface_type_to_material[surface_door] = asset_man.get_texture_index("transparent_block.png");
 }
 
 void

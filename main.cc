@@ -675,8 +675,6 @@ init()
     glEnable(GL_DEPTH_TEST);
     glPolygonOffset(-0.1f, -0.1f);
 
-    mesher_init();
-
     printf("Loading entities\n");
     load_entities();
 
@@ -685,6 +683,8 @@ init()
 
     asset_man.load_meshes();
     asset_man.load_textures();
+
+    mesher_init();
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
     unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
