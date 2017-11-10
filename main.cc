@@ -114,8 +114,8 @@ gl_debug_callback(GLenum source __unused,
 frame_data *frames, *frame;
 unsigned frame_index;
 
-GLuint simple_shader, unlit_shader, add_overlay_shader, remove_overlay_shader, ui_shader, ui_sprites_shader;
-GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader, modelspace_uv_shader;
+GLuint simple_shader, unlit_shader, overlay_shader, ui_shader, ui_sprites_shader;
+GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader, modelspace_uv_shader, chunk_shader;
 ship_space *ship;
 player pl;
 physics *phy;
@@ -690,13 +690,13 @@ init()
     unlit_shader = load_shader("shaders/simple.vert", "shaders/unlit.frag");
     unlit_instanced_shader = load_shader("shaders/simple_instanced.vert", "shaders/unlit.frag");
     lit_instanced_shader = load_shader("shaders/simple_instanced.vert", "shaders/simple.frag");
-    add_overlay_shader = load_shader("shaders/add_overlay.vert", "shaders/unlit.frag");
-    remove_overlay_shader = load_shader("shaders/remove_overlay.vert", "shaders/unlit.frag");
+    overlay_shader = load_shader("shaders/overlay.vert", "shaders/unlit.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
     ui_sprites_shader = load_shader("shaders/ui_sprites.vert", "shaders/ui_sprites.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
     particle_shader = load_shader("shaders/particle.vert", "shaders/particle.frag");
     modelspace_uv_shader = load_shader("shaders/simple_modelspace_uv.vert", "shaders/simple.frag");
+    chunk_shader = load_shader("shaders/chunk.vert", "shaders/simple.frag");
 
     glUseProgram(simple_shader);
 
@@ -914,9 +914,6 @@ struct add_block_entity_tool : tool
         if (type >= entity_names.size()) {
             type = 0;
         }
-//        do {
-//            type = (type + 1) % (sizeof(entity_types) / sizeof(*entity_types));
-//        } while (entity_types[type].placed_on_surface);
     }
 
     void preview(raycast_info *rc, frame_data *frame) override {
@@ -929,16 +926,21 @@ struct add_block_entity_tool : tool
 
         auto &stub = entity_stubs[entity_names[type]];
         std::string mesh_name{};
+        GLuint mesh_mat{};
         for (auto &comp: stub.components) {
             auto render = dynamic_cast<renderable_component_stub*>(comp.get());
             if (render) {
                 mesh_name = render->mesh;
+                mesh_mat = asset_man.get_texture_index(render->material);
                 break;
             }
         }
         assert(!mesh_name.empty());
 
         auto mesh = asset_man.meshes[mesh_name];
+
+        glUseProgram(simple_shader);
+        glUniform1i(glGetUniformLocation(simple_shader, "mat"), mesh_mat);
         draw_mesh(mesh.hw);
 
         auto mat_overlay = frame->alloc_aligned<glm::mat4>(1);
@@ -946,9 +948,11 @@ struct add_block_entity_tool : tool
         mat_overlay.bind(1, frame);
 
         auto &frame_mesh = asset_man.meshes["initial_frame.dae"];
+        auto material = asset_man.get_texture_index("white.png");
 
         /* draw a block overlay as well around the block */
-        glUseProgram(add_overlay_shader);
+        glUseProgram(overlay_shader);
+        glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
         draw_mesh(frame_mesh.hw);
         glUseProgram(simple_shader);
     }
@@ -962,15 +966,7 @@ struct add_block_entity_tool : tool
 
 struct add_surface_entity_tool : tool
 {
-    unsigned type = std::numeric_limits<unsigned>::max();
-
-    void select() override {
-        if (type == std::numeric_limits<unsigned>::max()) {
-            // todo: this might want to check which entities are surface placeable
-            // as is, this tool is going to be very similar add_block_entity_tool
-            type = 0;
-        }
-    }
+    unsigned type = 0;
 
     bool can_use(raycast_info *rc) {
         if (!rc->hit)
@@ -1030,9 +1026,6 @@ struct add_surface_entity_tool : tool
         if (type >= entity_names.size()) {
             type = 0;
         }
-//        do {
-//            type = (type + 1) % (sizeof(entity_types) / sizeof(*entity_types));
-//        } while (!entity_types[type].placed_on_surface);
     }
 
     void preview(raycast_info *rc, frame_data *frame) override {
@@ -1047,16 +1040,20 @@ struct add_surface_entity_tool : tool
 
         auto &stub = entity_stubs[entity_names[type]];
         std::string mesh_name{};
+        GLuint mesh_mat{};
         for (auto &comp: stub.components) {
             auto render = dynamic_cast<renderable_component_stub*>(comp.get());
             if (render) {
                 mesh_name = render->mesh;
+                mesh_mat = asset_man.get_texture_index(render->material);
                 break;
             }
         }
         assert(!mesh_name.empty());
 
         auto mesh = asset_man.meshes[mesh_name];
+        glUseProgram(simple_shader);
+        glUniform1i(glGetUniformLocation(simple_shader, "mat"), mesh_mat);
         draw_mesh(mesh.hw);
 
         /* draw a surface overlay here too */
@@ -1066,8 +1063,10 @@ struct add_surface_entity_tool : tool
         mat.bind(1, frame);
 
         auto surf_mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
+        auto material = asset_man.get_texture_index("white.png");
 
-        glUseProgram(add_overlay_shader);
+        glUseProgram(overlay_shader);
+        glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
         glEnable(GL_POLYGON_OFFSET_FILL);
         draw_mesh(surf_mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
@@ -1117,8 +1116,10 @@ struct remove_surface_entity_tool : tool
         mat.bind(1, frame);
 
         auto surf_mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
+        auto material = asset_man.get_texture_index("white.png");
 
-        glUseProgram(remove_overlay_shader);
+        glUseProgram(overlay_shader);
+        glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
         glEnable(GL_POLYGON_OFFSET_FILL);
         draw_mesh(surf_mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
@@ -1367,9 +1368,12 @@ struct add_wiring_tool : tool
         *mat.ptr = a2.transform;
         mat.bind(1, frame);
 
-        auto mesh = allow_placement ? asset_man.meshes["attach.dae"] : asset_man.meshes["no_place.dae"];
-
         glUseProgram(unlit_shader);
+
+        auto mesh = allow_placement ? asset_man.meshes["attach.dae"] : asset_man.meshes["no_place.dae"];
+        auto material = asset_man.get_texture_index("no_place.png");
+
+        glUniform1i(glGetUniformLocation(unlit_shader, "mat"), material);
         draw_mesh(mesh.hw);
         glUseProgram(simple_shader);
 
@@ -1383,6 +1387,7 @@ struct add_wiring_tool : tool
             mat.bind(1, frame);
 
             glUseProgram(unlit_shader);
+            glUniform1i(glGetUniformLocation(unlit_shader, "mat"), asset_man.get_texture_index("wire.png"));
             draw_mesh(asset_man.meshes["wire.dae"].hw);
             glUseProgram(simple_shader);
         }
@@ -1739,6 +1744,8 @@ void render() {
 
     prepare_chunks();
 
+    glUseProgram(chunk_shader);
+
     for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
         for (int j = ship->mins.y; j <= ship->maxs.y; j++) {
             for (int i = ship->mins.x; i <= ship->maxs.x; i++) {
@@ -1756,6 +1763,8 @@ void render() {
 
     state->render(frame);
 
+    glUseProgram(simple_shader);
+
     draw_renderables(frame);
     glUseProgram(modelspace_uv_shader);
     draw_doors(frame);
@@ -1763,10 +1772,9 @@ void render() {
     /* draw the projectiles */
     glUseProgram(unlit_instanced_shader);
     draw_projectiles(proj_man, frame);
-    glUseProgram(lit_instanced_shader);
+
     draw_attachments(ship, frame);
     draw_segments(ship, frame);
-    glUseProgram(unlit_instanced_shader);
     draw_attachments_on_active_wire(ship, frame);
     draw_active_segments(ship, frame);
 

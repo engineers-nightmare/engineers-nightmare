@@ -8,8 +8,7 @@
 #include "tools.h"
 
 
-extern GLuint add_overlay_shader;
-extern GLuint remove_overlay_shader;
+extern GLuint overlay_shader;
 extern GLuint simple_shader;
 
 extern ship_space *ship;
@@ -59,8 +58,10 @@ struct remove_surface_tool : tool
         mat.bind(1, frame);
 
         auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
+        auto material = asset_man.get_texture_index("red.png");
 
-        glUseProgram(remove_overlay_shader);
+        glUseProgram(overlay_shader);
+        glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
         glEnable(GL_POLYGON_OFFSET_FILL);
         draw_mesh(mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);

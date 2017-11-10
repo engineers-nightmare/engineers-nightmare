@@ -172,7 +172,7 @@ chunk::prepare_render()
                 if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
                     auto mesh = asset_man.meshes["initial_frame.dae"];
-                    stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), 1);
+                    stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), asset_man.get_texture_index("frame.png"));
                 }
 
                 for (int surf = 0; surf < 6; surf++) {

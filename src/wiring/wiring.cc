@@ -10,10 +10,17 @@
 extern asset_manager asset_man;
 extern component_system_manager component_system_man;
 
+extern GLuint simple_shader;
+extern GLuint unlit_instanced_shader;
+extern GLuint lit_instanced_shader;
+
 void
 draw_attachments(ship_space *ship, frame_data *frame)
 {
     auto &attach_mesh = asset_man.meshes["attach.dae"];
+
+    glUseProgram(lit_instanced_shader);
+    glUniform1i(glGetUniformLocation(lit_instanced_shader, "mat"), asset_man.get_texture_index("wire.png"));
 
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];
@@ -49,6 +56,9 @@ void
 draw_attachments_on_active_wire(ship_space *ship, frame_data *frame)
 {
     auto &attach_mesh = asset_man.meshes["attach.dae"];
+
+    glUseProgram(unlit_instanced_shader);
+    glUniform1i(glGetUniformLocation(unlit_instanced_shader, "mat"), asset_man.get_texture_index("no_place.png"));
 
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];
@@ -106,6 +116,9 @@ void
 draw_segments(ship_space *ship, frame_data *frame) {
     auto &wire_mesh = asset_man.meshes["wire.dae"];
 
+    glUseProgram(lit_instanced_shader);
+    glUniform1i(glGetUniformLocation(lit_instanced_shader, "mat"), asset_man.get_texture_index("no_place.png"));
+
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];
         auto const & wire_segments = ship->wire_segments[type];
@@ -145,6 +158,9 @@ draw_segments(ship_space *ship, frame_data *frame) {
 void
 draw_active_segments(ship_space *ship, frame_data *frame) {
     auto &wire_mesh = asset_man.meshes["wire.dae"];
+
+    glUseProgram(unlit_instanced_shader);
+    glUniform1i(glGetUniformLocation(unlit_instanced_shader, "mat"), asset_man.get_texture_index("wire.png"));
 
     for (auto type = 0u; type < num_wire_types; ++type) {
         auto const & wire_attachments = ship->wire_attachments[type];

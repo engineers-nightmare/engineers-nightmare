@@ -7,7 +7,7 @@
 #include "tools.h"
 
 
-extern GLuint add_overlay_shader;
+extern GLuint overlay_shader;
 extern GLuint simple_shader;
 
 extern ship_space *ship;
@@ -59,8 +59,10 @@ struct add_block_tool : tool
             mat.bind(1, frame);
 
             auto mesh = asset_man.meshes["initial_frame.dae"];
+            auto material = asset_man.get_texture_index("white.png");
 
-            glUseProgram(add_overlay_shader);
+            glUseProgram(overlay_shader);
+            glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
             draw_mesh(mesh.hw);
             glUseProgram(simple_shader);
         }
