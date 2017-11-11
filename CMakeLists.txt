@@ -164,7 +164,8 @@ foreach(test_src ${TESTS_SRCS})
         add_executable(${test_name} ${test_src})
 
         # link to our libs
-        target_link_libraries(${test_name} NIGHTMARE)
+	# TODO: uncouple this.
+        target_link_libraries(${test_name} NIGHTMARE ${BULLET_LIBRARIES})
 
         # move into test_bin
         set_target_properties(${test_name} PROPERTIES 
