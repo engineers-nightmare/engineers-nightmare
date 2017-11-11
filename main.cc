@@ -17,6 +17,7 @@
 #include <libconfig.h>
 #include <iostream>
 #include <memory>
+#include "src/libconfig_shim.h"
 
 #include "src/asset_manager.h"
 #include "src/common.h"
