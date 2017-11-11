@@ -1,12 +1,11 @@
 #ifndef EN_LIBCONFIG_SHIM
 #define EN_LIBCONFIG_SHIM
 /* various shims around broken libconfig compat
- * http://upstream-tracker.org/versions/libconfig.html
+ * https://abi-laboratory.pro/tracker/timeline/libconfig/
  * is quite useful
  */
 
 /* renamed: `config_lookup_from` to `config_setting_lookup`
- * http://upstream-tracker.org/diffs/libconfig/1.4.9_to_1.5/diff.html
  * with this change they bumped LIBCONFIG_VER_MINOR from 4 to 5
 */
 #if LIBCONFIG_VER_MINOR < 5
@@ -15,7 +14,6 @@
 
 
 /* LIBCONFIG_VER_MINOR was added in 1.4.5
- * http://upstream-tracker.org/diffs/libconfig/1.3.2_to_1.4.5/diff.html
 */
 #ifndef LIBCONFIG_VER_MINOR
 
@@ -78,7 +76,6 @@ config_setting_t *config_setting_lookup(config_setting_t *setting,
  *    #define config_error_file(C) ((C)->error_file)
  *
  * however `error_file` was only added to `config_t` in 1.4.5
- * http://upstream-tracker.org/diffs/libconfig/1.3.2_to_1.4.5/diff.html
  *
  * `config_error_file` is expected to return a char* of the file that
  * the error occurded on, as per
