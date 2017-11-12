@@ -295,7 +295,7 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
     auto physics = physics_man.get_instance_data(ce);
     *physics.rigid = nullptr;
     std::string m = *physics.mesh;
-    auto const &phys_mesh = asset_man.meshes[m];
+    auto const &phys_mesh = asset_man.get_mesh(m);
     build_static_physics_rb_mat(&mat, phys_mesh.phys_shape, physics.rigid);    
     /* so that we can get back to the entity from a phys raycast */
     /* TODO: these should really come from a dense pool rather than the generic allocator */
@@ -359,7 +359,7 @@ place_entity_attaches(raycast_info* rc, int index, c_entity e) {
     auto &render_man = component_system_man.managers.renderable_component_man;
 
     auto mesh_name = *render_man.get_instance_data(e).mesh;
-    auto sw = asset_man.meshes[mesh_name].sw;
+    auto sw = asset_man.get_mesh(mesh_name).sw;
 
     for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
         auto wt = (wire_type)wire_index;
@@ -667,8 +667,8 @@ struct add_block_entity_tool : tool
             printf("taking block %d,%d,%d\n", p.x, p.y, p.z);
 
             /* consume ALL the space on the surfaces */
-            for (int face = 0; face < face_count; face++) {
-                bl->surf_space[face] = ~0;
+            for (unsigned short &face : bl->surf_space) {
+                face = (unsigned short)~0;
             }
         }
 
@@ -708,7 +708,7 @@ struct add_block_entity_tool : tool
         mat.ptr->material = mesh_mat;
         mat.bind(1, frame);
 
-        auto mesh = asset_man.meshes[mesh_name];
+        auto mesh = asset_man.get_mesh(mesh_name);
         draw_mesh(mesh.hw);
 
         auto material = asset_man.get_texture_index("white.png");
@@ -718,7 +718,7 @@ struct add_block_entity_tool : tool
         mat_overlay.ptr->material = material;
         mat_overlay.bind(1, frame);
 
-        auto &frame_mesh = asset_man.meshes["initial_frame.dae"];
+        auto &frame_mesh = asset_man.get_mesh("initial_frame.dae");
 
         /* draw a block overlay as well around the block */
         glUseProgram(overlay_shader);
@@ -752,7 +752,7 @@ struct add_surface_entity_tool : tool
             return false;
 
         block *other_side = ship->get_block(rc->p);
-        unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
+        auto required_space = (unsigned short)~0; /* TODO: make this a prop of the type + subblock placement */
 
         if (other_side->surf_space[index ^ 1] & required_space) {
             /* no room on the surface */
@@ -769,7 +769,7 @@ struct add_surface_entity_tool : tool
         int index = normal_to_surface_index(rc);
 
         block *other_side = ship->get_block(rc->p);
-        unsigned short required_space = ~0; /* TODO: make this a prop of the type + subblock placement */
+        auto required_space = (unsigned short)~0; /* TODO: make this a prop of the type + subblock placement */
 
         chunk *ch = ship->get_chunk_containing(rc->p);
         /* the chunk we're placing into is guaranteed to exist, because there's
@@ -801,7 +801,7 @@ struct add_surface_entity_tool : tool
         if (!can_use(rc))
             return;
 
-        int index = normal_to_surface_index(rc);
+        auto index = normal_to_surface_index(rc);
 
         auto &stub = entity_stubs[entity_names[type]];
         std::string mesh_name{};
@@ -821,13 +821,13 @@ struct add_surface_entity_tool : tool
         mat.ptr->material = mesh_mat;
         mat.bind(1, frame);
 
-        auto mesh = asset_man.meshes[mesh_name];
+        auto mesh = asset_man.get_mesh(mesh_name);
         glUseProgram(simple_shader);
         draw_mesh(mesh.hw);
 
         /* draw a surface overlay here too */
         /* TODO: sub-block placement granularity -- will need a different overlay */
-        auto surf_mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
+        auto surf_mesh = asset_man.get_surface_mesh(index);
         auto material = asset_man.get_texture_index("white.png");
 
         auto mat2 = frame->alloc_aligned<mesh_instance>(1);
@@ -887,7 +887,7 @@ struct remove_surface_entity_tool : tool
         mat.ptr->material = material;
         mat.bind(1, frame);
 
-        auto surf_mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
+        auto surf_mesh = asset_man.get_surface_mesh(index);
 
         glUseProgram(overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -1131,7 +1131,7 @@ struct add_wiring_tool : tool
             break;
         }
 
-        auto mesh = allow_placement ? asset_man.meshes["attach.dae"] : asset_man.meshes["no_place.dae"];
+        auto mesh = allow_placement ? asset_man.get_mesh("attach.dae") : asset_man.get_mesh("no_place.dae");
         auto material = asset_man.get_texture_index("no_place.png");
 
         /* if existing, place preview mesh as existing
@@ -1157,7 +1157,7 @@ struct add_wiring_tool : tool
             mat.bind(1, frame);
 
             glUseProgram(unlit_shader);
-            draw_mesh(asset_man.meshes["wire.dae"].hw);
+            draw_mesh(asset_man.get_mesh("wire.dae").hw);
             glUseProgram(simple_shader);
         }
     }
@@ -1509,7 +1509,7 @@ void render() {
     camera_params.ptr->aspect = (float)wnd.width / wnd.height;
     camera_params.bind(0, frame);
 
-    asset_man.world_textures->bind(0);
+    asset_man.bind_world_textures(0);
 
     prepare_chunks();
 
@@ -1549,7 +1549,7 @@ void render() {
 
     /* draw the sky */
     glUseProgram(sky_shader);
-    asset_man.skybox->bind(0);
+    asset_man.bind_skybox(0);
     glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
     glDrawArrays(GL_TRIANGLES, 0, 3);

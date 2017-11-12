@@ -509,7 +509,7 @@ draw_renderables(frame_data *frame)
         auto ce = render_man.instance_pool.entity[i];
         auto & material = render_man.instance_pool.material[i];
         auto & mesh_name = render_man.instance_pool.mesh[i];
-        auto & mesh = asset_man.meshes[mesh_name];
+        auto & mesh = asset_man.get_mesh(mesh_name);
         auto & mat = *pos_man.get_instance_data(ce).mat;
 
         auto params = frame->alloc_aligned<mesh_instance>(1);
@@ -536,7 +536,7 @@ draw_doors(frame_data *frame)
             continue;
         }
 
-        auto & mesh = asset_man.meshes[mesh_name];
+        auto & mesh = asset_man.get_mesh(mesh_name);
 
         glm::mat4 mat = *pos_man.get_instance_data(ce).mat;
 

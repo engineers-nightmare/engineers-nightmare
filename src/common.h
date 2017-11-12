@@ -41,7 +41,7 @@ struct raycast_info {
     struct block *block;
 };
 
-static inline int
+static inline unsigned
 normal_to_surface_index(raycast_info const *rc)
 {
     if (rc->n.x == 1) return 0;

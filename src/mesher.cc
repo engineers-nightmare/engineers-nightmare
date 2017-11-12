@@ -171,13 +171,13 @@ chunk::prepare_render()
 
                 if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
-                    auto mesh = asset_man.meshes["initial_frame.dae"];
+                    auto mesh = asset_man.get_mesh("initial_frame.dae");
                     stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), asset_man.get_texture_index("frame.png"));
                 }
 
-                for (int surf = 0; surf < 6; surf++) {
+                for (unsigned surf = 0; surf < 6; surf++) {
                     if (b->surfs[surf] != surface_none) {
-                        auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[surf]];
+                        auto mesh = asset_man.get_surface_mesh(surf);
                         stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k),
                                 surface_type_to_material[b->surfs[surf]]);
                     }
@@ -185,7 +185,7 @@ chunk::prepare_render()
             }
 
     /* wrap the vectors in a temporary sw_mesh */
-    sw_mesh m;
+    sw_mesh m{};
     m.verts = &verts[0];
     m.indices = &indices[0];
     m.num_vertices = (unsigned)verts.size();
@@ -218,20 +218,20 @@ chunk::prepare_phys(int x, int y, int z)
 
                 if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
-                    auto mesh = asset_man.meshes["initial_frame.dae"];
+                    auto mesh = asset_man.get_mesh("initial_frame.dae");
                     stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), 1);
                 }
 
-                for (int surf = 0; surf < 6; surf++) {
+                for (unsigned surf = 0; surf < 6; surf++) {
                     if (b->surfs[surf] & surface_phys) {
-                        auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[surf]];
+                        auto mesh = asset_man.get_surface_mesh(surf);
                         stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), 0);
                     }
                 }
             }
 
     /* wrap the vectors in a temporary sw_mesh */
-    sw_mesh m;
+    sw_mesh m{};
     m.verts = &verts[0];
     m.indices = &indices[0];
     m.num_vertices = (unsigned)verts.size();

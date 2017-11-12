@@ -41,7 +41,7 @@ struct remove_block_tool : tool
 
         block *bl = rc->block;
         if (bl->type != block_empty) {
-            auto mesh = asset_man.meshes["initial_frame.dae"];
+            auto mesh = asset_man.get_mesh("initial_frame.dae");
             auto material = asset_man.get_texture_index("red.png");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);

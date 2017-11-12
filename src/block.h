@@ -28,7 +28,7 @@ enum surface_type : unsigned char {
  * so ym is the surface corresponding to the face
  *  on this block 'facing' down the +y axis
  */
-enum surface_index {
+enum surface_index : unsigned {
     surface_xp,
     surface_xm,
     surface_yp,
@@ -46,8 +46,8 @@ enum surface_index {
 struct block {
     block_type type = block_frame;
 
-    surface_type surfs[face_count];
-    unsigned short surf_space[face_count];
+    surface_type surfs[face_count]{};
+    unsigned short surf_space[face_count]{};
 };
 
 static inline unsigned char  /* bool */

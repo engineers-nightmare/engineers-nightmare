@@ -4,13 +4,13 @@
 #define WORLD_TEXTURE_DIMENSION     32
 #define MAX_WORLD_TEXTURES          64
 
-asset_manager::asset_manager() : meshes(), surface_index_to_mesh() {
-    surface_index_to_mesh[surface_xm] = "x_quad.dae";
-    surface_index_to_mesh[surface_xp] = "x_quad_p.dae";
-    surface_index_to_mesh[surface_ym] = "y_quad.dae";
-    surface_index_to_mesh[surface_yp] = "y_quad_p.dae";
-    surface_index_to_mesh[surface_zm] = "z_quad.dae";
-    surface_index_to_mesh[surface_zp] = "z_quad_p.dae";
+asset_manager::asset_manager() : meshes(), surface_index_to_mesh_name() {
+    surface_index_to_mesh_name[surface_xm] = "x_quad.dae";
+    surface_index_to_mesh_name[surface_xp] = "x_quad_p.dae";
+    surface_index_to_mesh_name[surface_ym] = "y_quad.dae";
+    surface_index_to_mesh_name[surface_yp] = "y_quad_p.dae";
+    surface_index_to_mesh_name[surface_zm] = "z_quad.dae";
+    surface_index_to_mesh_name[surface_zp] = "z_quad_p.dae";
 }
 
 void asset_manager::load_meshes() {
@@ -110,3 +110,20 @@ void asset_manager::load_textures() {
 unsigned asset_manager::get_texture_index(const std::string & tex) const {
     return texture_to_index.at(tex);
 }
+
+mesh_data & asset_manager::get_mesh(const std::string & mesh) {
+    return meshes.at(mesh);
+}
+
+mesh_data &asset_manager::get_surface_mesh(unsigned surface_index) {
+    return meshes.at(surface_index_to_mesh_name[surface_index]);
+}
+
+void asset_manager::bind_world_textures(int i) {
+    world_textures->bind(i);
+}
+
+void asset_manager::bind_skybox(int i) {
+    skybox->bind(i);
+}
+

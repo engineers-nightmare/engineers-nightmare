@@ -166,10 +166,10 @@ paint_surface_tool::cycle_mode() {
 
 void
 paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
-    int index = normal_to_surface_index(rc);
+    auto index = normal_to_surface_index(rc);
 
     if (state == paint_state::started) {
-        auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
+        auto mesh = asset_man.get_surface_mesh(index);
         auto material = asset_man.get_texture_index("red.png");
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
@@ -220,7 +220,7 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
                             continue;
                         }
 
-                        auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
+                        auto mesh = asset_man.get_surface_mesh(index);
                         auto material = asset_man.get_texture_index("red.png");
 
                         auto mat = frame->alloc_aligned<mesh_instance>(1);
@@ -239,7 +239,7 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
                 break;
             }
             case paint_state::idle: {
-                auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
+                auto mesh = asset_man.get_surface_mesh(index);
                 auto material = asset_man.get_texture_index("white.png");
 
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
