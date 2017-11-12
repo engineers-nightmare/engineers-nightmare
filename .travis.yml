@@ -1,31 +1,34 @@
+dist: trusty
+sudo: required
+
 language: cpp
 
 compiler: gcc
 
-before_install:
-    # http://www.ubuntuupdates.org/ppa/getdeb_games for libbullet-dev >= 2.7
-    - wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
-    - sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu precise-getdeb games" > /etc/apt/sources.list.d/getdeb.list'
-    - sudo add-apt-repository -y ppa:zoogie/sdl2-snapshots # libsdl2-dev, libsdl2-image-dev
-    - sudo apt-add-repository -y ppa:sfttech/random # libepoxy-dev
-    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test # sane g++ for c++11
-    - sudo apt-get update -qy
-    - mkdir $HOME/usr
-    - export PATH="$HOME/usr/bin:$PATH"
-    - wget https://cmake.org/files/v3.8/cmake-3.8.2-Linux-x86_64.sh
-    - chmod +x cmake-3.8.2-Linux-x86_64.sh
-    - ./cmake-3.8.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
+addons:
+    apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:zoogie/sdl2-snapshots'
+        packages:
+        - libconfig-dev
+        - gcc-5
+        - g++-5
+        - libsdl2-dev
+        - libsdl2-image-dev
+        - libepoxy-dev
+        - libbullet-dev
+        - libfreetype6-dev
+        - libassimp-dev
+        - libglm-dev
+        - cmake
 
 # NB: this below list must be kept in sync with `README.md`
 install:
-    - sudo apt-get install -qy libconfig-dev build-essential gcc-5 g++-5 libsdl2-dev libsdl2-image-dev libepoxy-dev libbullet-dev libfreetype6-dev
-    - wget http://launchpadlibrarian.net/157997579/libassimp3_3.0~dfsg-2_amd64.deb http://launchpadlibrarian.net/157997580/libassimp-dev_3.0~dfsg-2_amd64.deb http://launchpadlibrarian.net/205738508/libglm-dev_0.9.6.3-1_all.deb
-    - sudo dpkg -i libassimp3_3.0~dfsg-2_amd64.deb libassimp-dev_3.0~dfsg-2_amd64.deb libglm-dev_0.9.6.3-1_all.deb
-    # taken from http://gearchicken.com/wordpress/?p=105
     - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90
 
 script:
     - cmake .
-    - make
+    - make -skj
     - make test
 

@@ -398,7 +398,7 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
         glm::ivec3 sensor_pos_block = get_coord_containing(pos);
         glm::ivec3 player_pos_block = get_coord_containing(pl->pos);
 
-        glm::vec3 delta = player_pos_block - sensor_pos_block;
+        glm::vec3 delta = glm::vec3(player_pos_block - sensor_pos_block);
 
         // Do quick relative range check first
         if (glm::length((delta)) <= *(proximity.range)) {

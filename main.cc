@@ -830,9 +830,8 @@ struct add_surface_entity_tool : tool
         auto surf_mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
         auto material = asset_man.get_texture_index("white.png");
 
-
         auto mat2 = frame->alloc_aligned<mesh_instance>(1);
-        mat2.ptr->world_matrix = mat_position(rc->bl);
+        mat2.ptr->world_matrix = mat_position(glm::vec3(rc->bl));
         mat2.ptr->material = material;
         mat2.bind(1, frame);
 
@@ -884,7 +883,7 @@ struct remove_surface_entity_tool : tool
         auto material = asset_man.get_texture_index("white.png");
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
-        mat.ptr->world_matrix = mat_position(rc->bl);
+        mat.ptr->world_matrix = mat_position(glm::vec3(rc->bl));
         mat.ptr->material = material;
         mat.bind(1, frame);
 
@@ -1523,7 +1522,7 @@ void render() {
                 chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
                 if (ch) {
                     auto chunk_matrix = frame->alloc_aligned<glm::mat4>(1);
-                    *chunk_matrix.ptr = mat_position(CHUNK_SIZE * glm::ivec3(i, j, k));
+                    *chunk_matrix.ptr = mat_position(glm::vec3(CHUNK_SIZE * glm::ivec3(i, j, k)));
                     chunk_matrix.bind(1, frame);
                     draw_mesh(ch->render_chunk.mesh);
                 }

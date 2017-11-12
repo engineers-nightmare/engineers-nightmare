@@ -58,7 +58,7 @@ struct add_block_tool : tool
             auto material = asset_man.get_texture_index("white.png");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);
-            mat.ptr->world_matrix = mat_position(rc->p);
+            mat.ptr->world_matrix = mat_position(glm::vec3(rc->p));
             mat.ptr->material = material;
             mat.bind(1, frame);
 

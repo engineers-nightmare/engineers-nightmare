@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.2)
 project(nightmare)
 
 # from http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
