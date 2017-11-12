@@ -169,15 +169,16 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
     int index = normal_to_surface_index(rc);
 
     if (state == paint_state::started) {
-        auto mat = frame->alloc_aligned<glm::mat4>(1);
-        *mat.ptr = mat_position(start_block);
-        mat.bind(1, frame);
-
         auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
         auto material = asset_man.get_texture_index("red.png");
 
+        auto mat = frame->alloc_aligned<mesh_instance>(1);
+        mat.ptr->world_matrix = mat_position(start_block);
+        mat.ptr->material = material;
+        mat.bind(1, frame);
+
+
         glUseProgram(overlay_shader);
-        glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
         glEnable(GL_POLYGON_OFFSET_FILL);
         draw_mesh(mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
@@ -219,15 +220,15 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
                             continue;
                         }
 
-                        auto mat = frame->alloc_aligned<glm::mat4>(1);
-                        *mat.ptr = mat_position(cur);
-                        mat.bind(1, frame);
-
                         auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
                         auto material = asset_man.get_texture_index("red.png");
 
+                        auto mat = frame->alloc_aligned<mesh_instance>(1);
+                        mat.ptr->world_matrix = mat_position(cur);
+                        mat.ptr->material = material;
+                        mat.bind(1, frame);
+
                         glUseProgram(overlay_shader);
-                        glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
                         glEnable(GL_POLYGON_OFFSET_FILL);
                         draw_mesh(mesh.hw);
                         glDisable(GL_POLYGON_OFFSET_FILL);
@@ -238,15 +239,15 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
                 break;
             }
             case paint_state::idle: {
-                auto mat = frame->alloc_aligned<glm::mat4>(1);
-                *mat.ptr = mat_position(rc->bl);
-                mat.bind(1, frame);
-
                 auto mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
                 auto material = asset_man.get_texture_index("white.png");
 
+                auto mat = frame->alloc_aligned<mesh_instance>(1);
+                mat.ptr->world_matrix = mat_position(rc->bl);
+                mat.ptr->material = material;
+                mat.bind(1, frame);
+
                 glUseProgram(overlay_shader);
-                glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
                 glEnable(GL_POLYGON_OFFSET_FILL);
                 draw_mesh(mesh.hw);
                 glDisable(GL_POLYGON_OFFSET_FILL);

@@ -708,21 +708,21 @@ struct add_block_entity_tool : tool
         assert(!mesh_name.empty());
 
         auto mesh = asset_man.meshes[mesh_name];
-
         glUseProgram(simple_shader);
         glUniform1i(glGetUniformLocation(simple_shader, "mat"), mesh_mat);
         draw_mesh(mesh.hw);
 
-        auto mat_overlay = frame->alloc_aligned<glm::mat4>(1);
-        *mat_overlay.ptr = mat_position(glm::vec3(rc->p) );
+        auto material = asset_man.get_texture_index("white.png");
+
+        auto mat_overlay = frame->alloc_aligned<mesh_instance>(1);
+        mat_overlay.ptr->world_matrix = mat_position(glm::vec3(rc->p) );
+        mat_overlay.ptr->material = material;
         mat_overlay.bind(1, frame);
 
         auto &frame_mesh = asset_man.meshes["initial_frame.dae"];
-        auto material = asset_man.get_texture_index("white.png");
 
         /* draw a block overlay as well around the block */
         glUseProgram(overlay_shader);
-        glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
         draw_mesh(frame_mesh.hw);
         glUseProgram(simple_shader);
     }
@@ -828,15 +828,16 @@ struct add_surface_entity_tool : tool
 
         /* draw a surface overlay here too */
         /* TODO: sub-block placement granularity -- will need a different overlay */
-        mat = frame->alloc_aligned<glm::mat4>(1);
-        *mat.ptr = mat_position(rc->bl);
-        mat.bind(1, frame);
-
         auto surf_mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
         auto material = asset_man.get_texture_index("white.png");
 
+
+        auto mat2 = frame->alloc_aligned<mesh_instance>(1);
+        mat2.ptr->world_matrix = mat_position(rc->bl);
+        mat2.ptr->material = material;
+        mat2.bind(1, frame);
+
         glUseProgram(overlay_shader);
-        glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
         glEnable(GL_POLYGON_OFFSET_FILL);
         draw_mesh(surf_mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
@@ -881,15 +882,16 @@ struct remove_surface_entity_tool : tool
             return;
         }
 
-        auto mat = frame->alloc_aligned<glm::mat4>(1);
-        *mat.ptr = mat_position(rc->bl);
+        auto material = asset_man.get_texture_index("white.png");
+
+        auto mat = frame->alloc_aligned<mesh_instance>(1);
+        mat.ptr->world_matrix = mat_position(rc->bl);
+        mat.ptr->material = material;
         mat.bind(1, frame);
 
         auto surf_mesh = asset_man.meshes[asset_man.surface_index_to_mesh[index]];
-        auto material = asset_man.get_texture_index("white.png");
 
         glUseProgram(overlay_shader);
-        glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
         glEnable(GL_POLYGON_OFFSET_FILL);
         draw_mesh(surf_mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);

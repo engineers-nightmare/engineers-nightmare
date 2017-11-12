@@ -41,15 +41,15 @@ struct remove_block_tool : tool
 
         block *bl = rc->block;
         if (bl->type != block_empty) {
-            auto mat = frame->alloc_aligned<glm::mat4>(1);
-            *mat.ptr = mat_position(rc->bl);
-            mat.bind(1, frame);
-
             auto mesh = asset_man.meshes["initial_frame.dae"];
             auto material = asset_man.get_texture_index("red.png");
 
+            auto mat = frame->alloc_aligned<mesh_instance>(1);
+            mat.ptr->world_matrix = mat_position(rc->bl);
+            mat.ptr->material = material;
+            mat.bind(1, frame);
+
             glUseProgram(overlay_shader);
-            glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
             glEnable(GL_POLYGON_OFFSET_FILL);
             draw_mesh(mesh.hw);
             glDisable(GL_POLYGON_OFFSET_FILL);

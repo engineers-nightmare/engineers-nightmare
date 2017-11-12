@@ -80,3 +80,8 @@ struct mesh_data {
         build_static_physics_mesh(sw, &phys_mesh, &phys_shape);
     }
 };
+
+struct mesh_instance {
+    glm::mat4 world_matrix;
+    alignas(glm::vec4) int material;
+};

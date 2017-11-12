@@ -54,15 +54,15 @@ struct add_block_tool : tool
 
         /* can only build on the side of an existing frame */
         if ((!bl || bl->type == block_empty) && rc->block->type == block_frame) {
-            auto mat = frame->alloc_aligned<glm::mat4>(1);
-            *mat.ptr = mat_position(rc->p);
-            mat.bind(1, frame);
-
             auto mesh = asset_man.meshes["initial_frame.dae"];
             auto material = asset_man.get_texture_index("white.png");
 
+            auto mat = frame->alloc_aligned<mesh_instance>(1);
+            mat.ptr->world_matrix = mat_position(rc->p);
+            mat.ptr->material = material;
+            mat.bind(1, frame);
+
             glUseProgram(overlay_shader);
-            glUniform1i(glGetUniformLocation(overlay_shader, "mat"), material);
             draw_mesh(mesh.hw);
             glUseProgram(simple_shader);
         }
