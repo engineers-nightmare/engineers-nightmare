@@ -107,6 +107,6 @@ void asset_manager::load_textures() {
     skybox->load(5, "textures/sky_back6.png");
 }
 
-unsigned asset_manager::get_texture_index(const std::string & tex) {
-    return texture_to_index[tex];
+unsigned asset_manager::get_texture_index(const std::string & tex) const {
+    return texture_to_index.at(tex);
 }

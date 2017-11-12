@@ -25,6 +25,6 @@ struct asset_manager
 
     void load_textures();
 
-    unsigned get_texture_index(const std::string &);
+    unsigned get_texture_index(const std::string &) const;
 };
 
