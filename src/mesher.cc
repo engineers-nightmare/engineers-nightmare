@@ -4,15 +4,12 @@
 #include <string>
 
 #include <glm/glm.hpp>
-#include <vector>       // HISSSSSSS
+#include <vector>
 #include <btBulletDynamicsCommon.h>
 #include <unordered_map>
-#include <array>
 
 #include "asset_manager.h"
 #include "chunk.h"
-#include "mesh.h"
-#include "physics.h"
 
 extern asset_manager asset_man;
 
@@ -47,7 +44,7 @@ build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBod
         (*rb)->setCollisionShape(shape);
     }
     else {
-        /* Rigid body doesn't exist yet -- build one, along with all th motionstate junk */
+        /* Rigid body doesn't exist yet -- build one, along with all the motionstate junk */
         btDefaultMotionState *ms = new btDefaultMotionState(
             btTransform(btQuaternion(0, 0, 0, 1), btVector3((float)x, (float)y, (float)z)));
         btRigidBody::btRigidBodyConstructionInfo
@@ -143,6 +140,12 @@ teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, b
 }
 
 static int surface_type_to_material[256];
+static const mesh_data * surface_index_to_mesh[face_count];
+
+static struct {
+    const mesh_data * frame_mesh;
+    unsigned frame_mat;
+} frame_render_data;
 
 void
 mesher_init()
@@ -153,6 +156,16 @@ mesher_init()
     surface_type_to_material[surface_grate] = asset_man.get_texture_index("grate.png");
     surface_type_to_material[surface_glass] = asset_man.get_texture_index("glass.png");
     surface_type_to_material[surface_door] = asset_man.get_texture_index("transparent_block.png");
+
+    surface_index_to_mesh[surface_xp] = &asset_man.get_surface_mesh(surface_xp);
+    surface_index_to_mesh[surface_xm] = &asset_man.get_surface_mesh(surface_xm);
+    surface_index_to_mesh[surface_yp] = &asset_man.get_surface_mesh(surface_yp);
+    surface_index_to_mesh[surface_ym] = &asset_man.get_surface_mesh(surface_ym);
+    surface_index_to_mesh[surface_zp] = &asset_man.get_surface_mesh(surface_zp);
+    surface_index_to_mesh[surface_zm] = &asset_man.get_surface_mesh(surface_zm);
+
+    frame_render_data.frame_mesh = &asset_man.get_mesh("initial_frame.dae");
+    frame_render_data.frame_mat = asset_man.get_texture_index("frame.png");
 }
 
 void
@@ -164,25 +177,27 @@ chunk::prepare_render()
     std::vector<vertex> verts;
     std::vector<unsigned> indices;
 
-    for (int k = 0; k < CHUNK_SIZE; k++)
-        for (int j = 0; j < CHUNK_SIZE; j++)
-            for (int i = 0; i < CHUNK_SIZE; i++) {
+    for (unsigned k = 0; k < CHUNK_SIZE; k++) {
+        for (unsigned j = 0; j < CHUNK_SIZE; j++) {
+            for (unsigned i = 0; i < CHUNK_SIZE; i++) {
                 block *b = this->blocks.get(i, j, k);
 
                 if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
-                    auto mesh = asset_man.get_mesh("initial_frame.dae");
-                    stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), asset_man.get_texture_index("frame.png"));
+                    stamp_at_offset(&verts, &indices, frame_render_data.frame_mesh->sw, glm::vec3(i, j, k),
+                                    frame_render_data.frame_mat);
                 }
 
                 for (unsigned surf = 0; surf < 6; surf++) {
                     if (b->surfs[surf] != surface_none) {
-                        auto mesh = asset_man.get_surface_mesh(surf);
-                        stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k),
-                                surface_type_to_material[b->surfs[surf]]);
+                        auto mesh = surface_index_to_mesh[surf];
+                        stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k),
+                                        surface_type_to_material[b->surfs[surf]]);
                     }
                 }
             }
+        }
+    }
 
     /* wrap the vectors in a temporary sw_mesh */
     sw_mesh m{};
@@ -211,24 +226,25 @@ chunk::prepare_phys(int x, int y, int z)
     std::vector<vertex> verts;
     std::vector<unsigned> indices;
 
-    for (int k = 0; k < CHUNK_SIZE; k++)
-        for (int j = 0; j < CHUNK_SIZE; j++)
-            for (int i = 0; i < CHUNK_SIZE; i++) {
+    for (unsigned k = 0; k < CHUNK_SIZE; k++) {
+        for (unsigned j = 0; j < CHUNK_SIZE; j++) {
+            for (unsigned i = 0; i < CHUNK_SIZE; i++) {
                 block *b = this->blocks.get(i, j, k);
 
                 if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
-                    auto mesh = asset_man.get_mesh("initial_frame.dae");
-                    stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), 1);
+                    stamp_at_offset(&verts, &indices, frame_render_data.frame_mesh->sw, glm::vec3(i, j, k), 1);
                 }
 
                 for (unsigned surf = 0; surf < 6; surf++) {
-                    if (b->surfs[surf] & surface_phys) {
-                        auto mesh = asset_man.get_surface_mesh(surf);
-                        stamp_at_offset(&verts, &indices, mesh.sw, glm::vec3(i, j, k), 0);
+                    if (b->surfs[surf] != surface_none) {
+                        auto mesh = surface_index_to_mesh[surf];
+                        stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k), 0);
                     }
                 }
             }
+        }
+    }
 
     /* wrap the vectors in a temporary sw_mesh */
     sw_mesh m{};

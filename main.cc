@@ -454,6 +454,7 @@ init()
     asset_man.load_meshes();
     asset_man.load_textures();
 
+    // must be called after asset_man is setup
     mesher_init();
 
     simple_shader = load_shader("shaders/simple.vert", "shaders/simple.frag");
