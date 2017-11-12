@@ -7,8 +7,6 @@ layout(location=0) in vec4 pos;
 //layout(location=1) in int mat;
 layout(location=2) in vec3 norm;
 
-uniform int mat;
-
 layout(std140, binding=0) uniform per_camera {
 
 	mat4 view_proj_matrix;
@@ -19,6 +17,7 @@ layout(std140, binding=0) uniform per_camera {
 layout(std140, binding=1) uniform per_object {
 
 	mat4 world_matrix;
+	int material;
 
 };
 
@@ -31,7 +30,7 @@ void main(void)
 {
     vec4 world_pos = world_matrix * pos;
 	gl_Position = view_proj_matrix * world_pos;
-    texcoord.z = mat;
+    texcoord.z = material;
 
     vec3 n = normalize(mat3(world_matrix) * norm);
 

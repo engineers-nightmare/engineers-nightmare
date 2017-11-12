@@ -690,10 +690,6 @@ struct add_block_entity_tool : tool
         if (!can_use(rc))
             return;
 
-        auto mat = frame->alloc_aligned<glm::mat4>(1);
-        *mat.ptr = mat_position(glm::vec3(rc->p) + glm::vec3(0.5f, 0.5f, 0.0f));
-        mat.bind(1, frame);
-
         auto &stub = entity_stubs[entity_names[type]];
         std::string mesh_name{};
         GLuint mesh_mat{};
@@ -707,9 +703,12 @@ struct add_block_entity_tool : tool
         }
         assert(!mesh_name.empty());
 
+        auto mat = frame->alloc_aligned<mesh_instance>(1);
+        mat.ptr->world_matrix = mat_position(glm::vec3(rc->p) + glm::vec3(0.5f, 0.5f, 0.0f));
+        mat.ptr->material = mesh_mat;
+        mat.bind(1, frame);
+
         auto mesh = asset_man.meshes[mesh_name];
-        glUseProgram(simple_shader);
-        glUniform1i(glGetUniformLocation(simple_shader, "mat"), mesh_mat);
         draw_mesh(mesh.hw);
 
         auto material = asset_man.get_texture_index("white.png");
@@ -804,10 +803,6 @@ struct add_surface_entity_tool : tool
 
         int index = normal_to_surface_index(rc);
 
-        auto mat = frame->alloc_aligned<glm::mat4>(1);
-        *mat.ptr = mat_block_face(rc->p, index ^ 1);
-        mat.bind(1, frame);
-
         auto &stub = entity_stubs[entity_names[type]];
         std::string mesh_name{};
         GLuint mesh_mat{};
@@ -821,9 +816,13 @@ struct add_surface_entity_tool : tool
         }
         assert(!mesh_name.empty());
 
+        auto mat = frame->alloc_aligned<mesh_instance>(1);
+        mat.ptr->world_matrix = mat_block_face(rc->p, index ^ 1);
+        mat.ptr->material = mesh_mat;
+        mat.bind(1, frame);
+
         auto mesh = asset_man.meshes[mesh_name];
         glUseProgram(simple_shader);
-        glUniform1i(glGetUniformLocation(simple_shader, "mat"), mesh_mat);
         draw_mesh(mesh.hw);
 
         /* draw a surface overlay here too */
@@ -1133,19 +1132,18 @@ struct add_wiring_tool : tool
             break;
         }
 
-        /* if existing, place preview mesh as existing
-        * otherwise use raycast info
-        */
-        auto mat = frame->alloc_aligned<glm::mat4>(1);
-        *mat.ptr = a2.transform;
-        mat.bind(1, frame);
-
-        glUseProgram(unlit_shader);
-
         auto mesh = allow_placement ? asset_man.meshes["attach.dae"] : asset_man.meshes["no_place.dae"];
         auto material = asset_man.get_texture_index("no_place.png");
 
-        glUniform1i(glGetUniformLocation(unlit_shader, "mat"), material);
+        /* if existing, place preview mesh as existing
+        * otherwise use raycast info
+        */
+        auto mat = frame->alloc_aligned<mesh_instance>(1);
+        mat.ptr->world_matrix = a2.transform;
+        mat.ptr->material = material;
+        mat.bind(1, frame);
+
+        glUseProgram(unlit_shader);
         draw_mesh(mesh.hw);
         glUseProgram(simple_shader);
 
@@ -1154,12 +1152,12 @@ struct add_wiring_tool : tool
 
         /* draw wire segment to preview attach location */
         if (allow_placement && current_attach != existing_attach) {
-            mat = frame->alloc_aligned<glm::mat4>(1);
-            *mat.ptr = calc_segment_matrix(a1, a2);
+            mat = frame->alloc_aligned<mesh_instance>(1);
+            mat.ptr->world_matrix = calc_segment_matrix(a1, a2);
+            mat.ptr->material = asset_man.get_texture_index("wire.png");
             mat.bind(1, frame);
 
             glUseProgram(unlit_shader);
-            glUniform1i(glGetUniformLocation(unlit_shader, "mat"), asset_man.get_texture_index("wire.png"));
             draw_mesh(asset_man.meshes["wire.dae"].hw);
             glUseProgram(simple_shader);
         }

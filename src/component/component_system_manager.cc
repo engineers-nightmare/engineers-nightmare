@@ -512,12 +512,10 @@ draw_renderables(frame_data *frame)
         auto & mesh = asset_man.meshes[mesh_name];
         auto & mat = *pos_man.get_instance_data(ce).mat;
 
-        auto entity_matrix = frame->alloc_aligned<glm::mat4>(1);
-        *entity_matrix.ptr = mat;
-        entity_matrix.bind(1, frame);
-
-        auto loc = glGetUniformLocation(simple_shader, "mat");
-        glUniform1i(loc, material);
+        auto params = frame->alloc_aligned<mesh_instance>(1);
+        params.ptr->world_matrix = mat;
+        params.ptr->material = material;
+        params.bind(1, frame);
 
         draw_mesh(mesh.hw);
     }
