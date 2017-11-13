@@ -1,24 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nightmare", "nightmare.vcxproj", "{8303C144-B172-4802-B4AD-123817757C4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
-		ReleaseWithDebug|Win32 = ReleaseWithDebug|Win32
 		ReleaseWithDebug|x64 = ReleaseWithDebug|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8303C144-B172-4802-B4AD-123817757C4D}.Release|Win32.ActiveCfg = Release|Win32
-		{8303C144-B172-4802-B4AD-123817757C4D}.Release|Win32.Build.0 = Release|Win32
 		{8303C144-B172-4802-B4AD-123817757C4D}.Release|x64.ActiveCfg = Release|x64
 		{8303C144-B172-4802-B4AD-123817757C4D}.Release|x64.Build.0 = Release|x64
-		{8303C144-B172-4802-B4AD-123817757C4D}.ReleaseWithDebug|Win32.ActiveCfg = ReleaseWithDebug|Win32
-		{8303C144-B172-4802-B4AD-123817757C4D}.ReleaseWithDebug|Win32.Build.0 = ReleaseWithDebug|Win32
 		{8303C144-B172-4802-B4AD-123817757C4D}.ReleaseWithDebug|x64.ActiveCfg = ReleaseWithDebug|x64
 		{8303C144-B172-4802-B4AD-123817757C4D}.ReleaseWithDebug|x64.Build.0 = ReleaseWithDebug|x64
 	EndGlobalSection
