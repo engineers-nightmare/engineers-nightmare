@@ -141,6 +141,10 @@
     <ClCompile Include="src\component\switch_component.cc" />
     <ClCompile Include="src\component\type_component.cc" />
     <ClCompile Include="src\config.cc" />
+    <ClCompile Include="src\imgui\imgui.cpp" />
+    <ClCompile Include="src\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\imgui_impl_sdl_gl3.cc" />
     <ClCompile Include="src\input.cc" />
     <ClCompile Include="src\mesh.cc" />
     <ClCompile Include="src\mesher.cc" />
@@ -191,6 +195,13 @@
     <ClInclude Include="src\component\type_component.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\fixed_cube.h" />
+    <ClInclude Include="src\imgui\imconfig.h" />
+    <ClInclude Include="src\imgui\imgui.h" />
+    <ClInclude Include="src\imgui\imgui_internal.h" />
+    <ClInclude Include="src\imgui\stb_rect_pack.h" />
+    <ClInclude Include="src\imgui\stb_textedit.h" />
+    <ClInclude Include="src\imgui\stb_truetype.h" />
+    <ClInclude Include="src\imgui_impl_sdl_gl3.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\libconfig_shim.h" />
     <ClInclude Include="src\memory.h" />

@@ -38,6 +38,7 @@ set(EN_SOURCES
     src/component/type_component.cc
     src/config.cc
     src/input.cc
+    src/imgui_impl_sdl_gl3.cc
     src/mesh.cc
     src/mesher.cc
     src/mock_ship_junk.cc
@@ -89,6 +90,7 @@ set(EN_HEADERS
     src/config.h
     src/fixed_cube.h
     src/input.h
+    src/imgui_impl_sdl_gl3.h
     src/libconfig_shim.h
     src/memory.h
     src/mesh.h
@@ -112,7 +114,19 @@ set(EN_HEADERS
     src/tinydir.h
 )
 
-add_library(NIGHTMARE ${EN_SOURCES} ${EN_HEADERS})
+set(IMGUI_SOURCES
+    src/imgui/imconfig.h
+    src/imgui/imgui.cpp
+    src/imgui/imgui.h
+    src/imgui/imgui_demo.cpp
+    src/imgui/imgui_draw.cpp
+    src/imgui/imgui_internal.h
+    src/imgui/stb_rect_pack.h
+    src/imgui/stb_textedit.h
+    src/imgui/stb_truetype.h
+)
+
+add_library(NIGHTMARE ${EN_SOURCES} ${EN_HEADERS} ${IMGUI_SOURCES})
 
 include(FindPkgConfig)
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
