@@ -127,7 +127,7 @@ add_room_tool::preview(raycast_info *rc, frame_data *frame) {
 
         for (auto & door : doors) {
             auto mesh = asset_man.get_mesh("initial_frame.dae");
-            auto material = asset_man.get_texture_index("red.png");
+            auto material = asset_man.get_world_texture_index("red.png");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);
             mat.ptr->world_matrix = mat_position(glm::vec3(door));

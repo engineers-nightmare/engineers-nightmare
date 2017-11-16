@@ -151,11 +151,11 @@ void
 mesher_init()
 {
     memset(surface_type_to_material, 0, sizeof(surface_type_to_material));
-    surface_type_to_material[surface_none] = asset_man.get_texture_index("white.png");
-    surface_type_to_material[surface_wall] = asset_man.get_texture_index("plate.png");
-    surface_type_to_material[surface_grate] = asset_man.get_texture_index("grate.png");
-    surface_type_to_material[surface_glass] = asset_man.get_texture_index("glass.png");
-    surface_type_to_material[surface_door] = asset_man.get_texture_index("transparent_block.png");
+    surface_type_to_material[surface_none] = asset_man.get_world_texture_index("white.png");
+    surface_type_to_material[surface_wall] = asset_man.get_world_texture_index("plate.png");
+    surface_type_to_material[surface_grate] = asset_man.get_world_texture_index("grate.png");
+    surface_type_to_material[surface_glass] = asset_man.get_world_texture_index("glass.png");
+    surface_type_to_material[surface_door] = asset_man.get_world_texture_index("transparent_block.png");
 
     surface_index_to_mesh[surface_xp] = &asset_man.get_surface_mesh(surface_xp);
     surface_index_to_mesh[surface_xm] = &asset_man.get_surface_mesh(surface_xm);
@@ -165,7 +165,7 @@ mesher_init()
     surface_index_to_mesh[surface_zm] = &asset_man.get_surface_mesh(surface_zm);
 
     frame_render_data.frame_mesh = &asset_man.get_mesh("initial_frame.dae");
-    frame_render_data.frame_mat = asset_man.get_texture_index("frame.png");
+    frame_render_data.frame_mat = asset_man.get_world_texture_index("frame.png");
 }
 
 void

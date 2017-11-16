@@ -10,4 +10,5 @@ struct texture_set {
     texture_set(GLenum target, int dim, int array_size);
     void bind(int texunit);
     void load(int slot, char const *filename);
+    void load_empty(int slot);
 };

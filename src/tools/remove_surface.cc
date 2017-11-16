@@ -54,7 +54,7 @@ struct remove_surface_tool : tool
 
         auto index = normal_to_surface_index(rc);
         auto mesh = asset_man.get_surface_mesh(index);
-        auto material = asset_man.get_texture_index("red.png");
+        auto material = asset_man.get_world_texture_index("red.png");
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = mat_position(glm::vec3(rc->bl));

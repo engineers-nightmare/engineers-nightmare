@@ -312,7 +312,7 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
     *pos.mat = mat;
 
     auto render = render_man.get_instance_data(ce);
-    *render.material = asset_man.get_texture_index(render_stub->material);
+    *render.material = asset_man.get_world_texture_index(render_stub->material);
 
     return ce;
 }
@@ -698,7 +698,7 @@ struct add_block_entity_tool : tool
             auto render = dynamic_cast<renderable_component_stub*>(comp.get());
             if (render) {
                 mesh_name = render->mesh;
-                mesh_mat = asset_man.get_texture_index(render->material);
+                mesh_mat = asset_man.get_world_texture_index(render->material);
                 break;
             }
         }
@@ -712,7 +712,7 @@ struct add_block_entity_tool : tool
         auto mesh = asset_man.get_mesh(mesh_name);
         draw_mesh(mesh.hw);
 
-        auto material = asset_man.get_texture_index("white.png");
+        auto material = asset_man.get_world_texture_index("white.png");
 
         auto mat_overlay = frame->alloc_aligned<mesh_instance>(1);
         mat_overlay.ptr->world_matrix = mat_position(glm::vec3(rc->p) );
@@ -811,7 +811,7 @@ struct add_surface_entity_tool : tool
             auto render = dynamic_cast<renderable_component_stub*>(comp.get());
             if (render) {
                 mesh_name = render->mesh;
-                mesh_mat = asset_man.get_texture_index(render->material);
+                mesh_mat = asset_man.get_world_texture_index(render->material);
                 break;
             }
         }
@@ -829,7 +829,7 @@ struct add_surface_entity_tool : tool
         /* draw a surface overlay here too */
         /* TODO: sub-block placement granularity -- will need a different overlay */
         auto surf_mesh = asset_man.get_surface_mesh(index);
-        auto material = asset_man.get_texture_index("white.png");
+        auto material = asset_man.get_world_texture_index("white.png");
 
         auto mat2 = frame->alloc_aligned<mesh_instance>(1);
         mat2.ptr->world_matrix = mat_position(glm::vec3(rc->bl));
@@ -881,7 +881,7 @@ struct remove_surface_entity_tool : tool
             return;
         }
 
-        auto material = asset_man.get_texture_index("white.png");
+        auto material = asset_man.get_world_texture_index("white.png");
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = mat_position(glm::vec3(rc->bl));

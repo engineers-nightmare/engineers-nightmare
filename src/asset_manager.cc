@@ -93,7 +93,7 @@ void asset_manager::load_textures() {
         }
         printf("  %s\n", f.path);
         world_textures->load(cnt, f.path);
-        texture_to_index.emplace(std::pair<std::string, unsigned>{f.name, cnt});
+        world_texture_to_index.emplace(std::pair<std::string, unsigned>{f.name, cnt});
 
         cnt++;
     }
@@ -107,8 +107,12 @@ void asset_manager::load_textures() {
     skybox->load(5, "textures/sky_back6.png");
 }
 
-unsigned asset_manager::get_texture_index(const std::string & tex) const {
-    return texture_to_index.at(tex);
+unsigned asset_manager::get_world_texture_index(const std::string & tex) const {
+    return world_texture_to_index.at(tex);
+}
+
+unsigned asset_manager::get_render_texture_index(const std::string & tex) const {
+    return render_texture_to_index.at(tex);
 }
 
 mesh_data & asset_manager::get_mesh(const std::string & mesh) {
@@ -121,6 +125,10 @@ mesh_data &asset_manager::get_surface_mesh(unsigned surface_index) {
 
 void asset_manager::bind_world_textures(int i) {
     world_textures->bind(i);
+}
+
+void asset_manager::bind_render_textures(int i) {
+    render_textures->bind(i);
 }
 
 void asset_manager::bind_skybox(int i) {

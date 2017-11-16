@@ -504,6 +504,7 @@ draw_renderables(frame_data *frame)
 {
     auto &render_man = component_system_man.managers.renderable_component_man;
     auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &type_man = component_system_man.managers.type_component_man;
 
     for (auto i = 0u; i < render_man.buffer.num; i++) {
         auto ce = render_man.instance_pool.entity[i];
@@ -511,6 +512,12 @@ draw_renderables(frame_data *frame)
         auto & mesh_name = render_man.instance_pool.mesh[i];
         auto & mesh = asset_man.get_mesh(mesh_name);
         auto & mat = *pos_man.get_instance_data(ce).mat;
+        auto & name = *type_man.get_instance_data(ce).name;
+
+        if (strcmp(name, "display") == 0) {
+            glBindFramebuffer(GL_FRAMEBUFFER, 1); // todo: assumes render_fbo is at 1
+            material = 21;
+        }
 
         auto params = frame->alloc_aligned<mesh_instance>(1);
         params.ptr->world_matrix = mat;
@@ -518,6 +525,8 @@ draw_renderables(frame_data *frame)
         params.bind(1, frame);
 
         draw_mesh(mesh.hw);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 }
 

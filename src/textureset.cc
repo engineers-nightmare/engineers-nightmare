@@ -72,3 +72,26 @@ texture_set::load(int slot, char const *filename)
 
     SDL_FreeSurface(surf);
 }
+
+void texture_set::load_empty(int slot)
+{
+    /* bring on DSA... for now, we disturb the tex0 binding */
+    glActiveTexture(GL_TEXTURE0);
+
+    glBindTexture(target, texobj);
+    if (target == GL_TEXTURE_CUBE_MAP) {
+        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + slot, 0,
+            0, 0, dim, dim,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            nullptr);
+    }
+    else {
+        glTexSubImage3D(target, 0,
+            0, 0, slot,
+            dim, dim, 1,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            nullptr);
+    }
+}
