@@ -46,6 +46,10 @@
 #define MOUSE_Y_LIMIT      1.54f
 #define MAX_AXIS_PER_EVENT 128
 
+
+#include "src/imgui/imgui.h"
+#include "src/imgui_impl_sdl_gl3.h"
+
 bool exit_requested = false;
 
 bool draw_hud = true;
@@ -418,6 +422,9 @@ prepare_chunks()
     }
 }
 
+GLuint render_fbo;
+GLenum draw_buffers[1] = { GL_COLOR_ATTACHMENT0 };
+
 void
 init()
 {
@@ -452,7 +459,27 @@ init()
     particle_man->create_particle_data(1000);
 
     asset_man.load_meshes();
+    
+    glGenFramebuffers(1, &render_fbo);
     asset_man.load_textures();
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_fbo);
+
+    asset_man.bind_render_textures(0);
+    glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 0);
+    auto fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "Framebuffer not complete: " << fboStatus << std::endl;
+    {
+        auto glstatus = glGetError();
+        if (glstatus != GL_NO_ERROR) {
+            std::cout << "Error in GL call: " << glstatus << std::endl;
+        }
+    }
+    assert(glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+    glDrawBuffers(1, draw_buffers);
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     // must be called after asset_man is setup
     mesher_init();
@@ -1627,6 +1654,8 @@ handle_input()
     }
 }
 
+bool show_test_window = true;
+bool show_another_window = false;
 
 void
 run()
@@ -1646,6 +1675,7 @@ run()
 
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
+            ImGui_ImplSdlGL3_ProcessEvent(&e);
             switch (e.type) {
             case SDL_QUIT:
                 printf("Quit event caught, shutting down.\n");
@@ -1693,11 +1723,39 @@ run()
                 break;
             }
         }
+        ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+
+        auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
+
+        // center on screen
+        // todo: figure out how this is supposed to work so it's robust
+        // across different RENDER_DIM values
+        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
+        ImGui::Begin("First Windows", false, { 0, 0 }, 1.0f, flags);
+        {
+            static float f = 0.0f;
+            ImGui::Text("Hello, world!");
+            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+            ImGui::Button("Test Window");
+            ImGui::Button("Another Window");
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        }
+        ImGui::End();
 
         /* SDL_PollEvent above has already pumped the input, so current key state is available */
         handle_input();
 
         update();
+
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_fbo);
+        glViewport(0, 0, RENDER_DIM, RENDER_DIM);
+        glClearColor(0, 0.18f, 0.21f, 1);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui::Render();
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glViewport(0, 0, wnd.width, wnd.height);
 
         render();
 
@@ -1730,6 +1788,8 @@ main(int, char **)
 
     wnd.gl_ctx = SDL_GL_CreateContext(wnd.ptr);
 
+    ImGui_ImplSdlGL3_Init(wnd.ptr);
+
     keys = SDL_GetKeyboardState(nullptr);
 
     resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -1737,6 +1797,8 @@ main(int, char **)
     init();
 
     run();
+
+    ImGui_ImplSdlGL3_Shutdown();
 
     return 0;
 }

@@ -514,9 +514,10 @@ draw_renderables(frame_data *frame)
         auto & mat = *pos_man.get_instance_data(ce).mat;
         auto & name = *type_man.get_instance_data(ce).name;
 
-        if (strcmp(name, "display") == 0) {
-            glBindFramebuffer(GL_FRAMEBUFFER, 1); // todo: assumes render_fbo is at 1
-            material = 21;
+        auto isDisplay = strcmp(name, "display") == 0;
+        if (isDisplay) {
+            asset_man.bind_render_textures(0);
+            material = asset_man.get_render_texture_index("render");
         }
 
         auto params = frame->alloc_aligned<mesh_instance>(1);
@@ -526,7 +527,9 @@ draw_renderables(frame_data *frame)
 
         draw_mesh(mesh.hw);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        if (isDisplay) {
+            asset_man.bind_world_textures(0);
+        }
     }
 }
 

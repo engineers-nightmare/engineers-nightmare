@@ -1,8 +1,6 @@
 #include "asset_manager.h"
 #include "tinydir.h"
-
-#define WORLD_TEXTURE_DIMENSION     32
-#define MAX_WORLD_TEXTURES          64
+#include "common.h"
 
 asset_manager::asset_manager() : meshes(), surface_index_to_mesh_name() {
     surface_index_to_mesh_name[surface_xm] = "x_quad.dae";
@@ -62,6 +60,9 @@ void asset_manager::load_meshes() {
 
 void asset_manager::load_textures() {
     world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
+    glBindFramebuffer(GL_FRAMEBUFFER, 1);
+    render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 1);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
 
     std::vector<tinydir_file> files;
@@ -97,6 +98,11 @@ void asset_manager::load_textures() {
 
         cnt++;
     }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 1);
+    render_textures->load_empty(0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    render_texture_to_index.emplace(std::pair<std::string, unsigned>{"render", 0});
 
     printf("Loading skybox\n");
     skybox->load(0, "textures/sky_right1.png");
