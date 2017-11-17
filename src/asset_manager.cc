@@ -100,9 +100,6 @@ void asset_manager::load_textures() {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 1);
-    render_textures->load_empty(0);
-    render_textures->load_empty(1);
-
     render_texture_to_index.emplace(std::pair<std::string, unsigned>{"render", 0});
     render_texture_to_index.emplace(std::pair<std::string, unsigned>{"render2", 1});
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
