@@ -87,21 +87,21 @@ void asset_manager::load_textures() {
     tinydir_close(&dir);
 
     printf("Loading textures\n");
-    auto cnt = 0;
+    unsigned cnt = 0;
     for (auto &f: files) {
         if (strstr(f.name, "sky_") == f.name) {
             continue;
         }
         printf("  %s\n", f.path);
         world_textures->load(cnt, f.path);
-        world_texture_to_index.emplace(std::pair<std::string, unsigned>{f.name, cnt});
+        world_texture_to_index[f.name] = cnt;
 
         cnt++;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 1);
-    render_texture_to_index.emplace(std::pair<std::string, unsigned>{"render", 0});
-    render_texture_to_index.emplace(std::pair<std::string, unsigned>{"render2", 1});
+    render_texture_to_index["render"] = 0;
+    render_texture_to_index["render2"] = 1;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     printf("Loading skybox\n");
