@@ -389,6 +389,7 @@ struct game_state {
 
     static game_state *create_play_state();
     static game_state *create_menu_state();
+    static game_state *create_imgui_menu_state();
     static game_state *create_menu_settings_state();
 };
 
@@ -424,6 +425,8 @@ prepare_chunks()
 
 GLuint render_fbo;
 GLenum draw_buffers[1] = { GL_COLOR_ATTACHMENT0 };
+
+std::array<ImGuiContext*, 3> imgui_contexts{};
 
 void
 init()
@@ -461,12 +464,16 @@ init()
     asset_man.load_meshes();
     
     glGenFramebuffers(1, &render_fbo);
+
+    // todo: asset_man uses hardcoded framebuffer value of 1
+    // which matches render_fbo, but shouldn't be trusted
     asset_man.load_textures();
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_fbo);
 
     asset_man.bind_render_textures(0);
     glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 0);
+    glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 1);
     auto fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "Framebuffer not complete: " << fboStatus << std::endl;
@@ -480,6 +487,19 @@ init()
     glDrawBuffers(1, draw_buffers);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+    for (unsigned i = 0; i < imgui_contexts.max_size(); ++i) {
+        if (i == 0) {
+            imgui_contexts[i] = ImGui::GetCurrentContext();
+        }
+        else {
+            imgui_contexts[i] = ImGui::CreateContext();
+            ImGui::SetCurrentContext(imgui_contexts[i]);
+            ImGui_ImplSdlGL3_Init(wnd.ptr);
+        }
+    }
+    ImGui::SetCurrentContext(imgui_contexts[0]);
+
 
     // must be called after asset_man is setup
     mesher_init();
@@ -1032,8 +1052,6 @@ void render() {
         }
     }
 
-    state->render(frame);
-
     glUseProgram(simple_shader);
 
     draw_renderables(frame);
@@ -1078,6 +1096,8 @@ void render() {
     }
 
     glUseProgram(simple_shader);
+
+    state->render(frame);
 
     frame->end();
 }
@@ -1462,11 +1482,63 @@ struct play_state : game_state {
             pl.move = pl.move / len;
 
         if (get_input(action_menu)->just_active) {
-            set_game_state(create_menu_state());
+            set_game_state(create_imgui_menu_state());
+            //set_game_state(create_menu_state());
         }
     }
 };
 
+
+struct imgui_menu_state : game_state {
+    imgui_menu_state() {
+        SDL_WarpMouseInWindow(wnd.ptr, wnd.width / 2, wnd.height / 2);
+    }
+
+    virtual void handle_input() override {
+        if (get_input(action_menu)->just_active) {
+            set_game_state(create_play_state());
+        }
+    }
+
+    virtual void rebuild_ui() override {
+    }
+
+    void update(float dt) override {
+        if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+        }
+    }
+
+    void render(frame_data *frame) override {
+        ImGui::SetCurrentContext(imgui_contexts[0]);
+        ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+
+        // center on screen
+        ImGui::SetNextWindowPos(ImVec2{ wnd.width / 2.0f, wnd.height / 2.0f }, 0, ImVec2{ 0.5f, 0.5f });
+        {
+            ImGui::Begin("", false, { 0, 0 }, 1.0f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize);
+            {
+                static float f = 0.0f;
+                ImGui::Text("Menu");
+                ImGui::Separator();
+                ImGui::Dummy(ImVec2{ 10, 10 });
+                if (ImGui::Button("Resume Game")) {
+                    set_game_state(create_play_state());
+                }
+                ImGui::Dummy(ImVec2{10, 10});
+                if (ImGui::Button("Exit Game")) {
+                    exit_requested = true;
+                }
+                ImGui::Dummy(ImVec2{ 10, 10 });
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            }
+            ImGui::End();
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glViewport(0, 0, wnd.width, wnd.height);
+            ImGui::Render();
+        }
+    }
+};
 
 struct menu_state : game_state
 {
@@ -1642,6 +1714,7 @@ struct menu_settings_state : game_state
 
 game_state *game_state::create_play_state() { return new play_state; }
 game_state *game_state::create_menu_state() { return new menu_state; }
+game_state *game_state::create_imgui_menu_state() { return new imgui_menu_state; }
 game_state *game_state::create_menu_settings_state() { return new menu_settings_state; }
 
 
@@ -1653,9 +1726,6 @@ handle_input()
         state->handle_input();
     }
 }
-
-bool show_test_window = true;
-bool show_another_window = false;
 
 void
 run()
@@ -1723,38 +1793,66 @@ run()
                 break;
             }
         }
+
+        ImGui::SetCurrentContext(imgui_contexts[1]);
         ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
 
         auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
             ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
-
         // center on screen
-        // todo: figure out how this is supposed to work so it's robust
-        // across different RENDER_DIM values
-        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
-        ImGui::Begin("First Windows", false, { 0, 0 }, 1.0f, flags);
+        // todo: modify NewFrame() to allow us to use this properly
+        static float pos = 0;
+        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4}, 0, ImVec2{ 0.5f, 0.5f });
         {
-            static float f = 0.0f;
-            ImGui::Text("Hello, world!");
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-            ImGui::Button("Test Window");
-            ImGui::Button("Another Window");
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Begin("First Window", false, { 0, 0 }, 1.0f, flags);
+            {
+                static float f = 0.0f;
+                ImGui::Text("Hello, world!");
+                ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+                ImGui::Button("Test Window");
+                ImGui::Button("Another Window");
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            }
+            ImGui::End();
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_fbo);
+            glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 0);
+            glViewport(0, 0, RENDER_DIM, RENDER_DIM);
+            glClearColor(0, 0.18f, 0.21f, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+            ImGui::Render();
         }
-        ImGui::End();
+
+        ImGui::SetCurrentContext(imgui_contexts[2]);
+        ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
+        {
+            ImGui::Begin("Second Window", false, { 0, 0 }, 1.0f, flags);
+            {
+                static float f = 0.0f;
+                ImGui::Text("Goodbye, world!");
+                ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+                ImGui::Button("Test Window");
+                ImGui::Button("Another Window");
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            }
+            ImGui::End();
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_fbo);
+            glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 1);
+            glViewport(0, 0, RENDER_DIM, RENDER_DIM);
+            glClearColor(1, 0.0f, 0.18f, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+            ImGui::Render();
+        }
+        
+        // reset back to default framebuffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
         /* SDL_PollEvent above has already pumped the input, so current key state is available */
         handle_input();
 
         update();
 
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_fbo);
-        glViewport(0, 0, RENDER_DIM, RENDER_DIM);
-        glClearColor(0, 0.18f, 0.21f, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
-        ImGui::Render();
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glViewport(0, 0, wnd.width, wnd.height);
 
         render();

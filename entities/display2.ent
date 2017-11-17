@@ -1,0 +1,29 @@
+entity: {
+    components: {
+        type: {
+            name: "display2",
+        },
+        renderable: {
+            mesh: "panel_4x4.dae",
+            material: "display.png",
+        },
+        relative_position: {
+        },
+        physics: {
+            mesh: "panel_4x4.dae",
+        },
+        surface_attachment: {
+        },
+        power: {
+            required_power: 4,
+            max_required_power: 4,
+        },
+        light: {
+            intensity: 0.15,
+        },
+        reader: {
+            name: "light brightness",
+            desc: "",
+        },
+    };
+};

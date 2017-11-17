@@ -514,10 +514,16 @@ draw_renderables(frame_data *frame)
         auto & mat = *pos_man.get_instance_data(ce).mat;
         auto & name = *type_man.get_instance_data(ce).name;
 
-        auto isDisplay = strcmp(name, "display") == 0;
-        if (isDisplay) {
+        auto isDisplay1 = strcmp(name, "display") == 0;
+        auto isDisplay2 = strcmp(name, "display2") == 0;
+        if (isDisplay1 || isDisplay2) {
             asset_man.bind_render_textures(0);
-            material = asset_man.get_render_texture_index("render");
+            if (isDisplay1) {
+                material = asset_man.get_render_texture_index("render");
+            }
+            if (isDisplay2) {
+                material = asset_man.get_render_texture_index("render2");
+            }
         }
 
         auto params = frame->alloc_aligned<mesh_instance>(1);
@@ -527,7 +533,7 @@ draw_renderables(frame_data *frame)
 
         draw_mesh(mesh.hw);
 
-        if (isDisplay) {
+        if (isDisplay1 || isDisplay2) {
             asset_man.bind_world_textures(0);
         }
     }
