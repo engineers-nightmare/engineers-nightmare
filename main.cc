@@ -1496,12 +1496,14 @@ struct imgui_menu_state : game_state {
         Keybinds,
     } state{MenuState::Main};
 
+    unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
+
     imgui_menu_state() {
         SDL_WarpMouseInWindow(wnd.ptr, wnd.width / 2, wnd.height / 2);
         state = MenuState::Main;
     }
 
-    virtual void handle_input() override {
+    void handle_input() override {
         if (get_input(action_menu)->just_active) {
             switch (state) {
                 case MenuState::Main:
@@ -1515,7 +1517,7 @@ struct imgui_menu_state : game_state {
         }
     }
 
-    virtual void rebuild_ui() override {
+    void rebuild_ui() override {
     }
 
     void update(float dt) override {
@@ -1525,7 +1527,7 @@ struct imgui_menu_state : game_state {
     }
 
     void handle_main_menu() {
-        ImGui::Begin("", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize);
+        ImGui::Begin("", nullptr, menu_flags);
         {
             ImGui::Text("Menu");
             ImGui::Separator();
@@ -1546,7 +1548,7 @@ struct imgui_menu_state : game_state {
     }
 
     void handle_settings_menu() {
-        ImGui::Begin("", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize);
+        ImGui::Begin("", nullptr, menu_flags);
         {
             bool dirty = false;
 
