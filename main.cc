@@ -46,7 +46,7 @@
 #define MOUSE_Y_LIMIT      1.54f
 #define MAX_AXIS_PER_EVENT 128
 
-
+#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 #include "src/imgui/imgui.h"
 #include "src/imgui_impl_sdl_gl3.h"
 
@@ -1490,13 +1490,28 @@ struct play_state : game_state {
 
 
 struct imgui_menu_state : game_state {
+    enum class MenuState {
+        Main,
+        Settings,
+        Keybinds,
+    } state{MenuState::Main};
+
     imgui_menu_state() {
         SDL_WarpMouseInWindow(wnd.ptr, wnd.width / 2, wnd.height / 2);
+        state = MenuState::Main;
     }
 
     virtual void handle_input() override {
         if (get_input(action_menu)->just_active) {
-            set_game_state(create_play_state());
+            switch (state) {
+                case MenuState::Main:
+                    set_game_state(create_play_state());
+                    break;
+                case MenuState::Settings:
+                case MenuState::Keybinds:
+                    state = MenuState::Main;
+                    break;
+            }
         }
     }
 
@@ -1509,6 +1524,51 @@ struct imgui_menu_state : game_state {
         }
     }
 
+    void handle_main_menu() {
+        ImGui::Begin("", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize);
+        {
+            ImGui::Text("Menu");
+            ImGui::Separator();
+            ImGui::Dummy(ImVec2{ 10, 10 });
+            if (ImGui::Button("Resume Game")) {
+                set_game_state(create_play_state());
+            }
+            ImGui::Dummy(ImVec2{10, 10});
+            if (ImGui::Button("Settings")) {
+                state = MenuState::Settings;
+            }
+            ImGui::Dummy(ImVec2{10, 10});
+            if (ImGui::Button("Exit Game")) {
+                exit_requested = true;
+            }
+        }
+        ImGui::End();
+    }
+
+    void handle_settings_menu() {
+        ImGui::Begin("", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize);
+        {
+            bool dirty = false;
+
+            ImGui::Text("Settings");
+            ImGui::Separator();
+
+            bool invert = game_settings.input.mouse_invert == -1.0f;
+            dirty |= ImGui::Checkbox("Invert Mouse", &invert);
+            game_settings.input.mouse_invert = invert ? -1 : 1;
+
+            ImGui::Dummy(ImVec2{ 10, 10 });
+            if (ImGui::Button("Back")) {
+                state = MenuState::Main;
+            }
+
+            if (dirty) {
+                save_settings(game_settings);
+            }
+        }
+        ImGui::End();
+    }
+
     void render(frame_data *frame) override {
         ImGui::SetCurrentContext(imgui_contexts[0]);
         ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
@@ -1516,27 +1576,24 @@ struct imgui_menu_state : game_state {
         // center on screen
         ImGui::SetNextWindowPos(ImVec2{ wnd.width / 2.0f, wnd.height / 2.0f }, 0, ImVec2{ 0.5f, 0.5f });
         {
-            ImGui::Begin("", false, { 0, 0 }, 1.0f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize);
-            {
-                static float f = 0.0f;
-                ImGui::Text("Menu");
-                ImGui::Separator();
-                ImGui::Dummy(ImVec2{ 10, 10 });
-                if (ImGui::Button("Resume Game")) {
-                    set_game_state(create_play_state());
+            switch (state) {
+                case MenuState::Main: {
+                    handle_main_menu();
+                    break;
                 }
-                ImGui::Dummy(ImVec2{10, 10});
-                if (ImGui::Button("Exit Game")) {
-                    exit_requested = true;
+                case MenuState::Settings: {
+                    handle_settings_menu();
+                    break;
                 }
-                ImGui::Dummy(ImVec2{ 10, 10 });
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+                case MenuState::Keybinds: {
+//                    handle_keybinds_menu();
+                    break;
+                }
             }
-            ImGui::End();
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-            glViewport(0, 0, wnd.width, wnd.height);
-            ImGui::Render();
         }
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glViewport(0, 0, wnd.width, wnd.height);
+        ImGui::Render();
     }
 };
 
@@ -1802,10 +1859,9 @@ run()
             ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
         // center on screen
         // todo: modify NewFrame() to allow us to use this properly
-        static float pos = 0;
         ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4}, 0, ImVec2{ 0.5f, 0.5f });
         {
-            ImGui::Begin("First Window", false, { 0, 0 }, 1.0f, flags);
+            ImGui::Begin("First Window", nullptr, flags);
             {
                 static float f = 0.0f;
                 ImGui::Text("Hello, world!");
@@ -1827,7 +1883,7 @@ run()
         ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
         ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
         {
-            ImGui::Begin("Second Window", false, { 0, 0 }, 1.0f, flags);
+            ImGui::Begin("Second Window", nullptr, flags);
             {
                 static float f = 0.0f;
                 ImGui::Text("Goodbye, world!");
