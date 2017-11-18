@@ -389,8 +389,6 @@ struct game_state {
 
     static game_state *create_play_state();
     static game_state *create_menu_state();
-    static game_state *create_imgui_menu_state();
-    static game_state *create_menu_settings_state();
 };
 
 
@@ -1482,14 +1480,13 @@ struct play_state : game_state {
             pl.move = pl.move / len;
 
         if (get_input(action_menu)->just_active) {
-            set_game_state(create_imgui_menu_state());
-            //set_game_state(create_menu_state());
+            set_game_state(create_menu_state());
         }
     }
 };
 
 
-struct imgui_menu_state : game_state {
+struct menu_state : game_state {
     enum class MenuState {
         Main,
         Settings,
@@ -1498,7 +1495,7 @@ struct imgui_menu_state : game_state {
 
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
-    imgui_menu_state() {
+    menu_state() {
         SDL_WarpMouseInWindow(wnd.ptr, wnd.width / 2, wnd.height / 2);
         state = MenuState::Main;
     }
@@ -1529,7 +1526,7 @@ struct imgui_menu_state : game_state {
     void handle_main_menu() {
         ImGui::Begin("", nullptr, menu_flags);
         {
-            ImGui::Text("Menu");
+            ImGui::Text("Engineer's Nightmare");
             ImGui::Separator();
             ImGui::Dummy(ImVec2{ 10, 10 });
             if (ImGui::Button("Resume Game")) {
@@ -1599,183 +1596,8 @@ struct imgui_menu_state : game_state {
     }
 };
 
-struct menu_state : game_state
-{
-    typedef std::pair<char const *, std::function<void()>> menu_item;
-    std::vector<menu_item> items;
-    unsigned selected = 0;
-
-    menu_state() : items() {
-        items.push_back(menu_item("Resume Game", []{ set_game_state(create_play_state()); }));
-        items.push_back(menu_item("Settings", []{ set_game_state(create_menu_settings_state()); }));
-        items.push_back(menu_item("Exit Game", []{ exit_requested = true; }));
-    }
-
-    void update(float dt) override {
-        if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
-            SDL_SetRelativeMouseMode(SDL_FALSE);
-        }
-    }
-
-    void render(frame_data *frame) override {
-    }
-
-    void put_item_text(char *dest, char const *src, unsigned index) {
-        if (index == selected)
-            sprintf(dest, "> %s <", src);
-        else
-            strcpy(dest, src);
-    }
-
-    void rebuild_ui() override {
-        float w = 0;
-        float h = 0;
-        char buf[256];
-
-        sprintf(buf, "Engineer's Nightmare");
-        text->measure(buf, &w, &h);
-        add_text_with_outline(buf, -w/2, 300);
-
-        float y = 50;
-        float dy = -100;
-
-        for (auto it = items.begin(); it != items.end(); it++) {
-            w = 0;
-            h = 0;
-            put_item_text(buf, it->first, (unsigned)(it - items.begin()));
-            text->measure(buf, &w, &h);
-            add_text_with_outline(buf, -w/2, y);
-            y += dy;
-        }
-    }
-
-    void handle_input() override {
-        if (get_input(action_menu_confirm)->just_active) {
-            items[selected].second();
-        }
-
-        if (get_input(action_menu_down)->just_active) {
-            selected = (selected + 1) % items.size();
-            pl.ui_dirty = true;
-        }
-
-        if (get_input(action_menu_up)->just_active) {
-            selected = (unsigned)(selected + items.size() - 1) % items.size();
-            pl.ui_dirty = true;
-        }
-
-        if (get_input(action_menu)->just_active) {
-            set_game_state(create_play_state());
-        }
-    }
-};
-
-
-struct menu_settings_state : game_state
-{
-    typedef std::tuple<char const *, char const *, std::function<void()>> menu_item;
-    std::vector<menu_item> items;
-    int selected = 0;
-
-    char const *on_text = "On";
-    char const *off_text = "Off";
-
-    char const *invert_mouse_text = "Invert Mouse: ";
-
-    Uint32 mouse_invert_mi = 0;
-
-    menu_settings_state() {
-        mouse_invert_mi = (unsigned)items.size();
-        items.push_back(menu_item(invert_mouse_text, "",
-            []{ toggle_mouse_invert(); }));
-            // ^^ Not real keen on requiring these to be static
-
-        items.push_back(
-            menu_item("Save Settings", "",
-            []{ save_settings(game_settings); }));
-
-        items.push_back(
-            menu_item("Back", "",
-            []{ set_game_state(create_menu_state()); }));
-    }
-
-    static void toggle_mouse_invert() {
-    // ^^ Not real keen on requiring these to be static
-        game_settings.input.mouse_invert *= -1;
-    }
-
-    void update(float dt) override {
-        if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_TRUE) {
-            SDL_SetRelativeMouseMode(SDL_FALSE);
-        }
-    }
-
-    void render(frame_data *frame) override {
-    }
-
-    void put_item_text(char *dest, char const *src, int index) {
-        if (index == selected)
-            sprintf(dest, "> %s <", src);
-        else
-            strcpy(dest, src);
-    }
-
-    void rebuild_ui() override {
-        menu_item *invert_item = &items.at(mouse_invert_mi);
-        std::get<1>(*invert_item) = game_settings.input.mouse_invert > 0 ? off_text : on_text;
-
-        float w = 0;
-        float h = 0;
-        char buf[256];
-        char buf2[256];
-
-        sprintf(buf, "Engineer's Nightmare");
-        text->measure(buf, &w, &h);
-        add_text_with_outline(buf, -w / 2, 300);
-
-        float y = 50;
-        float dy = -100;
-
-        for (auto it = items.begin(); it != items.end(); ++it) {
-            w = 0;
-            h = 0;
-            sprintf(buf2, "%s%s", std::get<0>(*it), std::get<1>(*it));
-            put_item_text(buf, buf2, (unsigned)(it - items.begin()));
-            text->measure(buf, &w, &h);
-            add_text_with_outline(buf, -w / 2, y);
-            y += dy;
-        }
-    }
-
-
-    void handle_input() override {
-        if (get_input(action_menu_confirm)->just_active) {
-            std::get<2>(items[selected])();
-            pl.ui_dirty = true;
-        }
-
-        if (get_input(action_menu_down)->just_active) {
-            selected = (selected + 1) % items.size();
-            pl.ui_dirty = true;
-        }
-
-        if (get_input(action_menu_up)->just_active) {
-            selected = (unsigned)(selected + items.size() - 1) % items.size();
-            pl.ui_dirty = true;
-        }
-
-        if (get_input(action_menu)->just_active) {
-            set_game_state(create_play_state());
-        }
-    }
-};
-
-
 game_state *game_state::create_play_state() { return new play_state; }
 game_state *game_state::create_menu_state() { return new menu_state; }
-game_state *game_state::create_imgui_menu_state() { return new imgui_menu_state; }
-game_state *game_state::create_menu_settings_state() { return new menu_settings_state; }
-
 
 void
 handle_input()
