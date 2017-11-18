@@ -1017,11 +1017,6 @@ void render() {
     glUseProgram(unlit_instanced_shader);
     draw_projectiles(proj_man, frame);
 
-    draw_attachments(ship, frame);
-    draw_segments(ship, frame);
-    draw_attachments_on_active_wire(ship, frame);
-    draw_active_segments(ship, frame);
-
     /* draw the sky */
     glUseProgram(sky_shader);
     asset_man.bind_skybox(0);
