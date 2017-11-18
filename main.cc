@@ -394,15 +394,15 @@ struct game_state {
 };
 
 
-game_state *state = game_state::create_play_state();
+game_state *current_game_state = game_state::create_play_state();
 
 void
 set_game_state(game_state *s)
 {
-    if (state)
-        delete state;
+    if (current_game_state)
+        delete current_game_state;
 
-    state = s;
+    current_game_state = s;
     pl.ui_dirty = true; /* state change always requires a ui rebuild. */
 }
 
@@ -1097,7 +1097,7 @@ void render() {
 
     glUseProgram(simple_shader);
 
-    state->render(frame);
+    current_game_state->render(frame);
 
     frame->end();
 }
@@ -1116,7 +1116,7 @@ update()
     fast_tick_accum.add(dt);
 
     /* this absolutely must run every frame */
-    state->update(dt);
+    current_game_state->update(dt);
 
     /* things that can run at a pretty slow rate */
     while (main_tick_accum.tick()) {
@@ -1148,7 +1148,7 @@ update()
             text->reset();
             ui_sprites->reset();
 
-            state->rebuild_ui();
+            current_game_state->rebuild_ui();
 
             if (draw_fps) {
                 char buf[3][256];
@@ -1723,7 +1723,7 @@ handle_input()
 {
     if (wnd.has_focus) {
         set_inputs(keys, mouse_buttons, mouse_axes, game_settings.bindings.bindings);
-        state->handle_input();
+        current_game_state->handle_input();
     }
 }
 
