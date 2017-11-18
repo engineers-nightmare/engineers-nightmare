@@ -1675,6 +1675,15 @@ run()
             }
         }
 
+        // todo: investigate having imgui impl use our input rather than grabbing SDL
+        // if imgui wants mouse capture but we don't clear these
+        // then we get the mouse-up button capture on the next frame
+        // which causes side-effects
+        if (ImGui::GetIO().WantCaptureMouse) {
+            memset(mouse_buttons, 0, input_mouse_buttons_count);
+            memset(mouse_axes, 0, input_mouse_axes_count);
+        }
+
         ImGui::SetCurrentContext(imgui_contexts[1]);
         ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
 
