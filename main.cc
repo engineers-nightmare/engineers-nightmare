@@ -1248,7 +1248,7 @@ struct play_state : game_state {
          * anything that may delete the entity
          */
         auto hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
-            phy->ghostObj, phy->dynamicsWorld);
+            phy->ghostObj.get(), phy->dynamicsWorld.get());
         /* can only interact with entities which have
          * the switch component
          */

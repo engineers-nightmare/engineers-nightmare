@@ -3,6 +3,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/glm.hpp>
+#include <memory>
 #include "char.h"
 #include "component/c_entity.h"
 
@@ -18,24 +19,21 @@ struct physics {
     /* all of our incantation state
      * FIXME we probably don't need to keep half of this
      */
-    btBroadphaseInterface *broadphase;
-    btDefaultCollisionConfiguration *collisionConfiguration;
-    btCollisionDispatcher *dispatcher;
-    btSequentialImpulseConstraintSolver *solver;
-    btDiscreteDynamicsWorld *dynamicsWorld;
+    std::unique_ptr<btBroadphaseInterface> broadphase;
+    std::unique_ptr<btDefaultCollisionConfiguration> collisionConfiguration;
+    std::unique_ptr<btCollisionDispatcher> dispatcher;
+    std::unique_ptr<btSequentialImpulseConstraintSolver> solver;
+    std::unique_ptr<btDiscreteDynamicsWorld> dynamicsWorld;
 
     player *pl;
 
     /* character control guff */
-    btConvexShape *standShape;
-    btConvexShape *crouchShape;
-    btPairCachingGhostObject *ghostObj;
-    en_char_controller *controller;
+    std::unique_ptr<btConvexShape> standShape, crouchShape;
+    std::unique_ptr<btPairCachingGhostObject> ghostObj;
+    std::unique_ptr<en_char_controller> controller;
 
     /* initialise our physics state */
     physics(player *pl);
-
-    ~physics();
 
     /* call each physics tick */
     void tick_controller(float dt);

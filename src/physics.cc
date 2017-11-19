@@ -13,29 +13,18 @@
  * http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World
  */
 physics::physics(player *p)
+    :
+    broadphase(new btDbvtBroadphase()),
+    collisionConfiguration(new btDefaultCollisionConfiguration()),
+    dispatcher(new btCollisionDispatcher(collisionConfiguration.get())),
+    solver(new btSequentialImpulseConstraintSolver),
+    dynamicsWorld(new btDiscreteDynamicsWorld(
+        dispatcher.get(),
+        broadphase.get(),
+        solver.get(),
+        collisionConfiguration.get())),
+    ghostObj(new btPairCachingGhostObject())
 {
-    /* a broadspace filters out obvious non-colliding pairs
-     * before the more expensive collision detection algorithm sees them
-     *
-     * FIXME currently using default broadphase
-     * see http://bulletphysics.org/mediawiki-1.5.8/index.php/Broadphase
-     * for more information
-     */
-    this->broadphase = new btDbvtBroadphase();
-
-    this->collisionConfiguration = new btDefaultCollisionConfiguration();
-    this->dispatcher = new btCollisionDispatcher(this->collisionConfiguration);
-
-    /* the magic sauce that makes everything else work */
-    this->solver = new btSequentialImpulseConstraintSolver;
-
-    /* our actual world */
-    this->dynamicsWorld =
-        new btDiscreteDynamicsWorld(this->dispatcher,
-                                    this->broadphase,
-                                    this->solver,
-                                    this->collisionConfiguration);
-
     /* some default gravity
      * z is up and down
      */
@@ -56,43 +45,25 @@ physics::physics(player *p)
      * total height - 2 * radius
      */
     auto standHeight = std::max(0.f, PLAYER_STAND_HEIGHT - 2 * PLAYER_RADIUS);
-    this->standShape = new btCapsuleShapeZ(PLAYER_RADIUS, standHeight);
+    standShape.reset(new btCapsuleShapeZ(PLAYER_RADIUS, standHeight));
     auto crouchHeight = std::max(0.f, PLAYER_CROUCH_HEIGHT - 2 * PLAYER_RADIUS);
-    this->crouchShape = new btCapsuleShapeZ(PLAYER_RADIUS, crouchHeight);
+    crouchShape.reset(new btCapsuleShapeZ(PLAYER_RADIUS, crouchHeight));
     float maxStepHeight = 0.15f;
 
     /* setup the character controller. this gets a bit fiddly. */
     btTransform startTransform;
     startTransform.setIdentity();
     startTransform.setOrigin(btVector3(pl->pos.x, pl->pos.y, pl->pos.z));
-    this->ghostObj = new btPairCachingGhostObject();
-    this->ghostObj->setWorldTransform(startTransform);
-    this->broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
-    this->ghostObj->setCollisionShape(this->standShape);
-    this->ghostObj->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
-    this->controller = new en_char_controller(this->ghostObj, this->standShape, this->crouchShape, btScalar(maxStepHeight));
+    ghostObj->setWorldTransform(startTransform);
+    broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+    ghostObj->setCollisionShape(standShape.get());
+    ghostObj->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
+    controller.reset(new en_char_controller(ghostObj.get(), standShape.get(), crouchShape.get(), btScalar(maxStepHeight)));
 
-    this->dynamicsWorld->addCollisionObject(this->ghostObj, btBroadphaseProxy::CharacterFilter,
+    dynamicsWorld->addCollisionObject(ghostObj.get(), btBroadphaseProxy::CharacterFilter,
             btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
-    this->dynamicsWorld->addAction(this->controller);
-    this->controller->setUpAxis(2);
-}
-
-physics::~physics()
-{
-    delete(this->broadphase);
-
-    delete(this->collisionConfiguration);
-    delete(this->dispatcher);
-
-    delete(this->solver);
-
-    delete(this->dynamicsWorld);
-
-    delete(this->standShape);
-    delete(this->crouchShape);
-    delete(this->ghostObj);
-    delete(this->controller);
+    dynamicsWorld->addAction(controller.get());
+    controller->setUpAxis(2);
 }
 
 void
@@ -145,7 +116,7 @@ physics::tick_controller(float dt)
     }
 
     if (pl->crouch) {
-        this->controller->crouch(this->dynamicsWorld);
+        this->controller->crouch(dynamicsWorld.get());
     }
     else if (pl->crouch_end) {
         this->controller->crouchEnd();

@@ -75,7 +75,7 @@ void projectile_linear_manager::simulate(float dt) {
         auto new_pos = projectile_pool.position[i] + projectile_pool.velocity[i] * dt;
 
         auto hit = phys_raycast_generic(projectile_pool.position[i], new_pos,
-            phy->ghostObj, phy->dynamicsWorld);
+            phy->ghostObj.get(), phy->dynamicsWorld.get());
 
         if (hit.hit) {
             new_pos = hit.hitCoord;
