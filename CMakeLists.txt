@@ -57,6 +57,7 @@ set(EN_SOURCES
     src/tools/fire_projectile.cc
     src/tools/remove_block.cc
     src/tools/remove_surface.cc
+    src/tools/remove_surface_entity.cc
     src/wiring/wiring.cc
     src/wiring/wiring_data.cc
 )

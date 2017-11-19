@@ -164,6 +164,7 @@
     <ClCompile Include="src\tools\fire_projectile.cc" />
     <ClCompile Include="src\tools\remove_block.cc" />
     <ClCompile Include="src\tools\remove_surface.cc" />
+    <ClCompile Include="src\tools\remove_surface_entity.cc" />
     <ClCompile Include="src\wiring\wiring.cc" />
     <ClCompile Include="src\wiring\wiring_data.cc" />
   </ItemGroup>
