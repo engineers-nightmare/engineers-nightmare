@@ -62,7 +62,8 @@ calculate_power_wires(ship_space *ship) {
                 auto wire = attach_topo_find(ship, type, attach);
                 auto & power_data = ship->power_wires[wire];
 
-                power_data.total_power += power_provider_man.instance_pool.provided[i];
+                // TODO: model provided vs max_provided here.
+                power_data.total_power += power_provider_man.instance_pool.max_provided[i];
                 power_data.num_providers++;
             }
         }

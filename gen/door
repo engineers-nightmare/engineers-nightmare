@@ -1,3 +1,4 @@
+stub,const char*,string,,mesh,
 body,const char*,mesh,nullptr
 body,float,pos,1
 body,float,desired_pos,1

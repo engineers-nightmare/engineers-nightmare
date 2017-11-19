@@ -25,5 +25,7 @@ entity: {
             name: "light brightness",
             desc: "",
         },
+        switch: {
+        },
     };
 };

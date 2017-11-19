@@ -15,10 +15,11 @@ entity: {
         surface_attachment: {
         },
         power: {
-            required_power: 8,
-            max_required_power: 8,
+            required_power: 8.0,
+            max_required_power: 8.0,
         },
         door: {
+            mesh: "single_door.dae",
         },
         reader: {
             name: "desired state",

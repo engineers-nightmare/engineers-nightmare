@@ -92,4 +92,6 @@ door_component_stub::assign_component_to_entity(c_entity entity) {
     *data.desired_pos = 1;
 
     *data.height = 2;
+
+    *data.mesh = mesh;
 };

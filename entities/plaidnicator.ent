@@ -1,7 +1,7 @@
 entity: {
     components: {
         type: {
-            name: "plaidnicator",
+            name: "Power Supply",
         },
         renderable: {
             mesh: "frobnicator.dae",
@@ -15,7 +15,7 @@ entity: {
         surface_attachment: {
         },
         power_provider: {
-            max_provided: 6,
+            max_provided: 6.0,
         },
     };
 };

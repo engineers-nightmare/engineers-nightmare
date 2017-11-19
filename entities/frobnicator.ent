@@ -1,7 +1,7 @@
 entity: {
     components: {
         type: {
-            name: "frobnicator",
+            name: "Oxygen Generator",
         },
         renderable: {
             mesh: "frobnicator.dae",
@@ -15,8 +15,8 @@ entity: {
         surface_attachment: {
         },
         power: {
-            required_power: 6,
-            max_required_power: 6,
+            required_power: 6.0,
+            max_required_power: 6.0,
         },
         gas_producer: {
             gas_type: 1.0,
