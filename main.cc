@@ -1476,7 +1476,7 @@ struct menu_state : game_state {
 
             bool invert = game_settings.input.mouse_invert == -1.0f;
             dirty |= ImGui::Checkbox("Invert Mouse", &invert);
-            game_settings.input.mouse_invert = invert ? -1 : 1;
+            game_settings.input.mouse_invert = invert ? -1.0f : 1.0f;
 
             ImGui::Checkbox("Draw Debug Text", &draw_debug_text);
             ImGui::Checkbox("Draw FPS", &draw_fps);
