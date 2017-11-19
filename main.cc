@@ -141,6 +141,15 @@ component_system_manager component_system_man;
 struct entity_data {
     std::string name;
     std::vector<std::unique_ptr<component_stub>> components;
+
+    template<typename T>
+    T *get_component() {
+        for (auto &c : components) {
+            T *t = dynamic_cast<T *>(c.get());
+            if (t) return t;
+        }
+        return nullptr;
+    }
 };
 
 static std::vector<std::string> entity_names;
@@ -282,14 +291,12 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
 
     auto entity = &entity_stubs[name];
 
-    renderable_component_stub * render_stub = nullptr;
+    auto render_stub = entity->get_component<renderable_component_stub>();
+    assert(render_stub);
+
     for (auto &comp : entity->components) {
         comp->assign_component_to_entity(ce);
-        if (!render_stub) {
-            render_stub = dynamic_cast<renderable_component_stub*>(comp.get());
-        }
     }
-    assert(render_stub);
 
     auto &pos_man = component_system_man.managers.relative_position_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
