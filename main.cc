@@ -1215,7 +1215,6 @@ struct play_state : game_state {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
 
-
         auto *t = tools[pl.active_tool_slot];
 
         if (t) {

@@ -35,7 +35,7 @@ void asset_manager::load_meshes() {
 
     printf("Loading meshes\n");
     for (auto &f : files) {
-        meshes.emplace(f.name, mesh_data{ f.path }).second;
+        meshes[f.name] = mesh_data{ f.path };
     }
 
     auto proj_mesh = meshes["sphere.dae"];
