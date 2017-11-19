@@ -321,14 +321,6 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
     return ce;
 }
 
-// retaining this as reference for reader stuff.
-//        reader_man.assign_entity(ce);
-//        auto reader = reader_man.get_instance_data(ce);
-//        *reader.name = "flashlight brightness";
-//        reader.source->id = 0;
-//        *reader.desc = nullptr;
-//        *reader.data = 0.75f;
-
 
 void
 use_action_on_entity(ship_space *ship, c_entity ce) {
