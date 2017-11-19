@@ -44,13 +44,6 @@ void asset_manager::load_meshes() {
         proj_mesh.sw->verts[i].y *= 0.01f;
         proj_mesh.sw->verts[i].z *= 0.01f;
     }
-    set_mesh_material(proj_mesh.sw, 11);
-
-    set_mesh_material(meshes["attach.dae"].sw, 10);
-    set_mesh_material(meshes["no_place.dae"].sw, 11);
-    set_mesh_material(meshes["wire.dae"].sw, 12);
-    set_mesh_material(meshes["single_door.dae"].sw, 2);
-    set_mesh_material(meshes["wire.dae"].sw, 12);
 
     for (auto &mesh : meshes) {
         mesh.second.upload_mesh();
