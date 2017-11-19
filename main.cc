@@ -939,6 +939,8 @@ struct remove_surface_entity_tool : tool
     }
 };
 
+tool *tool::create_remove_surface_entity_tool() { return new remove_surface_entity_tool(); }
+
 std::array<tool*, 8> tools {
     //tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
@@ -947,7 +949,7 @@ std::array<tool*, 8> tools {
     tool::create_remove_surface_tool(),
     new add_block_entity_tool(),
     new add_surface_entity_tool(),
-    new remove_surface_entity_tool(),
+    tool::create_remove_surface_entity_tool(),
     new add_room_tool(),
 };
 
