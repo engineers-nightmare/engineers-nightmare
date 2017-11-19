@@ -735,25 +735,14 @@ struct add_block_entity_tool : tool
         if (!can_use(rc))
             return;
 
-        auto &stub = entity_stubs[entity_names[type]];
-        std::string mesh_name{};
-        GLuint mesh_mat{};
-        for (auto &comp: stub.components) {
-            auto render = dynamic_cast<renderable_component_stub*>(comp.get());
-            if (render) {
-                mesh_name = render->mesh;
-                mesh_mat = asset_man.get_world_texture_index(render->material);
-                break;
-            }
-        }
-        assert(!mesh_name.empty());
+        auto render = entity_stubs[entity_names[type]].get_component<renderable_component_stub>();
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = mat_position(glm::vec3(rc->p) + glm::vec3(0.5f, 0.5f, 0.0f));
-        mat.ptr->material = mesh_mat;
+        mat.ptr->material = asset_man.get_world_texture_index(render->material);
         mat.bind(1, frame);
 
-        auto mesh = asset_man.get_mesh(mesh_name);
+        auto mesh = asset_man.get_mesh(render->mesh);
         draw_mesh(mesh.hw);
 
         auto material = asset_man.get_world_texture_index("white.png");
@@ -847,27 +836,14 @@ struct add_surface_entity_tool : tool
             return;
 
         auto index = normal_to_surface_index(rc);
-
-        auto &stub = entity_stubs[entity_names[type]];
-        std::string mesh_name{};
-        GLuint mesh_mat{};
-        for (auto &comp: stub.components) {
-            auto render = dynamic_cast<renderable_component_stub*>(comp.get());
-            if (render) {
-                mesh_name = render->mesh;
-                mesh_mat = asset_man.get_world_texture_index(render->material);
-                break;
-            }
-        }
-        assert(!mesh_name.empty());
+        auto render = entity_stubs[entity_names[type]].get_component<renderable_component_stub>();
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = mat_block_face(rc->p, index ^ 1);
-        mat.ptr->material = mesh_mat;
+        mat.ptr->material = asset_man.get_world_texture_index(render->material);
         mat.bind(1, frame);
 
-        auto mesh = asset_man.get_mesh(mesh_name);
-        glUseProgram(simple_shader);
+        auto mesh = asset_man.get_mesh(render->mesh);
         draw_mesh(mesh.hw);
 
         /* draw a surface overlay here too */
