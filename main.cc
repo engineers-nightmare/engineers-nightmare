@@ -1207,8 +1207,6 @@ struct play_state : game_state {
     }
 
     void update(float dt) override {
-        auto &switch_man = component_system_man.managers.switch_component_man;
-
         if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_FALSE) {
             SDL_SetRelativeMouseMode(SDL_TRUE);
         }
@@ -1255,6 +1253,7 @@ struct play_state : game_state {
         /* can only interact with entities which have
          * the switch component
          */
+        auto &switch_man = component_system_man.managers.switch_component_man;
         if (hit_ent && !switch_man.exists(hit_ent->ce)) {
             hit_ent = nullptr;
         }
