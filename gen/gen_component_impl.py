@@ -250,22 +250,22 @@ def main():
     comp_names = sorted([f.replace('gen/', '').replace('gen\\', '') for f in files])
     print("  header: src/component/component_managers.h")
     with open("src/component/component_managers.h", "w") as g:
-            g.write(man_header_1)
-            for comp_name in comp_names:
-                g.write(man_header_2_each % comp_name)
-            g.write(man_header_3)
-            for comp_name in comp_names:
-                g.write(man_header_4_each % (comp_name))
-            g.write(man_header_5)
-            for comp_name in comp_names:
-                g.write(man_header_6_each % (comp_name, comp_name))
-            g.write(man_header_7)
-            for comp_name in comp_names:
-                g.write(man_header_8_each % (comp_name, comp_name))
-            g.write(man_header_9)
-            for comp_name in comp_names:
-                g.write(man_header_10_each % comp_name)
-            g.write(man_header_11)
+        g.write(man_header_1)
+        for comp_name in comp_names:
+            g.write(man_header_2_each % comp_name)
+        g.write(man_header_3)
+        for comp_name in comp_names:
+            g.write(man_header_4_each % (comp_name))
+        g.write(man_header_5)
+        for comp_name in comp_names:
+            g.write(man_header_6_each % (comp_name, comp_name))
+        g.write(man_header_7)
+        for comp_name in comp_names:
+            g.write(man_header_8_each % (comp_name, comp_name))
+        g.write(man_header_9)
+        for comp_name in comp_names:
+            g.write(man_header_10_each % comp_name)
+        g.write(man_header_11)
 
     for fl in files:
         print("Genning from %s to " % fl)
