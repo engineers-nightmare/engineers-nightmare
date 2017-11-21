@@ -81,3 +81,9 @@ relative_position_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.mat = glm::mat4(0);
 };
+
+std::unique_ptr<component_stub> relative_position_component_stub::from_config(const config_setting_t *config) {
+    auto relative_position_stub = std::make_unique<relative_position_component_stub>();
+
+    return std::move(relative_position_stub);
+}

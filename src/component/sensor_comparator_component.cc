@@ -83,3 +83,12 @@ sensor_comparator_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.compare_epsilon = compare_epsilon;
 };
+
+std::unique_ptr<component_stub> sensor_comparator_component_stub::from_config(const config_setting_t *config) {
+    auto sensor_comparator_stub = std::make_unique<sensor_comparator_component_stub>();
+
+    auto compare_epsilon_member = config_setting_get_member(config, "compare_epsilon");
+    sensor_comparator_stub->compare_epsilon = config_setting_get_float(compare_epsilon_member);
+
+    return std::move(sensor_comparator_stub);
+}

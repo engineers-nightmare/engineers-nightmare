@@ -39,14 +39,5 @@ struct physics_component_stub : component_stub {
     void
     assign_component_to_entity(c_entity entity) override;
 
-    static
-    std::unique_ptr<component_stub>
-    from_config(const config_setting_t *physics_config) {
-        auto physics_stub = std::make_unique<physics_component_stub>();
-
-        auto mesh_member = config_setting_get_member(physics_config, "mesh");
-        physics_stub->mesh = config_setting_get_string(mesh_member);
-
-        return std::move(physics_stub);
-    }
+    static std::unique_ptr<component_stub> from_config(config_setting_t const *config);
 };

@@ -83,3 +83,12 @@ pressure_sensor_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.type = type;
 };
+
+std::unique_ptr<component_stub> pressure_sensor_component_stub::from_config(const config_setting_t *config) {
+    auto pressure_sensor_stub = std::make_unique<pressure_sensor_component_stub>();
+
+    auto type_member = config_setting_get_member(config, "type");
+    pressure_sensor_stub->type = config_setting_get_int(type_member);
+
+    return std::move(pressure_sensor_stub);
+}

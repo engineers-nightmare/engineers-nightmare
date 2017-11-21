@@ -75,3 +75,9 @@ switch_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.enabled = false;
 };
+
+std::unique_ptr<component_stub> switch_component_stub::from_config(const config_setting_t *config) {
+    auto switch_stub = std::make_unique<switch_component_stub>();
+
+    return std::move(switch_stub);
+}

@@ -45,14 +45,5 @@ struct door_component_stub : component_stub {
     void
     assign_component_to_entity(c_entity entity) override;
 
-    static
-    std::unique_ptr<component_stub>
-    from_config(const config_setting_t *door_config) {
-        auto door_stub = std::make_unique<door_component_stub>();
-
-        auto mesh_member = config_setting_get_member(door_config, "mesh");
-        door_stub->mesh = config_setting_get_string(mesh_member);
-
-        return std::move(door_stub);
-    }
+    static std::unique_ptr<component_stub> from_config(config_setting_t const *config);
 };

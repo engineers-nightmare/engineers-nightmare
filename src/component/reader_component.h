@@ -47,17 +47,5 @@ struct reader_component_stub : component_stub {
     void
     assign_component_to_entity(c_entity entity) override;
 
-    static
-    std::unique_ptr<component_stub>
-    from_config(const config_setting_t *reader_config) {
-        auto reader_stub = std::make_unique<reader_component_stub>();
-
-        auto name_member = config_setting_get_member(reader_config, "name");
-        reader_stub->name = config_setting_get_string(name_member);
-
-        auto desc_member = config_setting_get_member(reader_config, "desc");
-        reader_stub->desc = config_setting_get_string(desc_member);
-
-        return std::move(reader_stub);
-    }
+    static std::unique_ptr<component_stub> from_config(config_setting_t const *config);
 };

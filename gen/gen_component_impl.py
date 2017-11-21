@@ -116,20 +116,7 @@ header_template_8="""
     void
     assign_component_to_entity(c_entity entity) override;
 
-    static
-    std::unique_ptr<component_stub>
-    from_config(const config_setting_t *%s_config) {
-        auto %s_stub = std::make_unique<%s_component_stub>();
-"""
-
-header_template_9_each_stub="""
-        auto %(name)s_member = config_setting_get_member(%(comp_name)s_config, "%(name)s");
-        %(comp_name)s_stub->%(name)s = config_setting_get_%(type)s(%(name)s_member);
-"""
-
-header_template_10="""
-        return std::move(%s_stub);
-    }
+    static std::unique_ptr<component_stub> from_config(config_setting_t const *config);
 };
 """
 
@@ -234,7 +221,21 @@ impl_template_11_each_stub="""
     *data.%(name)s = %(pre)s%(name)s%(extra)s;
 """
 
+
 impl_template_12="""};
+
+std::unique_ptr<component_stub> %(comp_name)s_component_stub::from_config(const config_setting_t *config) {
+    auto %(comp_name)s_stub = std::make_unique<%(comp_name)s_component_stub>();
+"""
+
+impl_template_13_each="""
+    auto %(name)s_member = config_setting_get_member(config, "%(name)s");
+    %(comp_name)s_stub->%(name)s = config_setting_get_%(type)s(%(name)s_member);
+"""
+
+impl_template_14="""
+    return std::move(%(comp_name)s_stub);
+}
 """
 
 
@@ -293,10 +294,7 @@ def main():
             g.write(header_template_6 % (component_name, component_name))
             for fi in stub_fields:
                 g.write(header_template_7_each_stub % fi)
-            g.write(header_template_8 % (component_name, component_name, component_name))
-            for fi in stub_fields:
-                g.write(header_template_9_each_stub % fi)
-            g.write(header_template_10 % component_name)
+            g.write(header_template_8 % {})
 
         print("  source: src/component/%s_component.cc" % component_name)
         with open("src/component/%s_component.cc" % component_name, "w") as g:
@@ -318,7 +316,10 @@ def main():
                 g.write(impl_template_10_each_body % fi)
             for fi in stub_fields:
                 g.write(impl_template_11_each_stub % fi)
-            g.write(impl_template_12)
+            g.write(impl_template_12 % {'comp_name': component_name})
+            for fi in stub_fields:
+                g.write(impl_template_13_each % fi)
+            g.write(impl_template_14 % {'comp_name': component_name})
 
     return 0;
 

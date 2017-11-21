@@ -99,3 +99,18 @@ gas_producer_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.max_pressure = max_pressure;
 };
+
+std::unique_ptr<component_stub> gas_producer_component_stub::from_config(const config_setting_t *config) {
+    auto gas_producer_stub = std::make_unique<gas_producer_component_stub>();
+
+    auto gas_type_member = config_setting_get_member(config, "gas_type");
+    gas_producer_stub->gas_type = config_setting_get_int(gas_type_member);
+
+    auto flow_rate_member = config_setting_get_member(config, "flow_rate");
+    gas_producer_stub->flow_rate = config_setting_get_float(flow_rate_member);
+
+    auto max_pressure_member = config_setting_get_member(config, "max_pressure");
+    gas_producer_stub->max_pressure = config_setting_get_float(max_pressure_member);
+
+    return std::move(gas_producer_stub);
+}

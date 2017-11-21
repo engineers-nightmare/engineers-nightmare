@@ -83,3 +83,12 @@ light_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.intensity = intensity;
 };
+
+std::unique_ptr<component_stub> light_component_stub::from_config(const config_setting_t *config) {
+    auto light_stub = std::make_unique<light_component_stub>();
+
+    auto intensity_member = config_setting_get_member(config, "intensity");
+    light_stub->intensity = config_setting_get_float(intensity_member);
+
+    return std::move(light_stub);
+}

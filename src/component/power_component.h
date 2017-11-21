@@ -44,17 +44,5 @@ struct power_component_stub : component_stub {
     void
     assign_component_to_entity(c_entity entity) override;
 
-    static
-    std::unique_ptr<component_stub>
-    from_config(const config_setting_t *power_config) {
-        auto power_stub = std::make_unique<power_component_stub>();
-
-        auto required_power_member = config_setting_get_member(power_config, "required_power");
-        power_stub->required_power = config_setting_get_float(required_power_member);
-
-        auto max_required_power_member = config_setting_get_member(power_config, "max_required_power");
-        power_stub->max_required_power = config_setting_get_float(max_required_power_member);
-
-        return std::move(power_stub);
-    }
+    static std::unique_ptr<component_stub> from_config(config_setting_t const *config);
 };

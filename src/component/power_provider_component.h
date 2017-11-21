@@ -39,14 +39,5 @@ struct power_provider_component_stub : component_stub {
     void
     assign_component_to_entity(c_entity entity) override;
 
-    static
-    std::unique_ptr<component_stub>
-    from_config(const config_setting_t *power_provider_config) {
-        auto power_provider_stub = std::make_unique<power_provider_component_stub>();
-
-        auto max_provided_member = config_setting_get_member(power_provider_config, "max_provided");
-        power_provider_stub->max_provided = config_setting_get_float(max_provided_member);
-
-        return std::move(power_provider_stub);
-    }
+    static std::unique_ptr<component_stub> from_config(config_setting_t const *config);
 };

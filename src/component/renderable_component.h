@@ -41,17 +41,5 @@ struct renderable_component_stub : component_stub {
     void
     assign_component_to_entity(c_entity entity) override;
 
-    static
-    std::unique_ptr<component_stub>
-    from_config(const config_setting_t *renderable_config) {
-        auto renderable_stub = std::make_unique<renderable_component_stub>();
-
-        auto mesh_member = config_setting_get_member(renderable_config, "mesh");
-        renderable_stub->mesh = config_setting_get_string(mesh_member);
-
-        auto material_member = config_setting_get_member(renderable_config, "material");
-        renderable_stub->material = config_setting_get_string(material_member);
-
-        return std::move(renderable_stub);
-    }
+    static std::unique_ptr<component_stub> from_config(config_setting_t const *config);
 };

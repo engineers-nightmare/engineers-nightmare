@@ -39,14 +39,5 @@ struct proximity_sensor_component_stub : component_stub {
     void
     assign_component_to_entity(c_entity entity) override;
 
-    static
-    std::unique_ptr<component_stub>
-    from_config(const config_setting_t *proximity_sensor_config) {
-        auto proximity_sensor_stub = std::make_unique<proximity_sensor_component_stub>();
-
-        auto range_member = config_setting_get_member(proximity_sensor_config, "range");
-        proximity_sensor_stub->range = config_setting_get_float(range_member);
-
-        return std::move(proximity_sensor_stub);
-    }
+    static std::unique_ptr<component_stub> from_config(config_setting_t const *config);
 };

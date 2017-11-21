@@ -85,3 +85,15 @@ renderable_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.material = 0;//material;
 };
+
+std::unique_ptr<component_stub> renderable_component_stub::from_config(const config_setting_t *config) {
+    auto renderable_stub = std::make_unique<renderable_component_stub>();
+
+    auto mesh_member = config_setting_get_member(config, "mesh");
+    renderable_stub->mesh = config_setting_get_string(mesh_member);
+
+    auto material_member = config_setting_get_member(config, "material");
+    renderable_stub->material = config_setting_get_string(material_member);
+
+    return std::move(renderable_stub);
+}

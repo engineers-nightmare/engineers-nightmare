@@ -81,3 +81,9 @@ surface_attachment_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.face = 0;
 };
+
+std::unique_ptr<component_stub> surface_attachment_component_stub::from_config(const config_setting_t *config) {
+    auto surface_attachment_stub = std::make_unique<surface_attachment_component_stub>();
+
+    return std::move(surface_attachment_stub);
+}

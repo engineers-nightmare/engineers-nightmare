@@ -83,3 +83,12 @@ type_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.name = name.c_str();
 };
+
+std::unique_ptr<component_stub> type_component_stub::from_config(const config_setting_t *config) {
+    auto type_stub = std::make_unique<type_component_stub>();
+
+    auto name_member = config_setting_get_member(config, "name");
+    type_stub->name = config_setting_get_string(name_member);
+
+    return std::move(type_stub);
+}

@@ -91,3 +91,15 @@ power_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.max_required_power = max_required_power;
 };
+
+std::unique_ptr<component_stub> power_component_stub::from_config(const config_setting_t *config) {
+    auto power_stub = std::make_unique<power_component_stub>();
+
+    auto required_power_member = config_setting_get_member(config, "required_power");
+    power_stub->required_power = config_setting_get_float(required_power_member);
+
+    auto max_required_power_member = config_setting_get_member(config, "max_required_power");
+    power_stub->max_required_power = config_setting_get_float(max_required_power_member);
+
+    return std::move(power_stub);
+}
