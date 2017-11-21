@@ -52,6 +52,7 @@ set(EN_SOURCES
     src/text.cc
     src/textureset.cc
     src/tools/add_block.cc
+    src/tools/add_entity.cc
     src/tools/add_room.cc
     src/tools/paint_surface.cc
     src/tools/fire_projectile.cc
