@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <glm/glm.hpp> /* ivec3 */
 #include <set>
@@ -44,10 +44,6 @@ struct ship_space {
     std::unordered_map<topo_info *, zone_info *> zones;
 
     std::vector<wire_attachment> wire_attachments[num_wire_types];
-    std::vector<wire_segment> wire_segments[num_wire_types];
-
-    /* for rendering currently edited wire */
-    unsigned active_wire[num_wire_types][2];
 
     std::unordered_map<c_entity, std::unordered_set<unsigned>> entity_to_attach_lookups[num_wire_types];
 

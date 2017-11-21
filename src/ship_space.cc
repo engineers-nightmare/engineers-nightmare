@@ -1,4 +1,4 @@
-﻿#include "ship_space.h"
+#include "ship_space.h"
 #include <assert.h>
 #include <math.h>
 
@@ -11,13 +11,6 @@ ship_space::ship_space(void)
     : mins(), maxs(),
       num_full_rebuilds(0), num_fast_unifys(0), num_fast_nosplits(0), num_false_splits(0)
 {
-    /* start rather large */
-    power_wires.reserve(MAX_WIRE_INSTANCES);
-
-    for (auto i = 0; i < num_wire_types; ++i) {
-        active_wire[i][0] = invalid_attach;
-        active_wire[i][1] = invalid_attach;
-    }
 }
 
 
