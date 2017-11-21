@@ -30,6 +30,20 @@ struct component_stub {
     virtual ~component_stub() = default;
 };
 
+struct entity_data {
+    std::string name;
+    std::vector<std::unique_ptr<component_stub>> components;
+
+    template<typename T>
+    T *get_component() {
+        for (auto &c : components) {
+            T *t = dynamic_cast<T *>(c.get());
+            if (t) return t;
+        }
+        return nullptr;
+    }
+};
+
 struct component_manager {
     struct instance {
         unsigned index;
