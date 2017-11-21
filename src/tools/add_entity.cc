@@ -10,6 +10,9 @@
 #include "../player.h"
 #include "tools.h"
 
+#include <libconfig.h>
+#include "../libconfig_shim.h"
+
 
 extern GLuint overlay_shader;
 extern GLuint simple_shader;
