@@ -27,6 +27,7 @@ extern player pl;
 std::vector<std::string> entity_names{};
 std::unordered_map<std::string, std::shared_ptr<entity_data>> entity_stubs{};
 
+extern frame_info frame_info;
 
 void load_entities() {
     std::vector<std::string> files;
@@ -254,6 +255,10 @@ struct add_entity_tool : tool {
         FreeForm,
     } place_mode{PlaceMode::BlockSnapped};
 
+    const unsigned rotate_tick_rate = 5; // hz
+    double last_rotate_time = 0;
+    unsigned cur_rotate = 0;
+
     unsigned entity_name_index = 0;
 
     bool can_use(raycast_info *rc) {
@@ -267,6 +272,13 @@ struct add_entity_tool : tool {
     }
 
     void alt_use(raycast_info *rc) override {
+        entity_name_index++;
+        if (entity_name_index>= entity_names.size()) {
+            entity_name_index = 0;
+        }
+    }
+
+    void long_use(raycast_info *rc) override {
         switch (rotate_mode) {
             case RotateMode::AxisAligned: {
                 rotate_mode = RotateMode::Stepped45;
@@ -278,23 +290,42 @@ struct add_entity_tool : tool {
             }
             case RotateMode::Stepped15: {
                 rotate_mode = RotateMode::AxisAligned;
+                cur_rotate = 0;
                 break;
             }
         }
     }
 
-    void long_use(raycast_info *rc) override {
-
-    }
-
     void long_alt_use(raycast_info *rc) override {
+        unsigned rotate = 90;
 
+        switch (rotate_mode) {
+            case RotateMode::AxisAligned: {
+                rotate = 90;
+                break;
+            }
+            case RotateMode::Stepped45: {
+                rotate = 45;
+                break;
+            }
+            case RotateMode::Stepped15: {
+                rotate = 15;
+                break;
+            }
+        }
+
+        if (frame_info.elapsed >= last_rotate_time + 1.0 / rotate_tick_rate) {
+            cur_rotate += rotate;
+            last_rotate_time = frame_info.elapsed;
+            printf("%d\n", cur_rotate);
+        }
     }
 
     void cycle_mode() override {
         switch (place_mode) {
             case PlaceMode::BlockSnapped: {
                 place_mode = PlaceMode::HalfBlockSnapped;
+                // shouldn't need to snap as coming from block snapped it should be snapped already
                 break;
             }
             case PlaceMode::HalfBlockSnapped: {
@@ -303,6 +334,7 @@ struct add_entity_tool : tool {
             }
             case PlaceMode::FreeForm: {
                 place_mode = PlaceMode::BlockSnapped;
+                // todo: snap to block
                 break;
             }
         }
