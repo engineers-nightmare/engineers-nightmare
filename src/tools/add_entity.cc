@@ -25,7 +25,7 @@ extern player pl;
 
 
 std::vector<std::string> entity_names{};
-std::unordered_map<std::string, std::shared_ptr<entity_data>> entity_stubs{};
+std::unordered_map<std::string, entity_data> entity_stubs{};
 
 extern frame_info frame_info;
 
@@ -65,7 +65,7 @@ void load_entities() {
             assert(false);
         }
 
-        auto entity = std::make_shared<entity_data>();
+        entity_data entity{};
 
         // required to be a valid entity
         std::unordered_map<std::string, bool> found{
@@ -98,11 +98,11 @@ void load_entities() {
 
                 auto stub_ptr = component_system_man.managers.get_stub(component->name, component).release();
 
-                entity->components.emplace_back(stub_ptr);
+                entity.components.emplace_back(stub_ptr);
 
                 auto type_stub = dynamic_cast<type_component_stub*>(stub_ptr);
                 if (type_stub) {
-                    entity->name = type_stub->name;
+                    entity.name = type_stub->name;
 
                     found[component->name] = true;
                 }
@@ -131,13 +131,13 @@ void load_entities() {
             auto valid = true;
             for (auto &find : found) {
                 if (!find.second) {
-                    printf("!! Entity %s in %s missing %s component\n", f.c_str(), entity->name.c_str(), find.first.c_str());
+                    printf("!! Entity %s in %s missing %s component\n", f.c_str(), entity.name.c_str(), find.first.c_str());
                     valid = false;
                 }
             }
 
             if (valid) {
-                entity_stubs[entity->name] = std::move(entity);
+                entity_stubs[entity.name] = std::move(entity);
             }
         }
     }
@@ -154,12 +154,12 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face) {
 
     auto mat = mat_block_face(p, face);
 
-    auto entity = entity_stubs[name];
+    auto & entity = entity_stubs[name];
 
-    auto render_stub = entity->get_component<renderable_component_stub>();
+    auto render_stub = entity.get_component<renderable_component_stub>();
     assert(render_stub);
 
-    for (auto &comp : entity->components) {
+    for (auto &comp : entity.components) {
         comp->assign_component_to_entity(ce);
     }
 
@@ -384,7 +384,7 @@ struct add_entity_tool : tool {
             return;
 
         auto index = normal_to_surface_index(rc);
-        auto render = entity_stubs[entity_names[entity_name_index]]->get_component<renderable_component_stub>();
+        auto render = entity_stubs[entity_names[entity_name_index]].get_component<renderable_component_stub>();
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = mat_block_face(rc->p, index ^ 1);

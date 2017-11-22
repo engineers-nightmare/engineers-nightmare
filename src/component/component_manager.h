@@ -23,7 +23,7 @@ namespace std {
 }
 
 struct component_stub {
-    explicit component_stub() {}
+    explicit component_stub() = default;
 
     virtual void assign_component_to_entity(c_entity) = 0;
 
@@ -31,6 +31,8 @@ struct component_stub {
 };
 
 struct entity_data {
+    entity_data() = default;
+
     std::string name;
     std::vector<std::unique_ptr<component_stub>> components{};
 
@@ -42,6 +44,14 @@ struct entity_data {
         }
         return nullptr;
     }
+
+    // disable copy
+    entity_data(const entity_data &) = default;
+    entity_data& operator=(const entity_data &) = delete;
+
+    // allow move
+    entity_data(entity_data&&) = default;
+    entity_data& operator=(entity_data&&) = default;
 };
 
 struct component_manager {
