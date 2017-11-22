@@ -407,14 +407,12 @@ remove_ents_from_surface(glm::ivec3 b, int face)
 }
 
 
-std::array<tool*, 9> tools {
+std::array<tool*, 7> tools {
     //tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
     tool::create_remove_block_tool(),
     new paint_surface_tool(),
     tool::create_remove_surface_tool(),
-    tool::create_add_block_entity_tool(),
-    tool::create_add_surface_entity_tool(),
     tool::create_add_entity_tool(),
     tool::create_remove_surface_entity_tool(),
     new add_room_tool(),
