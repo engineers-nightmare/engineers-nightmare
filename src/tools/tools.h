@@ -30,6 +30,7 @@ struct tool
     static tool *create_remove_surface_entity_tool();
     static tool *create_add_block_entity_tool();
     static tool *create_add_surface_entity_tool();
+    static tool *create_add_entity_tool();
 };
 
 struct add_room_tool : tool {

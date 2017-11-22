@@ -241,7 +241,114 @@ place_entity_attaches(raycast_info* rc, int index, c_entity e) {
     }
 }
 
+struct add_entity_tool : tool {
+    enum class RotateMode {
+        AxisAligned,
+        Stepped45,
+        Stepped15,
+    } rotate_mode{RotateMode::AxisAligned};
 
+    enum class PlaceMode {
+        BlockSnapped,
+        HalfBlockSnapped,
+        FreeForm,
+    } place_mode{PlaceMode::BlockSnapped};
+
+    unsigned entity_name_index = 0;
+
+    bool can_use(raycast_info *rc) {
+        return true;
+    }
+
+    void use(raycast_info *rc) override {
+        if (!can_use(rc)) {
+            return;
+        }
+    }
+
+    void alt_use(raycast_info *rc) override {
+        switch (rotate_mode) {
+            case RotateMode::AxisAligned: {
+                rotate_mode = RotateMode::Stepped45;
+                break;
+            }
+            case RotateMode::Stepped45: {
+                rotate_mode = RotateMode::Stepped15;
+                break;
+            }
+            case RotateMode::Stepped15: {
+                rotate_mode = RotateMode::AxisAligned;
+                break;
+            }
+        }
+    }
+
+    void long_use(raycast_info *rc) override {
+
+    }
+
+    void long_alt_use(raycast_info *rc) override {
+
+    }
+
+    void cycle_mode() override {
+        switch (place_mode) {
+            case PlaceMode::BlockSnapped: {
+                place_mode = PlaceMode::HalfBlockSnapped;
+                break;
+            }
+            case PlaceMode::HalfBlockSnapped: {
+                place_mode = PlaceMode::FreeForm;
+                break;
+            }
+            case PlaceMode::FreeForm: {
+                place_mode = PlaceMode::BlockSnapped;
+                break;
+            }
+        }
+    }
+
+    void preview(raycast_info *rc, frame_data *frame) override {
+    }
+
+    void get_description(char *str) override {
+        auto name = entity_names[entity_name_index];
+        const char *rotate = nullptr;
+        switch (rotate_mode) {
+            case RotateMode::AxisAligned: {
+                rotate = "Axis Aligned";
+                break;
+            }
+            case RotateMode::Stepped45: {
+                rotate = "Stepped @ 45";
+                break;
+            }
+            case RotateMode::Stepped15: {
+                rotate = "Stepped @ 15";
+                break;
+            }
+        }
+
+        const char *place = nullptr;
+        switch (place_mode) {
+            case PlaceMode::BlockSnapped: {
+                place = "Block Snapped";
+                break;
+            }
+            case PlaceMode::HalfBlockSnapped: {
+                place = "Half Block Snapped";
+                break;
+            }
+            case PlaceMode::FreeForm: {
+                place = "Free Form";
+                break;
+            }
+        }
+        sprintf(str, "Place %s \nRotating %s \nPlacing %s", name.c_str(), rotate, place);
+    }
+};
+
+tool *tool::create_add_entity_tool() { return new add_entity_tool; }
 
 struct add_block_entity_tool : tool
 {
