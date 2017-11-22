@@ -715,7 +715,7 @@ struct play_state : game_state {
         auto key = lookup_key((*bind).second.binds.inputs[0]);
         sprintf(buf2, "%s: %s", key, buf);
         text->measure(buf2, &w, &h);
-        add_text_with_outline(buf2, -w/2, -400);
+        add_text_with_outline(buf2, -w/2, -360);
 
         /* Gravity state (temp) */
         w = 0; h = 0;
