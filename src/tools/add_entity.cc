@@ -261,7 +261,33 @@ struct add_entity_tool : tool {
 
     unsigned entity_name_index = 0;
 
+    // todo: we need to check against entities already placed in the world for interpenetration
+    // todo: we need to check to ensure that this placement won't embed us in a block/is on a full base
     bool can_use(raycast_info *rc) {
+        if (!rc->hit) {
+            return false;
+        }
+
+        block *bl = rc->block;
+
+        if (!bl) {
+            return false;
+        }
+
+        int index = normal_to_surface_index(rc);
+
+        if (~bl->surfs[index] & surface_phys) {
+            return false;
+        }
+
+        block *other_side = ship->get_block(rc->p);
+        auto required_space = (unsigned short)~0; /* TODO: make this a prop of the type + subblock placement */
+
+        if (other_side->surf_space[index ^ 1] & required_space) {
+            /* no room on the surface */
+            return false;
+        }
+
         return true;
     }
 
@@ -269,6 +295,19 @@ struct add_entity_tool : tool {
         if (!can_use(rc)) {
             return;
         }
+
+        int index = normal_to_surface_index(rc);
+
+        chunk *ch = ship->get_chunk_containing(rc->p);
+        /* the chunk we're placing into is guaranteed to exist, because there's
+        * a surface facing into it */
+        assert(ch);
+
+        auto name = entity_names[entity_name_index];
+        auto e = spawn_entity(name, rc->p, index ^ 1);
+        ch->entities.push_back(e);
+
+        place_entity_attaches(rc, index, e);
     }
 
     void alt_use(raycast_info *rc) override {
@@ -341,6 +380,35 @@ struct add_entity_tool : tool {
     }
 
     void preview(raycast_info *rc, frame_data *frame) override {
+        if (!can_use(rc))
+            return;
+
+        auto index = normal_to_surface_index(rc);
+        auto render = entity_stubs[entity_names[entity_name_index]]->get_component<renderable_component_stub>();
+
+        auto mat = frame->alloc_aligned<mesh_instance>(1);
+        mat.ptr->world_matrix = mat_block_face(rc->p, index ^ 1);
+        mat.ptr->material = asset_man.get_world_texture_index(render->material);
+        mat.bind(1, frame);
+
+        auto mesh = asset_man.get_mesh(render->mesh);
+        draw_mesh(mesh.hw);
+
+        /* draw a surface overlay here too */
+        /* TODO: sub-block placement granularity -- will need a different overlay */
+        auto surf_mesh = asset_man.get_surface_mesh(index);
+        auto material = asset_man.get_world_texture_index("white.png");
+
+        auto mat2 = frame->alloc_aligned<mesh_instance>(1);
+        mat2.ptr->world_matrix = mat_position(glm::vec3(rc->bl));
+        mat2.ptr->material = material;
+        mat2.bind(1, frame);
+
+        glUseProgram(overlay_shader);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        draw_mesh(surf_mesh.hw);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glUseProgram(simple_shader);
     }
 
     void get_description(char *str) override {
