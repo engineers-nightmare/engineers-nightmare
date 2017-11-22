@@ -442,7 +442,7 @@ std::array<tool*, 8> tools {
     new paint_surface_tool(),
     tool::create_remove_surface_tool(),
     tool::create_add_block_entity_tool(),
-    tool::create_remove_surface_entity_tool(),
+    tool::create_add_surface_entity_tool(),
     tool::create_remove_surface_entity_tool(),
     new add_room_tool(),
 };
