@@ -32,7 +32,7 @@ struct component_stub {
 
 struct entity_data {
     std::string name;
-    std::vector<std::unique_ptr<component_stub>> components;
+    std::vector<std::unique_ptr<component_stub>> components{};
 
     template<typename T>
     T *get_component() {
