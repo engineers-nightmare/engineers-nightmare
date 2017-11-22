@@ -9,11 +9,12 @@ struct frame_data;
 
 struct tool
 {
-    virtual ~tool() {}
+    virtual ~tool() = default;
 
     virtual void use(raycast_info *rc) = 0;
     virtual void alt_use(raycast_info *rc) = 0;
     virtual void long_use(raycast_info *rc) = 0;
+    virtual void long_alt_use(raycast_info *rc) {}
     virtual void select() {}
     virtual void unselect() {}
 

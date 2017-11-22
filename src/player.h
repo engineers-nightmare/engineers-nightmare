@@ -37,6 +37,7 @@ struct player {
     bool use_tool;
     bool alt_use_tool;    
     bool long_use_tool;
+    bool long_alt_use_tool;
 
     bool ui_dirty;
 

@@ -807,6 +807,11 @@ struct play_state : game_state {
                 pl.ui_dirty = true;
             }
 
+            if (pl.long_alt_use_tool) {
+                t->long_alt_use(&rc);
+                pl.ui_dirty = true;
+            }
+
             if (pl.cycle_mode) {
                 t->cycle_mode();
                 pl.ui_dirty = true;
@@ -912,6 +917,7 @@ struct play_state : game_state {
         auto long_use_tool      = input_use_tool->held;
         auto input_alt_use_tool = get_input(action_alt_use_tool);
         auto alt_use_tool       = input_alt_use_tool->just_pressed;
+        auto long_alt_use_tool  = input_alt_use_tool->held;
 
         /* persistent */
 
@@ -927,16 +933,17 @@ struct play_state : game_state {
 
         pl.move = glm::vec2((float) moveX, (float) moveY);
 
-        pl.jump          = jump;
-        pl.crouch        = crouch;
-        pl.reset         = reset;
-        pl.crouch_end    = crouch_end;
-        pl.use           = use;
-        pl.cycle_mode    = cycle_mode;
-        pl.gravity       = gravity;
-        pl.use_tool      = use_tool;
-        pl.alt_use_tool  = alt_use_tool;
-        pl.long_use_tool = long_use_tool;
+        pl.jump              = jump;
+        pl.crouch            = crouch;
+        pl.reset             = reset;
+        pl.crouch_end        = crouch_end;
+        pl.use               = use;
+        pl.cycle_mode        = cycle_mode;
+        pl.gravity           = gravity;
+        pl.use_tool          = use_tool;
+        pl.alt_use_tool      = alt_use_tool;
+        pl.long_use_tool     = long_use_tool;
+        pl.long_alt_use_tool = long_alt_use_tool;
 
         // blech. Tool gets used below, then fire projectile gets hit here
         if (pl.fire_projectile) {
