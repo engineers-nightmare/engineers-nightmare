@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "timer.h"
+
 #ifndef _WIN32
 #define __unused __attribute__(( unused ))
 #else
@@ -17,6 +19,37 @@
 #define WORLD_TEXTURE_DIMENSION     32
 #define MAX_WORLD_TEXTURES          64
 
+struct frame_info {
+    Timer timer{};
+
+    const float fps_duration = 0.25f;
+
+    unsigned frame = 0;
+
+    unsigned fps_frame = 0;
+    double fps_time = 0.0;
+
+    double dt = 0.0;
+    double fps = 0.0;
+    double elapsed = 0.0;
+
+    void tick() {
+        auto t = timer.touch();
+
+        dt = (float) t.delta;   /* narrowing */
+        frame++;
+        elapsed += dt;
+
+        fps_frame++;
+        fps_time += dt;
+
+        if (fps_time >= fps_duration) {
+            fps = 1 / (fps_time / fps_frame);
+            fps_time = 0.f;
+            fps_frame = 0;
+        }
+    }
+};
 
 static inline glm::ivec3
 get_coord_containing(glm::vec3 v) {

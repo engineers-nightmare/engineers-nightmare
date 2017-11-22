@@ -68,35 +68,7 @@ struct {
     bool has_focus;
 } wnd;
 
-struct {
-    Timer timer;
-
-    const float fps_duration = 0.25f;
-
-    unsigned int frame = 0;
-
-    unsigned int fps_frame = 0;
-    float fps_time = 0.f;
-
-    float dt = 0.f;
-    float fps = 0.f;
-
-    void tick() {
-        auto t = timer.touch();
-
-        dt = (float) t.delta;   /* narrowing */
-        frame++;
-
-        fps_frame++;
-        fps_time += dt;
-
-        if (fps_time >= fps_duration) {
-            fps = 1 / (fps_time / fps_frame);
-            fps_time = 0.f;
-            fps_frame = 0;
-        }
-    }
-} frame_info;
+frame_info frame_info;
 
 struct per_camera_params {
     glm::mat4 view_proj_matrix;
