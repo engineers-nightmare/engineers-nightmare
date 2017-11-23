@@ -20,7 +20,6 @@ addons:
         - libbullet-dev
         - libfreetype6-dev
         - libassimp-dev
-        - libglm-dev
         - cmake
 
 # NB: this below list must be kept in sync with `README.md`
