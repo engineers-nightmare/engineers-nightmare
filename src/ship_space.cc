@@ -145,15 +145,9 @@ max_along_axis(float o, float d)
     }
 }
 
-/* max reach, counted in edge-crossings. for spherical reach, the results need to be
- * further pruned -- this allows ~2 blocks in the worst case diagonals, and 6 in the
- * best cases, where only one axis is traversed.
- */
-#define MAX_PLAYER_REACH 6
-
 
 void
-ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
+ship_space::raycast(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_info *rc)
 {
     /* implementation of the algorithm described in
      * http://www.cse.yorku.ca/~amana/research/grid.pdf
@@ -193,7 +187,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
     float tMaxZ = max_along_axis(o.z, d.z);
     float t = 0;
 
-    for (int i = 0; i < MAX_PLAYER_REACH; ++i) {
+    while (t < max_reach_distance) {
         if (tMaxX < tMaxY) {
             if (tMaxX < tMaxZ) {
                 x += stepX;

@@ -44,6 +44,8 @@
 #define MOUSE_Y_LIMIT      1.54f
 #define MAX_AXIS_PER_EVENT 128
 
+#define MAX_REACH_DISTANCE 5.0f
+
 #define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 #include "src/imgui/imgui.h"
 #include "src/imgui_impl_sdl_gl3.h"
@@ -786,7 +788,7 @@ struct play_state : game_state {
         if (t) {
             /* both tool use and overlays need the raycast itself */
             raycast_info rc;
-            ship->raycast(pl.eye, pl.dir, &rc);
+            ship->raycast(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc);
             raycast_dist = rc.t;
 
             /* tool use */
@@ -842,7 +844,7 @@ struct play_state : game_state {
         }
 
         raycast_info rc;
-        ship->raycast(pl.eye, pl.dir, &rc);
+        ship->raycast(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc);
 
         /* tool preview */
         t->preview(&rc, frame);
