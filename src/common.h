@@ -44,6 +44,7 @@ struct raycast_info {
     glm::ivec3 p;           /* the block along the normal */
     struct block *block;
     float t;                /* distance along the ray */
+    glm::vec3 intersection; /* intersection point in ship space */
 };
 
 static inline unsigned

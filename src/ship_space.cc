@@ -248,6 +248,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_
             rc->p.y = y + ny;
             rc->p.z = z + nz;
             rc->t = t;
+            rc->intersection = o + rc->t * d;
             return;
         }
     }
