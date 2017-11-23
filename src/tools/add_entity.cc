@@ -154,7 +154,7 @@ struct add_entity_tool : tool {
     void cycle_mode() override {
         switch (place_mode) {
             case PlaceMode::BlockSnapped: {
-                place_mode = PlaceMode::FreeForm;
+                place_mode = PlaceMode::HalfBlockSnapped;
                 // todo: step to half block if we want that?
                 // shouldn't need to snap as coming from block snapped it should be snapped already
                 break;
@@ -247,20 +247,35 @@ struct add_entity_tool : tool {
         switch (place_mode) {
             case PlaceMode::BlockSnapped: {
                 m = mat_block_face(rc->p, index ^ 1);
-                m = rotate(m, glm::radians((float) cur_rotate), rot_axis);
                 break;
             }
             case PlaceMode::HalfBlockSnapped: {
-                // todo: implement or nah?
+                auto pos = rc->intersection;
+                m = mat_rotate_mesh(pos, rc->n);
+                auto p = m[3];
+                auto n = surface_index_to_normal(index ^ 1);
+                if (n.x != 0) {
+                    p.y = std::round(p.y * 2) / 2;
+                    p.z = std::round(p.z * 2) / 2;
+                }
+                else if (n.y != 0) {
+                    p.x = std::round(p.x * 2) / 2;
+                    p.z = std::round(p.z * 2) / 2;
+                }
+                else if (n.z != 0) {
+                    p.x = std::round(p.x * 2) / 2;
+                    p.y = std::round(p.y * 2) / 2;
+                }
+                m[3] = p;
                 break;
             }
             case PlaceMode::FreeForm: {
                 auto pos = rc->intersection;
                 m = mat_rotate_mesh(pos, rc->n);
-                m = rotate(m, glm::radians((float) cur_rotate), rot_axis);
                 break;
             }
         }
+        m = rotate(m, glm::radians((float) cur_rotate), rot_axis);
         return m;
     }
 };
