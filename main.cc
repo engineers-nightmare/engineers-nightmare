@@ -681,6 +681,7 @@ action const* get_input(en_action a) {
 
 struct play_state : game_state {
     phys_ent_ref *use_entity = nullptr;
+    float raycast_dist = 0.0f;
 
     play_state() {
     }
@@ -755,11 +756,12 @@ struct play_state : game_state {
             add_text_with_outline(buf2, -w/2, -100);
 
             w = 0; h = 0;
-            sprintf(buf2, "full: %d fast-unify: %d fast-nosplit: %d false-split: %d",
+            sprintf(buf2, "full: %d fast-unify: %d fast-nosplit: %d false-split: %d dist: %2.2f",
                     ship->num_full_rebuilds,
                     ship->num_fast_unifys,
                     ship->num_fast_nosplits,
-                    ship->num_false_splits);
+                    ship->num_false_splits,
+                    raycast_dist);
             text->measure(buf2, &w, &h);
             add_text_with_outline(buf2, -w/2, -150);
         }
@@ -785,6 +787,7 @@ struct play_state : game_state {
             /* both tool use and overlays need the raycast itself */
             raycast_info rc;
             ship->raycast(pl.eye, pl.dir, &rc);
+            raycast_dist = rc.t;
 
             /* tool use */
             if (pl.use_tool) {

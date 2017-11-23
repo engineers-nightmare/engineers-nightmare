@@ -161,6 +161,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
 
     assert(rc);
     rc->hit = false;
+    rc->t = 0.0f;
 
     /* if less than 0 we need to subtract one
      * as float truncation will bias
