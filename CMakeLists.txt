@@ -61,6 +61,7 @@ set(EN_SOURCES
     src/tools/remove_surface_entity.cc
     src/wiring/wiring.cc
     src/wiring/wiring_data.cc
+    src/entity_utils.cc
 )
 
 set(EN_HEADERS
@@ -114,6 +115,7 @@ set(EN_HEADERS
     src/wiring/wiring_data.h
     src/wiring/wiring.h
     src/tinydir.h
+    src/entity_utils.h
 )
 
 set(IMGUI_SOURCES
