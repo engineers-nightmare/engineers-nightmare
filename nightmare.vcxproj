@@ -41,11 +41,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;windows-dependencies\glm;windows-dependencies\getopt</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;src\glm;windows-dependencies\getopt</IncludePath>
     <LibraryPath>windows-dependencies\assimp\lib64;windows-dependencies\bullet\lib64;windows-dependencies\epoxy\lib64;windows-dependencies\freetype\lib64;windows-dependencies\libconfig\lib64;windows-dependencies\mman-win32\lib64;windows-dependencies\sdl2\lib\x64;windows-dependencies\sdl2_image\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;windows-dependencies\glm;windows-dependencies\getopt</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;src\glm;windows-dependencies\getopt</IncludePath>
     <LibraryPath>windows-dependencies\assimp\lib64;windows-dependencies\bullet\lib64;windows-dependencies\epoxy\lib64;windows-dependencies\freetype\lib64;windows-dependencies\libconfig\lib64;windows-dependencies\mman-win32\lib64;windows-dependencies\sdl2\lib\x64;windows-dependencies\sdl2_image\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
