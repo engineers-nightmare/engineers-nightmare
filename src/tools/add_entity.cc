@@ -303,7 +303,7 @@ struct add_entity_tool : tool {
         assert(ch);
 
         auto mat = mat_block_face(rc->p, index ^ 1);
-        mat = glm::rotate(mat, (float)cur_rotate, glm::vec3{surface_index_to_normal(surface_zp)});
+        mat = glm::rotate(mat, glm::radians((float)cur_rotate), glm::vec3{surface_index_to_normal(surface_zp)});
 
         auto name = entity_names[entity_name_index];
         auto e = spawn_entity(name, rc->p, index ^ 1, mat);
@@ -391,7 +391,7 @@ struct add_entity_tool : tool {
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = mat_block_face(rc->p, index ^ 1);
-        mat.ptr->world_matrix = glm::rotate(mat.ptr->world_matrix, (float)cur_rotate, glm::vec3{surface_index_to_normal(surface_zp)});
+        mat.ptr->world_matrix = glm::rotate(mat.ptr->world_matrix, glm::radians((float)cur_rotate), glm::vec3{surface_index_to_normal(surface_zp)});
         mat.ptr->material = asset_man.get_world_texture_index(render->material);
         mat.bind(1, frame);
 
