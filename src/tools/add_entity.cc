@@ -295,15 +295,14 @@ struct add_entity_tool : tool {
             return;
         }
 
-        int index = normal_to_surface_index(rc);
+        auto index = normal_to_surface_index(rc);
 
         chunk *ch = ship->get_chunk_containing(rc->p);
         /* the chunk we're placing into is guaranteed to exist, because there's
         * a surface facing into it */
         assert(ch);
 
-        auto mat = mat_block_face(rc->p, index ^ 1);
-        mat = glm::rotate(mat, glm::radians((float)cur_rotate), glm::vec3{surface_index_to_normal(surface_zp)});
+        glm::mat4 mat = get_place_matrix(rc, index);
 
         auto name = entity_names[entity_name_index];
         auto e = spawn_entity(name, rc->p, index ^ 1, mat);
@@ -366,7 +365,8 @@ struct add_entity_tool : tool {
     void cycle_mode() override {
         switch (place_mode) {
             case PlaceMode::BlockSnapped: {
-                place_mode = PlaceMode::HalfBlockSnapped;
+                place_mode = PlaceMode::FreeForm;
+                // todo: step to half block if we want that?
                 // shouldn't need to snap as coming from block snapped it should be snapped already
                 break;
             }
@@ -376,7 +376,6 @@ struct add_entity_tool : tool {
             }
             case PlaceMode::FreeForm: {
                 place_mode = PlaceMode::BlockSnapped;
-                // todo: snap to block
                 break;
             }
         }
@@ -389,9 +388,10 @@ struct add_entity_tool : tool {
         auto index = normal_to_surface_index(rc);
         auto render = entity_stubs[entity_names[entity_name_index]].get_component<renderable_component_stub>();
 
+        glm::mat4 m = get_place_matrix(rc, index);
+
         auto mat = frame->alloc_aligned<mesh_instance>(1);
-        mat.ptr->world_matrix = mat_block_face(rc->p, index ^ 1);
-        mat.ptr->world_matrix = glm::rotate(mat.ptr->world_matrix, glm::radians((float)cur_rotate), glm::vec3{surface_index_to_normal(surface_zp)});
+        mat.ptr->world_matrix = m;
         mat.ptr->material = asset_man.get_world_texture_index(render->material);
         mat.bind(1, frame);
 
@@ -449,6 +449,31 @@ struct add_entity_tool : tool {
             }
         }
         sprintf(str, "Place %s \nRotating %s \nPlacing %s", name.c_str(), rotate, place);
+    }
+
+    glm::mat4 get_place_matrix(const raycast_info *rc, unsigned int index) const {
+        glm::mat4 m;
+        auto rot_axis = glm::vec3{surface_index_to_normal(surface_zp)};
+
+        switch (place_mode) {
+            case PlaceMode::BlockSnapped: {
+                m = mat_block_face(rc->p, index ^ 1);
+                m = rotate(m, glm::radians((float) cur_rotate), rot_axis);
+                break;
+            }
+            case PlaceMode::HalfBlockSnapped: {
+                // todo: implement or nah?
+                break;
+            }
+            case PlaceMode::FreeForm: {
+                auto norm = glm::vec3{surface_index_to_normal(index ^ 1)};
+                auto pos = rc->intersection;
+                m = mat_rotate_mesh(pos, rc->n);
+                m = rotate(m, glm::radians((float) cur_rotate), rot_axis);
+                break;
+            }
+        }
+        return m;
     }
 };
 
