@@ -142,23 +142,27 @@ find_package(Bullet REQUIRED)
 find_path(LIBCONFIG_INCLUDE_DIRS libconfig.h)
 find_library(LIBCONFIG_LIBRARIES config)
 
-include_directories(${SDL2_INCLUDE_DIRS}
-                    ${EPOXY_INCLUDE_DIRS}
-                    ${ASSIMP_INCLUDE_DIRS}
-                    ${SDL2_IMAGE_INCLUDE_DIRS}
-                    ${BULLET_INCLUDE_DIRS}
-                    ${FREETYPE_INCLUDE_DIRS}
-                    ${LIBCONFIG_INCLUDE_DIRS})
+include_directories(
+    ${SDL2_INCLUDE_DIRS}
+    ${EPOXY_INCLUDE_DIRS}
+    ${ASSIMP_INCLUDE_DIRS}
+    ${SDL2_IMAGE_INCLUDE_DIRS}
+    ${BULLET_INCLUDE_DIRS}
+    ${FREETYPE_INCLUDE_DIRS}
+    ${LIBCONFIG_INCLUDE_DIRS}
+    src/glm
+)
 
 target_link_libraries(nightmare
-                      ${SDL2_LIBRARIES}
-                      ${EPOXY_LIBRARIES}
-                      ${ASSIMP_LIBRARIES}
-                      ${SDL2_IMAGE_LIBRARIES}
-                      ${BULLET_LIBRARIES}
-                      ${FREETYPE_LIBRARIES}
-                      ${LIBCONFIG_LIBRARIES}
-                      NIGHTMARE)
+  ${SDL2_LIBRARIES}
+  ${EPOXY_LIBRARIES}
+  ${ASSIMP_LIBRARIES}
+  ${SDL2_IMAGE_LIBRARIES}
+  ${BULLET_LIBRARIES}
+  ${FREETYPE_LIBRARIES}
+  ${LIBCONFIG_LIBRARIES}
+  NIGHTMARE
+)
 
 # the following is based on
 # http://www.cmake.org/Wiki/CMake/Tutorials/Object_Library
