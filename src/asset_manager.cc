@@ -53,9 +53,7 @@ void asset_manager::load_meshes() {
 
 void asset_manager::load_textures() {
     world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
-    glBindFramebuffer(GL_FRAMEBUFFER, 1);
     render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 2);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
 
     std::vector<tinydir_file> files;
@@ -92,10 +90,8 @@ void asset_manager::load_textures() {
         cnt++;
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 1);
     render_texture_to_index["render"] = 0;
     render_texture_to_index["render2"] = 1;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     printf("Loading skybox\n");
     skybox->load(0, "textures/sky_right1.png");
