@@ -43,6 +43,7 @@ struct raycast_info {
     glm::ivec3 n;           /* the face normal we hit */
     glm::ivec3 p;           /* the block along the normal */
     struct block *block;
+    float t;                /* distance along the ray */
 };
 
 static inline unsigned

@@ -190,11 +190,13 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
     float tMaxX = max_along_axis(o.x, d.x);
     float tMaxY = max_along_axis(o.y, d.y);
     float tMaxZ = max_along_axis(o.z, d.z);
+    float t = 0;
 
     for (int i = 0; i < MAX_PLAYER_REACH; ++i) {
         if (tMaxX < tMaxY) {
             if (tMaxX < tMaxZ) {
                 x += stepX;
+                t = tMaxX;
                 tMaxX += tDeltaX;
                 nx = -stepX;
                 ny = 0;
@@ -202,6 +204,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
             }
             else {
                 z += stepZ;
+                t = tMaxZ;
                 tMaxZ += tDeltaZ;
                 nx = 0;
                 ny = 0;
@@ -211,6 +214,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
         else {
             if (tMaxY < tMaxZ) {
                 y += stepY;
+                t = tMaxY;
                 tMaxY += tDeltaY;
                 nx = 0;
                 ny = -stepY;
@@ -218,6 +222,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
             }
             else {
                 z += stepZ;
+                t = tMaxZ;
                 tMaxZ += tDeltaZ;
                 nx = 0;
                 ny = 0;
@@ -247,6 +252,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, raycast_info *rc)
             rc->p.x = x + nx;
             rc->p.y = y + ny;
             rc->p.z = z + nz;
+            rc->t = t;
             return;
         }
     }
