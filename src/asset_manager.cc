@@ -11,20 +11,17 @@ asset_manager::asset_manager() : meshes(), surface_index_to_mesh_name() {
     surface_index_to_mesh_name[surface_zp] = "z_quad_p.dae";
 }
 
-void asset_manager::load_meshes() {
+template<typename Func>
+std::vector<tinydir_file> get_file_list(char const *path, Func f) {
     std::vector<tinydir_file> files;
-
     tinydir_dir dir{};
-    tinydir_open(&dir, "mesh");
+    tinydir_open(&dir, path);
 
-    while (dir.has_next)
-    {
+    for (; dir.has_next; tinydir_next(&dir)) {
         tinydir_file file{};
         tinydir_readfile(&dir, &file);
 
-        tinydir_next(&dir);
-
-        if (file.is_dir || strcmp(file.extension, "dae") != 0) {
+        if (file.is_dir || !f(file)) {
             continue;
         }
 
@@ -32,6 +29,12 @@ void asset_manager::load_meshes() {
     }
 
     tinydir_close(&dir);
+
+    return files;
+}
+
+void asset_manager::load_meshes() {
+    auto files = get_file_list("mesh", [](tinydir_file const &f) { return !strcmp(f.extension, "dae"); });
 
     printf("Loading meshes\n");
     for (auto &f : files) {
@@ -56,26 +59,7 @@ void asset_manager::load_textures() {
     render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 2);
     skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
 
-    std::vector<tinydir_file> files;
-
-    tinydir_dir dir{};
-    tinydir_open(&dir, "textures");
-
-    while (dir.has_next)
-    {
-        tinydir_file file{};
-        tinydir_readfile(&dir, &file);
-
-        tinydir_next(&dir);
-
-        if (file.is_dir) {
-            continue;
-        }
-
-        files.emplace_back(file);
-    }
-
-    tinydir_close(&dir);
+    auto files = get_file_list("textures", [](tinydir_file const &f) { return true; });
 
     printf("Loading textures\n");
     unsigned cnt = 0;
