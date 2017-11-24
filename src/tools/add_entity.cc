@@ -40,6 +40,8 @@ struct add_entity_tool : tool {
     enum class PlaceMode {
         BlockSnapped,
         HalfBlockSnapped,
+        QuarterBlockSnapped,
+        EighthBlockSnapped,
         FreeForm,
     } place_mode{PlaceMode::BlockSnapped};
 
@@ -160,6 +162,14 @@ struct add_entity_tool : tool {
                 break;
             }
             case PlaceMode::HalfBlockSnapped: {
+                place_mode = PlaceMode::QuarterBlockSnapped;
+                break;
+            }
+            case PlaceMode::QuarterBlockSnapped: {
+                place_mode = PlaceMode::EighthBlockSnapped;
+                break;
+            }
+            case PlaceMode::EighthBlockSnapped: {
                 place_mode = PlaceMode::FreeForm;
                 break;
             }
@@ -232,6 +242,14 @@ struct add_entity_tool : tool {
                 place = "Half Block Snapped";
                 break;
             }
+            case PlaceMode::QuarterBlockSnapped: {
+                place = "Quarter Block Snapped";
+                break;
+            }
+            case PlaceMode::EighthBlockSnapped: {
+                place = "Eighth Block Snapped";
+                break;
+            }
             case PlaceMode::FreeForm: {
                 place = "Free Form";
                 break;
@@ -244,29 +262,37 @@ struct add_entity_tool : tool {
         glm::mat4 m;
         auto rot_axis = glm::vec3{surface_index_to_normal(surface_zp)};
 
+        float step = 1;
         switch (place_mode) {
-            case PlaceMode::BlockSnapped: {
-                m = mat_block_face(rc->p, index ^ 1);
-                break;
+            case PlaceMode::EighthBlockSnapped: {
+                step *= 2;
+                // falls through
+            }
+            case PlaceMode::QuarterBlockSnapped: {
+                step *= 2;
+                // falls through
             }
             case PlaceMode::HalfBlockSnapped: {
+                step *= 2;
                 auto pos = rc->intersection;
                 m = mat_rotate_mesh(pos, rc->n);
                 auto p = m[3];
                 auto n = surface_index_to_normal(index ^ 1);
                 if (n.x != 0) {
-                    p.y = std::round(p.y * 2) / 2;
-                    p.z = std::round(p.z * 2) / 2;
-                }
-                else if (n.y != 0) {
-                    p.x = std::round(p.x * 2) / 2;
-                    p.z = std::round(p.z * 2) / 2;
-                }
-                else if (n.z != 0) {
-                    p.x = std::round(p.x * 2) / 2;
-                    p.y = std::round(p.y * 2) / 2;
+                    p.y = std::round(p.y * step) / step;
+                    p.z = std::round(p.z * step) / step;
+                } else if (n.y != 0) {
+                    p.x = std::round(p.x * step) / step;
+                    p.z = std::round(p.z * step) / step;
+                } else if (n.z != 0) {
+                    p.x = std::round(p.x * step) / step;
+                    p.y = std::round(p.y * step) / step;
                 }
                 m[3] = p;
+                break;
+            }
+            case PlaceMode::BlockSnapped: {
+                m = mat_block_face(rc->p, index ^ 1);
                 break;
             }
             case PlaceMode::FreeForm: {
