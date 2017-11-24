@@ -1,6 +1,8 @@
 #include "asset_manager.h"
 #include "tinydir.h"
 #include "common.h"
+#include <libconfig.h>
+#include "libconfig_shim.h"
 
 asset_manager::asset_manager() : meshes(), surface_index_to_mesh_name() {
     surface_index_to_mesh_name[surface_xm] = "x_quad.dae";
@@ -33,12 +35,21 @@ std::vector<tinydir_file> get_file_list(char const *path, Func f) {
     return files;
 }
 
+void load_asset_manifest(char const *filename) {
+    // TODO
+}
+
 void asset_manager::load_meshes() {
     auto files = get_file_list("mesh", [](tinydir_file const &f) { return !strcmp(f.extension, "dae"); });
 
     printf("Loading meshes\n");
-    for (auto &f : files) {
+    for (auto const &f : files) {
         meshes[f.name] = mesh_data{ f.path };
+    }
+
+    auto asset_files = get_file_list("assets", [](tinydir_file const &f) { return !strcmp(f.extension, "manifest"); });
+    for (auto const &f : asset_files) {
+        load_asset_manifest(f.path);
     }
 
     auto proj_mesh = meshes["sphere.dae"];
