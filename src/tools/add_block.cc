@@ -54,7 +54,7 @@ struct add_block_tool : tool
 
         /* can only build on the side of an existing frame */
         if ((!bl || bl->type == block_empty) && rc->block->type == block_frame) {
-            auto mesh = asset_man.get_mesh("initial_frame.dae");
+            auto mesh = asset_man.get_mesh("frame");
             auto material = asset_man.get_world_texture_index("white.png");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);

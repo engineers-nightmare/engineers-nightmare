@@ -1,0 +1,6 @@
+assets = ( {
+	name = "frame"
+	type = "mesh"
+	file = "mesh/initial_frame.dae"
+  }
+);

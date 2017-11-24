@@ -164,7 +164,7 @@ mesher_init()
     surface_index_to_mesh[surface_zp] = &asset_man.get_surface_mesh(surface_zp);
     surface_index_to_mesh[surface_zm] = &asset_man.get_surface_mesh(surface_zm);
 
-    frame_render_data.frame_mesh = &asset_man.get_mesh("initial_frame.dae");
+    frame_render_data.frame_mesh = &asset_man.get_mesh("frame");
     frame_render_data.frame_mat = asset_man.get_world_texture_index("frame.png");
 }
 

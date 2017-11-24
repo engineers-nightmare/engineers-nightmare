@@ -35,17 +35,40 @@ std::vector<tinydir_file> get_file_list(char const *path, Func f) {
     return files;
 }
 
-void load_asset_manifest(char const *filename) {
+void asset_manager::load_asset_manifest(char const *filename) {
     config_t cfg{};
     config_init(&cfg);
 
+    printf("Loading from manifest `%s`\n", filename);
+
     if (!config_read_file(&cfg, filename)) {
-        printf("Failed to load asset manifest `%s`\n", filename);
+        printf("Failed to load asset manifest `%s`: %s:%d\n", filename, config_error_text(&cfg),
+            config_error_line(&cfg));
         config_destroy(&cfg);
         return;
     }
 
-    // TODO
+    auto assets_setting = config_lookup(&cfg, "assets");
+    auto num_assets = config_setting_length(assets_setting);
+
+    for (auto i = 0; i < num_assets; i++) {
+        auto asset_setting = config_setting_get_elem(assets_setting, i);
+        char const *asset_type;
+        config_setting_lookup_string(asset_setting, "type", &asset_type);
+
+        if (!strcmp(asset_type, "mesh")) {
+            char const *asset_name;
+            config_setting_lookup_string(asset_setting, "name", &asset_name);
+            char const *asset_file;
+            config_setting_lookup_string(asset_setting, "file", &asset_file);
+
+            auto & m = meshes[asset_name] = mesh_data{ asset_file };
+        }
+        else {
+            printf("Unknown asset type `%s`\n", asset_type);
+            continue;
+        }
+    }
 
     config_destroy(&cfg);
 }

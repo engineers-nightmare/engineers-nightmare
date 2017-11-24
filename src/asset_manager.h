@@ -20,6 +20,8 @@ class asset_manager
     texture_set *render_textures{nullptr};
     texture_set *skybox{nullptr};
 
+    void load_asset_manifest(char const *filename);
+
 public:
     asset_manager();
     ~asset_manager() = default;
