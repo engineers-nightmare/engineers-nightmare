@@ -2,6 +2,8 @@
 // Created by caleb on 11/23/17.
 //
 
+#include <libconfig.h>
+#include "libconfig_shim.h"
 #include "entity_utils.h"
 #include "asset_manager.h"
 #include "component/component_system_manager.h"
