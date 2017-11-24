@@ -86,13 +86,6 @@ void asset_manager::load_meshes() {
         load_asset_manifest(f.path);
     }
 
-    auto proj_mesh = meshes["sphere.dae"];
-    for (auto i = 0u; i < proj_mesh.sw->num_vertices; ++i) {
-        proj_mesh.sw->verts[i].x *= 0.01f;
-        proj_mesh.sw->verts[i].y *= 0.01f;
-        proj_mesh.sw->verts[i].z *= 0.01f;
-    }
-
     for (auto &mesh : meshes) {
         mesh.second.upload_mesh();
         mesh.second.load_physics();
