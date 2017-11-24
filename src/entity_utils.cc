@@ -130,6 +130,9 @@ load_entities() {
                 entity_stubs[entity.name] = std::move(entity);
             }
         }
+
+        // TODO: don't keep any ptrs into the config blob, and call
+        // config_destroy(&cfg) here.
     }
 
     for (auto &entity : entity_stubs) {
