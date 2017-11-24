@@ -567,7 +567,7 @@ void
 update()
 {
     frame_info.tick();
-    auto dt = frame_info.dt;
+    auto dt = (float)frame_info.dt;     /* narrowing */
 
     main_tick_accum.add(dt);
     fast_tick_accum.add(dt);
