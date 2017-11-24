@@ -47,7 +47,6 @@ struct block {
     block_type type = block_frame;
 
     surface_type surfs[face_count]{};
-    unsigned short surf_space[face_count]{};
 };
 
 static inline unsigned char  /* bool */

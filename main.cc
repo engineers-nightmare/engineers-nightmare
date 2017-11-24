@@ -339,11 +339,6 @@ destroy_entity(c_entity e)
             if (bl->type == block_entity) {
                 printf("emptying %d,%d,%d on remove of ent\n", p.x, p.y, p.z);
                 bl->type = block_empty;
-
-                for (auto face = 0; face < 6; face++) {
-                    /* unreserve all the space */
-                    bl->surf_space[face] = 0;
-                }
             }
         }
     }
@@ -395,10 +390,6 @@ remove_ents_from_surface(glm::ivec3 b, int face)
         if (p.x == b.x && p.y == b.y && p.z <= b.z && p.z + height > b.z && f == face) {
             destroy_entity(ce);
             it = ch->entities.erase(it);
-
-            block *bl = ship->get_block(p);
-            assert(bl);
-            bl->surf_space[face] = 0;   /* we've popped *everything* off, it must be empty now */
         }
         else {
             ++it;

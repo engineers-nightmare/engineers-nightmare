@@ -70,14 +70,6 @@ struct add_entity_tool : tool {
             return false;
         }
 
-        block *other_side = ship->get_block(rc->p);
-        auto required_space = (unsigned short)~0; /* TODO: make this a prop of the type + subblock placement */
-
-        if (other_side->surf_space[index ^ 1] & required_space) {
-            /* no room on the surface */
-            return false;
-        }
-
         return true;
     }
 

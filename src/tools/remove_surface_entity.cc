@@ -41,7 +41,7 @@ struct remove_surface_entity_tool : tool
         int index = normal_to_surface_index(rc);
         block *other_side = ship->get_block(rc->p);
 
-        if (!other_side || !other_side->surf_space[index ^ 1]) {
+        if (!other_side) {
             return;
         }
 
