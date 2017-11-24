@@ -36,7 +36,18 @@ std::vector<tinydir_file> get_file_list(char const *path, Func f) {
 }
 
 void load_asset_manifest(char const *filename) {
+    config_t cfg{};
+    config_init(&cfg);
+
+    if (!config_read_file(&cfg, filename)) {
+        printf("Failed to load asset manifest `%s`\n", filename);
+        config_destroy(&cfg);
+        return;
+    }
+
     // TODO
+
+    config_destroy(&cfg);
 }
 
 void asset_manager::load_meshes() {
