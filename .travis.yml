@@ -28,6 +28,6 @@ install:
 
 script:
     - cmake .
-    - make -skj
+    - make -sk
     - make test
 
