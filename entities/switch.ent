@@ -10,7 +10,7 @@ entity: {
         relative_position: {
         },
         physics: {
-            mesh: "panel_4x4.dae",
+            mesh: "panel_1x1.dae",
         },
         surface_attachment: {
         },
