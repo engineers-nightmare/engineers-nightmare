@@ -4,13 +4,13 @@ entity: {
             name: "display",
         },
         renderable: {
-            mesh: "panel_4x4.dae",
+            mesh: "panel_4x4",
             material: "display.png",
         },
         relative_position: {
         },
         physics: {
-            mesh: "panel_4x4.dae",
+            mesh: "panel_4x4",
         },
         surface_attachment: {
         },

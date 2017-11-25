@@ -1,6 +1,12 @@
-assets = ( {
-	name = "frame"
-	type = "mesh"
-	file = "mesh/initial_frame.dae"
-  }
+assets = (
+{
+    name = "frame"
+    type = "mesh"
+    file = "mesh/initial_frame.dae"
+},
+{
+    name = "panel_4x4"
+    type = "mesh"
+    file = "mesh/panel_4x4.dae"
+}
 );
