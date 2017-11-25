@@ -1,10 +1,12 @@
 #include "../network.h"
 
+#include <glm/gtc/random.hpp>
+
 #include "../common.h"
 #include "../ship_space.h"
 #include "../mesh.h"
 #include "tools.h"
-#include "../light_field.h"
+#include "../component/component_system_manager.h"
 
 
 extern GLuint add_overlay_shader;
@@ -35,6 +37,19 @@ struct add_block_tool : tool
         if (bl && rc->block->type == block_frame) {
             /* tell server we want this block */
             set_block_type(peer, rc->p, block_frame);
+
+            for (auto j = 0; j < 1000; j++) {
+                auto fvec = glm::vec3(rc->p);
+                auto spawn_pos = glm::vec3(
+                    fvec.x + glm::linearRand(0.0f, 1.0f),
+                    fvec.y + glm::linearRand(0.0f, 1.0f),
+                    fvec.z + glm::linearRand(0.0f, 1.0f));
+
+                particle_man->spawn(
+                    spawn_pos,
+                    glm::vec3(0),
+                    1.0);
+            }
         }
     }
 
