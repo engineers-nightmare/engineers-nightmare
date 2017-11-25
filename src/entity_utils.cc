@@ -131,8 +131,7 @@ load_entities() {
             }
         }
 
-        // TODO: don't keep any ptrs into the config blob, and call
-        // config_destroy(&cfg) here.
+        config_destroy(&cfg);
     }
 
     for (auto &entity : entity_stubs) {
