@@ -40,7 +40,7 @@ struct door_component_manager : component_manager {
 struct door_component_stub : component_stub {
     door_component_stub() = default;
 
-    const char* mesh{};
+    std::string mesh{};
 
     void
     assign_component_to_entity(c_entity entity) override;

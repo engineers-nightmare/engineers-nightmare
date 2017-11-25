@@ -34,9 +34,9 @@ struct renderable_component_manager : component_manager {
 struct renderable_component_stub : component_stub {
     renderable_component_stub() = default;
 
-    const char* mesh{};
+    std::string mesh{};
 
-    const char* material{};
+    std::string material{};
 
     void
     assign_component_to_entity(c_entity entity) override;
