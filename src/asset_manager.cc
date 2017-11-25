@@ -35,6 +35,12 @@ std::vector<tinydir_file> get_file_list(char const *path, Func f) {
     return files;
 }
 
+struct asset_type {
+    static constexpr const char* mesh {"mesh"};
+    static constexpr const char* texture {"texture"};
+    static constexpr const char* skybox {"skybox"};
+};
+
 void asset_manager::load_asset_manifest(char const *filename) {
     config_t cfg{};
     config_init(&cfg);
@@ -56,7 +62,7 @@ void asset_manager::load_asset_manifest(char const *filename) {
         char const *asset_type;
         config_setting_lookup_string(asset_setting, "type", &asset_type);
 
-        if (!strcmp(asset_type, "mesh")) {
+        if (!strcmp(asset_type, asset_type::mesh)) {
             char const *asset_name;
             config_setting_lookup_string(asset_setting, "name", &asset_name);
             char const *asset_file;
@@ -86,6 +92,35 @@ void asset_manager::load_asset_manifest(char const *filename) {
                 }
             }
         }
+        else if (!strcmp(asset_type, asset_type::texture)) {
+            char const *asset_name;
+            config_setting_lookup_string(asset_setting, "name", &asset_name);
+            char const *asset_file;
+            config_setting_lookup_string(asset_setting, "file", &asset_file);
+
+            auto slot = world_textures->load(asset_file);
+            world_texture_to_index[asset_name] = slot;
+
+        }
+        else if (!strcmp(asset_type, asset_type::skybox)) {
+            char const *asset_name;
+            config_setting_lookup_string(asset_setting, "name", &asset_name);
+            int asset_dim;
+            config_setting_lookup_int(asset_setting, "dimensions", &asset_dim);
+
+            skyboxes[asset_name] = new texture_set(GL_TEXTURE_CUBE_MAP, asset_dim, 6);
+
+            auto files = config_setting_lookup(asset_setting, "files");
+
+            auto files_count = config_setting_length(files);
+            assert(files_count == 6);
+
+            for (unsigned files_index = 0; files_index < (unsigned)files_count; ++files_index) {
+                config_setting_t *input = config_setting_get_elem(files, files_index);
+                auto file = config_setting_get_string(input);
+                skyboxes[asset_name]->load(file);
+            }
+        }
         else {
             printf("Unknown asset type `%s`\n", asset_type);
             continue;
@@ -95,7 +130,10 @@ void asset_manager::load_asset_manifest(char const *filename) {
     config_destroy(&cfg);
 }
 
-void asset_manager::load_meshes() {
+void asset_manager::load_assets() {
+    world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
+    render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 2);
+
     auto asset_files = get_file_list("assets", [](tinydir_file const &f) { return !strcmp(f.extension, "manifest"); });
     for (auto const &f : asset_files) {
         load_asset_manifest(f.path);
@@ -105,38 +143,9 @@ void asset_manager::load_meshes() {
         mesh.second.upload_mesh();
         mesh.second.load_physics();
     }
-}
-
-void asset_manager::load_textures() {
-    world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
-    render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 2);
-    skybox = new texture_set(GL_TEXTURE_CUBE_MAP, 2048, 6);
-
-    auto files = get_file_list("textures", [](tinydir_file const &f) { return true; });
-
-    printf("Loading textures\n");
-    unsigned cnt = 0;
-    for (auto &f: files) {
-        if (strstr(f.name, "sky_") == f.name) {
-            continue;
-        }
-        printf("  %s\n", f.path);
-        world_textures->load(cnt, f.path);
-        world_texture_to_index[f.name] = cnt;
-
-        cnt++;
-    }
 
     render_texture_to_index["render"] = 0;
     render_texture_to_index["render2"] = 1;
-
-    printf("Loading skybox\n");
-    skybox->load(0, "textures/sky_right1.png");
-    skybox->load(1, "textures/sky_left2.png");
-    skybox->load(2, "textures/sky_top3.png");
-    skybox->load(3, "textures/sky_bottom4.png");
-    skybox->load(4, "textures/sky_front5.png");
-    skybox->load(5, "textures/sky_back6.png");
 }
 
 unsigned asset_manager::get_world_texture_index(const std::string & tex) const {
@@ -163,7 +172,7 @@ void asset_manager::bind_render_textures(int i) {
     render_textures->bind(i);
 }
 
-void asset_manager::bind_skybox(int i) {
-    skybox->bind(i);
+void asset_manager::bind_skybox(const std::string & skybox, int i) {
+    skyboxes[skybox]->bind(i);
 }
 

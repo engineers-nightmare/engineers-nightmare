@@ -15,7 +15,7 @@
 
 
 texture_set::texture_set(GLenum target, int dim, int array_size)
-    : texobj(0), dim(dim), array_size(array_size), target(target) {
+    : texobj(0), dim(dim), array_size(array_size), target(target), slots(0) {
     glGenTextures(1, &texobj);
     glBindTexture(target, texobj);
     if (target == GL_TEXTURE_CUBE_MAP) {
@@ -39,9 +39,10 @@ texture_set::bind(int texunit)
 }
 
 
-void
-texture_set::load(int slot, char const *filename)
+unsigned
+texture_set::load(char const *filename)
 {
+    auto slot = slots;
     SDL_Surface* surf = IMG_Load( filename );
 
     if (!surf)
@@ -71,4 +72,8 @@ texture_set::load(int slot, char const *filename)
     }
 
     SDL_FreeSurface(surf);
+
+    slots++;
+
+    return slot;
 }

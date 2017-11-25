@@ -18,7 +18,7 @@ class asset_manager
 
     texture_set *world_textures{ nullptr };
     texture_set *render_textures{nullptr};
-    texture_set *skybox{nullptr};
+    std::unordered_map<std::string, texture_set *> skyboxes {};
 
     void load_asset_manifest(char const *filename);
 
@@ -26,9 +26,7 @@ public:
     asset_manager();
     ~asset_manager() = default;
 
-    void load_meshes();
-
-    void load_textures();
+    void load_assets();
 
     unsigned get_world_texture_index(const std::string &) const;
     unsigned get_render_texture_index(const std::string &) const;
@@ -38,5 +36,5 @@ public:
     void bind_world_textures(int i);
     void bind_render_textures(int i);
 
-    void bind_skybox(int i);
+    void bind_skybox(const std::string &skybox, int i);
 };

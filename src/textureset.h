@@ -6,8 +6,10 @@ struct texture_set {
     int dim;
     int array_size;
     GLenum target;
+    unsigned slots;
 
     texture_set(GLenum target, int dim, int array_size);
     void bind(int texunit);
-    void load(int slot, char const *filename);
+
+    unsigned load(const char *filename);
 };

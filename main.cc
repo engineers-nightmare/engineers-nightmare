@@ -204,13 +204,11 @@ init()
     particle_man = new particle_manager();
     particle_man->create_particle_data(1000);
 
-    asset_man.load_meshes();
-    
     glGenFramebuffers(1, &render_fbo);
 
     // todo: asset_man uses hardcoded framebuffer value of 1
     // which matches render_fbo, but shouldn't be trusted
-    asset_man.load_textures();
+    asset_man.load_assets();
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_fbo);
 
@@ -512,7 +510,7 @@ void render() {
 
     /* draw the sky */
     glUseProgram(sky_shader);
-    asset_man.bind_skybox(0);
+    asset_man.bind_skybox("starry-night", 0);
     glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
     glDrawArrays(GL_TRIANGLES, 0, 3);
