@@ -13,5 +13,55 @@ assets = (
     name = "panel_1x1"
     type = "mesh"
     file = "mesh/panel_1x1.dae"
+},
+{
+    name = "x_quad"
+    type = "mesh"
+    file = "mesh/x_quad.dae"
+},
+{
+    name = "x_quad_p"
+    type = "mesh"
+    file = "mesh/x_quad_p.dae"
+},
+{
+    name = "y_quad"
+    type = "mesh"
+    file = "mesh/y_quad.dae"
+},
+{
+    name = "y_quad_p"
+    type = "mesh"
+    file = "mesh/y_quad_p.dae"
+},
+{
+    name = "z_quad"
+    type = "mesh"
+    file = "mesh/z_quad.dae"
+},
+{
+    name = "z_quad_p"
+    type = "mesh"
+    file = "mesh/z_quad_p.dae"
+},
+{
+    name = "frobnicator"
+    type = "mesh"
+    file = "mesh/frobnicator.dae"
+},
+{
+    name = "single_door_frame"
+    type = "mesh"
+    file = "mesh/single_door_frame.dae"
+},
+{
+    name = "single_door"
+    type = "mesh"
+    file = "mesh/single_door.dae"
+},
+{
+    name = "warning_light"
+    type = "mesh"
+    file = "mesh/warning_light.dae"
 }
 );

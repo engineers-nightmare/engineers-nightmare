@@ -4,13 +4,13 @@ entity: {
             name: "door",
         },
         renderable: {
-            mesh: "single_door_frame.dae",
+            mesh: "single_door_frame",
             material: "frame.png",
         },
         relative_position: {
         },
         physics: {
-            mesh: "single_door_frame.dae",
+            mesh: "single_door_frame",
         },
         surface_attachment: {
         },
@@ -19,7 +19,7 @@ entity: {
             max_required_power: 8.0,
         },
         door: {
-            mesh: "single_door.dae",
+            mesh: "single_door",
         },
         reader: {
             name: "desired state",

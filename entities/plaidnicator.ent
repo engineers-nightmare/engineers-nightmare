@@ -4,13 +4,13 @@ entity: {
             name: "Power Supply",
         },
         renderable: {
-            mesh: "frobnicator.dae",
+            mesh: "frobnicator",
             material: "plaidnicator.png",
         },
         relative_position: {
         },
         physics: {
-            mesh: "frobnicator.dae",
+            mesh: "frobnicator",
         },
         surface_attachment: {
         },

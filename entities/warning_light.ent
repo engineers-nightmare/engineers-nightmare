@@ -4,13 +4,13 @@ entity: {
             name: "warning light",
         },
         renderable: {
-            mesh: "warning_light.dae",
+            mesh: "warning_light",
             material: "port.png",
         },
         relative_position: {
         },
         physics: {
-            mesh: "warning_light.dae",
+            mesh: "warning_light",
         },
         surface_attachment: {
         },

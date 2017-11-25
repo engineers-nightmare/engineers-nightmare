@@ -5,12 +5,12 @@
 #include "libconfig_shim.h"
 
 asset_manager::asset_manager() : meshes(), surface_index_to_mesh_name() {
-    surface_index_to_mesh_name[surface_xm] = "x_quad.dae";
-    surface_index_to_mesh_name[surface_xp] = "x_quad_p.dae";
-    surface_index_to_mesh_name[surface_ym] = "y_quad.dae";
-    surface_index_to_mesh_name[surface_yp] = "y_quad_p.dae";
-    surface_index_to_mesh_name[surface_zm] = "z_quad.dae";
-    surface_index_to_mesh_name[surface_zp] = "z_quad_p.dae";
+    surface_index_to_mesh_name[surface_xm] = "x_quad";
+    surface_index_to_mesh_name[surface_xp] = "x_quad_p";
+    surface_index_to_mesh_name[surface_ym] = "y_quad";
+    surface_index_to_mesh_name[surface_yp] = "y_quad_p";
+    surface_index_to_mesh_name[surface_zm] = "z_quad";
+    surface_index_to_mesh_name[surface_zp] = "z_quad_p";
 }
 
 template<typename Func>
@@ -74,13 +74,6 @@ void asset_manager::load_asset_manifest(char const *filename) {
 }
 
 void asset_manager::load_meshes() {
-    auto files = get_file_list("mesh", [](tinydir_file const &f) { return !strcmp(f.extension, "dae"); });
-
-    printf("Loading meshes\n");
-    for (auto const &f : files) {
-        meshes[f.name] = mesh_data{ f.path };
-    }
-
     auto asset_files = get_file_list("assets", [](tinydir_file const &f) { return !strcmp(f.extension, "manifest"); });
     for (auto const &f : asset_files) {
         load_asset_manifest(f.path);

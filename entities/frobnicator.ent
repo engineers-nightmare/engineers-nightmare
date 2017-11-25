@@ -4,13 +4,13 @@ entity: {
             name: "Oxygen Generator",
         },
         renderable: {
-            mesh: "frobnicator.dae",
+            mesh: "frobnicator",
             material: "frobnicator.png",
         },
         relative_position: {
         },
         physics: {
-            mesh: "frobnicator.dae",
+            mesh: "frobnicator",
         },
         surface_attachment: {
         },
