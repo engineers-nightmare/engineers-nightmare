@@ -186,13 +186,14 @@ chunk::prepare_render()
                     // TODO: block detail, variants, types, surfaces
                     stamp_at_offset(&verts, &indices, frame_render_data.frame_mesh->sw, glm::vec3(i, j, k),
                                     frame_render_data.frame_mat);
-                }
 
-                for (unsigned surf = 0; surf < 6; surf++) {
-                    if (b->surfs[surf] != surface_none) {
-                        auto mesh = surface_index_to_mesh[surf];
-                        stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k),
-                                        surface_type_to_material[b->surfs[surf]]);
+                    // Only frame side of surface gets generated
+                    for (unsigned surf = 0; surf < 6; surf++) {
+                        if (b->surfs[surf] != surface_none) {
+                            auto mesh = surface_index_to_mesh[surf];
+                            stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k),
+                                surface_type_to_material[b->surfs[surf]]);
+                        }
                     }
                 }
             }
@@ -234,12 +235,13 @@ chunk::prepare_phys(int x, int y, int z)
                 if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
                     stamp_at_offset(&verts, &indices, frame_render_data.frame_mesh->sw, glm::vec3(i, j, k), 1);
-                }
 
-                for (unsigned surf = 0; surf < 6; surf++) {
-                    if (b->surfs[surf] != surface_none) {
-                        auto mesh = surface_index_to_mesh[surf];
-                        stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k), 0);
+                    // Only generate in blocks that have framing
+                    for (unsigned surf = 0; surf < 6; surf++) {
+                        if (b->surfs[surf] != surface_none) {
+                            auto mesh = surface_index_to_mesh[surf];
+                            stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k), 0);
+                        }
                     }
                 }
             }
