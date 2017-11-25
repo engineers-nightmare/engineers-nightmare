@@ -1,4 +1,4 @@
-stub,const char*,string,,mesh,
+stub,std::string,string,,mesh,.c_str()
 body,const char*,mesh,nullptr
 body,float,pos,1
 body,float,desired_pos,1

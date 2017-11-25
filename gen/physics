@@ -1,3 +1,3 @@
-stub,const char*,string,,mesh,
+stub,std::string,string,,mesh,.c_str()
 body,const char*,mesh,nullptr
 body,btRigidBody *,rigid,nullptr
