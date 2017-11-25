@@ -63,6 +63,28 @@ void asset_manager::load_asset_manifest(char const *filename) {
             config_setting_lookup_string(asset_setting, "file", &asset_file);
 
             auto & m = meshes[asset_name] = mesh_data{ asset_file };
+
+            double scale;
+            if (config_setting_lookup_float(asset_setting, "scale", &scale)) {
+                // TODO: if -ve scale, or we add nonuniform sometime, then
+                // I need to fix the normals too
+                for (auto i = 0u; i < m.sw->num_vertices; i++) {
+                    m.sw->verts[i].x *= (float)scale;
+                    m.sw->verts[i].y *= (float)scale;
+                    m.sw->verts[i].z *= (float)scale;
+                }
+            }
+            auto offset = config_setting_lookup(asset_setting, "offset");
+            if (offset) {
+                auto ox = (float)config_setting_get_float_elem(offset, 0);
+                auto oy = (float)config_setting_get_float_elem(offset, 1);
+                auto oz = (float)config_setting_get_float_elem(offset, 2);
+                for (auto i = 0u; i < m.sw->num_vertices; i++) {
+                    m.sw->verts[i].x += ox;
+                    m.sw->verts[i].y += oy;
+                    m.sw->verts[i].z += oz;
+                }
+            }
         }
         else {
             printf("Unknown asset type `%s`\n", asset_type);
