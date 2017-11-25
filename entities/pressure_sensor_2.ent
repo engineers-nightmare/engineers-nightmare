@@ -4,13 +4,13 @@ entity: {
             name: "pressure sensor 2",
         },
         renderable: {
-            mesh: "panel_1x1.dae",
+            mesh: "panel_1x1",
             material: "no_place.png",
         },
         relative_position: {
         },
         physics: {
-            mesh: "panel_1x1.dae",
+            mesh: "panel_1x1",
         },
         surface_attachment: {
         },

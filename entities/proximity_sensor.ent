@@ -4,13 +4,13 @@ entity: {
             name: "proximity sensor",
         },
         renderable: {
-            mesh: "panel_1x1.dae",
+            mesh: "panel_1x1",
             material: "port.png",
         },
         relative_position: {
         },
         physics: {
-            mesh: "panel_1x1.dae",
+            mesh: "panel_1x1",
         },
         surface_attachment: {
         },

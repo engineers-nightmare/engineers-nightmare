@@ -8,5 +8,10 @@ assets = (
     name = "panel_4x4"
     type = "mesh"
     file = "mesh/panel_4x4.dae"
+},
+{
+    name = "panel_1x1"
+    type = "mesh"
+    file = "mesh/panel_1x1.dae"
 }
 );
