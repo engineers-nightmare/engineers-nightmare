@@ -185,6 +185,16 @@ assets = (
     type = "texture"
     file = "textures/wire.png"
 },
+{
+    name = "placement_overlay"
+    type = "texture"
+    file = "textures/placement-overlay.png"
+},
+{
+    name = "no_placement_overlay"
+    type = "texture"
+    file = "textures/no-placement-overlay.png"
+},
 
 {
     name = "starry-night"
