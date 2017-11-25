@@ -79,6 +79,11 @@ assets = (
     file = "mesh/warning_light.dae"
     scale = 3.0
 },
+{
+    name = "placement_overlay"
+    type = "mesh"
+    file = "mesh/placement_overlay.dae"
+},
 
 {
     name = "attach"

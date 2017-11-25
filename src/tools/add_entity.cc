@@ -187,17 +187,16 @@ struct add_entity_tool : tool {
         auto mesh = asset_man.get_mesh(render->mesh);
         draw_mesh(mesh.hw);
 
-        /* draw a surface overlay here too */
-        /* TODO: sub-block placement granularity -- will need a different overlay */
-        auto surf_mesh = asset_man.get_surface_mesh(index);
-        auto material = asset_man.get_world_texture_index("white");
+        // draw the placement overlay
+        auto surf_mesh = asset_man.get_mesh("placement_overlay");
+        auto material = asset_man.get_world_texture_index("placement_overlay");
 
         auto mat2 = frame->alloc_aligned<mesh_instance>(1);
-        mat2.ptr->world_matrix = mat_position(glm::vec3(rc->bl));
+        mat2.ptr->world_matrix = m;
         mat2.ptr->material = material;
         mat2.bind(1, frame);
 
-        glUseProgram(overlay_shader);
+        glUseProgram(simple_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
         draw_mesh(surf_mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
