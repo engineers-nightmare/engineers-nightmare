@@ -149,8 +149,6 @@ struct add_entity_tool : tool {
         switch (place_mode) {
             case PlaceMode::BlockSnapped: {
                 place_mode = PlaceMode::HalfBlockSnapped;
-                // todo: step to half block if we want that?
-                // shouldn't need to snap as coming from block snapped it should be snapped already
                 break;
             }
             case PlaceMode::HalfBlockSnapped: {
