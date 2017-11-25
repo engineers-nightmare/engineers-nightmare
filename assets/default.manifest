@@ -64,5 +64,125 @@ assets = (
     type = "mesh"
     file = "mesh/warning_light.dae"
     scale = 3.0
+},
+
+{
+    name = "attach"
+    type = "texture"
+    file = "textures/attach.png"
+},
+{
+    name = "comms_wire"
+    type = "texture"
+    file = "textures/comms_wire.png"
+},
+{
+    name = "display"
+    type = "texture"
+    file = "textures/display.png"
+},
+{
+    name = "frame"
+    type = "texture"
+    file = "textures/frame.png"
+},
+{
+    name = "frobnicator"
+    type = "texture"
+    file = "textures/frobnicator.png"
+},
+{
+    name = "glass"
+    type = "texture"
+    file = "textures/glass.png"
+},
+{
+    name = "grate"
+    type = "texture"
+    file = "textures/grate.png"
+},
+{
+    name = "light"
+    type = "texture"
+    file = "textures/light.png"
+},
+{
+    name = "no_place"
+    type = "texture"
+    file = "textures/no_place.png"
+},
+{
+    name = "particle"
+    type = "texture"
+    file = "textures/particle.png"
+},
+{
+    name = "plaidnicator"
+    type = "texture"
+    file = "textures/plaidnicator.png"
+},
+{
+    name = "plate"
+    type = "texture"
+    file = "textures/plate.png"
+},
+{
+    name = "port"
+    type = "texture"
+    file = "textures/port.png"
+},
+{
+    name = "red"
+    type = "texture"
+    file = "textures/red.png"
+},
+{
+    name = "switch"
+    type = "texture"
+    file = "textures/switch.png"
+},
+{
+    name = "text_example"
+    type = "texture"
+    file = "textures/text_example.png"
+},
+{
+    name = "transparent_block"
+    type = "texture"
+    file = "textures/transparent_block.png"
+},
+{
+    name = "ui-slot-lit"
+    type = "texture"
+    file = "textures/ui-slot-lit.png"
+},
+{
+    name = "ui-slot"
+    type = "texture"
+    file = "textures/ui-slot.png"
+},
+{
+    name = "white"
+    type = "texture"
+    file = "textures/white.png"
+},
+{
+    name = "wire"
+    type = "texture"
+    file = "textures/wire.png"
+},
+
+{
+    name = "starry-night"
+    type = "skybox"
+    dimensions = 2048
+    files = [
+        "textures/sky_right1.png",
+        "textures/sky_left2.png",
+        "textures/sky_top3.png",
+        "textures/sky_bottom4.png",
+        "textures/sky_front5.png",
+        "textures/sky_back6.png"
+    ]
 }
 );
