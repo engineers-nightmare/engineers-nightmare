@@ -170,7 +170,7 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
 
     if (state == paint_state::started) {
         auto mesh = asset_man.get_surface_mesh(index);
-        auto material = asset_man.get_world_texture_index("red.png");
+        auto material = asset_man.get_world_texture_index("red");
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = mat_position(glm::vec3(start_block));
@@ -221,7 +221,7 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
                         }
 
                         auto mesh = asset_man.get_surface_mesh(index);
-                        auto material = asset_man.get_world_texture_index("red.png");
+                        auto material = asset_man.get_world_texture_index("red");
 
                         auto mat = frame->alloc_aligned<mesh_instance>(1);
                         mat.ptr->world_matrix = mat_position(glm::vec3(cur));
@@ -240,7 +240,7 @@ paint_surface_tool::preview(raycast_info *rc, frame_data *frame) {
             }
             case paint_state::idle: {
                 auto mesh = asset_man.get_surface_mesh(index);
-                auto material = asset_man.get_world_texture_index("white.png");
+                auto material = asset_man.get_world_texture_index("white");
 
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
                 mat.ptr->world_matrix = mat_position(glm::vec3(rc->bl));

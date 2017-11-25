@@ -42,7 +42,7 @@ struct remove_block_tool : tool
         block *bl = rc->block;
         if (bl->type != block_empty) {
             auto mesh = asset_man.get_mesh("frame");
-            auto material = asset_man.get_world_texture_index("red.png");
+            auto material = asset_man.get_world_texture_index("red");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);
             mat.ptr->world_matrix = mat_position(glm::vec3(rc->bl));

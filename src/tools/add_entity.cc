@@ -192,7 +192,7 @@ struct add_entity_tool : tool {
         /* draw a surface overlay here too */
         /* TODO: sub-block placement granularity -- will need a different overlay */
         auto surf_mesh = asset_man.get_surface_mesh(index);
-        auto material = asset_man.get_world_texture_index("white.png");
+        auto material = asset_man.get_world_texture_index("white");
 
         auto mat2 = frame->alloc_aligned<mesh_instance>(1);
         mat2.ptr->world_matrix = mat_position(glm::vec3(rc->bl));

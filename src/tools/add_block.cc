@@ -55,7 +55,7 @@ struct add_block_tool : tool
         /* can only build on the side of an existing frame */
         if ((!bl || bl->type == block_empty) && rc->block->type == block_frame) {
             auto mesh = asset_man.get_mesh("frame");
-            auto material = asset_man.get_world_texture_index("white.png");
+            auto material = asset_man.get_world_texture_index("white");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);
             mat.ptr->world_matrix = mat_position(glm::vec3(rc->p));
