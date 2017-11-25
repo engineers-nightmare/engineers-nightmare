@@ -5,7 +5,7 @@ entity: {
         },
         renderable: {
             mesh: "panel_4x4",
-            material: "display.png",
+            material: "display",
         },
         relative_position: {
         },
