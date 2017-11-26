@@ -85,6 +85,10 @@ gl_debug_callback(GLenum source __unused,
                   GLchar const *message,
                   void const *userParam __unused)
 {
+    // Skip NVIDIA's buffer placement noise
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+        return;
+
     printf("GL: %s\n", message);
 }
 
