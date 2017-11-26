@@ -33,12 +33,6 @@ physics::physics(player *p)
     /* store a pointer to our player so physics can drive his position */
     this->pl = p;
 
-    /* set player height to physics height */
-//    pl->pos.x = PLAYER_START_X;
-//    pl->pos.y = PLAYER_START_Y;
-//    pl->pos.z = PLAYER_START_Z;
-
-
     /* setup player rigid body */
     /* player height is 2 * radius + height
      * therefore, height for capsule is

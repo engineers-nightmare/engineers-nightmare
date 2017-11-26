@@ -124,7 +124,6 @@ namespace std {
 }
 
 void load_entities();
-c_entity spawn_entity(const std::string &name, glm::ivec3 p, int face);
 void use_action_on_entity(ship_space *ship, c_entity ce);
 void place_entity_attaches(raycast_info* rc, int index, c_entity e);
 
@@ -286,7 +285,7 @@ init()
 
     pl.angle = 0;
     pl.elev = 0;
-    pl.pos = glm::vec3(3,2,2);
+    pl.pos = glm::vec3(3.0f,2.0f,3.0f);
     pl.active_tool_slot = 0;
     pl.ui_dirty = true;
     pl.disable_gravity = false;
@@ -306,6 +305,9 @@ init()
 
     /* prepare the chunks -- this populates the physics data */
     prepare_chunks();
+
+    // Absorb all the init time so we dont try to catch up
+    frame_info.tick();
 }
 
 
