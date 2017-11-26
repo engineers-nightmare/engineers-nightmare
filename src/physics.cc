@@ -106,7 +106,7 @@ physics::tick_controller(float dt)
 
     if (pl->reset) {
         /* reset position (for debug) */
-        this->controller->warp(btVector3(0, 0, 0));
+        this->controller->warp(btVector3(3.0f, 2.0f, 3.0f));
     }
 
     if (pl->crouch) {
