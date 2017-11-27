@@ -167,6 +167,9 @@ upload_mesh(sw_mesh *mesh)
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid const *)offsetof(vertex, nx));
 
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid const *)offsetof(vertex, u));
+
     glGenBuffers(1, &ret->ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ret->ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->num_indices * sizeof(unsigned), mesh->indices, GL_STATIC_DRAW);
