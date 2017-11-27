@@ -59,6 +59,90 @@ assets = (
     offset = [0.5,0.0,0.5]
 },
 {
+    name = "grate_x_quad"
+    type = "mesh"
+    file = "mesh/grate_xm.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "grate_x_quad_p"
+    type = "mesh"
+    file = "mesh/grate_xp.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "grate_y_quad"
+    type = "mesh"
+    file = "mesh/grate_ym.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "grate_y_quad_p"
+    type = "mesh"
+    file = "mesh/grate_yp.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "grate_z_quad"
+    type = "mesh"
+    file = "mesh/grate_zm.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "grate_z_quad_p"
+    type = "mesh"
+    file = "mesh/grate_zp.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "glass_x_quad"
+    type = "mesh"
+    file = "mesh/glass_xm.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "glass_x_quad_p"
+    type = "mesh"
+    file = "mesh/glass_xp.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "glass_y_quad"
+    type = "mesh"
+    file = "mesh/glass_ym.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "glass_y_quad_p"
+    type = "mesh"
+    file = "mesh/glass_yp.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "glass_z_quad"
+    type = "mesh"
+    file = "mesh/glass_zm.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
+    name = "glass_z_quad_p"
+    type = "mesh"
+    file = "mesh/glass_zp.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.5]
+},
+{
     name = "frobnicator"
     type = "mesh"
     file = "mesh/frobnicator.dae"
