@@ -93,9 +93,13 @@ load_mesh(char const *filename) {
                 // NOTE: we assume that all mesh origins coincide, so we're not applying transforms here
                 auto submesh_base = (unsigned)verts.size();
 
-                for (unsigned int j = 0; j < m->mNumVertices; j++)
+                for (unsigned int j = 0; j < m->mNumVertices; j++) {
                     verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z,
-                        -m->mNormals[j].x, -m->mNormals[j].y, -m->mNormals[j].z, 0 /* mat */));
+                        -m->mNormals[j].x, -m->mNormals[j].y, -m->mNormals[j].z,
+                        0 /* mat */,
+                        m->mTextureCoords[0] ? m->mTextureCoords[0][j].x : 0.0f,
+                        m->mTextureCoords[0] ? m->mTextureCoords[0][j].y : 0.0f));
+                }
 
                 for (unsigned int j = 0; j < m->mNumFaces; j++) {
                     if (m->mFaces[j].mNumIndices != 3)
