@@ -6,14 +6,7 @@
 
 asset_manager::asset_manager()
     : meshes(),
-      surface_index_to_mesh_name(),
       surf_to_mesh() {
-    surface_index_to_mesh_name[surface_xm] = "x_quad";
-    surface_index_to_mesh_name[surface_xp] = "x_quad_p";
-    surface_index_to_mesh_name[surface_ym] = "y_quad";
-    surface_index_to_mesh_name[surface_yp] = "y_quad_p";
-    surface_index_to_mesh_name[surface_zm] = "z_quad";
-    surface_index_to_mesh_name[surface_zp] = "z_quad_p";
 
     surf_to_mesh[surface_xm][surface_wall] = "x_quad";
     surf_to_mesh[surface_xp][surface_wall] = "x_quad_p";
@@ -182,10 +175,6 @@ unsigned asset_manager::get_render_texture_index(const std::string & tex) const 
 
 mesh_data & asset_manager::get_mesh(const std::string & mesh) {
     return meshes.at(mesh);
-}
-
-mesh_data &asset_manager::get_surface_mesh(unsigned surface_index) {
-    return meshes.at(surface_index_to_mesh_name[surface_index]);
 }
 
 mesh_data &asset_manager::get_surface_mesh(unsigned surface_index, unsigned surface_type) {
