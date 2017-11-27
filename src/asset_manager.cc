@@ -4,13 +4,37 @@
 #include <libconfig.h>
 #include "libconfig_shim.h"
 
-asset_manager::asset_manager() : meshes(), surface_index_to_mesh_name() {
+asset_manager::asset_manager()
+    : meshes(),
+      surface_index_to_mesh_name(),
+      surf_to_mesh() {
     surface_index_to_mesh_name[surface_xm] = "x_quad";
     surface_index_to_mesh_name[surface_xp] = "x_quad_p";
     surface_index_to_mesh_name[surface_ym] = "y_quad";
     surface_index_to_mesh_name[surface_yp] = "y_quad_p";
     surface_index_to_mesh_name[surface_zm] = "z_quad";
     surface_index_to_mesh_name[surface_zp] = "z_quad_p";
+
+    surf_to_mesh[surface_xm][surface_wall] = "x_quad";
+    surf_to_mesh[surface_xp][surface_wall] = "x_quad_p";
+    surf_to_mesh[surface_ym][surface_wall] = "y_quad";
+    surf_to_mesh[surface_yp][surface_wall] = "y_quad_p";
+    surf_to_mesh[surface_zm][surface_wall] = "z_quad";
+    surf_to_mesh[surface_zp][surface_wall] = "z_quad_p";
+
+    surf_to_mesh[surface_xm][surface_grate] = "grate_x_quad";
+    surf_to_mesh[surface_xp][surface_grate] = "grate_x_quad_p";
+    surf_to_mesh[surface_ym][surface_grate] = "grate_y_quad";
+    surf_to_mesh[surface_yp][surface_grate] = "grate_y_quad_p";
+    surf_to_mesh[surface_zm][surface_grate] = "grate_z_quad";
+    surf_to_mesh[surface_zp][surface_grate] = "grate_z_quad_p";
+
+    surf_to_mesh[surface_xm][surface_glass] = "glass_x_quad";
+    surf_to_mesh[surface_xp][surface_glass] = "glass_x_quad_p";
+    surf_to_mesh[surface_ym][surface_glass] = "glass_y_quad";
+    surf_to_mesh[surface_yp][surface_glass] = "glass_y_quad_p";
+    surf_to_mesh[surface_zm][surface_glass] = "glass_z_quad";
+    surf_to_mesh[surface_zp][surface_glass] = "glass_z_quad_p";
 }
 
 template<typename Func>
@@ -162,6 +186,10 @@ mesh_data & asset_manager::get_mesh(const std::string & mesh) {
 
 mesh_data &asset_manager::get_surface_mesh(unsigned surface_index) {
     return meshes.at(surface_index_to_mesh_name[surface_index]);
+}
+
+mesh_data &asset_manager::get_surface_mesh(unsigned surface_index, unsigned surface_type) {
+    return meshes.at(surf_to_mesh[surface_index][surface_type]);
 }
 
 void asset_manager::bind_world_textures(int i) {
