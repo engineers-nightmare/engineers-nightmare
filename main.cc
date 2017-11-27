@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <stdio.h>
 #include <SDL.h>
+#include <SDL_image.h>
 #include <unordered_map>
 #include <array>
 #include <libconfig.h>
@@ -97,6 +98,7 @@ unsigned frame_index;
 
 GLuint simple_shader, unlit_shader, overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader, modelspace_uv_shader, chunk_shader;
+GLuint palette_tex;
 ship_space *ship;
 player pl;
 physics *phy;
@@ -258,7 +260,7 @@ init()
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
     particle_shader = load_shader("shaders/particle.vert", "shaders/particle.frag");
     modelspace_uv_shader = load_shader("shaders/simple_modelspace_uv.vert", "shaders/simple.frag");
-    chunk_shader = load_shader("shaders/chunk.vert", "shaders/simple.frag");
+    chunk_shader = load_shader("shaders/chunk.vert", "shaders/chunk.frag");
 
     glUseProgram(simple_shader);
 
@@ -305,6 +307,17 @@ init()
 
     /* prepare the chunks -- this populates the physics data */
     prepare_chunks();
+
+    /* raw palette tex -- bind and leave it bound */
+    /* TODO: generalize texture_set so it can do this nicely. */
+    auto image = IMG_Load("mesh/mv-frame.png");
+    glGenTextures(1, &palette_tex);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_1D, palette_tex);
+    glTexStorage1D(GL_TEXTURE_1D, 1, GL_RGBA8, 256);
+    glTexSubImage1D(GL_TEXTURE_1D, 0, 0, 256, GL_RGBA, GL_UNSIGNED_BYTE, image->pixels);
+    glActiveTexture(GL_TEXTURE0);
+    SDL_FreeSurface(image);
 
     // Absorb all the init time so we dont try to catch up
     frame_info.tick();

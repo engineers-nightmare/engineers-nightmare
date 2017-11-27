@@ -6,6 +6,7 @@
 layout(location=0) in vec4 pos;
 layout(location=1) in int mat;
 layout(location=2) in vec3 norm;
+layout(location=3) in vec2 uv;
 
 layout(std140, binding=0) uniform per_camera {
 
@@ -32,21 +33,7 @@ void main(void)
     texcoord.z = mat;
 
     vec3 n = normalize(mat3(world_matrix) * norm);
-
-    /* Quick & dirty triplanar mapping */
-    if (n.x > 0.8) {
-        texcoord.xy = vec2(-world_pos.y, -world_pos.z);
-	} else if (n.x < -0.8) {
-        texcoord.xy = vec2(world_pos.y, -world_pos.z);
-    } else if (n.y > 0.8) {
-        texcoord.xy = vec2(world_pos.x, -world_pos.z);
-	} else if (n.y < -0.8) {
-		texcoord.xy = vec2(-world_pos.x, -world_pos.z);
-    } else if (n.z < -0.8) {
-		texcoord.xy = vec2(world_pos.x, -world_pos.y);
-	} else {
-        texcoord.xy = world_pos.xy;
-    }
+    texcoord.xy = uv;
 
     ws_pos = world_pos.xyz;
     ws_norm = n;
