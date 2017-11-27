@@ -52,7 +52,7 @@ struct remove_surface_entity_tool : tool
         mat.ptr->material = material;
         mat.bind(1, frame);
 
-        auto surf_mesh = asset_man.get_surface_mesh(index);
+        auto surf_mesh = asset_man.get_surface_mesh(index, surface_wall);
 
         glUseProgram(overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);

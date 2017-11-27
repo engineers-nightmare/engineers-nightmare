@@ -139,9 +139,6 @@ teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, b
     }
 }
 
-static int surface_type_to_material[256];
-static const mesh_data * surface_index_to_mesh[face_count];
-
 static struct {
     const mesh_data * frame_mesh;
     unsigned frame_mat;
@@ -150,20 +147,6 @@ static struct {
 void
 mesher_init()
 {
-    memset(surface_type_to_material, 0, sizeof(surface_type_to_material));
-    surface_type_to_material[surface_none] = asset_man.get_world_texture_index("white");
-    surface_type_to_material[surface_wall] = asset_man.get_world_texture_index("plate");
-    surface_type_to_material[surface_grate] = asset_man.get_world_texture_index("grate");
-    surface_type_to_material[surface_glass] = asset_man.get_world_texture_index("glass");
-    surface_type_to_material[surface_door] = asset_man.get_world_texture_index("transparent_block");
-
-    surface_index_to_mesh[surface_xp] = &asset_man.get_surface_mesh(surface_xp);
-    surface_index_to_mesh[surface_xm] = &asset_man.get_surface_mesh(surface_xm);
-    surface_index_to_mesh[surface_yp] = &asset_man.get_surface_mesh(surface_yp);
-    surface_index_to_mesh[surface_ym] = &asset_man.get_surface_mesh(surface_ym);
-    surface_index_to_mesh[surface_zp] = &asset_man.get_surface_mesh(surface_zp);
-    surface_index_to_mesh[surface_zm] = &asset_man.get_surface_mesh(surface_zm);
-
     frame_render_data.frame_mesh = &asset_man.get_mesh("frame");
     frame_render_data.frame_mat = asset_man.get_world_texture_index("frame");
 }
@@ -190,9 +173,9 @@ chunk::prepare_render()
                     // Only frame side of surface gets generated
                     for (unsigned surf = 0; surf < 6; surf++) {
                         if (b->surfs[surf] != surface_none) {
-                            auto mesh = surface_index_to_mesh[surf];
+                            auto mesh = &asset_man.get_surface_mesh(surf, b->surfs[surf]);
                             stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k),
-                                surface_type_to_material[b->surfs[surf]]);
+                                0);
                         }
                     }
                 }
@@ -239,7 +222,7 @@ chunk::prepare_phys(int x, int y, int z)
                     // Only generate in blocks that have framing
                     for (unsigned surf = 0; surf < 6; surf++) {
                         if (b->surfs[surf] != surface_none) {
-                            auto mesh = surface_index_to_mesh[surf];
+                            auto mesh = &asset_man.get_surface_mesh(surf, b->surfs[surf]);
                             stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k), 0);
                         }
                     }

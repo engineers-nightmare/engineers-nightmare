@@ -23,7 +23,7 @@ struct remove_surface_tool : tool
             return false;
 
         block *bl = rc->block;
-        int index = normal_to_surface_index(rc);
+        auto index = normal_to_surface_index(rc);
         return bl && bl->surfs[index] & surface_phys;
     }
 
@@ -32,7 +32,7 @@ struct remove_surface_tool : tool
         if (!can_use(rc))
             return;
 
-        int index = normal_to_surface_index(rc);
+        auto index = normal_to_surface_index(rc);
 
         ship->set_surface(rc->bl, rc->p, (surface_index)index, surface_none);
 
@@ -52,8 +52,10 @@ struct remove_surface_tool : tool
         if (!can_use(rc))
             return;
 
+        block *bl = rc->block;
         auto index = normal_to_surface_index(rc);
-        auto mesh = asset_man.get_surface_mesh(index);
+
+        auto mesh = asset_man.get_surface_mesh(index, bl->surfs[index]);
         auto material = asset_man.get_world_texture_index("red");
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
