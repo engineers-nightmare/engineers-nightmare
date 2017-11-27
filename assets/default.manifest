@@ -182,6 +182,13 @@ assets = (
     type = "mesh"
     file = "mesh/placement_overlay.dae"
 },
+{
+    name = "o2_gen"
+    type = "mesh"
+    file = "mesh/o2_gen.obj"
+    scale = 0.0333
+    offset = [0.0,0.0,0.0]
+},
 
 {
     name = "attach"

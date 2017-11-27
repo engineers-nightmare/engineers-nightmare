@@ -4,7 +4,7 @@ entity: {
             name: "Oxygen Generator",
         },
         renderable: {
-            mesh: "frobnicator",
+            mesh: "o2_gen",
             material: "frobnicator",
         },
         placeable: {
@@ -14,7 +14,7 @@ entity: {
         relative_position: {
         },
         physics: {
-            mesh: "frobnicator",
+            mesh: "o2_gen",
         },
         surface_attachment: {
         },
