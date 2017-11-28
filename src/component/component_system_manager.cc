@@ -25,11 +25,13 @@ tick_gas_producers(ship_space *ship)
     auto &gas_man = component_system_man.managers.gas_producer_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
     auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     for (auto i = 0u; i < gas_man.buffer.num; i++) {
         auto ce = gas_man.instance_pool.entity[i];
+        assert(cwire_man.exists(ce));
 
-        /* gas producers require: power */
+        /* gas producers require: power, position */
         assert(power_man.exists(ce) || !"gas producer must be powerable");
         assert(pos_man.exists(ce) || !"gas producer must have position");
 
@@ -41,32 +43,17 @@ tick_gas_producers(ship_space *ship)
             continue;
         }
 
-        auto comms = wire_type_comms;
-        auto & comms_attaches = ship->entity_to_attach_lookups[comms];
-        auto attaches = comms_attaches.find(ce);
-        if (attaches != comms_attaches.end()) {
-            std::unordered_set<unsigned> visited_wires;
-            for (auto const & sea : attaches->second) {
-                auto wire_index = attach_topo_find(ship, comms, sea);
-                if (visited_wires.find(wire_index) != visited_wires.end()) {
-                    continue;
-                }
+        auto const &cwire = cwire_man.get_instance_data(ce);
+        auto const &net = ship->get_comms_network(*cwire.network);
+        /* now that we have the wire, see if it has any msgs for us */
+        /* todo: origin discrimination */
+        for (auto msg : net.read_buffer) {
 
-                auto const & wire = ship->comms_wires[wire_index];
+            if (msg.desc == comms_msg_type_switch_state) {
 
-                visited_wires.insert(wire_index);
-
-                /* now that we have the wire, see if it has any msgs for us */
-                /* todo: origin discrimination */
-                for (auto msg : wire.read_buffer) {
-
-                    if (msg.desc == comms_msg_type_switch_state) {
-
-                        auto data = clamp(msg.data, 0.0f, 1.0f);
-                        gas_man.instance_pool.enabled[i] = data > 0;
-                        *power.required_power = data > 0 ? *power.max_required_power : 0.0f;
-                    }
-                }
+                auto data = clamp(msg.data, 0.0f, 1.0f);
+                gas_man.instance_pool.enabled[i] = data > 0;
+                *power.required_power = data > 0 ? *power.max_required_power : 0.0f;
             }
         }
 
@@ -202,29 +189,22 @@ tick_doors(ship_space *ship)
 void
 tick_power_consumers(ship_space *ship) {
     auto &power_man = component_system_man.managers.power_component_man;
+    auto &pwire_man = component_system_man.managers.wire_power_component_man;
 
     for (auto i = 0u; i < power_man.buffer.num; i++) {
         auto ce = power_man.instance_pool.entity[i];
+        assert(pwire_man.exists(ce));
 
         if (power_man.instance_pool.max_required_power[i] == 0 &&
             power_man.instance_pool.required_power[i] == 0)
             continue;
         power_man.instance_pool.powered[i] = false;
 
-        auto & power_attaches = ship->entity_to_attach_lookups[wire_type_power];
-        auto attaches = power_attaches.find(ce);
-        if (attaches == power_attaches.end()) {
-            continue;
-        }
+        auto const &pwire = pwire_man.get_instance_data(ce);
+        auto const &net = ship->get_power_network(*pwire.network);
 
-        for (auto sea : attaches->second) {
-            auto wire_index = attach_topo_find(ship, wire_type_power, sea);
-
-            auto const & wire = ship->power_wires[wire_index];
-
-            if (wire.total_power >= wire.total_draw && wire.total_power > 0) {
-                power_man.instance_pool.powered[i] = true;
-            }
+        if (net.total_power >= net.total_draw && net.total_power > 0) {
+            power_man.instance_pool.powered[i] = true;
         }
     }
 }
@@ -270,14 +250,17 @@ void
 tick_pressure_sensors(ship_space* ship) {
     auto &pressure_man = component_system_man.managers.pressure_sensor_component_man;
     auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     for (auto i = 0u; i < pressure_man.buffer.num; i++) {
         auto ce = pressure_man.instance_pool.entity[i];
+        assert(cwire_man.exists(ce));
 
         /* all pressure sensors currently require: position */
         assert(pos_man.exists(ce) || !"pressure sensors must have a position");
 
         auto pos = *pos_man.get_instance_data(ce).position;
+        auto network = *cwire_man.get_instance_data(ce).network;
 
         glm::ivec3 pos_block = get_coord_containing(pos);
 
@@ -291,12 +274,12 @@ tick_pressure_sensors(ship_space* ship) {
             desc = comms_msg_type_pressure_sensor_2_state;
         }
 
-        comms_msg msg;
-        msg.originator = ce;
-        msg.desc = desc;
-        msg.data = pressure;
-
-        publish_msg(ship, ce, msg);
+        comms_msg msg{
+            ce,
+            desc,
+            pressure,
+        };
+        publish_msg(ship, network, msg);
     }
 }
 
@@ -304,10 +287,12 @@ tick_pressure_sensors(ship_space* ship) {
 void
 tick_sensor_comparators(ship_space *ship) {
     auto &comparator_man = component_system_man.managers.sensor_comparator_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     for (auto i = 0u; i < comparator_man.buffer.num; i++) {
         auto ce = comparator_man.instance_pool.entity[i];
-        auto type = wire_type_comms;
+        assert(cwire_man.exists(ce));
+
         auto sensor_1 = FLT_MAX;
         auto sensor_2 = FLT_MAX;
         auto epsilon = comparator_man.instance_pool.compare_epsilon[i];
@@ -317,36 +302,22 @@ tick_sensor_comparators(ship_space *ship) {
         /* read pressure sensors from wire
          * bail after encountering first of each
          */
-        auto & comms_attaches = ship->entity_to_attach_lookups[type];
-        auto attaches = comms_attaches.find(ce);
-        if (attaches == comms_attaches.end()) {
-            continue;
-        }
+        auto const &cwire = cwire_man.get_instance_data(ce);
+        auto net_id = *cwire.network;
+        auto const &net = ship->get_comms_network(net_id);
 
-        std::unordered_set<unsigned> visited_wires;
-        for (auto sea : attaches->second) {
-            auto wire_index = attach_topo_find(ship, type, sea);
-            if (visited_wires.find(wire_index) != visited_wires.end()) {
-                continue;
+        /* now that we have the wire, see if it has any msgs for us */
+        /* todo: origin discrimination */
+        for (auto msg : net.read_buffer) {
+            if (sensor_1 == FLT_MAX && msg.desc == comms_msg_type_pressure_sensor_1_state) {
+                sensor_1 = msg.data;
+            }
+            if (sensor_2 == FLT_MAX && msg.desc == comms_msg_type_pressure_sensor_2_state) {
+                sensor_2 = msg.data;
             }
 
-            auto const & wire = ship->comms_wires[wire_index];
-
-            visited_wires.insert(wire_index);
-
-            /* now that we have the wire, see if it has any msgs for us */
-            /* todo: origin discrimination */
-            for (auto msg : wire.read_buffer) {
-                if (sensor_1 == FLT_MAX && msg.desc == comms_msg_type_pressure_sensor_1_state) {
-                    sensor_1 = msg.data;
-                }
-                if (sensor_2 == FLT_MAX && msg.desc == comms_msg_type_pressure_sensor_2_state) {
-                    sensor_2 = msg.data;
-                }
-
-                if (sensor_1 != FLT_MAX && sensor_2 != FLT_MAX) {
-                    break;
-                }
+            if (sensor_1 != FLT_MAX && sensor_2 != FLT_MAX) {
+                break;
             }
         }
 
@@ -362,11 +333,12 @@ tick_sensor_comparators(ship_space *ship) {
         difference = b ? 1.f : 0.f;
 
         /* publish result */
-        comms_msg msg;
-        msg.originator = ce;
-        msg.desc = comms_msg_type_sensor_comparison_state;
-        msg.data = difference;
-        publish_msg(ship, ce, msg);
+        comms_msg msg{
+            ce,
+            comms_msg_type_sensor_comparison_state,
+            difference,
+        };
+        publish_msg(ship, net_id, msg);
     }
 }
 
@@ -376,9 +348,11 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
     auto &pos_man = component_system_man.managers.relative_position_component_man;
     auto &surface_man = component_system_man.managers.surface_attachment_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     for (auto i = 0u; i < proximity_man.buffer.num; i++) {
         auto ce = proximity_man.instance_pool.entity[i];
+        assert(cwire_man.exists(ce));
 
         /* all proximity sensors currently require: position and power */
         assert(pos_man.exists(ce) || !"proximity sensors must have a position");
@@ -448,11 +422,15 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
         //Only publish the message if the sensor state changed
         if (was_detected != *(proximity.is_detected))
         {
-            comms_msg msg;
-            msg.originator = ce;
-            msg.desc = comms_msg_type_proximity_sensor_state;
-            msg.data = (*(proximity.is_detected)) ? 1.0f : 0.0f;
-            publish_msg(ship, ce, msg);
+            auto network = *cwire_man.get_instance_data(ce).network;
+
+            comms_msg msg{
+                ce,
+                comms_msg_type_proximity_sensor_state,
+                (*(proximity.is_detected)) ? 1.0f : 0.0f,
+            };
+
+            publish_msg(ship, network, msg);
         }
     }
 }
@@ -461,38 +439,32 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
 void
 tick_readers(ship_space *ship) {
     auto &reader_man = component_system_man.managers.reader_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     for (auto i = 0u; i < reader_man.buffer.num; i++) {
         auto ce = reader_man.instance_pool.entity[i];
+        assert(cwire_man.exists(ce));
 
-        auto & comms_attaches = ship->entity_to_attach_lookups[wire_type_comms];
-        auto attaches = comms_attaches.find(ce);
-        if (attaches == comms_attaches.end()) {
-            continue;
-        }
+        auto const &cwire = cwire_man.get_instance_data(ce);
+        auto const &net = ship->get_comms_network(*cwire.network);
 
-        for (auto sea : attaches->second) {
-            auto wire_index = attach_topo_find(ship, wire_type_comms, sea);
-            auto const & wire = ship->comms_wires[wire_index];
-
-            for (auto msg : wire.read_buffer) {
-                /* if we're filtering by source, and missed -- skip this one. */
-                if (reader_man.instance_pool.source[i].id &&
-                    reader_man.instance_pool.source[i].id != msg.originator.id) {
-                    continue;
-                }
-
-                /* if we're filtering by desc, and missed -- skip */
-                /* we /assume/ that everyone here has their strings interned. */
-                if (reader_man.instance_pool.desc[i] &&
-                    reader_man.instance_pool.desc[i] != msg.desc) {
-                    continue;
-                }
-
-                reader_man.instance_pool.data[i] = msg.data;
-
-                /* TODO: record /when/ we last got a matching packet */
+        for (auto msg : net.read_buffer) {
+            /* if we're filtering by source, and missed -- skip this one. */
+            if (reader_man.instance_pool.source[i].id &&
+                reader_man.instance_pool.source[i].id != msg.originator.id) {
+                continue;
             }
+
+            /* if we're filtering by desc, and missed -- skip */
+            /* we /assume/ that everyone here has their strings interned. */
+            if (reader_man.instance_pool.desc[i] &&
+                reader_man.instance_pool.desc[i] != msg.desc) {
+                continue;
+            }
+
+            reader_man.instance_pool.data[i] = msg.data;
+
+            /* TODO: record /when/ we last got a matching packet */
         }
     }
 }

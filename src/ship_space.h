@@ -43,12 +43,18 @@ struct ship_space {
     std::unordered_map<glm::ivec3, chunk*, ivec3_hash> chunks;
     std::unordered_map<topo_info *, zone_info *> zones;
 
-    std::vector<wire_attachment> wire_attachments[num_wire_types];
+    // fixed pools of networks
+    // trade-off of contiguous memory access and unused memory
+    std::array<power_wiring_data, MAX_NETWORKS> power_networks {};
+    std::array<comms_wiring_data, MAX_NETWORKS> comms_networks {};
 
-    std::unordered_map<c_entity, std::unordered_set<unsigned>> entity_to_attach_lookups[num_wire_types];
+    power_wiring_data & get_power_network(unsigned network) {
+        return power_networks[network];
+    }
 
-    std::unordered_map<unsigned, power_wiring_data> power_wires;
-    std::unordered_map<unsigned, comms_wiring_data> comms_wires;
+    comms_wiring_data & get_comms_network(unsigned network) {
+        return comms_networks[network];
+    }
 
     /* create an empty ship_space */
     ship_space();

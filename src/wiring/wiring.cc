@@ -29,44 +29,36 @@ void
 calculate_power_wires(ship_space *ship) {
     auto &power_man = component_system_man.managers.power_component_man;
     auto &power_provider_man = component_system_man.managers.power_provider_component_man;
+    auto &pwire_man = component_system_man.managers.wire_power_component_man;
 
-    ship->power_wires.clear();
-    const auto type = wire_type_power;
-
-    /* note: power_wires operator[] default-constructs the value if not present. */
+    for (auto &net : ship->power_networks) {
+        net = {};
+    }
 
     /* walk power consumers */
     /* invariant: at most /one/ power wire is attached. */
     for (auto i = 0u; i < power_man.buffer.num; i++) {
         auto ce = power_man.instance_pool.entity[i];
-        auto attaches = ship->entity_to_attach_lookups[type].find(ce);
-        if (attaches != ship->entity_to_attach_lookups[type].end()) {
-            for (auto attach : attaches->second) {
-                auto wire = attach_topo_find(ship, type, attach);
-                auto & power_data = ship->power_wires[wire];
 
-                power_data.num_consumers++;
-                power_data.peak_draw += power_man.instance_pool.max_required_power[i];
-                power_data.total_draw += power_man.instance_pool.required_power[i];
-            }
-        }
+        auto const &pwire = pwire_man.get_instance_data(ce);
+        auto &net = ship->get_power_network(*pwire.network);
+
+        net.num_consumers++;
+        net.peak_draw += power_man.instance_pool.max_required_power[i];
+        net.total_draw += power_man.instance_pool.required_power[i];
     }
 
     /* walk power producers */
     /* invariant: at most /one/ power wire is attached. */
     for (auto i = 0u; i < power_provider_man.buffer.num; i++) {
         auto ce = power_provider_man.instance_pool.entity[i];
-        auto attaches = ship->entity_to_attach_lookups[type].find(ce);
-        if (attaches != ship->entity_to_attach_lookups[type].end()) {
-            for (auto attach : attaches->second) {
-                auto wire = attach_topo_find(ship, type, attach);
-                auto & power_data = ship->power_wires[wire];
 
-                // TODO: model provided vs max_provided here.
-                power_data.total_power += power_provider_man.instance_pool.max_provided[i];
-                power_data.num_providers++;
-            }
-        }
+        auto const &pwire = pwire_man.get_instance_data(ce);
+        auto &net = ship->get_power_network(*pwire.network);
+
+        // TODO: model provided vs max_provided here.
+        net.total_power += power_provider_man.instance_pool.max_provided[i];
+        net.num_providers++;
     }
 }
 
@@ -78,72 +70,13 @@ calculate_power_wires(ship_space *ship) {
  */
 void
 propagate_comms_wires(ship_space *ship) {
-    for (auto & w : ship->comms_wires) {
-        std::swap(w.second.read_buffer, w.second.write_buffer);
-        w.second.write_buffer.clear();
+    for (auto & net : ship->comms_networks) {
+        std::swap(net.read_buffer, net.write_buffer);
+        net.write_buffer.clear();
     }
 }
-
 
 /* The common case for publishing comms_msg: broadcast to all connected wires. */
-void
-publish_msg(ship_space *ship, c_entity ce, comms_msg msg)
-{
-    auto & comms_attaches = ship->entity_to_attach_lookups[wire_type_comms];
-    auto attaches = comms_attaches.find(ce);
-    if (attaches == comms_attaches.end()) {
-        return;
-    }
-
-    std::unordered_set<unsigned> visited_wires;
-    for (auto sea : attaches->second) {
-        auto wire_index = attach_topo_find(ship, wire_type_comms, sea);
-        if (visited_wires.find(wire_index) != visited_wires.end()) {
-            continue;
-        }
-
-        visited_wires.insert(wire_index);
-        ship->comms_wires[wire_index].write_buffer.push_back(msg);
-    }
-}
-
-
-void
-remove_attaches_for_entity(ship_space *ship, c_entity ce)
-{
-    for (auto _type = 0; _type < num_wire_types; _type++) {
-        auto type = (wire_type)_type;
-        auto & entity_to_attach_lookup = ship->entity_to_attach_lookups[type];
-        auto & wire_attachments = ship->wire_attachments[type];
-
-        auto entity_attaches = entity_to_attach_lookup.find(ce);
-        if (entity_attaches != entity_to_attach_lookup.end()) {
-            auto const & set = entity_attaches->second;
-            auto attaches = std::vector<unsigned>(set.begin(), set.end());
-            std::sort(attaches.begin(), attaches.end());
-
-            /* Remove relevant attaches from wire_attachments
-            * relevant is an attach that isn't occupying a position
-            * will get popped off as a result of moving before removing
-            */
-            auto swap_index = (unsigned)wire_attachments.size() - 1;
-            for (auto att_index = (unsigned)attaches.size() - 1; att_index != invalid_attach; --att_index) {
-
-                auto from_attach = wire_attachments[swap_index];
-                auto rem = attaches[att_index];
-                if (swap_index > rem) {
-                    wire_attachments[rem] = from_attach;
-                    wire_attachments.pop_back();
-                    --swap_index;
-                }
-                else if (swap_index == rem) {
-                    wire_attachments.pop_back();
-                    --swap_index;
-                }
-            }
-
-            /* remove attaches assigned to entity from ship lookup */
-            entity_to_attach_lookup.erase(ce);
-        }
-    }
+void publish_msg(ship_space *ship, unsigned network, comms_msg msg) {
+    ship->comms_networks[network].write_buffer.push_back(msg);
 }

@@ -336,8 +336,7 @@ resize(int width, int height)
 
 
 void
-destroy_entity(c_entity e)
-{
+destroy_entity(c_entity e) {
     auto &surface_man = component_system_man.managers.surface_attachment_component_man;
     auto &door_man = component_system_man.managers.door_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
@@ -367,17 +366,14 @@ destroy_entity(c_entity e)
 
     if (physics_man.exists(e)) {
         auto phys_data = physics_man.get_instance_data(e);
-        phys_ent_ref *per = (phys_ent_ref *)(*phys_data.rigid)->getUserPointer();
-        if (per) {
-            delete per;
-        }
+        auto *per = (phys_ent_ref *) (*phys_data.rigid)->getUserPointer();
+        delete per;
+
 
         teardown_static_physics_setup(nullptr, nullptr, phys_data.rigid);
     }
 
     component_system_man.managers.destroy_entity_instance(e);
-
-    remove_attaches_for_entity(ship, e);
 }
 
 

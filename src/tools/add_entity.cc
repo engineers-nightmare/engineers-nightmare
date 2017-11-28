@@ -90,8 +90,6 @@ struct add_entity_tool : tool {
         auto name = entity_names[entity_name_index];
         auto e = spawn_entity(name, rc->p, index ^ 1, mat);
         ch->entities.push_back(e);
-
-        place_entity_attaches(rc, index, e);
     }
 
     void alt_use(raycast_info *rc) override {

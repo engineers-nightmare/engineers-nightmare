@@ -22,17 +22,16 @@ struct power_wiring_data {
 };
 
 struct comms_msg {
-    c_entity originator;
-    char const *desc;           /* non-owned: expected to point to memory outliving the comms_data */
+    c_entity originator{0};
+    char const *desc{nullptr};           /* non-owned: expected to point to memory outliving the comms_data */
 
     /* todo: other data types */
-    float data;
+    float data = 0.0f;
 };
 
 
 struct comms_wiring_data {
-    std::vector<comms_msg> read_buffer, write_buffer;
-    unsigned num_connected;
+    std::vector<comms_msg> read_buffer{}, write_buffer{};
 };
 
 

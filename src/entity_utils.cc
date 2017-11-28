@@ -188,9 +188,11 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
     auto &pos_man = component_system_man.managers.relative_position_component_man;
     auto &switch_man = component_system_man.managers.switch_component_man;
     auto &type_man = component_system_man.managers.type_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     /* used by the player */
     assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
+    assert(switch_man.exists(ce) || !"All [usable] entities need switch comp");
 
     auto pos = *pos_man.get_instance_data(ce).position;
     auto type = *type_man.get_instance_data(ce).name;
@@ -202,30 +204,11 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
         auto & enabled = *switch_man.get_instance_data(ce).enabled;
         enabled ^= true;
 
-        comms_msg msg;
-        msg.originator = ce;
-        msg.desc = comms_msg_type_switch_state;
-        msg.data = enabled ? 1.f : 0.f;
-        publish_msg(ship, ce, msg);
-    }
-}
-
-void
-place_entity_attaches(raycast_info *rc, int index, c_entity e) {
-    auto &render_man = component_system_man.managers.renderable_component_man;
-
-    auto mesh_name = *render_man.get_instance_data(e).mesh;
-    auto sw = asset_man.get_mesh(mesh_name).sw;
-
-    for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
-        auto wt = (wire_type)wire_index;
-        for (auto i = 0u; i < sw->num_attach_points[wt]; ++i) {
-            auto mat = mat_block_face(rc->p, index ^ 1) * sw->attach_points[wt][i];
-            auto attach_index = (unsigned)ship->wire_attachments[wt].size();
-            wire_attachment wa = { mat, attach_index, 0, true };
-
-            ship->wire_attachments[wt].push_back(wa);
-            ship->entity_to_attach_lookups[wt][e].insert(attach_index);
-        }
+        comms_msg msg{
+            ce,
+            comms_msg_type_switch_state,
+            enabled ? 1.f : 0.f,
+        };
+        publish_msg(ship, *cwire_man.get_instance_data(ce).network, msg);
     }
 }
