@@ -81,8 +81,7 @@ struct ship_space {
      *
      * returns 0 on error
      */
-    static ship_space * mock_ship_space(void);
-    static ship_space * mock_ship_space_2(void);
+    static ship_space * mock_ship_space();
 
     void raycast(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_info *rc);
 

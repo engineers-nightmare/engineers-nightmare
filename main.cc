@@ -264,7 +264,7 @@ init()
 
     glUseProgram(simple_shader);
 
-    ship = ship_space::mock_ship_space_2();
+    ship = ship_space::mock_ship_space();
     if( ! ship )
         errx(1, "Ship_space::mock_ship_space failed\n");
 
