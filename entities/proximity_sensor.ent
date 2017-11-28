@@ -22,5 +22,9 @@ entity: {
             range: 5.0,
             desc: "",
         },
+        wire_power: {
+        },
+        wire_comms: {
+        },
     };
 };

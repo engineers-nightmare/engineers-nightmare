@@ -25,5 +25,9 @@ entity: {
             name: "light brightness",
             desc: "",
         },
+        wire_power: {
+        },
+        wire_comms: {
+        },
     };
 };

@@ -17,5 +17,9 @@ entity: {
         pressure_sensor: {
             type: 2,
         },
+        wire_power: {
+        },
+        wire_comms: {
+        },
     };
 };

@@ -23,5 +23,13 @@ entity: {
             flow_rate: 0.1,
             max_pressure: 1.0,
         },
+        reader: {
+            name: "desired state",
+            desc: "comms_msg_type_switch_state",
+        },
+        wire_comms: {
+        },
+        wire_power: {
+        },
     };
 };

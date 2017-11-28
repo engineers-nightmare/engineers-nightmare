@@ -16,6 +16,8 @@ entity: {
         },
         sensor_comparator: {
             compare_epsilon: 0.0001,
-        }
+        },
+        wire_comms: {
+        },
     };
 };

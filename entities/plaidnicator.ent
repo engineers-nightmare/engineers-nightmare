@@ -17,5 +17,7 @@ entity: {
         power_provider: {
             max_provided: 6.0,
         },
+        wire_power: {
+        },
     };
 };

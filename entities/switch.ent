@@ -27,5 +27,9 @@ entity: {
         },
         switch: {
         },
+        wire_power: {
+        },
+        wire_comms: {
+        }
     };
 };
