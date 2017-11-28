@@ -36,6 +36,8 @@ set(EN_SOURCES
     src/component/surface_attachment_component.cc
     src/component/switch_component.cc
     src/component/type_component.cc
+    src/component/wire_comms_component.cc
+    src/component/wire_power_component.cc
     src/config.cc
     src/input.cc
     src/imgui_impl_sdl_gl3.cc
@@ -90,6 +92,8 @@ set(EN_HEADERS
     src/component/surface_attachment_component.h
     src/component/switch_component.h
     src/component/type_component.h
+    src/component/wire_comms_component.h
+    src/component/wire_power_component.h
     src/config.h
     src/fixed_cube.h
     src/input.h
