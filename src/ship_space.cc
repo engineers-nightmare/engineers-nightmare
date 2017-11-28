@@ -169,7 +169,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_
     block *bl = nullptr;
 
     bl = this->get_block(glm::ivec3(x,y,z));
-    rc->inside = bl ? bl->type != block_empty : 0;
+    rc->inside = bl ? bl->type != block_empty && bl->type != block_untouched : 0;
 
     int stepX = d.x > 0 ? 1 : -1;
     int stepY = d.y > 0 ? 1 : -1;
@@ -232,7 +232,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_
             continue;
         }
 
-        if (rc->inside ^ (bl && bl->type != block_empty)) {
+        if (rc->inside ^ (bl && bl->type != block_empty && bl->type != block_untouched)) {
             rc->hit = true;
             rc->bl.x = x;
             rc->bl.y = y;
@@ -769,6 +769,12 @@ void ship_space::cut_out_cuboid(glm::ivec3 mins, glm::ivec3 maxs, surface_type t
             for (auto k = mins.z - 1; k <= maxs.z + 1; k++) {
                 glm::ivec3 p(i, j, k);
                 ensure_block(p);
+
+                // Convert untouched surroundings to frame
+                auto bl = get_block(p);
+                if (bl->type == block_untouched)
+                    bl->type = block_frame;
+
                 get_chunk_containing(p)->phys_chunk.valid = false;
                 get_chunk_containing(p)->render_chunk.valid = false;
             }
@@ -783,39 +789,39 @@ void ship_space::cut_out_cuboid(glm::ivec3 mins, glm::ivec3 maxs, surface_type t
 
                 if (i == mins.x) {
                     auto b = p + surface_index_to_normal(surface_xm);
-                    if (get_block(b)->type != block_empty) {
+                    if (get_block(b)->type == block_frame) {
                         set_surface(b, p, surface_xp, type);
                     }
                 }
                 if (i == maxs.x) {
                     auto b = p + surface_index_to_normal(surface_xp);
-                    if (get_block(b)->type != block_empty) {
+                    if (get_block(b)->type == block_frame) {
                         set_surface(b, p, surface_xm, type);
                     }
                 }
 
                 if (j == mins.y) {
                     auto b = p + surface_index_to_normal(surface_ym);
-                    if (get_block(b)->type != block_empty) {
+                    if (get_block(b)->type == block_frame) {
                         set_surface(b, p, surface_yp, type);
                     }
                 }
                 if (j == maxs.y) {
                     auto b = p + surface_index_to_normal(surface_yp);
-                    if (get_block(b)->type != block_empty) {
+                    if (get_block(b)->type == block_frame) {
                         set_surface(b, p, surface_ym, type);
                     }
                 }
 
                 if (k == mins.z) {
                     auto b = p + surface_index_to_normal(surface_zm);
-                    if (get_block(b)->type != block_empty) {
+                    if (get_block(b)->type == block_frame) {
                         set_surface(b, p, surface_zp, type);
                     }
                 }
                 if (k == maxs.z) {
                     auto b = p + surface_index_to_normal(surface_zp);
-                    if (get_block(b)->type != block_empty) {
+                    if (get_block(b)->type == block_frame) {
                         set_surface(b, p, surface_zm, type);
                     }
                 }

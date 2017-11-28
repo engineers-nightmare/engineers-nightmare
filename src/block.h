@@ -1,6 +1,7 @@
 #pragma once
 
 enum block_type {
+    block_untouched,
     block_empty,
     block_frame,
     block_entity,
@@ -44,7 +45,7 @@ enum surface_index : unsigned {
  * for more information see docs/ships-space.md
  */
 struct block {
-    block_type type = block_frame;
+    block_type type = block_untouched;
 
     surface_type surfs[face_count]{};
 };

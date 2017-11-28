@@ -40,7 +40,7 @@ struct remove_block_tool : tool
             return;
 
         block *bl = rc->block;
-        if (bl->type != block_empty) {
+        if (bl->type != block_empty && bl->type != block_untouched) {
             auto mesh = asset_man.get_mesh("frame");
             auto material = asset_man.get_world_texture_index("red");
 

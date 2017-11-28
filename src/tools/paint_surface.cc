@@ -26,7 +26,7 @@ paint_surface_tool::can_use(const raycast_info *rc) const {
 
     // if we've started, only allow same plane
     if (state == paint_state::started) {
-        if (other->type != block_empty) {
+        if (other->type != block_empty && other->type != block_untouched) {
             return false;
         }
 

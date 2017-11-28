@@ -53,7 +53,7 @@ struct add_block_tool : tool
         block *bl = ship->get_block(rc->p);
 
         /* can only build on the side of an existing frame */
-        if ((!bl || bl->type == block_empty) && rc->block->type == block_frame) {
+        if ((!bl || bl->type == block_empty || bl->type == block_untouched) && rc->block->type == block_frame) {
             auto mesh = asset_man.get_mesh("frame");
             auto material = asset_man.get_world_texture_index("white");
 
