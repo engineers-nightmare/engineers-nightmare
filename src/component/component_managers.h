@@ -22,6 +22,8 @@
 #include "surface_attachment_component.h"
 #include "switch_component.h"
 #include "type_component.h"
+#include "wire_comms_component.h"
+#include "wire_power_component.h"
 
 #define INITIAL_MAX_COMPONENTS 20
 
@@ -42,6 +44,8 @@ struct component_managers {
         surface_attachment_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         switch_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         type_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        wire_comms_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        wire_power_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     }
 
     door_component_manager door_component_man{};
@@ -59,6 +63,8 @@ struct component_managers {
     surface_attachment_component_manager surface_attachment_component_man{};
     switch_component_manager switch_component_man{};
     type_component_manager type_component_man{};
+    wire_comms_component_manager wire_comms_component_man{};
+    wire_power_component_manager wire_power_component_man{};
 
     std::unique_ptr<component_stub> get_stub(const char*comp_name, const config_setting_t *config) {
         if (strcmp(comp_name, "door") == 0) {
@@ -106,6 +112,12 @@ struct component_managers {
         if (strcmp(comp_name, "type") == 0) {
             return type_component_stub::from_config(config);
         }
+        if (strcmp(comp_name, "wire_comms") == 0) {
+            return wire_comms_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "wire_power") == 0) {
+            return wire_power_component_stub::from_config(config);
+        }
         assert(false);
         return nullptr;
     }
@@ -126,5 +138,7 @@ struct component_managers {
         surface_attachment_component_man.destroy_entity_instance(ce);
         switch_component_man.destroy_entity_instance(ce);
         type_component_man.destroy_entity_instance(ce);
+        wire_comms_component_man.destroy_entity_instance(ce);
+        wire_power_component_man.destroy_entity_instance(ce);
     }
 };
