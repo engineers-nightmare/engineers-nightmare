@@ -3,9 +3,6 @@
 #include <math.h>
 
 
-#define MAX_WIRE_INSTANCES 64 * 1024
-
-
 /* create an empty ship_space */
 ship_space::ship_space(void)
     : mins(), maxs(),
