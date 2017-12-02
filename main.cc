@@ -16,6 +16,7 @@
 #include <libconfig.h>
 #include <iostream>
 #include <memory>
+#include <glm/ext.hpp>
 #include "src/libconfig_shim.h"
 
 #include "src/asset_manager.h"
@@ -958,6 +959,8 @@ struct play_state : game_state {
 
 
 struct menu_state : game_state {
+    glm::ivec4 cbdata;
+
     enum class MenuState {
         Main,
         Settings,
@@ -993,7 +996,6 @@ struct menu_state : game_state {
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
     }
-
     void handle_main_menu() {
         ImGui::Begin("", nullptr, menu_flags);
         {
@@ -1011,6 +1013,41 @@ struct menu_state : game_state {
             if (ImGui::Button("Exit Game")) {
                 exit_requested = true;
             }
+            ImGui::Separator();
+            auto pos = ImGui::GetCursorScreenPos();
+            ImGui::Dummy(ImVec2{300, 300});
+            auto list = ImGui::GetWindowDrawList();
+
+            // const ImDrawList* parent_list, const ImDrawCmd* cmd
+            auto cb = [](const ImDrawList* parent_list, const ImDrawCmd* cmd) {
+                if (!cmd->UserCallbackData) {
+                    return;
+                }
+                auto rect = glm::make_vec4((int*)cmd->UserCallbackData);
+
+                glm::mat4 vm;
+                glm::mat4 pm;
+                vm = glm::lookAt(glm::vec3{1, 0, 0}, glm::vec3{0, 1, 0}, glm::vec3{0, 0, 1});
+                pm = glm::perspective(90.0f, 1.0f, 0.01f, 2.0f);
+
+                auto camera_params = frame->alloc_aligned<per_camera_params>(1);
+
+                camera_params.ptr->view_proj_matrix = pm * vm;
+                camera_params.ptr->aspect = 1.0f;
+                camera_params.bind(0, frame);
+
+                auto params = frame->alloc_aligned<mesh_instance>(1);
+                params.ptr->world_matrix = mat_rotate_mesh({0, 0, 0}, {1, 0, 0});
+                params.ptr->material = asset_man.get_world_texture_index("port");
+                params.bind(1, frame);
+
+                glUseProgram(simple_shader);
+                glViewport(rect.x, rect.y, rect.z, rect.w);
+                draw_mesh(asset_man.get_mesh("warning_light").hw);
+            };
+            cbdata = glm::ivec4{pos.x + 75, pos.y - 150, 300, 300};
+            auto m = glm::value_ptr(cbdata);
+            list->AddCallback(cb, m);
         }
         ImGui::End();
     }
