@@ -198,6 +198,12 @@
     <ClCompile Include="src\entity_utils.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\wire_comms_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\wire_power_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -364,6 +370,12 @@
     </ClInclude>
     <ClInclude Include="src\imgui_impl_sdl_gl3.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\wire_comms_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\wire_power_component.h">
+      <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

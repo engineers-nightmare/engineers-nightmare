@@ -3,6 +3,7 @@
 #include <glm/glm.hpp> /* ivec3 */
 #include <set>
 #include <unordered_map>
+#include <array>
 
 #include "block.h"
 #include "common.h"
