@@ -189,23 +189,14 @@ tick_doors(ship_space *ship)
 void
 tick_power_consumers(ship_space *ship) {
     auto &power_man = component_system_man.managers.power_component_man;
-    auto &pwire_man = component_system_man.managers.wire_power_component_man;
 
     for (auto i = 0u; i < power_man.buffer.num; i++) {
-        auto ce = power_man.instance_pool.entity[i];
-        assert(pwire_man.exists(ce));
-
         if (power_man.instance_pool.max_required_power[i] == 0 &&
             power_man.instance_pool.required_power[i] == 0)
             continue;
-        power_man.instance_pool.powered[i] = false;
 
-        auto const &pwire = pwire_man.get_instance_data(ce);
-        auto const &net = ship->get_power_network(*pwire.network);
-
-        if (net.total_power >= net.total_draw && net.total_power > 0) {
-            power_man.instance_pool.powered[i] = true;
-        }
+        auto const &net = ship->get_power_network(power_man.instance_pool.network[i]);
+        power_man.instance_pool.powered[i] = net.total_power >= net.total_draw && net.total_power > 0;
     }
 }
 
@@ -235,12 +226,8 @@ tick_light_components(ship_space *ship) {
         auto new_intensity = *power.powered ? *(light.requested_intensity) : 0.0f;
 
         if (old_intensity != new_intensity) {
-
             *(light.intensity) = new_intensity;
             *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
-
-//            auto pos = *pos_man.get_instance_data(ce).position;
-//            auto block_pos = get_coord_containing(pos);
         }
     }
 }

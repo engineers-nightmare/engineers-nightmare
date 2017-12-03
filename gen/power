@@ -3,3 +3,4 @@ stub,float,float,,max_required_power,
 body,float,required_power,0
 body,bool,powered,false
 body,float,max_required_power,0
+body,unsigned,network,0

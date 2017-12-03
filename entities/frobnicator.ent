@@ -29,7 +29,5 @@ entity: {
         },
         wire_comms: {
         },
-        wire_power: {
-        },
     };
 };

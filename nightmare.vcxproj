@@ -141,7 +141,6 @@
     <ClCompile Include="src\component\switch_component.cc" />
     <ClCompile Include="src\component\type_component.cc" />
     <ClCompile Include="src\component\wire_comms_component.cc" />
-    <ClCompile Include="src\component\wire_power_component.cc" />
     <ClCompile Include="src\config.cc" />
     <ClCompile Include="src\entity_utils.cc" />
     <ClCompile Include="src\imgui\imgui.cpp" />
@@ -199,7 +198,6 @@
     <ClInclude Include="src\component\switch_component.h" />
     <ClInclude Include="src\component\type_component.h" />
     <ClInclude Include="src\component\wire_comms_component.h" />
-    <ClInclude Include="src\component\wire_power_component.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\fixed_cube.h" />
     <ClInclude Include="src\imgui\imconfig.h" />

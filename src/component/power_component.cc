@@ -22,6 +22,7 @@ power_component_manager::create_component_instance_data(unsigned count) {
     size = sizeof(float) * count + align_size<float>(size);
     size = sizeof(bool) * count + align_size<bool>(size);
     size = sizeof(float) * count + align_size<float>(size);
+    size = sizeof(unsigned) * count + align_size<unsigned>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -33,11 +34,13 @@ power_component_manager::create_component_instance_data(unsigned count) {
     new_pool.required_power = align_ptr((float *)(new_pool.entity + count));
     new_pool.powered = align_ptr((bool *)(new_pool.required_power + count));
     new_pool.max_required_power = align_ptr((float *)(new_pool.powered + count));
+    new_pool.network = align_ptr((unsigned *)(new_pool.max_required_power + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.required_power, instance_pool.required_power, buffer.num * sizeof(float));
     memcpy(new_pool.powered, instance_pool.powered, buffer.num * sizeof(bool));
     memcpy(new_pool.max_required_power, instance_pool.max_required_power, buffer.num * sizeof(float));
+    memcpy(new_pool.network, instance_pool.network, buffer.num * sizeof(unsigned));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -55,6 +58,7 @@ power_component_manager::destroy_instance(instance i) {
     instance_pool.required_power[i.index] = instance_pool.required_power[last_index];
     instance_pool.powered[i.index] = instance_pool.powered[last_index];
     instance_pool.max_required_power[i.index] = instance_pool.max_required_power[last_index];
+    instance_pool.network[i.index] = instance_pool.network[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
@@ -86,6 +90,8 @@ power_component_stub::assign_component_to_entity(c_entity entity) {
     *data.powered = false;
 
     *data.max_required_power = 0;
+
+    *data.network = 0;
 
     *data.required_power = required_power;
 

@@ -29,7 +29,6 @@ void
 calculate_power_wires(ship_space *ship) {
     auto &power_man = component_system_man.managers.power_component_man;
     auto &power_provider_man = component_system_man.managers.power_provider_component_man;
-    auto &pwire_man = component_system_man.managers.wire_power_component_man;
 
     for (auto &net : ship->power_networks) {
         net = {};
@@ -38,10 +37,7 @@ calculate_power_wires(ship_space *ship) {
     /* walk power consumers */
     /* invariant: at most /one/ power wire is attached. */
     for (auto i = 0u; i < power_man.buffer.num; i++) {
-        auto ce = power_man.instance_pool.entity[i];
-
-        auto const &pwire = pwire_man.get_instance_data(ce);
-        auto &net = ship->get_power_network(*pwire.network);
+        auto &net = ship->get_power_network(power_man.instance_pool.network[i]);
 
         net.num_consumers++;
         net.peak_draw += power_man.instance_pool.max_required_power[i];
@@ -51,11 +47,7 @@ calculate_power_wires(ship_space *ship) {
     /* walk power producers */
     /* invariant: at most /one/ power wire is attached. */
     for (auto i = 0u; i < power_provider_man.buffer.num; i++) {
-        auto ce = power_provider_man.instance_pool.entity[i];
-
-        auto const &pwire = pwire_man.get_instance_data(ce);
-        auto &net = ship->get_power_network(*pwire.network);
-
+        auto &net = ship->get_power_network(power_provider_man.instance_pool.network[i]);
         // TODO: model provided vs max_provided here.
         net.total_power += power_provider_man.instance_pool.max_provided[i];
         net.num_providers++;

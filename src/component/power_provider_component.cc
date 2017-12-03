@@ -21,6 +21,7 @@ power_provider_component_manager::create_component_instance_data(unsigned count)
     size_t size = sizeof(c_entity) * count;
     size = sizeof(float) * count + align_size<float>(size);
     size = sizeof(float) * count + align_size<float>(size);
+    size = sizeof(unsigned) * count + align_size<unsigned>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -31,10 +32,12 @@ power_provider_component_manager::create_component_instance_data(unsigned count)
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.max_provided = align_ptr((float *)(new_pool.entity + count));
     new_pool.provided = align_ptr((float *)(new_pool.max_provided + count));
+    new_pool.network = align_ptr((unsigned *)(new_pool.provided + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.max_provided, instance_pool.max_provided, buffer.num * sizeof(float));
     memcpy(new_pool.provided, instance_pool.provided, buffer.num * sizeof(float));
+    memcpy(new_pool.network, instance_pool.network, buffer.num * sizeof(unsigned));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -51,6 +54,7 @@ power_provider_component_manager::destroy_instance(instance i) {
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
     instance_pool.max_provided[i.index] = instance_pool.max_provided[last_index];
     instance_pool.provided[i.index] = instance_pool.provided[last_index];
+    instance_pool.network[i.index] = instance_pool.network[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
@@ -80,6 +84,8 @@ power_provider_component_stub::assign_component_to_entity(c_entity entity) {
     *data.max_provided = 0;
 
     *data.provided = 0;
+
+    *data.network = 0;
 
     *data.max_provided = max_provided;
 };

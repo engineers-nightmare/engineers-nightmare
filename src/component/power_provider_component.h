@@ -12,6 +12,7 @@ struct power_provider_component_manager : component_manager {
         c_entity *entity;
         float *max_provided;
         float *provided;
+        unsigned *network;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -26,6 +27,8 @@ struct power_provider_component_manager : component_manager {
         d.max_provided = instance_pool.max_provided + inst.index;
 
         d.provided = instance_pool.provided + inst.index;
+
+        d.network = instance_pool.network + inst.index;
 
         return d;
     }

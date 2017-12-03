@@ -201,9 +201,6 @@
     <ClCompile Include="src\component\wire_comms_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
-    <ClCompile Include="src\component\wire_power_component.cc">
-      <Filter>Source Files\component</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -372,9 +369,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\component\wire_comms_component.h">
-      <Filter>Header Files\component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\component\wire_power_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
