@@ -21,6 +21,7 @@ set(EN_SOURCES
     src/blob.cc
     src/char.cc
     src/component/component_system_manager.cc
+    src/component/display_component.cc
     src/component/door_component.cc
     src/component/gas_producer_component.cc
     src/component/light_component.cc
@@ -76,6 +77,7 @@ set(EN_HEADERS
     src/component/component_manager.h
     src/component/component_system_manager.h
     src/component/component_managers.h
+    src/component/display_component.h
     src/component/door_component.h
     src/component/gas_producer_component.h
     src/component/light_component.h

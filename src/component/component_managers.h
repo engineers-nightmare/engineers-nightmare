@@ -7,6 +7,7 @@
 
 #include "component_manager.h"
 
+#include "display_component.h"
 #include "door_component.h"
 #include "gas_producer_component.h"
 #include "light_component.h"
@@ -28,6 +29,7 @@
 
 struct component_managers {
     component_managers() {
+        display_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         door_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         gas_producer_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         light_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
@@ -46,6 +48,7 @@ struct component_managers {
         wire_comms_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
     }
 
+    display_component_manager display_component_man{};
     door_component_manager door_component_man{};
     gas_producer_component_manager gas_producer_component_man{};
     light_component_manager light_component_man{};
@@ -64,6 +67,9 @@ struct component_managers {
     wire_comms_component_manager wire_comms_component_man{};
 
     std::unique_ptr<component_stub> get_stub(const char*comp_name, const config_setting_t *config) {
+        if (strcmp(comp_name, "display") == 0) {
+            return display_component_stub::from_config(config);
+        }
         if (strcmp(comp_name, "door") == 0) {
             return door_component_stub::from_config(config);
         }
@@ -117,6 +123,7 @@ struct component_managers {
     }
 
     void destroy_entity_instance(c_entity ce) {
+        display_component_man.destroy_entity_instance(ce);
         door_component_man.destroy_entity_instance(ce);
         gas_producer_component_man.destroy_entity_instance(ce);
         light_component_man.destroy_entity_instance(ce);

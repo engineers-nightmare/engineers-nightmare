@@ -125,6 +125,7 @@
     <ClCompile Include="src\blob.cc" />
     <ClCompile Include="src\char.cc" />
     <ClCompile Include="src\component\component_system_manager.cc" />
+    <ClCompile Include="src\component\display_component.cc" />
     <ClCompile Include="src\component\door_component.cc" />
     <ClCompile Include="src\component\gas_producer_component.cc" />
     <ClCompile Include="src\component\light_component.cc" />
@@ -182,6 +183,7 @@
     <ClInclude Include="src\component\component_managers.h" />
     <ClInclude Include="src\component\component_system_manager.h" />
     <ClInclude Include="src\component\c_entity.h" />
+    <ClInclude Include="src\component\display_component.h" />
     <ClInclude Include="src\component\door_component.h" />
     <ClInclude Include="src\component\gas_producer_component.h" />
     <ClInclude Include="src\component\light_component.h" />
