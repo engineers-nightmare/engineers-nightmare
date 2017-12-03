@@ -28,8 +28,6 @@ struct tool
     static tool *create_remove_surface_tool();
     static tool *create_fire_projectile_tool(player *pl);
     static tool *create_remove_surface_entity_tool();
-    static tool *create_add_block_entity_tool();
-    static tool *create_add_surface_entity_tool();
     static tool *create_add_entity_tool();
 };
 
