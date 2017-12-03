@@ -245,9 +245,9 @@ import glob
 
 def main():
 
-    files = [f for f in glob.glob('gen/comp/*') if not f.endswith('.py')]
+    files = [f for f in glob.glob('gen/comp/*')]
 
-    comp_names = sorted([f.replace('gen/comp/', '').replace('gen\\comp\\', '') for f in files])
+    comp_names = sorted([os.path.basename(f) for f in files])
     print("  header: src/component/component_managers.h")
     with open("src/component/component_managers.h", "w") as g:
         g.write(man_header_1)
@@ -271,7 +271,7 @@ def main():
         print("Genning from %s to " % fl)
         stub_fields = []
         body_fields = []
-        component_name = fl.split(os.sep)[-1]
+        component_name = os.path.basename(fl)
         with open(fl, 'r') as f:
             prev = 'entity';
             for l in f:
@@ -321,7 +321,7 @@ def main():
                 g.write(impl_template_13_each % fi)
             g.write(impl_template_14 % fc)
 
-    return 0;
+    return 0
 
 if __name__ == '__main__':
     sys.exit(main())

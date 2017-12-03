@@ -64,6 +64,7 @@ set(EN_SOURCES
     src/wiring/wiring.cc
     src/wiring/wiring_data.cc
     src/entity_utils.cc
+    src/enums/enums.cc
 )
 
 set(EN_HEADERS
@@ -120,6 +121,7 @@ set(EN_HEADERS
     src/wiring/wiring.h
     src/tinydir.h
     src/entity_utils.h
+    src/enums/enums.h
 )
 
 set(IMGUI_SOURCES

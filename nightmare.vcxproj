@@ -144,6 +144,7 @@
     <ClCompile Include="src\component\wire_comms_component.cc" />
     <ClCompile Include="src\config.cc" />
     <ClCompile Include="src\entity_utils.cc" />
+    <ClCompile Include="src\enums\enums.cc" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="src\component\type_component.h" />
     <ClInclude Include="src\component\wire_comms_component.h" />
     <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\enums\enums.h" />
     <ClInclude Include="src\fixed_cube.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
     <ClInclude Include="src\imgui\imgui.h" />
@@ -263,51 +265,6 @@
       <FileType>Text</FileType>
     </None>
     <None Include="entities\warning_light.ent">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\door">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\gas_producer">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\light">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\physics">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\power">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\power_provider">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\pressure_sensor">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\proximity_sensor">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\reader">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\relative_position">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\renderable">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\sensor_comparator">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\surface_attachment">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\switch">
-      <FileType>Text</FileType>
-    </None>
-    <None Include="gen\type">
       <FileType>Text</FileType>
     </None>
   </ItemGroup>

@@ -37,9 +37,6 @@
     <Filter Include="Header Files\tools">
       <UniqueIdentifier>{b604ea93-9d24-4477-9bb4-5d14c8b98071}</UniqueIdentifier>
     </Filter>
-    <Filter Include="gen">
-      <UniqueIdentifier>{9f4400b4-3ce4-46cb-8511-8e3f84ad5aa9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\entities">
       <UniqueIdentifier>{1e54a95e-32c7-4662-aadc-f28ca9574a28}</UniqueIdentifier>
     </Filter>
@@ -203,6 +200,9 @@
     </ClCompile>
     <ClCompile Include="src\component\display_component.cc">
       <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\enums\enums.cc">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -377,53 +377,11 @@
     <ClInclude Include="src\component\display_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
+    <ClInclude Include="src\enums\enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="gen\door">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\gas_producer">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\light">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\physics">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\power">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\power_provider">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\pressure_sensor">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\proximity_sensor">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\reader">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\relative_position">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\renderable">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\sensor_comparator">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\surface_attachment">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\switch">
-      <Filter>gen</Filter>
-    </None>
-    <None Include="gen\type">
-      <Filter>gen</Filter>
-    </None>
     <None Include="entities\display.ent">
       <Filter>Header Files\entities</Filter>
     </None>
