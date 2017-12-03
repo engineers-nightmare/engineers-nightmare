@@ -173,7 +173,8 @@ prepare_chunks()
 
 GLuint render_fbo;
 
-std::array<ImGuiContext*, 3> imgui_contexts{};
+ImGuiContext *default_context;
+std::array<ImGuiContext*, 2> offscreen_contexts{};
 
 void
 init()
@@ -214,17 +215,14 @@ init()
     // which matches render_fbo, but shouldn't be trusted
     asset_man.load_assets();
 
-    for (unsigned i = 0; i < imgui_contexts.max_size(); ++i) {
-        if (i == 0) {
-            imgui_contexts[i] = ImGui::GetCurrentContext();
-        }
-        else {
-            imgui_contexts[i] = ImGui::CreateContext();
-            ImGui::SetCurrentContext(imgui_contexts[i]);
-            ImGui_ImplSdlGL3_Init(wnd.ptr);
-        }
+    ImGui_ImplSdlGL3_Init(wnd.ptr);
+    default_context = ImGui::GetCurrentContext();
+    for (auto &ctx : offscreen_contexts) {
+        ctx = ImGui::CreateContext();
+        ImGui::SetCurrentContext(ctx);
+        ImGui_ImplSdlGL3_Init(wnd.ptr);
     }
-    ImGui::SetCurrentContext(imgui_contexts[0]);
+    ImGui::SetCurrentContext(default_context);
 
 
     // must be called after asset_man is setup
@@ -1023,7 +1021,7 @@ struct menu_state : game_state {
     }
 
     void render(frame_data *frame) override {
-        ImGui::SetCurrentContext(imgui_contexts[0]);
+        ImGui::SetCurrentContext(default_context);
         ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
 
         // center on screen
@@ -1138,7 +1136,7 @@ run()
             memset(mouse_axes, 0, input_mouse_axes_count);
         }
 
-        ImGui::SetCurrentContext(imgui_contexts[1]);
+        ImGui::SetCurrentContext(offscreen_contexts[0]);
         ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
 
         auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
@@ -1166,7 +1164,7 @@ run()
             ImGui::Render();
         }
 
-        ImGui::SetCurrentContext(imgui_contexts[2]);
+        ImGui::SetCurrentContext(offscreen_contexts[1]);
         ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
         ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
         {
