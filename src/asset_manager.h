@@ -14,7 +14,6 @@ class asset_manager
     std::array<std::array<std::string, face_count>, 256> surf_to_mesh;
 
     std::unordered_map<std::string, unsigned> world_texture_to_index;
-    std::unordered_map<std::string, unsigned> render_texture_to_index;
 
     texture_set *world_textures{ nullptr };
     texture_set *render_textures{nullptr};
@@ -29,7 +28,6 @@ public:
     void load_assets();
 
     unsigned get_world_texture_index(const std::string &) const;
-    unsigned get_render_texture_index(const std::string &) const;
     mesh_data & get_mesh(const std::string &);
 
     mesh_data & get_surface_mesh(unsigned surface_index, unsigned surface_type);

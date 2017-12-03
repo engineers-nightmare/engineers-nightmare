@@ -160,17 +160,10 @@ void asset_manager::load_assets() {
         mesh.second.upload_mesh();
         mesh.second.load_physics();
     }
-
-    render_texture_to_index["render"] = 0;
-    render_texture_to_index["render2"] = 1;
 }
 
 unsigned asset_manager::get_world_texture_index(const std::string & tex) const {
     return world_texture_to_index.at(tex);
-}
-
-unsigned asset_manager::get_render_texture_index(const std::string & tex) const {
-    return render_texture_to_index.at(tex);
 }
 
 mesh_data & asset_manager::get_mesh(const std::string & mesh) {
