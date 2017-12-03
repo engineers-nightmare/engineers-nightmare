@@ -7,6 +7,9 @@ entity: {
             mesh: "panel_4x4",
             material: "display",
         },
+        display: {
+            mesh: "panel_4x4",
+        },
         relative_position: {
         },
         physics: {
