@@ -4,7 +4,7 @@ entity: {
             name: "display",
         },
         renderable: {
-            mesh: "panel_4x4",
+            mesh: "display",
             material: "display",
         },
         display: {
