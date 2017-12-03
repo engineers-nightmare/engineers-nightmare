@@ -4,7 +4,6 @@ enum block_type {
     block_untouched,
     block_empty,
     block_frame,
-    block_entity,
 };
 
 enum surface_type : unsigned char {

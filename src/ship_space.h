@@ -137,16 +137,6 @@ struct ship_space {
     void remove_block(glm::ivec3 p) {
         block *bl = get_block(p);
 
-        /* if there was a block entity here, find and remove it. block
-         * ents are "attached" to the zm surface */
-        if (bl->type == block_entity) {
-            /* TODO: should this even allow entity removal? This may be nothing more than
-             * historical accident.
-             */
-            remove_ents_from_surface(p, surface_zm);
-            return;
-        }
-
         /* block removal */
         bl->type = block_empty;
 

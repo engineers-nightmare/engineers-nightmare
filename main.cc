@@ -313,27 +313,8 @@ resize(int width, int height)
 
 void
 destroy_entity(c_entity e) {
-    auto &surface_man = component_system_man.managers.surface_attachment_component_man;
     auto &door_man = component_system_man.managers.door_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
-
-    /* removing block influence from this ent */
-    /* this should really be componentified */
-    if (surface_man.exists(e)) {
-        auto b = *surface_man.get_instance_data(e).block;
-
-        //todo: fix height here. hardcoded is wrong
-        auto height = 1;
-        for (auto i = 0; i < height; i++) {
-            auto p = b + glm::ivec3(0, 0, i);
-            block *bl = ship->get_block(p);
-            assert(bl);
-            if (bl->type == block_entity) {
-                printf("emptying %d,%d,%d on remove of ent\n", p.x, p.y, p.z);
-                bl->type = block_empty;
-            }
-        }
-    }
 
     if (door_man.exists(e)) {
         /* make sure the door is /open/ -- no magic surfaces left lying around. */
