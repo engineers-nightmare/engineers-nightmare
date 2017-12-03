@@ -172,7 +172,6 @@ prepare_chunks()
 }
 
 GLuint render_fbo;
-GLenum draw_buffers[1] = { GL_COLOR_ATTACHMENT0 };
 
 std::array<ImGuiContext*, 3> imgui_contexts{};
 
@@ -214,25 +213,6 @@ init()
     // todo: asset_man uses hardcoded framebuffer value of 1
     // which matches render_fbo, but shouldn't be trusted
     asset_man.load_assets();
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_fbo);
-
-    asset_man.bind_render_textures(0);
-    glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 0);
-    glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 1);
-    auto fboStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "Framebuffer not complete: " << fboStatus << std::endl;
-    {
-        auto glstatus = glGetError();
-        if (glstatus != GL_NO_ERROR) {
-            std::cout << "Error in GL call: " << glstatus << std::endl;
-        }
-    }
-    assert(glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
-    glDrawBuffers(1, draw_buffers);
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     for (unsigned i = 0; i < imgui_contexts.max_size(); ++i) {
         if (i == 0) {
