@@ -104,39 +104,6 @@ tick_gas_producers(ship_space *ship)
 }
 
 void
-set_door_state(ship_space *ship, c_entity ce, surface_type s)
-{
-    auto &door_man = component_system_man.managers.door_component_man;
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
-
-    auto position = pos_man.get_instance_data(ce);
-    auto pos = glm::ivec3(*position.position);
-    auto door = door_man.get_instance_data(ce);
-
-    auto from_surface = s == surface_none ? surface_door : surface_none;
-
-    /* todo: this has no support for rotation whatsoever */
-    for (auto h = 0; h < *door.height; ++h) {
-        auto ym = glm::ivec3(pos.x, pos.y - 1, pos.z);
-        auto yp = glm::ivec3(pos.x, pos.y + 1, pos.z);
-
-        /* we'll be calling ensure in set/remove surfaces anyway */
-        auto bl = ship->ensure_block(pos);
-        auto surfs = bl->surfs;
-
-        if (surfs[surface_yp] == from_surface) {
-            ship->set_surface(pos, yp, surface_yp, s);
-        }
-
-        if (surfs[surface_ym] == from_surface) {
-            ship->set_surface(pos, ym, surface_ym, s);
-        }
-
-        ++pos.z;
-    }
-}
-
-void
 tick_doors(ship_space *ship)
 {
     auto &pos_man = component_system_man.managers.relative_position_component_man;
@@ -173,15 +140,6 @@ tick_doors(ship_space *ship)
         door_man.instance_pool.pos[i] -= delta;
 
         auto pos = door_man.instance_pool.pos[i];
-
-        if (desired_state == 0 && old_pos != 0 && pos == 0) {
-            /* did we just finish closing? */
-            set_door_state(ship, ce, surface_door);
-        }
-        else if (desired_state == 1 && old_pos == 0 && pos != 0) {
-            /* just started opening? */
-            set_door_state(ship, ce, surface_none);
-        }
     }
 }
 

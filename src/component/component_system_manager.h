@@ -52,6 +52,3 @@ draw_renderables(frame_data *frame);
 
 void
 draw_doors(frame_data *frame);
-
-void
-set_door_state(ship_space *ship, c_entity ce, surface_type s);

@@ -313,19 +313,12 @@ resize(int width, int height)
 
 void
 destroy_entity(c_entity e) {
-    auto &door_man = component_system_man.managers.door_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
-
-    if (door_man.exists(e)) {
-        /* make sure the door is /open/ -- no magic surfaces left lying around. */
-        set_door_state(ship, e, surface_none);
-    }
 
     if (physics_man.exists(e)) {
         auto phys_data = physics_man.get_instance_data(e);
         auto *per = (phys_ent_ref *) (*phys_data.rigid)->getUserPointer();
         delete per;
-
 
         teardown_static_physics_setup(nullptr, nullptr, phys_data.rigid);
     }
