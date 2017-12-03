@@ -211,8 +211,6 @@ init()
 
     glGenFramebuffers(1, &render_fbo);
 
-    // todo: asset_man uses hardcoded framebuffer value of 1
-    // which matches render_fbo, but shouldn't be trusted
     asset_man.load_assets();
 
     ImGui_ImplSdlGL3_Init(wnd.ptr);
