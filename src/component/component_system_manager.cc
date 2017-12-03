@@ -463,39 +463,38 @@ draw_renderables(frame_data *frame)
 {
     auto &render_man = component_system_man.managers.renderable_component_man;
     auto &pos_man = component_system_man.managers.relative_position_component_man;
-    auto &type_man = component_system_man.managers.type_component_man;
+    auto &display_man = component_system_man.managers.display_component_man;
 
     for (auto i = 0u; i < render_man.buffer.num; i++) {
         auto ce = render_man.instance_pool.entity[i];
         auto & material = render_man.instance_pool.material[i];
         auto & mesh_name = render_man.instance_pool.mesh[i];
         auto & mesh = asset_man.get_mesh(mesh_name);
-        auto & mat = *pos_man.get_instance_data(ce).mat;
-        auto & name = *type_man.get_instance_data(ce).name;
-
-        auto isDisplay1 = strcmp(name, "display") == 0;
-        auto isDisplay2 = strcmp(name, "display2") == 0;
-        if (isDisplay1 || isDisplay2) {
-            asset_man.bind_render_textures(0);
-            if (isDisplay1) {
-                material = asset_man.get_render_texture_index("render");
-            }
-            if (isDisplay2) {
-                material = asset_man.get_render_texture_index("render2");
-            }
-        }
 
         auto params = frame->alloc_aligned<mesh_instance>(1);
-        params.ptr->world_matrix = mat;
+        params.ptr->world_matrix = *pos_man.get_instance_data(ce).mat;
         params.ptr->material = material;
         params.bind(1, frame);
 
         draw_mesh(mesh.hw);
-
-        if (isDisplay1 || isDisplay2) {
-            asset_man.bind_world_textures(0);
-        }
     }
+
+    asset_man.bind_render_textures(0);
+
+    for (auto i = 0u; i < display_man.buffer.num; i++) {
+        auto ce = display_man.instance_pool.entity[i];
+        auto & mesh_name = display_man.instance_pool.mesh[i];
+        auto & mesh = asset_man.get_mesh(mesh_name);
+
+        auto params = frame->alloc_aligned<mesh_instance>(1);
+        params.ptr->world_matrix = *pos_man.get_instance_data(ce).mat;
+        params.ptr->material = i;
+        params.bind(1, frame);
+
+        draw_mesh(mesh.hw);
+    }
+
+    asset_man.bind_world_textures(0);
 }
 
 
