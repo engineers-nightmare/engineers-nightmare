@@ -103,14 +103,14 @@ def main():
                 header.write("template<> %s get_enum<%s>(const char *e);\n" % (enum_name, enum_name))
 
 
-                source.write("// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n")
                 source.write("\n")
+                source.write("// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n")
                 source.write("const char* get_enum_string(%s value) {\n" % enum_name)
                 source.write(tab + "switch(value)\n")
                 source.write(tab + "{\n")
                 for field_name in fields.keys():
                     source.write(tab + "case %s::%s:\n" % (enum_name, field_name))
-                    source.write(tab + tab + "return \"%s::%s\";\n" % (enum_name, field_name))
+                    source.write(tab + tab + "return \"%s\";\n" % field_name)
                 source.write(tab + "default:\n")
                 source.write(tab + tab + "assert(false);\n")
                 source.write(tab + tab + "return nullptr;\n")
@@ -118,13 +118,14 @@ def main():
                 source.write("}\n")
                 source.write("\n")
                 source.write("template<> %s get_enum<%s>(const char *e) {\n" % (enum_name, enum_name))
-                source.write(tab + "auto _%s{%s::invalid};\n" % (enum_name, enum_name))
+                source.write(tab + "auto val{%s::invalid};\n" % enum_name)
                 for field_name in fields.keys():
-                    source.write(tab + "if (!strcmp(e, \"%s::%s\")) {\n" % (enum_name, field_name))
-                    source.write(tab + tab + "_%s = %s::%s;\n" % (enum_name, enum_name, field_name))
+                    source.write(tab + "if (!strcmp(e, \"%s\")) {\n" % field_name)
+                    source.write(tab + tab + "val = %s::%s;\n" % (enum_name, field_name))
                     source.write(tab + "}\n")
-                source.write(tab + "return _%s;\n" % enum_name)
-                source.write("}\n\n")
+                source.write(tab + "return val;\n")
+                source.write("}\n")
+                source.write("\n")
 
     return 0
 
