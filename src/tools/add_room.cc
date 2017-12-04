@@ -22,11 +22,9 @@ const static std::array<glm::ivec3, 3> room_sizes{glm::ivec3(3, 3, 3),
                                                   glm::ivec3(7, 7, 3),
 };
 
-const static std::set<surface_index> valid_directions{surface_xp,
-                                                      surface_xm,
-                                                      surface_yp,
-                                                      surface_ym
-};
+const static uint32_t valid_directions =
+    (1<<surface_xp) | (1<<surface_xm) |
+    (1<<surface_yp) | (1<<surface_ym);
 
 struct add_room_tool : tool {
     unsigned room_size = 0;
@@ -42,7 +40,7 @@ struct add_room_tool : tool {
             return false;
         }
 
-        return valid_directions.count((surface_index)index) > 0 &&
+        return (valid_directions & (1<<index)) &&
             bl && bl->surfs[index] != surface_none;
     }
 
