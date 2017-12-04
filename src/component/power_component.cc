@@ -83,6 +83,7 @@ power_component_stub::assign_component_to_entity(c_entity entity) {
     auto &man = component_system_man.managers.power_component_man;
 
     man.assign_entity(entity);
+
     auto data = man.get_instance_data(entity);        
 
     *data.required_power = 0;

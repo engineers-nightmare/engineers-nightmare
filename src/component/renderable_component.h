@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "component_manager.h"
+#include "../enums/enums.h"
 
 struct renderable_component_manager : component_manager {
     struct instance_data {

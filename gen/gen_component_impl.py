@@ -72,6 +72,7 @@ header_template_1="""#pragma once
 #include <memory>
 
 #include "component_manager.h"
+#include "../enums/enums.h"
 
 struct %s_component_manager : component_manager {
     struct instance_data {
@@ -210,6 +211,9 @@ void
     auto &man = component_system_man.managers.%(comp_name)s_component_man;
 
     man.assign_entity(entity);
+"""
+
+impl_template_9_1_if_body="""
     auto data = man.get_instance_data(entity);        
 """
 
@@ -312,10 +316,13 @@ def main():
             for fi in body_fields:
                 g.write(impl_template_8_each_body % fi)
             g.write(impl_template_9 % fc)
+            if body_fields:
+                g.write(impl_template_9_1_if_body)
             for fi in body_fields:
                 g.write(impl_template_10_each_body % fi)
-            for fi in stub_fields:
-                g.write(impl_template_11_each_stub % fi)
+            if body_fields:
+                for fi in stub_fields:
+                    g.write(impl_template_11_each_stub % fi)
             g.write(impl_template_12 % fc)
             for fi in stub_fields:
                 g.write(impl_template_13_each % fi)

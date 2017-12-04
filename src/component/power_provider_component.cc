@@ -79,6 +79,7 @@ power_provider_component_stub::assign_component_to_entity(c_entity entity) {
     auto &man = component_system_man.managers.power_provider_component_man;
 
     man.assign_entity(entity);
+
     auto data = man.get_instance_data(entity);        
 
     *data.max_provided = 0;

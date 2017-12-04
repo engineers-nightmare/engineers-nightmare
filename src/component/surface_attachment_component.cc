@@ -75,6 +75,7 @@ surface_attachment_component_stub::assign_component_to_entity(c_entity entity) {
     auto &man = component_system_man.managers.surface_attachment_component_man;
 
     man.assign_entity(entity);
+
     auto data = man.get_instance_data(entity);        
 
     *data.block = glm::ivec3(0);
