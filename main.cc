@@ -203,7 +203,6 @@ init()
 
     asset_man.load_assets();
 
-    ImGui_ImplSdlGL3_Init(wnd.ptr);
     default_context = ImGui::GetCurrentContext();
     for (auto &ctx : offscreen_contexts) {
         ctx = ImGui::CreateContext();
@@ -211,7 +210,6 @@ init()
         ImGui_ImplSdlGL3_Init(wnd.ptr);
     }
     ImGui::SetCurrentContext(default_context);
-
 
     // must be called after asset_man is setup
     mesher_init();
