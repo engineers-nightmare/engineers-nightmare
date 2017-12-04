@@ -5,19 +5,19 @@
 #include <cassert>
 #include <cstring>
 
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 const char* get_enum_string(placement value) {
     switch(value)
     {
     case placement::full_block_snapped:
-        return "placement::full_block_snapped";
+        return "full_block_snapped";
     case placement::half_block_snapped:
-        return "placement::half_block_snapped";
+        return "half_block_snapped";
     case placement::quarter_block_snapped:
-        return "placement::quarter_block_snapped";
+        return "quarter_block_snapped";
     case placement::eighth_block_snapped:
-        return "placement::eighth_block_snapped";
+        return "eighth_block_snapped";
     default:
         assert(false);
         return nullptr;
@@ -25,33 +25,43 @@ const char* get_enum_string(placement value) {
 }
 
 template<> placement get_enum<placement>(const char *e) {
-    auto _placement{placement::invalid};
-    if (!strcmp(e, "placement::full_block_snapped")) {
-        _placement = placement::full_block_snapped;
+    auto val{placement::invalid};
+    if (!strcmp(e, "full_block_snapped")) {
+        val = placement::full_block_snapped;
     }
-    if (!strcmp(e, "placement::half_block_snapped")) {
-        _placement = placement::half_block_snapped;
+    if (!strcmp(e, "half_block_snapped")) {
+        val = placement::half_block_snapped;
     }
-    if (!strcmp(e, "placement::quarter_block_snapped")) {
-        _placement = placement::quarter_block_snapped;
+    if (!strcmp(e, "quarter_block_snapped")) {
+        val = placement::quarter_block_snapped;
     }
-    if (!strcmp(e, "placement::eighth_block_snapped")) {
-        _placement = placement::eighth_block_snapped;
+    if (!strcmp(e, "eighth_block_snapped")) {
+        val = placement::eighth_block_snapped;
     }
-    return _placement;
+    assert(val != placement::invalid);
+    return val;
+}
+
+placement config_setting_get_placement(const config_setting_t *setting) {
+    const char *str = config_setting_get_string(setting);
+    return get_enum<placement>(str);
+}
+
+int config_setting_set_placement(config_setting_t *setting, placement value) {
+    auto str = get_enum_string(value);
+    return (config_setting_set_string(setting, str));
 }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
 const char* get_enum_string(rotation value) {
     switch(value)
     {
     case rotation::axis_aligned:
-        return "rotation::axis_aligned";
+        return "axis_aligned";
     case rotation::rot_45:
-        return "rotation::rot_45";
+        return "rot_45";
     case rotation::rot_15:
-        return "rotation::rot_15";
+        return "rot_15";
     default:
         assert(false);
         return nullptr;
@@ -59,16 +69,26 @@ const char* get_enum_string(rotation value) {
 }
 
 template<> rotation get_enum<rotation>(const char *e) {
-    auto _rotation{rotation::invalid};
-    if (!strcmp(e, "rotation::axis_aligned")) {
-        _rotation = rotation::axis_aligned;
+    auto val{rotation::invalid};
+    if (!strcmp(e, "axis_aligned")) {
+        val = rotation::axis_aligned;
     }
-    if (!strcmp(e, "rotation::rot_45")) {
-        _rotation = rotation::rot_45;
+    if (!strcmp(e, "rot_45")) {
+        val = rotation::rot_45;
     }
-    if (!strcmp(e, "rotation::rot_15")) {
-        _rotation = rotation::rot_15;
+    if (!strcmp(e, "rot_15")) {
+        val = rotation::rot_15;
     }
-    return _rotation;
+    assert(val != rotation::invalid);
+    return val;
 }
 
+rotation config_setting_get_rotation(const config_setting_t *setting) {
+    const char *str = config_setting_get_string(setting);
+    return get_enum<rotation>(str);
+}
+
+int config_setting_set_rotation(config_setting_t *setting, rotation value) {
+    auto str = get_enum_string(value);
+    return (config_setting_set_string(setting, str));
+}

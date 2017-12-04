@@ -35,6 +35,8 @@ def main():
         with open(source_file, "w") as source:
             header.write("#pragma once\n")
             header.write("\n")
+            header.write("#include <libconfig.h>\n")
+            header.write("\n")
             header.write(do_not_modify)
             header.write("\n")
             header.write("\n")
@@ -90,7 +92,6 @@ def main():
 
                 header.write("\n")
                 header.write("// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n")
-                header.write("\n")
                 header.write("enum class " + enum_name + "\n")
                 header.write("{\n")
                 for field_name, fieldValue in fields.items():
@@ -101,6 +102,10 @@ def main():
                 header.write("const char* get_enum_string(%s value);\n" % enum_name)
                 header.write("\n")
                 header.write("template<> %s get_enum<%s>(const char *e);\n" % (enum_name, enum_name))
+                header.write("\n")
+                header.write("%s config_setting_get_%s(const config_setting_t *setting);\n" % (enum_name, enum_name))
+                header.write("\n")
+                header.write("int config_setting_set_%s(config_setting_t *setting, %s value);\n" % (enum_name, enum_name))
 
 
                 source.write("\n")
@@ -123,9 +128,19 @@ def main():
                     source.write(tab + "if (!strcmp(e, \"%s\")) {\n" % field_name)
                     source.write(tab + tab + "val = %s::%s;\n" % (enum_name, field_name))
                     source.write(tab + "}\n")
+                source.write(tab + "assert(val != %s::invalid);\n" % enum_name)
                 source.write(tab + "return val;\n")
                 source.write("}\n")
                 source.write("\n")
+                source.write("%s config_setting_get_%s(const config_setting_t *setting) {\n" % (enum_name, enum_name))
+                source.write(tab + "const char *str = config_setting_get_string(setting);\n")
+                source.write(tab + "return get_enum<%s>(str);\n" % enum_name)
+                source.write("}\n")
+                source.write("\n")
+                source.write("int config_setting_set_%s(config_setting_t *setting, %s value) {\n" % (enum_name, enum_name))
+                source.write(tab + "auto str = get_enum_string(value);\n")
+                source.write(tab + "return (config_setting_set_string(setting, str));\n")
+                source.write("}\n")
 
     return 0
 
