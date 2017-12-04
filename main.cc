@@ -116,15 +116,6 @@ particle_manager *particle_man;
 asset_manager asset_man;
 component_system_manager component_system_man;
 
-namespace std {
-    template<>
-    struct hash<entity_data> {
-        size_t operator()(entity_data e) const {
-            return hash<std::string>()(e.name);
-        }
-    };
-}
-
 void load_entities();
 void use_action_on_entity(ship_space *ship, c_entity ce);
 void place_entity_attaches(raycast_info* rc, int index, c_entity e);
