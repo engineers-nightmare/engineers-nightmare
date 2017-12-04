@@ -118,7 +118,6 @@ component_system_manager component_system_man;
 
 void load_entities();
 void use_action_on_entity(ship_space *ship, c_entity ce);
-void place_entity_attaches(raycast_info* rc, int index, c_entity e);
 
 struct game_state {
     virtual ~game_state() {}
