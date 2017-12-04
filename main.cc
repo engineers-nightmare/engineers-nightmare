@@ -353,7 +353,7 @@ std::array<tool*, 7> tools {
     //tool::create_fire_projectile_tool(&pl),
     tool::create_add_block_tool(),
     tool::create_remove_block_tool(),
-    new paint_surface_tool(),
+    tool::create_paint_surface_tool(),
     tool::create_remove_surface_tool(),
     tool::create_add_entity_tool(),
     tool::create_remove_surface_entity_tool(),
