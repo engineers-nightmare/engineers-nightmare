@@ -7,6 +7,10 @@ entity: {
             mesh: "frobnicator",
             material: "frobnicator",
         },
+        placeable: {
+            rot: "rot_15",
+            place: "half_block_snapped",
+        },
         relative_position: {
         },
         physics: {

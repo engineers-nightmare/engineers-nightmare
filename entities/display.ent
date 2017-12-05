@@ -7,6 +7,10 @@ entity: {
             mesh: "display",
             material: "display",
         },
+        placeable: {
+            rot: "no_rotation",
+            place: "quarter_block_snapped",
+        },
         display: {
             mesh: "panel_4x4",
         },

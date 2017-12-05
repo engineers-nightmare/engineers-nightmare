@@ -7,6 +7,10 @@ entity: {
             mesh: "warning_light",
             material: "port",
         },
+        placeable: {
+            rot: "rot_15",
+            place: "quarter_block_snapped",
+        },
         relative_position: {
         },
         physics: {

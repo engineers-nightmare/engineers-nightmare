@@ -7,6 +7,10 @@ entity: {
             mesh: "panel_1x1",
             material: "switch",
         },
+        placeable: {
+            rot: "rot_15",
+            place: "eighth_block_snapped",
+        },
         relative_position: {
         },
         physics: {
