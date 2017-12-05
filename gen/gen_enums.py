@@ -36,6 +36,7 @@ def main():
             header.write("#pragma once\n")
             header.write("\n")
             header.write("#include <libconfig.h>\n")
+            header.write("#include \"../libconfig_shim.h\"\n")
             header.write("\n")
             header.write(do_not_modify)
             header.write("\n")
