@@ -31,20 +31,6 @@ extern std::unordered_map<std::string, entity_data> entity_stubs;
 extern frame_info frame_info;
 
 struct add_entity_tool : tool {
-    enum class RotateMode {
-        AxisAligned,
-        Stepped45,
-        Stepped15,
-    } rotate_mode{RotateMode::AxisAligned};
-
-    enum class PlaceMode {
-        BlockSnapped,
-        HalfBlockSnapped,
-        QuarterBlockSnapped,
-        EighthBlockSnapped,
-        FreeForm,
-    } place_mode{PlaceMode::BlockSnapped};
-
     const unsigned rotate_tick_rate = 5; // hz
     double last_rotate_time = 0;
     unsigned cur_rotate = 0;
@@ -73,6 +59,28 @@ struct add_entity_tool : tool {
         return true;
     }
 
+    unsigned get_rotate() const {
+        auto place = entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>();
+        unsigned int rotate;
+        switch (place->rot) {
+            case rotation::axis_aligned: {
+                return 90;
+            }
+            case rotation::rot_45: {
+                return 45;
+            }
+            case rotation::rot_15: {
+                return 15;
+            }
+            case rotation::no_rotation: {
+                return 0;
+            }
+            default:
+                assert(false);
+        }
+        return 0;
+    }
+
     void use(raycast_info *rc) override {
         if (!can_use(rc)) {
             return;
@@ -93,47 +101,28 @@ struct add_entity_tool : tool {
     }
 
     void alt_use(raycast_info *rc) override {
-        entity_name_index++;
-        if (entity_name_index>= entity_names.size()) {
-            entity_name_index = 0;
+        do {
+            entity_name_index++;
+            if (entity_name_index >= entity_names.size()) {
+                entity_name_index = 0;
+            }
+        } while (!entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>());
+
+        auto rotate = get_rotate();
+        if (rotate == 0) {
+            cur_rotate = 0;
+        }
+        else {
+            cur_rotate += rotate / 2;
+            cur_rotate = cur_rotate - (cur_rotate % rotate);
         }
     }
 
     void long_use(raycast_info *rc) override {
-        switch (rotate_mode) {
-            case RotateMode::AxisAligned: {
-                rotate_mode = RotateMode::Stepped45;
-                break;
-            }
-            case RotateMode::Stepped45: {
-                rotate_mode = RotateMode::Stepped15;
-                break;
-            }
-            case RotateMode::Stepped15: {
-                rotate_mode = RotateMode::AxisAligned;
-                cur_rotate = 0;
-                break;
-            }
-        }
     }
 
     void long_alt_use(raycast_info *rc) override {
-        unsigned rotate = 90;
-
-        switch (rotate_mode) {
-            case RotateMode::AxisAligned: {
-                rotate = 90;
-                break;
-            }
-            case RotateMode::Stepped45: {
-                rotate = 45;
-                break;
-            }
-            case RotateMode::Stepped15: {
-                rotate = 15;
-                break;
-            }
-        }
+        auto rotate = get_rotate();
 
         if (frame_info.elapsed >= last_rotate_time + 1.0 / rotate_tick_rate) {
             cur_rotate += rotate;
@@ -144,28 +133,6 @@ struct add_entity_tool : tool {
     }
 
     void cycle_mode() override {
-        switch (place_mode) {
-            case PlaceMode::BlockSnapped: {
-                place_mode = PlaceMode::HalfBlockSnapped;
-                break;
-            }
-            case PlaceMode::HalfBlockSnapped: {
-                place_mode = PlaceMode::QuarterBlockSnapped;
-                break;
-            }
-            case PlaceMode::QuarterBlockSnapped: {
-                place_mode = PlaceMode::EighthBlockSnapped;
-                break;
-            }
-            case PlaceMode::EighthBlockSnapped: {
-                place_mode = PlaceMode::FreeForm;
-                break;
-            }
-            case PlaceMode::FreeForm: {
-                place_mode = PlaceMode::BlockSnapped;
-                break;
-            }
-        }
     }
 
     void preview(raycast_info *rc, frame_data *frame) override {
@@ -203,63 +170,27 @@ struct add_entity_tool : tool {
 
     void get_description(char *str) override {
         auto name = entity_names[entity_name_index];
-        const char *rotate = nullptr;
-        switch (rotate_mode) {
-            case RotateMode::AxisAligned: {
-                rotate = "Axis Aligned";
-                break;
-            }
-            case RotateMode::Stepped45: {
-                rotate = "Stepped @ 45";
-                break;
-            }
-            case RotateMode::Stepped15: {
-                rotate = "Stepped @ 15";
-                break;
-            }
-        }
 
-        const char *place = nullptr;
-        switch (place_mode) {
-            case PlaceMode::BlockSnapped: {
-                place = "Block Snapped";
-                break;
-            }
-            case PlaceMode::HalfBlockSnapped: {
-                place = "Half Block Snapped";
-                break;
-            }
-            case PlaceMode::QuarterBlockSnapped: {
-                place = "Quarter Block Snapped";
-                break;
-            }
-            case PlaceMode::EighthBlockSnapped: {
-                place = "Eighth Block Snapped";
-                break;
-            }
-            case PlaceMode::FreeForm: {
-                place = "Free Form";
-                break;
-            }
-        }
-        sprintf(str, "Place %s \nRotating %s \nPlacing %s", name.c_str(), rotate, place);
+        sprintf(str, "Place %s", name.c_str());
     }
 
     glm::mat4 get_place_matrix(const raycast_info *rc, unsigned int index) const {
         glm::mat4 m;
         auto rot_axis = glm::vec3{surface_index_to_normal(surface_zp)};
 
+        auto place = entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>();
+
         float step = 1;
-        switch (place_mode) {
-            case PlaceMode::EighthBlockSnapped: {
+        switch (place->place) {
+            case placement::eighth_block_snapped: {
                 step *= 2;
                 // falls through
             }
-            case PlaceMode::QuarterBlockSnapped: {
+            case placement::quarter_block_snapped: {
                 step *= 2;
                 // falls through
             }
-            case PlaceMode::HalfBlockSnapped: {
+            case placement::half_block_snapped: {
                 step *= 2;
                 auto pos = rc->intersection;
                 m = mat_rotate_mesh(pos, rc->n);
@@ -278,15 +209,12 @@ struct add_entity_tool : tool {
                 m[3] = p;
                 break;
             }
-            case PlaceMode::BlockSnapped: {
+            case placement::full_block_snapped: {
                 m = mat_block_face(rc->p, index ^ 1);
                 break;
             }
-            case PlaceMode::FreeForm: {
-                auto pos = rc->intersection;
-                m = mat_rotate_mesh(pos, rc->n);
-                break;
-            }
+            default:
+                assert(false);
         }
         m = rotate(m, glm::radians((float) cur_rotate), rot_axis);
         return m;
