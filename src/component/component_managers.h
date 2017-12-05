@@ -12,6 +12,7 @@
 #include "gas_producer_component.h"
 #include "light_component.h"
 #include "physics_component.h"
+#include "placeable_component.h"
 #include "power_component.h"
 #include "power_provider_component.h"
 #include "pressure_sensor_component.h"
@@ -34,6 +35,7 @@ struct component_managers {
         gas_producer_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         light_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         physics_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        placeable_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         power_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         power_provider_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         pressure_sensor_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
@@ -53,6 +55,7 @@ struct component_managers {
     gas_producer_component_manager gas_producer_component_man{};
     light_component_manager light_component_man{};
     physics_component_manager physics_component_man{};
+    placeable_component_manager placeable_component_man{};
     power_component_manager power_component_man{};
     power_provider_component_manager power_provider_component_man{};
     pressure_sensor_component_manager pressure_sensor_component_man{};
@@ -81,6 +84,9 @@ struct component_managers {
         }
         if (strcmp(comp_name, "physics") == 0) {
             return physics_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "placeable") == 0) {
+            return placeable_component_stub::from_config(config);
         }
         if (strcmp(comp_name, "power") == 0) {
             return power_component_stub::from_config(config);
@@ -128,6 +134,7 @@ struct component_managers {
         gas_producer_component_man.destroy_entity_instance(ce);
         light_component_man.destroy_entity_instance(ce);
         physics_component_man.destroy_entity_instance(ce);
+        placeable_component_man.destroy_entity_instance(ce);
         power_component_man.destroy_entity_instance(ce);
         power_provider_component_man.destroy_entity_instance(ce);
         pressure_sensor_component_man.destroy_entity_instance(ce);
