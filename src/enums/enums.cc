@@ -62,6 +62,8 @@ const char* get_enum_string(rotation value) {
         return "rot_45";
     case rotation::rot_15:
         return "rot_15";
+    case rotation::no_rotation:
+        return "no_rotation";
     default:
         assert(false);
         return nullptr;
@@ -78,6 +80,9 @@ template<> rotation get_enum<rotation>(const char *e) {
     }
     if (!strcmp(e, "rot_15")) {
         val = rotation::rot_15;
+    }
+    if (!strcmp(e, "no_rotation")) {
+        val = rotation::no_rotation;
     }
     assert(val != rotation::invalid);
     return val;

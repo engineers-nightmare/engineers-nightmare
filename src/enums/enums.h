@@ -33,6 +33,7 @@ enum class rotation
     axis_aligned = 0,
     rot_45 = 1,
     rot_15 = 2,
+    no_rotation = 3,
     invalid = -1,
 };
 
