@@ -37,7 +37,7 @@ struct entity_data {
     std::vector<std::unique_ptr<component_stub>> components{};
 
     template<typename T>
-    T *get_component() {
+    T *get_component() const {
         for (auto &c : components) {
             T *t = dynamic_cast<T *>(c.get());
             if (t) return t;
