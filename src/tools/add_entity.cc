@@ -100,7 +100,29 @@ struct add_entity_tool : tool {
         ch->entities.push_back(e);
     }
 
+    // press to rotate once, hold to rotate continuously
     void alt_use(raycast_info *rc) override {
+        auto rotate = get_rotate();
+
+        cur_rotate += rotate;
+        cur_rotate %= 360;
+    }
+
+    void long_use(raycast_info *rc) override {
+    }
+
+    // hold to rotate continuously, press to rotate once
+    void long_alt_use(raycast_info *rc) override {
+        auto rotate = get_rotate();
+
+        if (frame_info.elapsed >= last_rotate_time + 1.0 / rotate_tick_rate) {
+            cur_rotate += rotate;
+            cur_rotate %= 360;
+            last_rotate_time = frame_info.elapsed;
+        }
+    }
+
+    void cycle_mode() override {
         do {
             entity_name_index++;
             if (entity_name_index >= entity_names.size()) {
@@ -116,23 +138,6 @@ struct add_entity_tool : tool {
             cur_rotate += rotate / 2;
             cur_rotate = cur_rotate - (cur_rotate % rotate);
         }
-    }
-
-    void long_use(raycast_info *rc) override {
-    }
-
-    void long_alt_use(raycast_info *rc) override {
-        auto rotate = get_rotate();
-
-        if (frame_info.elapsed >= last_rotate_time + 1.0 / rotate_tick_rate) {
-            cur_rotate += rotate;
-            cur_rotate %= 360;
-            last_rotate_time = frame_info.elapsed;
-            printf("%d\n", cur_rotate);
-        }
-    }
-
-    void cycle_mode() override {
     }
 
     void preview(raycast_info *rc, frame_data *frame) override {
@@ -216,7 +221,7 @@ struct add_entity_tool : tool {
             default:
                 assert(false);
         }
-        m = rotate(m, glm::radians((float) cur_rotate), rot_axis);
+        m = rotate(m, -glm::radians((float) cur_rotate), rot_axis);
         return m;
     }
 };
