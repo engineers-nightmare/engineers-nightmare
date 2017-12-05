@@ -202,14 +202,17 @@ struct add_entity_tool : tool {
                 auto p = m[3];
                 auto n = surface_index_to_normal(index ^ 1);
                 if (n.x != 0) {
+                    p.x = std::round(p.x);
                     p.y = std::round(p.y * step) / step;
                     p.z = std::round(p.z * step) / step;
                 } else if (n.y != 0) {
                     p.x = std::round(p.x * step) / step;
+                    p.y = std::round(p.y);
                     p.z = std::round(p.z * step) / step;
                 } else if (n.z != 0) {
                     p.x = std::round(p.x * step) / step;
                     p.y = std::round(p.y * step) / step;
+                    p.z = std::round(p.z);
                 }
                 m[3] = p;
                 break;
