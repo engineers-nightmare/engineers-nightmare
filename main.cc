@@ -64,7 +64,7 @@ bool draw_debug_chunks = false;
 bool draw_debug_axis = false;
 bool draw_fps = false;
 
-auto hfov = DEG2RAD(90.f);
+auto hfov = glm::radians(90.f);
 
 en_settings game_settings;
 
