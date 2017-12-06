@@ -106,6 +106,7 @@ unsigned frame_index;
 GLuint simple_shader, unlit_shader, overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, unlit_instanced_shader, lit_instanced_shader, particle_shader, modelspace_uv_shader, chunk_shader;
 GLuint palette_tex;
+GLuint sky_vao;
 ship_space *ship;
 player pl;
 physics *phy;
@@ -294,6 +295,8 @@ init()
     glActiveTexture(GL_TEXTURE0);
     SDL_FreeSurface(image);
 
+    glGenVertexArrays(1, &sky_vao);
+
     // Absorb all the init time so we dont try to catch up
     frame_info.tick();
 }
@@ -409,6 +412,7 @@ struct time_accumulator
 
 
 void render() {
+    glEnable(GL_DEPTH_TEST);
     float depthClearValue = 1.0f;
     glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
 
@@ -486,6 +490,7 @@ void render() {
     asset_man.bind_skybox("starry-night", 0);
     glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
+    glBindVertexArray(sky_vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glDepthFunc(GL_LESS);
 
