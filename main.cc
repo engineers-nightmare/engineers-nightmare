@@ -51,10 +51,17 @@
 #include "src/imgui/imgui.h"
 #include "src/imgui_impl_sdl_gl3.h"
 
+#define DEBUG_DRAW_IMPLEMENTATION
+#define DEBUG_DRAW_CXX11_SUPPORTED 1
+#define DEBUG_DRAW_USE_STD_MATH 1
+#include "src/utils/debugdraw.h"
+
 bool exit_requested = false;
 
 bool draw_hud = true;
 bool draw_debug_text = false;
+bool draw_debug_chunks = false;
+bool draw_debug_axis = false;
 bool draw_fps = false;
 
 auto hfov = DEG2RAD(90.f);
@@ -166,9 +173,13 @@ GLuint render_fbo;
 ImGuiContext *default_context;
 std::array<ImGuiContext*, 2> offscreen_contexts{};
 
+DDRenderInterfaceCoreGL *ddRenderIfaceGL;
 void
 init()
 {
+    ddRenderIfaceGL = new DDRenderInterfaceCoreGL();
+    dd::initialize(ddRenderIfaceGL);
+
     proj_man.create_projectile_data(1000);
 
     printf("%s starting up.\n", APP_NAME);
@@ -425,10 +436,13 @@ void render() {
 
     auto camera_params = frame->alloc_aligned<per_camera_params>(1);
 
-    camera_params.ptr->view_proj_matrix = proj * view;
+    auto mvp = proj * view;
+    camera_params.ptr->view_proj_matrix = mvp;
     camera_params.ptr->inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
     camera_params.ptr->aspect = (float)wnd.width / wnd.height;
     camera_params.bind(0, frame);
+
+    ddRenderIfaceGL->mvpMatrix = mvp;
 
     asset_man.bind_world_textures(0);
 
@@ -443,9 +457,15 @@ void render() {
                 chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
                 if (ch) {
                     auto chunk_matrix = frame->alloc_aligned<glm::mat4>(1);
-                    *chunk_matrix.ptr = mat_position(glm::vec3(CHUNK_SIZE * glm::ivec3(i, j, k)));
+                    auto p = glm::vec3(CHUNK_SIZE * glm::ivec3(i, j, k));
+                    *chunk_matrix.ptr = mat_position(p);
                     chunk_matrix.bind(1, frame);
                     draw_mesh(ch->render_chunk.mesh);
+
+                    if (draw_debug_chunks) {
+                        ddVec3 dv{p.x + CHUNK_SIZE / 2, p.y + CHUNK_SIZE / 2, p.z + CHUNK_SIZE / 2};
+                        dd::box(dv, dd::colors::DodgerBlue, CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE, 0, false);
+                    }
                 }
             }
         }
@@ -499,6 +519,22 @@ void render() {
     current_game_state->render(frame);
 
     frame->end();
+
+    if (draw_debug_axis) {
+        auto p = pl.eye + glm::normalize(pl.dir * 3.0f);
+        auto m = glm::translate(glm::mat4{}, p);
+        ddMat4x4 at{
+            m[0].x, m[0].y, m[0].z, m[0].w,
+            m[1].x, m[1].y, m[1].z, m[1].w,
+            m[2].x, m[2].y, m[2].z, m[2].w,
+            m[3].x, m[3].y, m[3].z, m[3].w,
+        };
+        dd::axisTriad(at, 0.01f, 0.1f, 0, false);
+    }
+
+    if (draw_debug_chunks || draw_debug_axis) {
+        dd::flush(SDL_GetTicks());
+    }
 }
 
 
@@ -965,8 +1001,18 @@ struct menu_state : game_state {
             dirty |= ImGui::Checkbox("Invert Mouse", &invert);
             game_settings.input.mouse_invert = invert ? -1.0f : 1.0f;
 
-            ImGui::Checkbox("Draw Debug Text", &draw_debug_text);
+            ImGui::Separator();
             ImGui::Checkbox("Draw FPS", &draw_fps);
+            ImGui::Separator();
+
+            // debug
+            bool draw_debug = draw_debug_text && draw_debug_chunks && draw_debug_axis;
+            if (ImGui::Checkbox("Draw Debug All", &draw_debug)) {
+                draw_debug_text = draw_debug_chunks = draw_debug_axis = draw_debug;
+            }
+            ImGui::Checkbox("Draw Debug Text", &draw_debug_text);
+            ImGui::Checkbox("Draw Chunk Debug", &draw_debug_chunks);
+            ImGui::Checkbox("Draw Axis Debug", &draw_debug_axis);
 
             ImGui::Dummy(ImVec2{ 10, 10 });
             if (ImGui::Button("Back")) {
