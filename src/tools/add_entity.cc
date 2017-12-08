@@ -199,22 +199,9 @@ struct add_entity_tool : tool {
                 step *= 2;
                 auto pos = rc->intersection;
                 m = mat_rotate_mesh(pos, rc->n);
-                auto p = m[3];
-                auto n = surface_index_to_normal(index ^ 1);
-                if (n.x != 0) {
-                    p.x = std::round(p.x);
-                    p.y = std::round(p.y * step) / step;
-                    p.z = std::round(p.z * step) / step;
-                } else if (n.y != 0) {
-                    p.x = std::round(p.x * step) / step;
-                    p.y = std::round(p.y);
-                    p.z = std::round(p.z * step) / step;
-                } else if (n.z != 0) {
-                    p.x = std::round(p.x * step) / step;
-                    p.y = std::round(p.y * step) / step;
-                    p.z = std::round(p.z);
-                }
-                m[3] = p;
+                m[3].x = std::round(m[3].x * step) / step;
+                m[3].y = std::round(m[3].y * step) / step;
+                m[3].z = std::round(m[3].z * step) / step;
                 break;
             }
             case placement::full_block_snapped: {
