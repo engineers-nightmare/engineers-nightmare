@@ -61,24 +61,24 @@ struct add_entity_tool : tool {
 
     unsigned get_rotate() const {
         auto place = entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>();
-        unsigned int rotate;
+
         switch (place->rot) {
-            case rotation::axis_aligned: {
-                return 90;
-            }
-            case rotation::rot_45: {
-                return 45;
-            }
-            case rotation::rot_15: {
-                return 15;
-            }
-            case rotation::no_rotation: {
-                return 0;
-            }
-            default:
-                assert(false);
+        case rotation::axis_aligned: {
+            return 90;
         }
-        return 0;
+        case rotation::rot_45: {
+            return 45;
+        }
+        case rotation::rot_15: {
+            return 15;
+        }
+        case rotation::no_rotation: {
+            return 0;
+        }
+        default:
+            assert(false);
+            return 0;
+        }
     }
 
     void use(raycast_info *rc) override {
