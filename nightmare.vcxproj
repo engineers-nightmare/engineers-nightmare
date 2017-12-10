@@ -171,6 +171,7 @@
     <ClCompile Include="src\tools\remove_block.cc" />
     <ClCompile Include="src\tools\remove_surface.cc" />
     <ClCompile Include="src\tools\remove_surface_entity.cc" />
+    <ClCompile Include="src\utils\debugdraw_gl.cc" />
     <ClCompile Include="src\wiring\wiring.cc" />
     <ClCompile Include="src\wiring\wiring_data.cc" />
   </ItemGroup>
@@ -230,6 +231,7 @@
     <ClInclude Include="src\textureset.h" />
     <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\tools\tools.h" />
+    <ClInclude Include="src\utils\debugdraw.h" />
     <ClInclude Include="src\winunistd.h" />
     <ClInclude Include="src\wiring\wiring.h" />
     <ClInclude Include="src\wiring\wiring_data.h" />

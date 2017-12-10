@@ -204,6 +204,12 @@
     <ClCompile Include="src\tools\paint_surface.cc">
       <Filter>Source Files\tools</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\placeable_component.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\debugdraw_gl.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -378,6 +384,12 @@
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\enums\enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\placeable_component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\debugdraw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
