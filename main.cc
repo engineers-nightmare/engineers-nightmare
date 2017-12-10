@@ -51,9 +51,6 @@
 #include "src/imgui/imgui.h"
 #include "src/imgui_impl_sdl_gl3.h"
 
-#define DEBUG_DRAW_IMPLEMENTATION
-#define DEBUG_DRAW_CXX11_SUPPORTED 1
-#define DEBUG_DRAW_USE_STD_MATH 1
 #include "src/utils/debugdraw.h"
 
 bool exit_requested = false;
@@ -445,8 +442,6 @@ void render() {
     camera_params.ptr->inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
     camera_params.ptr->aspect = (float)wnd.width / wnd.height;
     camera_params.bind(0, frame);
-
-    ddRenderIfaceGL->mvpMatrix = mvp;
 
     asset_man.bind_world_textures(0);
 
