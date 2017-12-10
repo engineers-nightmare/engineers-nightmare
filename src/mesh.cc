@@ -40,90 +40,38 @@ load_mesh(char const *filename) {
 
     std::vector<vertex> verts;
     std::vector<unsigned> indices;
-    std::vector<glm::mat4> attach_points[num_wire_types];
-
-    auto attach_name = "attach_";
 
     for (unsigned int i = 0; i < scene->mRootNode->mNumChildren; i++) {
         aiNode const *n = scene->mRootNode->mChildren[i];
 
-        if (!n) {
-            continue;
-        }
+        for (unsigned int k = 0; k < n->mNumMeshes; ++k) {
+            aiMesh const *m = scene->mMeshes[n->mMeshes[k]];
 
-        const char *str = n->mName.C_Str();
+            // when we have many submeshes we need to rebase the indices.
+            // NOTE: we assume that all mesh origins coincide, so we're not applying transforms here
+            auto submesh_base = (unsigned)verts.size();
 
-        auto type = wire_type_power;
-
-        /* match on "attach_{wire_type}_nnn"
-         * for instance, "attach_power_001"
-         * name assumed to be lower case
-         */
-        if (strstr(str, attach_name)) {
-            /* is attach */
-
-            auto found = false;
-            for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
-                if (strstr(str, wire_type_names[wire_index])) {
-                    type = (wire_type)wire_index;
-                    found = true;
-                    break;
-                }
+            for (unsigned int j = 0; j < m->mNumVertices; j++) {
+                verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z,
+                    -m->mNormals[j].x, -m->mNormals[j].y, -m->mNormals[j].z,
+                    0 /* mat */,
+                    m->mTextureCoords[0] ? m->mTextureCoords[0][j].x : 0.0f,
+                    m->mTextureCoords[0] ? m->mTextureCoords[0][j].y : 0.0f));
             }
 
-            if (found == false) {
-                assert(false || "attach of unknown type found.");
-                continue;
-            }
+            for (unsigned int j = 0; j < m->mNumFaces; j++) {
+                if (m->mFaces[j].mNumIndices != 3)
+                    errx(1, "Submesh %u face %u isnt a tri (%u indices)\n", i, j, m->mFaces[j].mNumIndices);
 
-            auto attach_mat = n->mTransformation;
-            glm::mat4 mat;
-
-            mat = glm::transpose(glm::make_mat4(&attach_mat.a1));
-
-            attach_points[type].push_back(mat);
-        }
-        else {
-            /* isn't attach */
-
-            for (unsigned int k = 0; k < n->mNumMeshes; ++k) {
-                aiMesh const *m = scene->mMeshes[n->mMeshes[k]];
-
-                // when we have many submeshes we need to rebase the indices.
-                // NOTE: we assume that all mesh origins coincide, so we're not applying transforms here
-                auto submesh_base = (unsigned)verts.size();
-
-                for (unsigned int j = 0; j < m->mNumVertices; j++) {
-                    verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z,
-                        -m->mNormals[j].x, -m->mNormals[j].y, -m->mNormals[j].z,
-                        0 /* mat */,
-                        m->mTextureCoords[0] ? m->mTextureCoords[0][j].x : 0.0f,
-                        m->mTextureCoords[0] ? m->mTextureCoords[0][j].y : 0.0f));
-                }
-
-                for (unsigned int j = 0; j < m->mNumFaces; j++) {
-                    if (m->mFaces[j].mNumIndices != 3)
-                        errx(1, "Submesh %u face %u isnt a tri (%u indices)\n", i, j, m->mFaces[j].mNumIndices);
-
-                    indices.push_back(m->mFaces[j].mIndices[0] + submesh_base);
-                    indices.push_back(m->mFaces[j].mIndices[1] + submesh_base);
-                    indices.push_back(m->mFaces[j].mIndices[2] + submesh_base);
-                }
+                indices.push_back(m->mFaces[j].mIndices[0] + submesh_base);
+                indices.push_back(m->mFaces[j].mIndices[1] + submesh_base);
+                indices.push_back(m->mFaces[j].mIndices[2] + submesh_base);
             }
         }
     }
 
     printf("\tAfter processing: %zu verts, %zu indices",
         verts.size(), indices.size());
-
-    for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
-        auto type = (wire_type)wire_index;
-        printf(", %zu %s attach points",
-            attach_points[type].size(), wire_type_names[type]);
-    }
-    printf("\n");
-
-
 
     aiReleaseImport(scene);
 
@@ -134,14 +82,6 @@ load_mesh(char const *filename) {
     memcpy(ret->verts, &verts[0], sizeof(vertex) * verts.size());
     ret->indices = new unsigned int[indices.size()];
     memcpy(ret->indices, &indices[0], sizeof(unsigned) * indices.size());
-
-    for (auto wire_index = 0; wire_index < num_wire_types; ++wire_index) {
-        auto type = (wire_type)wire_index;
-        ret->num_attach_points[type] = (unsigned)attach_points[type].size();
-        ret->attach_points[type] = new glm::mat4[attach_points[type].size()];
-        memcpy(ret->attach_points[type], &attach_points[type][0],
-            sizeof(glm::mat4) * attach_points[type].size());
-    }
 
     return ret;
 }
