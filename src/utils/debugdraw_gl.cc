@@ -25,38 +25,12 @@ static inline void errorF(const char * format, ...)
     std::fflush(stderr);
 }
 
-static inline const char * errorToString(const GLenum errorCode)
-{
-    switch (errorCode)
-    {
-        case GL_NO_ERROR          : return "GL_NO_ERROR";
-        case GL_INVALID_ENUM      : return "GL_INVALID_ENUM";
-        case GL_INVALID_VALUE     : return "GL_INVALID_VALUE";
-        case GL_INVALID_OPERATION : return "GL_INVALID_OPERATION";
-        case GL_OUT_OF_MEMORY     : return "GL_OUT_OF_MEMORY";
-        case GL_STACK_UNDERFLOW   : return "GL_STACK_UNDERFLOW"; // Legacy; not used on GL3+
-        case GL_STACK_OVERFLOW    : return "GL_STACK_OVERFLOW";  // Legacy; not used on GL3+
-        default                   : return "Unknown GL error";
-    } // switch (errorCode)
-}
-
-static void checkGLError(const char * file, const int line)
-{
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR)
-    {
-        errorF("%s(%d) : GL_CORE_ERROR=0x%X - %s", file, line, err, errorToString(err));
-    }
-}
-
 static void compileShader(const GLuint shader)
 {
     glCompileShader(shader);
-    checkGLError(__FILE__, __LINE__);
 
     GLint status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    checkGLError(__FILE__, __LINE__);
 
     if (status == GL_FALSE)
     {
@@ -69,11 +43,9 @@ static void compileShader(const GLuint shader)
 static void linkProgram(const GLuint program)
 {
     glLinkProgram(program);
-    checkGLError(__FILE__, __LINE__);
 
     GLint status;
     glGetProgramiv(program, GL_LINK_STATUS, &status);
-    checkGLError(__FILE__, __LINE__);
 
     if (status == GL_FALSE)
     {
@@ -117,7 +89,6 @@ void DDRenderInterfaceCoreGL::drawPointList(const dd::DrawVertex * points, int c
     glUseProgram(0);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    checkGLError(__FILE__, __LINE__);
 }
 
 void DDRenderInterfaceCoreGL::drawLineList(const dd::DrawVertex * lines, int count, bool depthEnabled)
@@ -150,7 +121,6 @@ void DDRenderInterfaceCoreGL::drawLineList(const dd::DrawVertex * lines, int cou
     glUseProgram(0);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    checkGLError(__FILE__, __LINE__);
 }
 
     // These two can also be implemented to perform GL render
@@ -236,7 +206,6 @@ void DDRenderInterfaceCoreGL::setupShaderPrograms()
         {
             errorF("Unable to get u_MvpMatrix uniform location!");
         }
-        checkGLError(__FILE__, __LINE__);
     }
 
     //
@@ -271,8 +240,6 @@ void DDRenderInterfaceCoreGL::setupShaderPrograms()
         {
             errorF("Unable to get u_screenDimensions uniform location!");
         }
-
-        checkGLError(__FILE__, __LINE__);
     }
 }
 
@@ -286,7 +253,6 @@ void DDRenderInterfaceCoreGL::setupVertexBuffers()
     {
         glGenVertexArrays(1, &linePointVAO);
         glGenBuffers(1, &linePointVBO);
-        checkGLError(__FILE__, __LINE__);
 
         glBindVertexArray(linePointVAO);
         glBindBuffer(GL_ARRAY_BUFFER, linePointVBO);
@@ -294,7 +260,6 @@ void DDRenderInterfaceCoreGL::setupVertexBuffers()
         // RenderInterface will never be called with a batch larger than
         // DEBUG_DRAW_VERTEX_BUFFER_SIZE vertexes, so we can allocate the same amount here.
         glBufferData(GL_ARRAY_BUFFER, DEBUG_DRAW_VERTEX_BUFFER_SIZE * sizeof(dd::DrawVertex), nullptr, GL_STREAM_DRAW);
-        checkGLError(__FILE__, __LINE__);
 
         // Set the vertex format expected by 3D points and lines:
         std::size_t offset = 0;
@@ -318,8 +283,6 @@ void DDRenderInterfaceCoreGL::setupVertexBuffers()
             /* stride    = */ sizeof(dd::DrawVertex),
             /* offset    = */ reinterpret_cast<void *>(offset));
 
-        checkGLError(__FILE__, __LINE__);
-
         // VAOs can be a pain in the neck if left enabled...
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -331,7 +294,6 @@ void DDRenderInterfaceCoreGL::setupVertexBuffers()
     {
         glGenVertexArrays(1, &textVAO);
         glGenBuffers(1, &textVBO);
-        checkGLError(__FILE__, __LINE__);
 
         glBindVertexArray(textVAO);
         glBindBuffer(GL_ARRAY_BUFFER, textVBO);
@@ -339,7 +301,6 @@ void DDRenderInterfaceCoreGL::setupVertexBuffers()
         // NOTE: A more optimized implementation might consider combining
         // both the lines/points and text buffers to save some memory!
         glBufferData(GL_ARRAY_BUFFER, DEBUG_DRAW_VERTEX_BUFFER_SIZE * sizeof(dd::DrawVertex), nullptr, GL_STREAM_DRAW);
-        checkGLError(__FILE__, __LINE__);
 
         // Set the vertex format expected by the 2D text:
         std::size_t offset = 0;
@@ -372,8 +333,6 @@ void DDRenderInterfaceCoreGL::setupVertexBuffers()
             /* normalize = */ GL_FALSE,
             /* stride    = */ sizeof(dd::DrawVertex),
             /* offset    = */ reinterpret_cast<void *>(offset));
-
-        checkGLError(__FILE__, __LINE__);
 
         // Ditto.
         glBindVertexArray(0);
