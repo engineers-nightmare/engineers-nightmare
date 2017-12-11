@@ -46,7 +46,7 @@ struct paint_surface_tool : tool
 
         // if we've started, only allow same plane
         if (state == paint_state::started) {
-            if (other->type != block_empty && other->type != block_untouched) {
+            if (other && other->type != block_empty && other->type != block_untouched) {
                 return false;
             }
 
