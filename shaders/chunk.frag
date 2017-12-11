@@ -15,7 +15,7 @@ float q = 3.0;
 void main(void)
 {
     vec3 quantized_pos = round(ws_pos * q) / q;
-    vec3 light_dir = normalize(quantized_pos - vec3(3.0, 2.0, 3.0));
+    vec3 light_dir = -normalize(quantized_pos - vec3(3.0, 2.0, 3.0));
     float light = clamp(dot(light_dir, ws_norm), 0.2, 1.0);
 
     color = texture(s_palette, texcoord.x) * light;

@@ -22,15 +22,12 @@ load_mesh(char const *filename) {
 
     static aiPropertyStore* meshImportProps = nullptr;
     if (!meshImportProps) {
-        /* FIXME: threading hazard if we want to do concurrent loading */
         meshImportProps = aiCreatePropertyStore();
-        aiSetImportPropertyInteger(meshImportProps, AI_CONFIG_PP_RVC_FLAGS, aiComponent_NORMALS);
     }
 
-    aiScene const *scene = aiImportFileExWithProperties(filename, aiProcess_Triangulate |
-            aiProcess_GenNormals | aiProcess_OptimizeMeshes | aiProcess_RemoveComponent,
-            nullptr /* IO */,
-            meshImportProps);
+    aiScene const *scene = aiImportFileEx(filename, aiProcess_Triangulate |
+            aiProcess_GenNormals | aiProcess_OptimizeMeshes,
+            nullptr /* IO */);
 
     if (!scene)
         errx(1, "Failed to load mesh %s", filename);
@@ -53,16 +50,13 @@ load_mesh(char const *filename) {
 
             for (unsigned int j = 0; j < m->mNumVertices; j++) {
                 verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z,
-                    -m->mNormals[j].x, -m->mNormals[j].y, -m->mNormals[j].z,
+                    m->mNormals[j].x, m->mNormals[j].y, m->mNormals[j].z,
                     0 /* mat */,
                     m->mTextureCoords[0] ? m->mTextureCoords[0][j].x : 0.0f,
                     m->mTextureCoords[0] ? m->mTextureCoords[0][j].y : 0.0f));
             }
 
             for (unsigned int j = 0; j < m->mNumFaces; j++) {
-                if (m->mFaces[j].mNumIndices != 3)
-                    errx(1, "Submesh %u face %u isnt a tri (%u indices)\n", i, j, m->mFaces[j].mNumIndices);
-
                 indices.push_back(m->mFaces[j].mIndices[0] + submesh_base);
                 indices.push_back(m->mFaces[j].mIndices[1] + submesh_base);
                 indices.push_back(m->mFaces[j].mIndices[2] + submesh_base);
