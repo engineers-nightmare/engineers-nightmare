@@ -15,7 +15,7 @@ extern asset_manager asset_man;
 
 static void
 stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
-                sw_mesh *src, glm::vec3 offset, int mat)
+                sw_mesh *src, glm::vec3 offset)
 {
     unsigned index_base = (unsigned)verts->size();
 
@@ -24,7 +24,6 @@ stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
         v.x += offset.x;
         v.y += offset.y;
         v.z += offset.z;
-        v.mat = mat;
         verts->push_back(v);
     }
 
@@ -141,14 +140,12 @@ teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, b
 
 static struct {
     const mesh_data * frame_mesh;
-    unsigned frame_mat;
 } frame_render_data;
 
 void
 mesher_init()
 {
     frame_render_data.frame_mesh = &asset_man.get_mesh("frame");
-    frame_render_data.frame_mat = asset_man.get_world_texture_index("frame");
 }
 
 void
@@ -167,15 +164,13 @@ chunk::prepare_render()
 
                 if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
-                    stamp_at_offset(&verts, &indices, frame_render_data.frame_mesh->sw, glm::vec3(i, j, k),
-                                    frame_render_data.frame_mat);
+                    stamp_at_offset(&verts, &indices, frame_render_data.frame_mesh->sw, glm::vec3(i, j, k));
 
                     // Only frame side of surface gets generated
                     for (unsigned surf = 0; surf < 6; surf++) {
                         if (b->surfs[surf] != surface_none) {
                             auto mesh = &asset_man.get_surface_mesh(surf, b->surfs[surf]);
-                            stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k),
-                                0);
+                            stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k));
                         }
                     }
                 }
@@ -217,13 +212,13 @@ chunk::prepare_phys(int x, int y, int z)
 
                 if (b->type == block_frame) {
                     // TODO: block detail, variants, types, surfaces
-                    stamp_at_offset(&verts, &indices, frame_render_data.frame_mesh->sw, glm::vec3(i, j, k), 1);
+                    stamp_at_offset(&verts, &indices, frame_render_data.frame_mesh->sw, glm::vec3(i, j, k));
 
                     // Only generate in blocks that have framing
                     for (unsigned surf = 0; surf < 6; surf++) {
                         if (b->surfs[surf] != surface_none) {
                             auto mesh = &asset_man.get_surface_mesh(surf, b->surfs[surf]);
-                            stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k), 0);
+                            stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k));
                         }
                     }
                 }

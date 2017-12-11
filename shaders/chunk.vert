@@ -29,7 +29,7 @@ void main(void)
 {
     vec4 world_pos = world_matrix * pos;
 	gl_Position = view_proj_matrix * world_pos;
-    texcoord.z = mat;
+    texcoord.z = 0;
 
     vec3 n = normalize(mat3(world_matrix) * norm);
     texcoord.xy = uv;

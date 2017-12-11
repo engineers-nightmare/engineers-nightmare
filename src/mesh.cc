@@ -99,9 +99,6 @@ upload_mesh(sw_mesh *mesh)
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid const *)offsetof(vertex, x));
 
-    glEnableVertexAttribArray(1);
-    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(vertex), (GLvoid const *)offsetof(vertex, mat));
-
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid const *)offsetof(vertex, nx));
 
