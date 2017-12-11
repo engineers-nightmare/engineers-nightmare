@@ -49,6 +49,8 @@ void main(void)
 	    texcoord.xy = pos.xy;
     }
 
+    texcoord.xy += 0.5;
+
     ws_pos = world_pos.xyz;
     ws_norm = n;
 }
