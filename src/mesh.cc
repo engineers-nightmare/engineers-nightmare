@@ -20,14 +20,8 @@
 sw_mesh *
 load_mesh(char const *filename) {
 
-    static aiPropertyStore* meshImportProps = nullptr;
-    if (!meshImportProps) {
-        meshImportProps = aiCreatePropertyStore();
-    }
-
-    aiScene const *scene = aiImportFileEx(filename, aiProcess_Triangulate |
-            aiProcess_GenNormals | aiProcess_OptimizeMeshes,
-            nullptr /* IO */);
+    aiScene const *scene = aiImportFileEx(filename, aiProcess_Triangulate | aiProcess_OptimizeMeshes,
+        nullptr /* IO */);
 
     if (!scene)
         errx(1, "Failed to load mesh %s", filename);
@@ -40,7 +34,7 @@ load_mesh(char const *filename) {
 
     // Temp hack for braindamaged exporters that insist on jumbling axes.
     // This can go away once we read .vox ourselves.
-//    bool fixup = !!strstr(filename, ".obj");
+    bool fixup = !!strstr(filename, ".obj");
 
     for (unsigned int i = 0; i < scene->mRootNode->mNumChildren; i++) {
         aiNode const *n = scene->mRootNode->mChildren[i];
@@ -52,12 +46,25 @@ load_mesh(char const *filename) {
             // NOTE: we assume that all mesh origins coincide, so we're not applying transforms here
             auto submesh_base = (unsigned)verts.size();
 
-            for (unsigned int j = 0; j < m->mNumVertices; j++) {
-                verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z,
-                    m->mNormals[j].x, m->mNormals[j].y, m->mNormals[j].z,
-                    0 /* mat */,
-                    m->mTextureCoords[0] ? m->mTextureCoords[0][j].x : 0.0f,
-                    m->mTextureCoords[0] ? m->mTextureCoords[0][j].y : 0.0f));
+            if (fixup) {
+                // rotate to undo what MV did on export:
+                // Y' = -Z    Z' = Y
+                for (unsigned int j = 0; j < m->mNumVertices; j++) {
+                    verts.push_back(vertex(m->mVertices[j].x, -m->mVertices[j].z, m->mVertices[j].y,
+                        m->mNormals[j].x, -m->mNormals[j].z, m->mNormals[j].y,
+                        0 /* mat */,
+                        m->mTextureCoords[0] ? m->mTextureCoords[0][j].x : 0.0f,
+                        m->mTextureCoords[0] ? m->mTextureCoords[0][j].y : 0.0f));
+                }
+            }
+            else {
+                for (unsigned int j = 0; j < m->mNumVertices; j++) {
+                    verts.push_back(vertex(m->mVertices[j].x, m->mVertices[j].y, m->mVertices[j].z,
+                        m->mNormals[j].x, m->mNormals[j].y, m->mNormals[j].z,
+                        0 /* mat */,
+                        m->mTextureCoords[0] ? m->mTextureCoords[0][j].x : 0.0f,
+                        m->mTextureCoords[0] ? m->mTextureCoords[0][j].y : 0.0f));
+                }
             }
 
             for (unsigned int j = 0; j < m->mNumFaces; j++) {
