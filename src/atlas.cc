@@ -52,7 +52,7 @@ texture_atlas::add_bitmap(unsigned char *src, int pitch, unsigned width, unsigne
 {
     /* overflow to next row */
     if (x + width > this->width) {
-        y += h;
+        y += h+1;
         x = 0;
         h = 0;
     }
@@ -71,7 +71,7 @@ texture_atlas::add_bitmap(unsigned char *src, int pitch, unsigned width, unsigne
     *out_x = x;
     *out_y = y;
 
-    x += width;
+    x += width + 1;
 }
 
 
