@@ -279,7 +279,7 @@ init()
 
     /* raw palette tex -- bind and leave it bound */
     /* TODO: generalize texture_set so it can do this nicely. */
-    auto image = IMG_Load("mesh/mv-frame.png");
+    auto image = IMG_Load("textures/palette.png");
     glGenTextures(1, &palette_tex);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_1D, palette_tex);
