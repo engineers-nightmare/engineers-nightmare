@@ -31,6 +31,13 @@ assets = (
     file = "mesh/panel_1x1.dae"
 },
 {
+    name = "doorframe_2x2"
+    type = "mesh"
+    file = "mesh/doorframe_2x2.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.0]
+},
+{
     name = "x_quad"
     type = "mesh"
     file = "mesh/side_xm.obj"

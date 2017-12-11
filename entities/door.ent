@@ -4,7 +4,7 @@ entity: {
             name: "door",
         },
         renderable: {
-            mesh: "single_door_frame",
+            mesh: "doorframe_2x2",
             material: "frame",
         },
         placeable: {
@@ -14,7 +14,7 @@ entity: {
         relative_position: {
         },
         physics: {
-            mesh: "single_door_frame",
+            mesh: "doorframe_2x2",
         },
         surface_attachment: {
         },
