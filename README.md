@@ -19,6 +19,16 @@ types; Lightfield propagated from certain entities.
 
 # Building and running
 
+## Obtaining source from GitHub
+
+    git clone --recursive https://github.com/engineers-nightmare/engineers-nightmare.git
+
+or
+
+    git clone https://github.com/engineers-nightmare/engineers-nightmare.git
+    cd engineers-nightmare
+    git submodule update --init
+
 ## Dependencies
 
  * assimp
