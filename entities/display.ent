@@ -12,12 +12,12 @@ entity: {
             place: "quarter_block_snapped",
         },
         display: {
-            mesh: "panel_4x4",
+            mesh: "display_panel",
         },
         relative_position: {
         },
         physics: {
-            mesh: "panel_4x4",
+            mesh: "display_panel",
         },
         surface_attachment: {
         },

@@ -14,6 +14,13 @@ assets = (
     offset = [0.0,0.0,0.0]
 },
 {
+    name = "display_panel"
+    type = "mesh"
+    file = "mesh/display_panel.obj"
+    scale = 0.0625
+    offset = [0.0,0.0,0.0]
+},
+{
     name = "panel_4x4"
     type = "mesh"
     file = "mesh/panel_4x4.dae"
