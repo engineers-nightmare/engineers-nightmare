@@ -151,9 +151,9 @@ struct add_entity_tool : tool {
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = m;
-        mat.ptr->material = asset_man.get_world_texture_index(render->material);
         mat.bind(1, frame);
 
+        glUseProgram(simple_shader);
         auto mesh = asset_man.get_mesh(render->mesh);
         draw_mesh(mesh.hw);
 
@@ -166,11 +166,10 @@ struct add_entity_tool : tool {
         mat2.ptr->material = material;
         mat2.bind(1, frame);
 
-        glUseProgram(simple_shader);
+        glUseProgram(overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
         draw_mesh(surf_mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
-        glUseProgram(simple_shader);
     }
 
     void get_description(char *str) override {

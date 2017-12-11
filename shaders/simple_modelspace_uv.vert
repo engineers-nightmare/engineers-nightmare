@@ -4,7 +4,6 @@
 #extension GL_ARB_shading_language_420pack: require
 
 layout(location=0) in vec4 pos;
-layout(location=1) in int mat;
 layout(location=2) in vec3 norm;
 
 
@@ -18,6 +17,7 @@ layout(std140, binding=0) uniform per_camera {
 layout(std140, binding=1) uniform per_object {
 
 	mat4 world_matrix;
+	int material;
 
 };
 
@@ -30,23 +30,23 @@ void main(void)
 {
     vec4 world_pos = world_matrix * pos;
 	gl_Position = view_proj_matrix * world_pos;
-    texcoord.z = mat;
+    texcoord.z = material;
 
     vec3 n = normalize(mat3(world_matrix) * norm);
 
     /* Quick & dirty triplanar mapping */
     if (norm.x > 0.8) {
-        texcoord.xy = vec2(-pos.y, -pos.z);
-	} else if (norm.x < -0.8) {
-        texcoord.xy = vec2(pos.y, -pos.z);
+	    texcoord.xy = vec2(-pos.y, -pos.z);
+    } else if (norm.x < -0.8) {
+	    texcoord.xy = vec2(pos.y, -pos.z);
     } else if (norm.y > 0.8) {
-        texcoord.xy = vec2(pos.x, -pos.z);
-	} else if (norm.y < -0.8) {
-		texcoord.xy = vec2(-pos.x, -pos.z);
+	    texcoord.xy = vec2(pos.x, -pos.z);
+    } else if (norm.y < -0.8) {
+	    texcoord.xy = vec2(-pos.x, -pos.z);
     } else if (norm.z < -0.8) {
-		texcoord.xy = vec2(pos.x, -pos.y);
-	} else {
-        texcoord.xy = pos.xy;
+	    texcoord.xy = vec2(pos.x, -pos.y);
+    } else {
+	    texcoord.xy = pos.xy;
     }
 
     ws_pos = world_pos.xyz;

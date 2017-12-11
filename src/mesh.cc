@@ -38,6 +38,10 @@ load_mesh(char const *filename) {
     std::vector<vertex> verts;
     std::vector<unsigned> indices;
 
+    // Temp hack for braindamaged exporters that insist on jumbling axes.
+    // This can go away once we read .vox ourselves.
+//    bool fixup = !!strstr(filename, ".obj");
+
     for (unsigned int i = 0; i < scene->mRootNode->mNumChildren; i++) {
         aiNode const *n = scene->mRootNode->mChildren[i];
 

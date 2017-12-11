@@ -11,8 +11,6 @@ extern asset_manager asset_man;
 extern component_system_manager component_system_man;
 
 extern GLuint simple_shader;
-extern GLuint unlit_instanced_shader;
-extern GLuint lit_instanced_shader;
 
 
 unsigned

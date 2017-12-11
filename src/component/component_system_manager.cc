@@ -414,7 +414,7 @@ tick_readers(ship_space *ship) {
     }
 }
 
-extern GLuint simple_shader;
+extern GLuint modelspace_uv_shader;
 
 void
 draw_renderables(frame_data *frame)
@@ -436,6 +436,8 @@ draw_renderables(frame_data *frame)
 
         draw_mesh(mesh.hw);
     }
+
+    glUseProgram(modelspace_uv_shader);
 
     asset_man.bind_render_textures(0);
 
