@@ -27,7 +27,7 @@ struct remove_block_tool : tool
         return rc.hit && !rc.inside;
     }
 
-    void use(raycast_info *) override
+    void use() override
     {
         if (!can_use())
             return;
@@ -35,7 +35,7 @@ struct remove_block_tool : tool
         ship->remove_block(rc.bl);
     }
 
-    void preview(raycast_info *, frame_data *frame) override
+    void preview(frame_data *frame) override
     {
         if (!can_use())
             return;

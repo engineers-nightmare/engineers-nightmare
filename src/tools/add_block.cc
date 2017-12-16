@@ -27,7 +27,7 @@ struct add_block_tool : tool
         return rc.hit && !rc.inside;
     }
 
-    void use(raycast_info *) override
+    void use() override
     {
         if (!can_use())
             return; /* n/a */
@@ -46,7 +46,7 @@ struct add_block_tool : tool
         }
     }
 
-    void preview(raycast_info *, frame_data *frame) override
+    void preview(frame_data *frame) override
     {
         if (!can_use())
             return; /* n/a */

@@ -78,7 +78,7 @@ struct add_entity_tool : tool {
         }
     }
 
-    void use(raycast_info *) override {
+    void use() override {
         if (!can_use()) {
             return;
         }
@@ -98,7 +98,7 @@ struct add_entity_tool : tool {
     }
 
     // press to rotate once, hold to rotate continuously
-    void alt_use(raycast_info *) override {
+    void alt_use() override {
         auto rotate = get_rotate();
 
         cur_rotate += rotate;
@@ -106,7 +106,7 @@ struct add_entity_tool : tool {
     }
 
     // hold to rotate continuously, press to rotate once
-    void long_alt_use(raycast_info *) override {
+    void long_alt_use() override {
         auto rotate = get_rotate();
 
         if (frame_info.elapsed >= last_rotate_time + 1.0 / rotate_tick_rate) {
@@ -134,7 +134,7 @@ struct add_entity_tool : tool {
         }
     }
 
-    void preview(raycast_info *, frame_data *frame) override {
+    void preview(frame_data *frame) override {
         if (!can_use())
             return;
 

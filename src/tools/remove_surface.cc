@@ -29,7 +29,7 @@ struct remove_surface_tool : tool
         return rc.hit;
     }
 
-    void use(raycast_info *) override
+    void use() override
     {
         if (!can_use())
             return;
@@ -43,7 +43,7 @@ struct remove_surface_tool : tool
         remove_ents_from_surface(rc.bl, index);
     }
 
-    void preview(raycast_info *, frame_data *frame) override
+    void preview(frame_data *frame) override
     {
         if (!can_use())
             return;

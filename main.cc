@@ -725,33 +725,26 @@ struct play_state : game_state {
         auto *t = tools[pl.active_tool_slot];
 
         if (t) {
-            /* both tool use and overlays need the raycast_block itself */
-            raycast_info rc;
-            ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, enter_exit_framing, &rc.block);
-
-            phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
-                               phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.world);
-
             t->pre_use(&pl);
 
             /* tool use */
             if (pl.use_tool) {
-                t->use(&rc);
+                t->use();
                 pl.ui_dirty = true;
             }
 
             if (pl.alt_use_tool) {
-                t->alt_use(&rc);
+                t->alt_use();
                 pl.ui_dirty = true;
             }
 
             if (pl.long_use_tool) {
-                t->long_use(&rc);
+                t->long_use();
                 pl.ui_dirty = true;
             }
 
             if (pl.long_alt_use_tool) {
-                t->long_alt_use(&rc);
+                t->long_alt_use();
                 pl.ui_dirty = true;
             }
 
@@ -791,17 +784,10 @@ struct play_state : game_state {
     void render(frame_data *frame) override {
         auto *t = tools[pl.active_tool_slot];
 
-        if (t == nullptr) {
-            return;
+        if (t) {
+            t->pre_use(&pl);
+            t->preview(frame);
         }
-
-        raycast_info rc;
-        ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, enter_exit_framing, &rc.block);
-        phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
-                           phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.world);
-
-        /* tool preview */
-        t->preview(&rc, frame);
     }
 
     void set_slot(unsigned slot) {

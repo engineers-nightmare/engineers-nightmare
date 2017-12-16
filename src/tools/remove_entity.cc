@@ -38,14 +38,14 @@ struct remove_entity_tool : tool
         return rc.hit && c_entity::is_valid(rc.entity);
     }
 
-    void use(raycast_info *) override {
+    void use() override {
         if (!can_use())
             return;
 
         destroy_entity(rc.entity);
     }
 
-    void preview(raycast_info *, frame_data *frame) override {
+    void preview(frame_data *frame) override {
         if (entity != rc.entity) {
             pl.ui_dirty = true;    // TODO: untangle this.
             entity = rc.entity;

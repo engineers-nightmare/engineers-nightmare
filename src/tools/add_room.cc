@@ -50,7 +50,7 @@ struct add_room_tool : tool {
         return (valid_directions & (1 << index));
     }
 
-    void use(raycast_info *) override {
+    void use() override {
         if (!rc.hit)
             return;
 
@@ -99,7 +99,7 @@ struct add_room_tool : tool {
         }
     }
 
-    void preview(raycast_info *, frame_data *frame) override {
+    void preview(frame_data *frame) override {
         if (!rc.hit)
             return;
 

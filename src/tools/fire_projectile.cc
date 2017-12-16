@@ -13,7 +13,7 @@ struct fire_projectile_tool : tool
         this->pl = pl;
     }
 
-    void use(raycast_info *rc) override
+    void use() override
     {
         pl->fire_projectile = true;
     }
