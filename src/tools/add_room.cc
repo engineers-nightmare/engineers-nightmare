@@ -86,10 +86,6 @@ struct add_room_tool : tool {
         ship->validate();
     }
 
-    void alt_use(raycast_info *rc) override {}
-
-    void long_use(raycast_info *rc) override {}
-
     void cycle_mode() override {
         room_size++;
         if (room_size >= room_sizes.size()) {

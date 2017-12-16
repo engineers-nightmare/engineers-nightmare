@@ -108,9 +108,6 @@ struct add_entity_tool : tool {
         cur_rotate %= 360;
     }
 
-    void long_use(raycast_info *rc) override {
-    }
-
     // hold to rotate continuously, press to rotate once
     void long_alt_use(raycast_info *rc) override {
         auto rotate = get_rotate();

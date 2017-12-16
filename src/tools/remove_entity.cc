@@ -36,12 +36,6 @@ struct remove_entity_tool : tool
         destroy_entity(rc->world.entity);
     }
 
-    void alt_use(raycast_info *rc) override {}
-
-    void long_use(raycast_info *rc) override {}
-
-    void cycle_mode() override {}
-
     void preview(raycast_info *rc, frame_data *frame) override {
         auto use = can_use(rc);
         if (use != dirty) {

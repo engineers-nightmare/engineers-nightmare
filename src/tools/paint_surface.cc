@@ -278,10 +278,6 @@ struct paint_surface_tool : tool
     void select() override {
         state = paint_state::idle;
     }
-
-    void unselect() override {
-        state = paint_state::idle;
-    }
 };
 
 tool *tool::create_paint_surface_tool() { return new paint_surface_tool; }

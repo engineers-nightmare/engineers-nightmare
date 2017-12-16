@@ -12,16 +12,16 @@ struct tool
 {
     virtual ~tool() = default;
 
-    virtual void use(raycast_info *rc) = 0;
-    virtual void alt_use(raycast_info *rc) = 0;
-    virtual void long_use(raycast_info *rc) = 0;
+    virtual void use(raycast_info *rc) {}
+    virtual void alt_use(raycast_info *rc) {}
+    virtual void long_use(raycast_info *rc) {}
     virtual void long_alt_use(raycast_info *rc) {}
     virtual void select() {}
     virtual void unselect() {}
 
-    virtual void cycle_mode() = 0;
+    virtual void cycle_mode() {}
 
-    virtual void preview(raycast_info *rc, frame_data *frame) = 0;
+    virtual void preview(raycast_info *rc, frame_data *frame) {}
     virtual void get_description(raycast_info *rc, char *str) = 0;
 
     static tool *create_add_block_tool();

@@ -39,12 +39,6 @@ struct add_block_tool : tool
         }
     }
 
-    void alt_use(raycast_info *rc) override {}
-
-    void long_use(raycast_info *rc) override {}
-
-    void cycle_mode() override {}
-
     void preview(raycast_info *rc, frame_data *frame) override
     {
         if (!can_use(rc))
