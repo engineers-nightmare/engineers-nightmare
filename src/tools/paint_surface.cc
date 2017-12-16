@@ -6,6 +6,7 @@
 #include "../ship_space.h"
 #include "../mesh.h"
 #include "../block.h"
+#include "../player.h"
 #include "tools.h"
 
 
@@ -19,11 +20,12 @@ extern asset_manager asset_man;
 
 struct paint_surface_tool : tool
 {
-    surface_type select_type;
-    surface_type replace_type;
+    surface_type select_type = surface_wall;
+    surface_type replace_type = surface_wall;
 
     glm::ivec3 start_block;
     surface_index start_index;
+    raycast_info_block rc;
 
     enum class replace_mode {
         all,
@@ -35,14 +37,20 @@ struct paint_surface_tool : tool
         idle,
     } state = paint_state::idle;
 
-    paint_surface_tool() : select_type(surface_wall), replace_type(surface_wall) {}
+    void pre_use(player *pl) override {
+        ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, 
+            (raycast_stopping_rule)(enter_exit_framing | cross_surface), &rc);
+    }
 
-    bool can_use(const raycast_info_block *rc) const {
-        auto *block = rc->block;
-        auto bl = rc->bl;
-        auto index = normal_to_surface_index(rc);
+    bool can_use() const {
+        if (!rc.hit)
+            return false;
+
+        auto *block = rc.block;
+        auto bl = rc.bl;
+        auto index = normal_to_surface_index(&rc);
         auto si = (surface_index)index;
-        auto *other = ship->get_block(rc->p);
+        auto *other = ship->get_block(rc.p);
 
         // if we've started, only allow same plane
         if (state == paint_state::started) {
@@ -76,25 +84,25 @@ struct paint_surface_tool : tool
         return (block && block->type == block_frame);
     }
 
-    void use(raycast_info *rc) override {
-        if (!rc->block.hit)
+    void use(raycast_info *) override {
+        if (!rc.hit)
             return;
 
-        int index = normal_to_surface_index(&rc->block);
+        int index = normal_to_surface_index(&rc);
         auto si = (surface_index)index;
 
-        if (can_use(&rc->block)) {
+        if (can_use()) {
             switch (state) {
             case paint_state::started: {
-                finish_paint(rc->block.bl);
+                finish_paint(rc.bl);
 
                 state = paint_state::idle;
                 break;
             }
             case paint_state::idle: {
-                start_block = rc->block.bl;
+                start_block = rc.bl;
                 start_index = si;
-                select_type = rc->block.block->surfs[index];
+                select_type = rc.block->surfs[index];
 
                 state = paint_state::started;
                 break;
@@ -142,7 +150,7 @@ struct paint_surface_tool : tool
         }
     }
 
-    void alt_use(raycast_info *rc) override {
+    void alt_use(raycast_info *) override {
         switch (mode) {
         case replace_mode::all:
             mode = replace_mode::match;
@@ -153,7 +161,7 @@ struct paint_surface_tool : tool
         }
     }
 
-    void long_use(raycast_info *rc) override {
+    void long_use(raycast_info *) override {
         state = paint_state::idle;
     }
 
@@ -174,8 +182,8 @@ struct paint_surface_tool : tool
         }
     }
 
-    void preview(raycast_info *rc, frame_data *frame) override {
-        auto index = normal_to_surface_index(&rc->block);
+    void preview(raycast_info *, frame_data *frame) override {
+        auto index = normal_to_surface_index(&rc);
 
         if (state == paint_state::started) {
             auto mesh = asset_man.get_surface_mesh(index, replace_type);
@@ -194,10 +202,7 @@ struct paint_surface_tool : tool
             glUseProgram(simple_shader);
         }
 
-        if (!rc->block.hit)
-            return;
-
-        if (can_use(&rc->block)) {
+        if (can_use()) {
             switch (state) {
             case paint_state::started: {
                 auto cur = start_block;
@@ -216,8 +221,8 @@ struct paint_surface_tool : tool
                     i[1] = 1;
                 }
 
-                auto min = glm::min(start_block, rc->block.bl);
-                auto max = glm::max(start_block, rc->block.bl);
+                auto min = glm::min(start_block, rc.bl);
+                auto max = glm::max(start_block, rc.bl);
 
                 auto s = glm::value_ptr(min);
                 auto e = glm::value_ptr(max);
@@ -254,7 +259,7 @@ struct paint_surface_tool : tool
                 auto material = asset_man.get_world_texture_index("white");
 
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
-                mat.ptr->world_matrix = mat_position(glm::vec3(rc->block.bl));
+                mat.ptr->world_matrix = mat_position(glm::vec3(rc.bl));
                 mat.ptr->material = material;
                 mat.bind(1, frame);
 
