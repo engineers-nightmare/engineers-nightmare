@@ -26,7 +26,7 @@ struct vertex {
 
     vertex() : x(0), y(0), z(0) {}
 
-    vertex(float x, float y, float z, float nx, float ny, float nz, int mat, float u, float v)
+    vertex(float x, float y, float z, float nx, float ny, float nz, float u, float v)
         : x(x), y(y), z(z),
           normal_packed(glm::packSnorm3x10_1x2(glm::vec4(nx, ny, nz, 0))),
           uv_packed(glm::packUnorm2x16(glm::vec2(u,v)))
