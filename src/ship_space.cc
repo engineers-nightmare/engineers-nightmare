@@ -144,7 +144,7 @@ max_along_axis(float o, float d)
 
 
 void
-ship_space::raycast(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_info *rc)
+ship_space::raycast(glm::vec3 o, glm::vec3 d, float max_reach_distance, block_raycast_info *rc)
 {
     /* implementation of the algorithm described in
      * http://www.cse.yorku.ca/~amana/research/grid.pdf

@@ -21,4 +21,4 @@ use_action_on_entity(ship_space *ship, c_entity ce);
 
 /* todo: support free-placed entities*/
 void
-place_entity_attaches(raycast_info* rc, int index, c_entity e);
+place_entity_attaches(block_raycast_info* rc, int index, c_entity e);

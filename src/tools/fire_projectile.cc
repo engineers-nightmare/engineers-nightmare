@@ -12,18 +12,18 @@ struct fire_projectile_tool : tool
         this->pl = pl;
     }
 
-    void use(raycast_info *rc) override
+    void use(block_raycast_info *rc) override
     {
         pl->fire_projectile = true;
     }
 
-    void alt_use(raycast_info *rc) override {}
+    void alt_use(block_raycast_info *rc) override {}
 
-    void long_use(raycast_info *rc) override {}
+    void long_use(block_raycast_info *rc) override {}
 
     void cycle_mode() override {}
 
-    void preview(raycast_info *rc, frame_data *frame) override {}
+    void preview(block_raycast_info *rc, frame_data *frame) override {}
 
     void get_description(char *str) override
     {

@@ -728,7 +728,7 @@ struct play_state : game_state {
 
         if (t) {
             /* both tool use and overlays need the raycast itself */
-            raycast_info rc;
+            block_raycast_info rc;
             ship->raycast(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc);
             raycast_dist = rc.t;
 
@@ -789,7 +789,7 @@ struct play_state : game_state {
             return;
         }
 
-        raycast_info rc;
+        block_raycast_info rc;
         ship->raycast(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc);
 
         /* tool preview */

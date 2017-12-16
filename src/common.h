@@ -67,7 +67,7 @@ clamp(T t, T lower, T upper) {
     return t;
 }
 
-struct raycast_info {
+struct block_raycast_info {
     bool hit;
     bool inside;
     glm::ivec3 bl;          /* the block we hit */
@@ -79,7 +79,7 @@ struct raycast_info {
 };
 
 static inline unsigned
-normal_to_surface_index(raycast_info const *rc)
+normal_to_surface_index(block_raycast_info const *rc)
 {
     if (rc->n.x == 1) return 0;
     if (rc->n.x == -1) return 1;

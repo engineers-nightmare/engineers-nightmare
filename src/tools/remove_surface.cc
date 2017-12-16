@@ -17,7 +17,7 @@ extern asset_manager asset_man;
 
 struct remove_surface_tool : tool
 {
-    bool can_use(raycast_info *rc)
+    bool can_use(block_raycast_info *rc)
     {
         if (!rc->hit)
             return false;
@@ -27,7 +27,7 @@ struct remove_surface_tool : tool
         return bl && bl->surfs[index] & surface_phys;
     }
 
-    void use(raycast_info *rc) override
+    void use(block_raycast_info *rc) override
     {
         if (!can_use(rc))
             return;
@@ -41,13 +41,13 @@ struct remove_surface_tool : tool
         remove_ents_from_surface(rc->bl, index);
     }
 
-    void alt_use(raycast_info *rc) override {}
+    void alt_use(block_raycast_info *rc) override {}
 
-    void long_use(raycast_info *rc) override {}
+    void long_use(block_raycast_info *rc) override {}
 
     void cycle_mode() override {}
 
-    void preview(raycast_info *rc, frame_data *frame) override
+    void preview(block_raycast_info *rc, frame_data *frame) override
     {
         if (!can_use(rc))
             return;

@@ -29,7 +29,7 @@ const static uint32_t valid_directions =
 struct add_room_tool : tool {
     unsigned room_size = 0;
 
-    bool can_use(const raycast_info *rc) {
+    bool can_use(const block_raycast_info *rc) {
         auto *bl = ship->get_block(rc->bl);
         auto index = normal_to_surface_index(rc);
 
@@ -44,7 +44,7 @@ struct add_room_tool : tool {
             bl && bl->surfs[index] != surface_none;
     }
 
-    void use(raycast_info *rc) override {
+    void use(block_raycast_info *rc) override {
         if (!rc->hit)
             return;
 
@@ -86,9 +86,9 @@ struct add_room_tool : tool {
         ship->validate();
     }
 
-    void alt_use(raycast_info *rc) override {}
+    void alt_use(block_raycast_info *rc) override {}
 
-    void long_use(raycast_info *rc) override {}
+    void long_use(block_raycast_info *rc) override {}
 
     void cycle_mode() override {
         room_size++;
@@ -97,7 +97,7 @@ struct add_room_tool : tool {
         }
     }
 
-    void preview(raycast_info *rc, frame_data *frame) override {
+    void preview(block_raycast_info *rc, frame_data *frame) override {
         if (!rc->hit)
             return;
 

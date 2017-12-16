@@ -39,7 +39,7 @@ struct add_entity_tool : tool {
 
     // todo: we need to check against entities already placed in the world for interpenetration
     // todo: we need to check to ensure that this placement won't embed us in a block/is on a full base
-    bool can_use(raycast_info *rc) {
+    bool can_use(block_raycast_info *rc) {
         if (!rc->hit) {
             return false;
         }
@@ -81,7 +81,7 @@ struct add_entity_tool : tool {
         }
     }
 
-    void use(raycast_info *rc) override {
+    void use(block_raycast_info *rc) override {
         if (!can_use(rc)) {
             return;
         }
@@ -101,18 +101,18 @@ struct add_entity_tool : tool {
     }
 
     // press to rotate once, hold to rotate continuously
-    void alt_use(raycast_info *rc) override {
+    void alt_use(block_raycast_info *rc) override {
         auto rotate = get_rotate();
 
         cur_rotate += rotate;
         cur_rotate %= 360;
     }
 
-    void long_use(raycast_info *rc) override {
+    void long_use(block_raycast_info *rc) override {
     }
 
     // hold to rotate continuously, press to rotate once
-    void long_alt_use(raycast_info *rc) override {
+    void long_alt_use(block_raycast_info *rc) override {
         auto rotate = get_rotate();
 
         if (frame_info.elapsed >= last_rotate_time + 1.0 / rotate_tick_rate) {
@@ -140,7 +140,7 @@ struct add_entity_tool : tool {
         }
     }
 
-    void preview(raycast_info *rc, frame_data *frame) override {
+    void preview(block_raycast_info *rc, frame_data *frame) override {
         if (!can_use(rc))
             return;
 
@@ -178,7 +178,7 @@ struct add_entity_tool : tool {
         sprintf(str, "Place %s", name.c_str());
     }
 
-    glm::mat4 get_place_matrix(const raycast_info *rc, unsigned int index) const {
+    glm::mat4 get_place_matrix(const block_raycast_info *rc, unsigned int index) const {
         glm::mat4 m;
         auto rot_axis = glm::vec3{surface_index_to_normal(surface_zp)};
 

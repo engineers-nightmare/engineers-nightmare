@@ -16,11 +16,11 @@ extern asset_manager asset_man;
 
 struct remove_entity_tool : tool
 {
-    bool can_use(raycast_info *rc) {
+    bool can_use(block_raycast_info *rc) {
         return rc->hit;
     }
 
-    void use(raycast_info *rc) override {
+    void use(block_raycast_info *rc) override {
         if (!can_use(rc))
             return;
 
@@ -28,13 +28,13 @@ struct remove_entity_tool : tool
         remove_ents_from_surface(rc->p, index ^ 1);
     }
 
-    void alt_use(raycast_info *rc) override {}
+    void alt_use(block_raycast_info *rc) override {}
 
-    void long_use(raycast_info *rc) override {}
+    void long_use(block_raycast_info *rc) override {}
 
     void cycle_mode() override {}
 
-    void preview(raycast_info *rc, frame_data *frame) override {
+    void preview(block_raycast_info *rc, frame_data *frame) override {
         if (!can_use(rc))
             return;
 

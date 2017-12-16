@@ -37,7 +37,7 @@ struct paint_surface_tool : tool
 
     paint_surface_tool() : select_type(surface_wall), replace_type(surface_wall) {}
 
-    bool can_use(const raycast_info *rc) const {
+    bool can_use(const block_raycast_info *rc) const {
         auto *block = rc->block;
         auto bl = rc->bl;
         auto index = normal_to_surface_index(rc);
@@ -76,7 +76,7 @@ struct paint_surface_tool : tool
         return (block && block->type == block_frame);
     }
 
-    void use(raycast_info *rc) override {
+    void use(block_raycast_info *rc) override {
         if (!rc->hit)
             return;
 
@@ -142,7 +142,7 @@ struct paint_surface_tool : tool
         }
     }
 
-    void alt_use(raycast_info *rc) override {
+    void alt_use(block_raycast_info *rc) override {
         switch (mode) {
         case replace_mode::all:
             mode = replace_mode::match;
@@ -153,7 +153,7 @@ struct paint_surface_tool : tool
         }
     }
 
-    void long_use(raycast_info *rc) override {
+    void long_use(block_raycast_info *rc) override {
         state = paint_state::idle;
     }
 
@@ -174,7 +174,7 @@ struct paint_surface_tool : tool
         }
     }
 
-    void preview(raycast_info *rc, frame_data *frame) override {
+    void preview(block_raycast_info *rc, frame_data *frame) override {
         auto index = normal_to_surface_index(rc);
 
         if (state == paint_state::started) {
