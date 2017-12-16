@@ -23,7 +23,6 @@ extern ship_space *ship;
 
 extern asset_manager asset_man;
 extern component_system_manager component_system_man;
-extern player pl;
 
 extern std::vector<std::string> entity_names;
 extern std::unordered_map<std::string, entity_data> entity_stubs;
@@ -34,25 +33,23 @@ struct add_entity_tool : tool {
     const unsigned rotate_tick_rate = 5; // hz
     double last_rotate_time = 0;
     unsigned cur_rotate = 0;
-
     unsigned entity_name_index = 0;
+    raycast_info_block rc;
+
+    void pre_use(player *pl) override {
+        ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, cross_surface, &rc);
+    }
 
     // todo: we need to check against entities already placed in the world for interpenetration
     // todo: we need to check to ensure that this placement won't embed us in a block/is on a full base
-    bool can_use(raycast_info *rc) {
-        if (!rc->block.hit) {
+    bool can_use() {
+        if (!rc.hit) {
             return false;
         }
 
-        block *bl = rc->block.block;
+        block *bl = rc.block;
 
         if (!bl) {
-            return false;
-        }
-
-        int index = normal_to_surface_index(&rc->block);
-
-        if (~bl->surfs[index] & surface_phys) {
             return false;
         }
 
@@ -81,27 +78,27 @@ struct add_entity_tool : tool {
         }
     }
 
-    void use(raycast_info *rc) override {
-        if (!can_use(rc)) {
+    void use(raycast_info *) override {
+        if (!can_use()) {
             return;
         }
 
-        auto index = normal_to_surface_index(&rc->block);
+        auto index = normal_to_surface_index(&rc);
 
-        chunk *ch = ship->get_chunk_containing(rc->block.p);
+        chunk *ch = ship->get_chunk_containing(rc.p);
         /* the chunk we're placing into is guaranteed to exist, because there's
         * a surface facing into it */
         assert(ch);
 
-        glm::mat4 mat = get_place_matrix(&rc->block, index);
+        glm::mat4 mat = get_place_matrix(index);
 
         auto name = entity_names[entity_name_index];
-        auto e = spawn_entity(name, rc->block.p, index ^ 1, mat);
+        auto e = spawn_entity(name, rc.p, index ^ 1, mat);
         ch->entities.push_back(e);
     }
 
     // press to rotate once, hold to rotate continuously
-    void alt_use(raycast_info *rc) override {
+    void alt_use(raycast_info *) override {
         auto rotate = get_rotate();
 
         cur_rotate += rotate;
@@ -109,7 +106,7 @@ struct add_entity_tool : tool {
     }
 
     // hold to rotate continuously, press to rotate once
-    void long_alt_use(raycast_info *rc) override {
+    void long_alt_use(raycast_info *) override {
         auto rotate = get_rotate();
 
         if (frame_info.elapsed >= last_rotate_time + 1.0 / rotate_tick_rate) {
@@ -137,14 +134,14 @@ struct add_entity_tool : tool {
         }
     }
 
-    void preview(raycast_info *rc, frame_data *frame) override {
-        if (!can_use(rc))
+    void preview(raycast_info *, frame_data *frame) override {
+        if (!can_use())
             return;
 
-        auto index = normal_to_surface_index(&rc->block);
+        auto index = normal_to_surface_index(&rc);
         auto render = entity_stubs[entity_names[entity_name_index]].get_component<renderable_component_stub>();
 
-        glm::mat4 m = get_place_matrix(&rc->block, index);
+        glm::mat4 m = get_place_matrix(index);
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = m;
@@ -175,7 +172,7 @@ struct add_entity_tool : tool {
         sprintf(str, "Place %s", name.c_str());
     }
 
-    glm::mat4 get_place_matrix(const raycast_info_block *rc, unsigned int index) const {
+    glm::mat4 get_place_matrix(unsigned int index) const {
         glm::mat4 m;
         auto rot_axis = glm::vec3{surface_index_to_normal(surface_zp)};
 
@@ -193,15 +190,15 @@ struct add_entity_tool : tool {
             }
             case placement::half_block_snapped: {
                 step *= 2;
-                auto pos = rc->hitCoord;
-                m = mat_rotate_mesh(pos, rc->n);
+                auto pos = rc.hitCoord;
+                m = mat_rotate_mesh(pos, rc.n);
                 m[3].x = std::round(m[3].x * step) / step;
                 m[3].y = std::round(m[3].y * step) / step;
                 m[3].z = std::round(m[3].z * step) / step;
                 break;
             }
             case placement::full_block_snapped: {
-                m = mat_block_face(rc->p, index ^ 1);
+                m = mat_block_face(rc.p, index ^ 1);
                 break;
             }
             default:
