@@ -23,7 +23,7 @@ extern component_system_manager component_system_man;
 
 struct remove_entity_tool : tool
 {
-    bool dirty = false;
+    c_entity entity;
 
     bool can_use(raycast_info *rc) {
         return rc->world.hit && c_entity::is_valid(rc->world.entity);
@@ -37,17 +37,16 @@ struct remove_entity_tool : tool
     }
 
     void preview(raycast_info *rc, frame_data *frame) override {
-        auto use = can_use(rc);
-        if (use != dirty) {
+        if (entity != rc->world.entity) {
             pl.ui_dirty = true;
-            use = !use;
+            entity = rc->world.entity;
         }
     }
 
     void get_description(raycast_info *rc, char *str) override {
-        if (rc->world.hit && c_entity::is_valid(rc->world.entity)) {
+        if (c_entity::is_valid(entity)) {
             auto &type_man = component_system_man.managers.type_component_man;
-            auto type = type_man.get_instance_data(rc->world.entity);
+            auto type = type_man.get_instance_data(entity);
             sprintf(str, "Remove %s", *type.name);
         }
         else {
