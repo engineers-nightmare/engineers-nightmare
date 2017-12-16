@@ -729,9 +729,6 @@ struct play_state : game_state {
             raycast_info rc;
             ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc.block);
 
-            /* interact with ents. do this /after/
-             * anything that may delete the entity
-             */
            phys_raycast_entity(pl.eye, pl.eye + 2.f * pl.dir,
                                         phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.entity);
 
