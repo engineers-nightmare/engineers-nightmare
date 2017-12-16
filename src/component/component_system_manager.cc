@@ -429,6 +429,10 @@ draw_renderables(frame_data *frame)
         auto & mesh_name = render_man.instance_pool.mesh[i];
         auto & mesh = asset_man.get_mesh(mesh_name);
 
+        if (!render_man.instance_pool.draw[i]) {
+            continue;
+        }
+
         auto params = frame->alloc_aligned<mesh_instance>(1);
         params.ptr->world_matrix = *pos_man.get_instance_data(ce).mat;
         params.ptr->material = material;
@@ -445,6 +449,10 @@ draw_renderables(frame_data *frame)
         auto ce = display_man.instance_pool.entity[i];
         auto & mesh_name = display_man.instance_pool.mesh[i];
         auto & mesh = asset_man.get_mesh(mesh_name);
+
+        if (!render_man.get_instance_data(ce).draw) {
+            continue;
+        }
 
         auto params = frame->alloc_aligned<mesh_instance>(1);
         params.ptr->world_matrix = *pos_man.get_instance_data(ce).mat;

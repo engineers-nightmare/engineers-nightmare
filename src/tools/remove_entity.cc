@@ -10,8 +10,8 @@
 #include "../component/component_system_manager.h"
 
 
-extern GLuint overlay_shader;
 extern GLuint simple_shader;
+extern GLuint highlight_shader;
 
 extern ship_space *ship;
 
@@ -46,9 +46,35 @@ struct remove_entity_tool : tool
     }
 
     void preview(frame_data *frame) override {
+        auto &rend = component_system_man.managers.renderable_component_man;
+        auto &pos_man = component_system_man.managers.relative_position_component_man;
+
         if (entity != rc.entity) {
+            if (c_entity::is_valid(entity) && rend.exists(entity)) {
+                *rend.get_instance_data(entity).draw = true;
+            }
+
             pl.ui_dirty = true;    // TODO: untangle this.
             entity = rc.entity;
+
+            if (c_entity::is_valid(entity) && rend.exists(entity)) {
+                *rend.get_instance_data(entity).draw = false;
+            }
+        }
+
+        if (c_entity::is_valid(entity) && rend.exists(entity)) {
+            auto mat = frame->alloc_aligned<mesh_instance>(1);
+            mat.ptr->world_matrix =  *pos_man.get_instance_data(entity).mat;
+            mat.bind(1, frame);
+
+            auto inst = rend.get_instance_data(entity);
+            auto mesh = asset_man.get_mesh(*inst.mesh);
+            glUseProgram(highlight_shader);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            draw_mesh(mesh.hw);
+            glDisable(GL_BLEND);
+            glUseProgram(simple_shader);
         }
     }
 
@@ -60,6 +86,14 @@ struct remove_entity_tool : tool
         }
         else {
             strcpy(str, "Remove entity tool");
+        }
+    }
+
+    void unselect() override {
+        tool::unselect();
+        if (c_entity::is_valid(entity)) {
+            auto &rend = component_system_man.managers.renderable_component_man;
+            *rend.get_instance_data(entity).draw = true;
         }
     }
 };
