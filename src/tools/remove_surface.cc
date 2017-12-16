@@ -5,6 +5,7 @@
 #include "../ship_space.h"
 #include "../mesh.h"
 #include "../block.h"
+#include "../player.h"
 #include "tools.h"
 
 
@@ -17,43 +18,44 @@ extern asset_manager asset_man;
 
 struct remove_surface_tool : tool
 {
-    bool can_use(raycast_info *rc)
-    {
-        if (!rc->block.hit)
-            return false;
+    raycast_info_block rc;
 
-        block *bl = rc->block.block;
-        auto index = normal_to_surface_index(&rc->block);
-        return bl && bl->surfs[index] & surface_phys;
+    void pre_use(player *pl) {
+        ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, cross_surface, &rc);
     }
 
-    void use(raycast_info *rc) override
+    bool can_use()
     {
-        if (!can_use(rc))
+        return rc.hit;
+    }
+
+    void use(raycast_info *) override
+    {
+        if (!can_use())
             return;
 
-        auto index = normal_to_surface_index(&rc->block);
+        auto index = normal_to_surface_index(&rc);
 
-        ship->set_surface(rc->block.bl, rc->block.p, (surface_index)index, surface_none);
+        ship->set_surface(rc.bl, rc.p, (surface_index)index, surface_none);
 
         /* remove any ents using the surface */
-        remove_ents_from_surface(rc->block.p, index ^ 1);
-        remove_ents_from_surface(rc->block.bl, index);
+        remove_ents_from_surface(rc.p, index ^ 1);
+        remove_ents_from_surface(rc.bl, index);
     }
 
-    void preview(raycast_info *rc, frame_data *frame) override
+    void preview(raycast_info *, frame_data *frame) override
     {
-        if (!can_use(rc))
+        if (!can_use())
             return;
 
-        block *bl = rc->block.block;
-        auto index = normal_to_surface_index(&rc->block);
+        block *bl = rc.block;
+        auto index = normal_to_surface_index(&rc);
 
         auto mesh = asset_man.get_surface_mesh(index, bl->surfs[index]);
         auto material = asset_man.get_world_texture_index("red");
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
-        mat.ptr->world_matrix = mat_position(glm::vec3(rc->block.bl));
+        mat.ptr->world_matrix = mat_position(glm::vec3(rc.bl));
         mat.ptr->material = material;
         mat.bind(1, frame);
 
