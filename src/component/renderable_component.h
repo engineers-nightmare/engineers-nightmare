@@ -13,6 +13,7 @@ struct renderable_component_manager : component_manager {
         c_entity *entity;
         const char* *mesh;
         unsigned *material;
+        bool *draw;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -27,6 +28,8 @@ struct renderable_component_manager : component_manager {
         d.mesh = instance_pool.mesh + inst.index;
 
         d.material = instance_pool.material + inst.index;
+
+        d.draw = instance_pool.draw + inst.index;
 
         return d;
     }
