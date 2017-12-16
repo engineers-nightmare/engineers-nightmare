@@ -61,8 +61,8 @@ struct remove_entity_tool : tool
         glUseProgram(simple_shader);
     }
 
-    void get_description(char *str) override {
-        strcpy(str, "Remove entity");
+    void get_description(raycast_info *rc, char *str) override {
+        strcpy(str, "Remove entity tool");
     }
 };
 

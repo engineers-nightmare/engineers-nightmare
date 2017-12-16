@@ -134,7 +134,7 @@ struct add_room_tool : tool {
         }
     }
 
-    void get_description(char *str) override {
+    void get_description(raycast_info *rc, char *str) override {
         sprintf(str, "Add room: %s\n", glm::to_string(room_sizes[room_size]).c_str());
     }
 };

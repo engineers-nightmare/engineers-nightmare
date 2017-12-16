@@ -172,7 +172,7 @@ struct add_entity_tool : tool {
         glDisable(GL_POLYGON_OFFSET_FILL);
     }
 
-    void get_description(char *str) override {
+    void get_description(raycast_info *rc, char *str) override {
         auto name = entity_names[entity_name_index];
 
         sprintf(str, "Place %s", name.c_str());
