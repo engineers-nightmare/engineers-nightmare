@@ -33,6 +33,7 @@ struct zone_info {
 
 enum raycast_stopping_rule {
     enter_exit_framing = 1,
+    cross_surface = 2,
 };
 
 struct ship_space {

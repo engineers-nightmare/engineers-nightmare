@@ -250,6 +250,26 @@ ship_space::raycast_block(glm::vec3 o, glm::vec3 d, float max_reach_distance, ra
                 return rc->hit;
             }
         }
+
+        if (stopping_rule & cross_surface) {
+            int index = normal_to_surface_index(nx, ny, nz);
+            if (bl && bl->surfs[index]) {
+                rc->hit = true;
+                rc->bl.x = x;
+                rc->bl.y = y;
+                rc->bl.z = z;
+                rc->block = bl;
+                rc->n.x = nx;
+                rc->n.y = ny;
+                rc->n.z = nz;
+                rc->p.x = x + nx;
+                rc->p.y = y + ny;
+                rc->p.z = z + nz;
+                rc->t = t;
+                rc->hitCoord = o + rc->t * d;
+                return rc->hit;
+            }
+        }
     }
     return rc->hit;
 }
