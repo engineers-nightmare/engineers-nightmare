@@ -11,6 +11,8 @@ struct tool
 {
     virtual ~tool() = default;
 
+    virtual void pre_use(player *pl) {}
+
     virtual void use(raycast_info *rc) {}
     virtual void alt_use(raycast_info *rc) {}
     virtual void long_use(raycast_info *rc) {}

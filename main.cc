@@ -732,6 +732,8 @@ struct play_state : game_state {
             phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
                                phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.world);
 
+            t->pre_use(&pl);
+
             /* tool use */
             if (pl.use_tool) {
                 t->use(&rc);
