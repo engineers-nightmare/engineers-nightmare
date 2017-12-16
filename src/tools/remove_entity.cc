@@ -14,7 +14,7 @@ extern ship_space *ship;
 
 extern asset_manager asset_man;
 
-struct remove_surface_entity_tool : tool
+struct remove_entity_tool : tool
 {
     bool can_use(raycast_info *rc) {
         return rc->hit;
@@ -62,8 +62,8 @@ struct remove_surface_entity_tool : tool
     }
 
     void get_description(char *str) override {
-        strcpy(str, "Remove surface entity");
+        strcpy(str, "Remove entity");
     }
 };
 
-tool *tool::create_remove_surface_entity_tool() { return new remove_surface_entity_tool(); }
+tool *tool::create_remove_entity_tool() { return new remove_entity_tool(); }
