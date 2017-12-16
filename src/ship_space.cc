@@ -144,7 +144,7 @@ max_along_axis(float o, float d)
 
 
 bool
-ship_space::raycast_block(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_info_block *rc)
+ship_space::raycast_block(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_stopping_rule stopping_rule, raycast_info_block *rc)
 {
     /* implementation of the algorithm described in
      * http://www.cse.yorku.ca/~amana/research/grid.pdf
@@ -232,21 +232,23 @@ ship_space::raycast_block(glm::vec3 o, glm::vec3 d, float max_reach_distance, ra
             continue;
         }
 
-        if (rc->inside ^ (bl && bl->type != block_empty && bl->type != block_untouched)) {
-            rc->hit = true;
-            rc->bl.x = x;
-            rc->bl.y = y;
-            rc->bl.z = z;
-            rc->block = bl;
-            rc->n.x = nx;
-            rc->n.y = ny;
-            rc->n.z = nz;
-            rc->p.x = x + nx;
-            rc->p.y = y + ny;
-            rc->p.z = z + nz;
-            rc->t = t;
-            rc->hitCoord = o + rc->t * d;
-            return true;
+        if (stopping_rule & enter_exit_framing) {
+            if (rc->inside ^ (bl && bl->type != block_empty && bl->type != block_untouched)) {
+                rc->hit = true;
+                rc->bl.x = x;
+                rc->bl.y = y;
+                rc->bl.z = z;
+                rc->block = bl;
+                rc->n.x = nx;
+                rc->n.y = ny;
+                rc->n.z = nz;
+                rc->p.x = x + nx;
+                rc->p.y = y + ny;
+                rc->p.z = z + nz;
+                rc->t = t;
+		        rc->hitCoord = o + rc->t * d;
+                return rc->hit;
+            }
         }
     }
     return rc->hit;

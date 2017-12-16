@@ -31,6 +31,10 @@ struct zone_info {
     zone_info(float air_amount) : air_amount(air_amount) {}
 };
 
+enum raycast_stopping_rule {
+    enter_exit_framing = 1,
+};
+
 struct ship_space {
     /* the min and max chunk co-ords ship_space has seen for each axis
      * this is for iteration (min_x..max_x) (inclusive)
@@ -90,7 +94,7 @@ struct ship_space {
      */
     static ship_space * mock_ship_space();
 
-    bool raycast_block(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_info_block *rc);
+    bool raycast_block(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_stopping_rule stopping_rule, raycast_info_block *rc);
 
     /* ensure that the specified block_{x,y,z} can be fetched with a get_block
      *

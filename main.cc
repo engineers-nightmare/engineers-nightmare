@@ -642,7 +642,7 @@ struct play_state : game_state {
 
             if (t) {
                 raycast_info rc;
-                ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc.block);
+                ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, enter_exit_framing, &rc.block);
                 phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
                                    phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.world);
 
@@ -732,7 +732,7 @@ struct play_state : game_state {
         if (t) {
             /* both tool use and overlays need the raycast_block itself */
             raycast_info rc;
-            ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc.block);
+            ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, enter_exit_framing, &rc.block);
 
             phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
                                phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.world);
@@ -793,7 +793,7 @@ struct play_state : game_state {
         }
 
         raycast_info rc;
-        ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc.block);
+        ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, enter_exit_framing, &rc.block);
         phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
                            phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.world);
 
