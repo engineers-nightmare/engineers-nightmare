@@ -11,6 +11,12 @@
 #define FRAME_DATA_SIZE     (16u * 1024 * 1024)
 #define NUM_INFLIGHT_FRAMES 3
 
+struct per_camera_params {
+    glm::mat4 view_proj_matrix;
+    glm::mat4 inv_centered_view_proj_matrix;
+    float aspect;
+};
+
 struct frame_data {
     GLuint bo;
     void *base_ptr;

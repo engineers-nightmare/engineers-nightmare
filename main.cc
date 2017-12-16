@@ -70,18 +70,12 @@ en_settings game_settings;
 struct {
     SDL_Window *ptr;
     SDL_GLContext gl_ctx;
-    int width;
-    int height;
+    unsigned width;
+    unsigned height;
     bool has_focus;
 } wnd;
 
 frame_info frame_info;
-
-struct per_camera_params {
-    glm::mat4 view_proj_matrix;
-    glm::mat4 inv_centered_view_proj_matrix;
-    float aspect;
-};
 
 void GLAPIENTRY
 gl_debug_callback(GLenum source __unused,
@@ -128,6 +122,15 @@ extern std::unordered_map<std::string, entity_data> entity_stubs;
 
 void load_entities();
 void use_action_on_entity(ship_space *ship, c_entity ce);
+
+bool is_window_focused() {
+    return wnd.has_focus;
+}
+
+void get_window_size(unsigned *w, unsigned *h) {
+    *w = wnd.width;
+    *h = wnd.height;
+}
 
 struct game_state {
     virtual ~game_state() {}
@@ -301,7 +304,7 @@ init()
 
 
 void
-resize(int width, int height)
+resize(unsigned width, unsigned height)
 {
     /* TODO: resize offscreen (but screen-sized) surfaces, etc. */
     glViewport(0, 0, width, height);
@@ -721,13 +724,13 @@ struct play_state : game_state {
     }
 
     void update(float dt) override {
-        if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_FALSE) {
-            SDL_SetRelativeMouseMode(SDL_TRUE);
-        }
-
-        if (!wnd.has_focus && SDL_GetRelativeMouseMode() != SDL_FALSE) {
-            SDL_SetRelativeMouseMode(SDL_FALSE);
-        }
+//        if (wnd.has_focus && SDL_GetRelativeMouseMode() == SDL_FALSE) {
+//            SDL_SetRelativeMouseMode(SDL_TRUE);
+//        }
+//
+//        if (!wnd.has_focus && SDL_GetRelativeMouseMode() != SDL_FALSE) {
+//            SDL_SetRelativeMouseMode(SDL_FALSE);
+//        }
 
         auto *t = tools[pl.active_tool_slot];
 
@@ -965,55 +968,6 @@ struct menu_state : game_state {
         }
     }
 
-    struct mesh_grid {
-        unsigned entity_name_index;
-        glm::ivec4 grid_rect;
-    };
-    std::vector<mesh_grid> mesh_grids;
-
-    static void draw_entity_in_grid(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
-        if (!cmd->UserCallbackData) {
-            return;
-        }
-        auto mg = (mesh_grid*)cmd->UserCallbackData;
-
-        glm::mat4 vm;
-        glm::mat4 pm;
-        vm = glm::lookAt(glm::vec3{1.5f, 0, 0.5f}, glm::vec3{0, 0, 0}, glm::vec3{0, 0, 1});
-        pm = glm::perspective(glm::radians(90.0f), 1.0f, 0.01f, 20.0f);
-
-        auto camera_params = frame->alloc_aligned<per_camera_params>(1);
-
-        camera_params.ptr->view_proj_matrix = pm * vm;
-        camera_params.ptr->aspect = 1.0f;
-        camera_params.bind(0, frame);
-
-        auto name = entity_names[mg->entity_name_index];
-        auto render = entity_stubs[name].get_component<renderable_component_stub>();
-        auto mesh = asset_man.get_mesh(render->mesh);
-        auto material = asset_man.get_world_texture_index(render->material);
-
-        auto params = frame->alloc_aligned<mesh_instance>(1);
-        auto m = mat_rotate_mesh({0, 0, 0}, {1, 0, 1});
-        auto r = glm::rotate(SDL_GetTicks() / 5000.0f, glm::vec3{0, 0, 1});
-        params.ptr->world_matrix = m * r;
-        params.ptr->material = material;
-        params.bind(1, frame);
-
-        glUseProgram(simple_shader);
-        bool depth_enabled = glIsEnabled(GL_DEPTH_TEST);
-        if (!depth_enabled) {
-            glEnable(GL_DEPTH_TEST);
-        }
-        glScissor(mg->grid_rect.x, mg->grid_rect.y, mg->grid_rect.z, mg->grid_rect.w);
-        glViewport(mg->grid_rect.x, mg->grid_rect.y, mg->grid_rect.z, mg->grid_rect.w);
-        draw_mesh(mesh.hw);
-        glUseProgram(simple_shader);
-        if (!depth_enabled) {
-            glDisable(GL_DEPTH_TEST);
-        }
-    }
-
     void handle_main_menu() {
         ImGui::Begin("", nullptr, menu_flags);
         {
@@ -1036,42 +990,6 @@ struct menu_state : game_state {
                 exit_requested = true;
             }
             ImGui::Separator();
-        }
-        ImGui::End();
-    }
-
-    void handle_keybinds_menu() {
-        mesh_grids.resize(0);
-
-        ImGui::Begin("", nullptr, menu_flags);
-
-        ImGui::Text("Entity Browser");
-        const int columns = 3;
-        const int dim = 200;
-        const int margin = 5;
-        ImGui::Dummy({columns * (dim + 10), 1});
-        ImGui::Columns(columns, nullptr, false);
-
-        for (unsigned index = 0; index < entity_names.size(); ++index) {
-// todo: use this when placeable is merged in
-//                if (!entity_stubs[entity_names[index]].get_component<placeable_component_stub>()) {
-//                    continue;
-//                }
-            ImGui::Button("", {dim + 2 * margin, dim + 2 * margin});
-            glm::vec2 pos = ImGui::GetCursorScreenPos();
-//            ImGui::Dummy({dim + 10, dim + 10});
-            pos.x += margin;
-            pos.y = wnd.height - pos.y + margin;
-            auto rect = glm::vec4(pos, dim, dim);
-
-            mesh_grids.push_back({index, {pos, dim, dim}});
-            ImGui::NextColumn();
-        }
-        ImGui::Columns(1);
-
-        auto list = ImGui::GetWindowDrawList();
-        for (auto &&iv : mesh_grids) {
-            list->AddCallback(draw_entity_in_grid, (void*)&iv);
         }
         ImGui::End();
     }
@@ -1115,7 +1033,7 @@ struct menu_state : game_state {
 
     void render(frame_data *frame) override {
         ImGui::SetCurrentContext(default_context);
-        ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+        ImGui_ImplSdlGL3_NewFrame(wnd.width, wnd.height);
 
         // center on screen
         ImGui::SetNextWindowPos(ImVec2{ wnd.width / 2.0f, wnd.height / 2.0f }, 0, ImVec2{ 0.5f, 0.5f });
@@ -1130,7 +1048,7 @@ struct menu_state : game_state {
                     break;
                 }
                 case MenuState::Keybinds: {
-                    handle_keybinds_menu();
+//                    handle_keybinds_menu();
                     break;
                 }
             }
@@ -1185,7 +1103,7 @@ run()
                  */
                 switch (e.window.event) {
                 case SDL_WINDOWEVENT_RESIZED:
-                    resize(e.window.data1, e.window.data2);
+                    resize((unsigned)e.window.data1, (unsigned)e.window.data2);
                     break;
 
                 case SDL_WINDOWEVENT_FOCUS_LOST:
@@ -1231,7 +1149,7 @@ run()
         }
 
         ImGui::SetCurrentContext(offscreen_contexts[0]);
-        ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+        ImGui_ImplSdlGL3_NewFrame(RENDER_DIM, RENDER_DIM);
 
         auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
@@ -1259,7 +1177,7 @@ run()
         }
 
         ImGui::SetCurrentContext(offscreen_contexts[1]);
-        ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+        ImGui_ImplSdlGL3_NewFrame(RENDER_DIM, RENDER_DIM);
         ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
         {
             ImGui::Begin("Second Window", nullptr, flags);
@@ -1284,7 +1202,9 @@ run()
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
         /* SDL_PollEvent above has already pumped the input, so current key state is available */
-        handle_input();
+        if (!ImGui::GetIO().WantCaptureMouse && !ImGui::GetIO().WantCaptureKeyboard) {
+            handle_input();
+        }
 
         update();
 

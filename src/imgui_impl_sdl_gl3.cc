@@ -13,9 +13,10 @@
 
 // SDL,GL3W
 #include <SDL.h>
-#include <SDL_syswm.h>
 #include <epoxy/gl.h>
 //#include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
+
+extern bool is_window_focused();
 
 // Data
 static double       g_Time = 0.0f;
@@ -362,7 +363,7 @@ void ImGui_ImplSdlGL3_Shutdown()
     ImGui::Shutdown();
 }
 
-void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window)
+void ImGui_ImplSdlGL3_NewFrame(unsigned w, unsigned h)
 {
     if (!g_FontTexture)
         ImGui_ImplSdlGL3_CreateDeviceObjects();
@@ -370,12 +371,8 @@ void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window)
     ImGuiIO& io = ImGui::GetIO();
 
     // Setup display size (every frame to accommodate for window resizing)
-    int w, h;
-    int display_w, display_h;
-    SDL_GetWindowSize(window, &w, &h);
-    SDL_GL_GetDrawableSize(window, &display_w, &display_h);
     io.DisplaySize = ImVec2((float)w, (float)h);
-    io.DisplayFramebufferScale = ImVec2(w > 0 ? ((float)display_w / w) : 0, h > 0 ? ((float)display_h / h) : 0);
+    io.DisplayFramebufferScale = ImVec2(1, 1);
 
     // Setup time step
     Uint32	time = SDL_GetTicks();
@@ -387,7 +384,7 @@ void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window)
     // (we already got mouse wheel, keyboard keys & characters from SDL_PollEvent())
     int mx, my;
     Uint32 mouseMask = SDL_GetMouseState(&mx, &my);
-    if (SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_FOCUS)
+    if (is_window_focused())
         io.MousePos = ImVec2((float)mx, (float)my);   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
     else
         io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
