@@ -183,7 +183,7 @@
     <ClCompile Include="src\imgui_impl_sdl_gl3.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\tools\remove_surface_entity.cc">
+    <ClCompile Include="src\tools\remove_entity.cc">
       <Filter>Source Files\tools</Filter>
     </ClCompile>
     <ClCompile Include="src\tools\add_entity.cc">
