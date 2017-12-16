@@ -866,6 +866,7 @@ phys_raycast_world(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, bt
                    raycast_info_world *rc)
 {
     rc->hit = false;
+    rc->entity = c_entity{0};
 
     btVector3 start_bt = glm_to_bt(start);
     btVector3 end_bt = glm_to_bt(end);
