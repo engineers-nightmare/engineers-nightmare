@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include <array>
+#include <soloud.h>
 
 #include "mesh.h"
 #include "block.h"
@@ -15,7 +16,8 @@ class asset_manager
     std::array<std::string, 256> surf_type_to_mesh;
 
     std::unordered_map<std::string, texture_set *> skyboxes {};
-
+    std::unordered_map<std::string, SoLoud::AudioSource *> sounds {};
+     
     void load_asset_manifest(char const *filename);
 
 public:
@@ -31,6 +33,8 @@ public:
     const mesh_data & get_surface_mesh(unsigned surface_type) const;
 
     const std::string & get_surface_mesh_name(unsigned surface_type) const;
+
+    SoLoud::AudioSource * get_sound(const std::string &);
 
     void bind_render_textures(int i);
 

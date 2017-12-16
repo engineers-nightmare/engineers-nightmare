@@ -3,6 +3,8 @@
 #include "common.h"
 #include <libconfig.h>
 #include "libconfig_shim.h"
+#include <soloud_wav.h>
+#include <soloud_wavstream.h>
 
 asset_manager::asset_manager()
     : meshes(),
@@ -60,6 +62,7 @@ struct asset_type {
     static constexpr const char* mesh {"mesh"};
     static constexpr const char* texture {"texture"};
     static constexpr const char* skybox {"skybox"};
+    static constexpr const char* sound { "sound" };
 };
 
 void asset_manager::load_asset_manifest(char const *filename) {
@@ -132,6 +135,25 @@ void asset_manager::load_asset_manifest(char const *filename) {
                 skyboxes[asset_name]->load(file);
             }
         }
+        else if (!strcmp(asset_type, asset_type::sound)) {
+            char const *asset_name;
+            config_setting_lookup_string(asset_setting, "name", &asset_name);
+            char const *asset_file;
+            config_setting_lookup_string(asset_setting, "file", &asset_file);
+            int streaming;
+            config_setting_lookup_bool(asset_setting, "streaming", &streaming);
+
+            if (streaming) {
+                auto sound = new SoLoud::WavStream();
+                sounds[asset_name] = sound;
+                sound->load(asset_file);
+            }
+            else {
+                auto sound = new SoLoud::Wav();
+                sounds[asset_name] = sound;
+                sound->load(asset_file);
+            }
+        }
         else {
             printf("Unknown asset type `%s`\n", asset_type);
             continue;
@@ -165,6 +187,10 @@ const mesh_data & asset_manager::get_surface_mesh(unsigned surface_type) const {
 
 const std::string & asset_manager::get_surface_mesh_name(unsigned surface_type) const {
     return surf_type_to_mesh[surface_type];
+}
+
+SoLoud::AudioSource * asset_manager::get_sound(const std::string & sound) {
+    return sounds.at(sound);
 }
 
 void asset_manager::bind_render_textures(int i) {

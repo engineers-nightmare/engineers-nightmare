@@ -76,6 +76,8 @@ struct {
 
 frame_info frame_info;
 
+SoLoud::Soloud * audio;
+
 struct per_camera_params {
     glm::mat4 view_proj_matrix;
     glm::mat4 inv_centered_view_proj_matrix;
@@ -314,6 +316,9 @@ init()
     glGenVertexArrays(1, &sky_vao);
 
     apply_video_settings();
+
+    audio = new SoLoud::Soloud();
+    audio->init();
 
     // Absorb all the init time so we dont try to catch up
     frame_info.tick();
@@ -1418,6 +1423,9 @@ main(int, char **)
     run();
 
     ImGui_ImplSdlGL3_Shutdown();
+
+    audio->deinit();
+    delete audio;
 
     return 0;
 }
