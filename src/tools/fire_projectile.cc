@@ -18,7 +18,7 @@ struct fire_projectile_tool : tool
         pl->fire_projectile = true;
     }
 
-    void get_description(raycast_info *rc, char *str) override
+    void get_description(char *str) override
     {
         strcpy(str, "Fire Projectile");
     }

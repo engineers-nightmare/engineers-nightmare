@@ -22,7 +22,7 @@ struct tool
     virtual void cycle_mode() {}
 
     virtual void preview(raycast_info *rc, frame_data *frame) {}
-    virtual void get_description(raycast_info *rc, char *str) = 0;
+    virtual void get_description(char *str) = 0;
 
     static tool *create_add_block_tool();
     static tool *create_remove_block_tool();

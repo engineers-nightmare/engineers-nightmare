@@ -43,7 +43,7 @@ struct remove_entity_tool : tool
         }
     }
 
-    void get_description(raycast_info *rc, char *str) override {
+    void get_description(char *str) override {
         auto &type_man = component_system_man.managers.type_component_man;
         if (c_entity::is_valid(entity) && type_man.exists(entity)) {
             auto type = type_man.get_instance_data(entity);

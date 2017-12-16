@@ -51,7 +51,7 @@ struct remove_block_tool : tool
         }
     }
 
-    void get_description(raycast_info *rc, char *str) override
+    void get_description(char *str) override
     {
         strcpy(str, "Remove Framing");
     }

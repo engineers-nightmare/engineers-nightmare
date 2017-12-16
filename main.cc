@@ -641,12 +641,7 @@ struct play_state : game_state {
             tool *t = tools[pl.active_tool_slot];
 
             if (t) {
-                raycast_info rc;
-                ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, enter_exit_framing, &rc.block);
-                phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
-                                   phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.world);
-
-                t->get_description(&rc, buf);
+                t->get_description(buf);
             }
             else {
                 strcpy(buf, "(no tool)");
