@@ -4,7 +4,6 @@
 #include "../common.h"
 
 struct player;
-struct raycast_info_block;
 struct frame_data;
 
 
