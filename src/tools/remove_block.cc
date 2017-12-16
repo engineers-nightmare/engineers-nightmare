@@ -4,6 +4,7 @@
 #include "../common.h"
 #include "../ship_space.h"
 #include "../mesh.h"
+#include "../player.h"
 #include "tools.h"
 
 
@@ -16,30 +17,36 @@ extern asset_manager asset_man;
 
 struct remove_block_tool : tool
 {
-    bool can_use(raycast_info *rc) {
-        return rc->block.hit && !rc->block.inside;
+    raycast_info_block rc;
+
+    void pre_use(player *pl) override {
+        ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, enter_exit_framing, &rc);
     }
 
-    void use(raycast_info *rc) override
-    {
-        if (!can_use(rc))
-            return;
-
-        ship->remove_block(rc->block.bl);
+    bool can_use() {
+        return rc.hit && !rc.inside;
     }
 
-    void preview(raycast_info *rc, frame_data *frame) override
+    void use(raycast_info *) override
     {
-        if (!can_use(rc))
+        if (!can_use())
             return;
 
-        block *bl = rc->block.block;
+        ship->remove_block(rc.bl);
+    }
+
+    void preview(raycast_info *, frame_data *frame) override
+    {
+        if (!can_use())
+            return;
+
+        block *bl = rc.block;
         if (bl->type != block_empty && bl->type != block_untouched) {
             auto mesh = asset_man.get_mesh("frame");
             auto material = asset_man.get_world_texture_index("red");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);
-            mat.ptr->world_matrix = mat_position(glm::vec3(rc->block.bl));
+            mat.ptr->world_matrix = mat_position(glm::vec3(rc.bl));
             mat.ptr->material = material;
             mat.bind(1, frame);
 
