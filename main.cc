@@ -623,7 +623,7 @@ action const* get_input(en_action a) {
 
 
 struct play_state : game_state {
-    c_entity use_entity{0};
+    c_entity use_entity;
 
     play_state() {
     }
@@ -668,7 +668,7 @@ struct play_state : game_state {
         /* Use key affordance */
         bind = game_settings.bindings.bindings.find(action_use);
         key = lookup_key((*bind).second.binds.inputs[0]);
-        if (use_entity.id != 0) {
+        if (c_entity::is_valid(use_entity)) {
             auto name = *type_man.get_instance_data(use_entity).name;
             sprintf(buf2, "%s Use the %s", key, name);
             w = 0; h = 0;
@@ -729,11 +729,8 @@ struct play_state : game_state {
             raycast_info rc;
             ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc.block);
 
-           phys_raycast_entity(pl.eye, pl.eye + 2.f * pl.dir,
-                                        phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.entity);
-
-            phys_raycast_generic(pl.eye, pl.eye + 2.f * pl.dir,
-                                 phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.generic);
+            phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
+                               phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.entity);
 
             /* tool use */
             if (pl.use_tool) {
@@ -766,16 +763,16 @@ struct play_state : game_state {
          * the switch component
          */
         auto &switch_man = component_system_man.managers.switch_component_man;
-        raycast_info_entity rc_ent;
-        phys_raycast_entity(pl.eye, pl.eye + 2.f * pl.dir,
-                                           phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc_ent);
+        raycast_info_world rc_ent;
+        phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
+                           phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc_ent);
         if (rc_ent.hit && switch_man.exists(rc_ent.entity)) {
             if (rc_ent.entity != use_entity) {
                 use_entity = rc_ent.entity;
                 pl.ui_dirty = true;
             }
 
-            if (pl.use && rc_ent.entity.id != 0) {
+            if (pl.use && c_entity::is_valid(rc_ent.entity)) {
                 use_action_on_entity(ship, rc_ent.entity);
             }
         }

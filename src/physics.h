@@ -66,12 +66,8 @@ void
 teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);
 
 bool
-phys_raycast_entity(glm::vec3 start, glm::vec3 end,
-                    btCollisionObject *ignore, btCollisionWorld *world, raycast_info_entity *rc);
-
-bool
-phys_raycast_generic(glm::vec3 start, glm::vec3 end,
-                     btCollisionObject *ignore, btCollisionWorld *world, raycast_info_generic *rc);
+phys_raycast_world(glm::vec3 start, glm::vec3 end,
+                   btCollisionObject *ignore, btCollisionWorld *world, raycast_info_world *rc);
 
 static inline glm::vec3
 bt_to_glm(btVector3 const &v)

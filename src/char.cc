@@ -862,51 +862,23 @@ void en_char_controller::stand(btCollisionWorld *collisionWorld)
 
 /* Not part of CC, but reuses the same callbacks etc. */
 bool
-phys_raycast_entity(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollisionWorld *world, raycast_info_entity *rc)
+phys_raycast_world(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollisionWorld *world,
+                   raycast_info_world *rc)
 {
     rc->hit = false;
 
     btVector3 start_bt = glm_to_bt(start);
     btVector3 end_bt = glm_to_bt(end);
-    en_ray_result_callback callback(ignore, start_bt, end_bt);
-    world->rayTest(start_bt, end_bt, callback);
-
-    if (callback.hasHit()) {
-        if (callback.m_collisionObject->getUserPointer()) {
-            rc->hit = true;
-            rc->entity = ((phys_ent_ref *) callback.m_collisionObject->getUserPointer())->ce;
-            rc->hitCoord = glm::vec3(callback.m_hitPointWorld.x(), callback.m_hitPointWorld.y(),
-                                     callback.m_hitPointWorld.z());
-        }
-    }
-
-    return rc->hit;
-}
-
-/* Not part of CC, but reuses the same callbacks etc. */
-bool
-phys_raycast_generic(glm::vec3 start, glm::vec3 end,
-        btCollisionObject *ignore, btCollisionWorld *world, raycast_info_generic *rc)
-{
-    rc->hit = false;
-
-    btVector3 start_bt = glm_to_bt(start);
-    btVector3 end_bt = glm_to_bt(end);
-
     en_ray_result_callback callback(ignore, start_bt, end_bt);
     world->rayTest(start_bt, end_bt, callback);
 
     if (callback.hasHit()) {
         rc->hit = true;
-
         rc->hitCoord = bt_to_glm(callback.m_hitPointWorld);
         rc->hitNormal = bt_to_glm(callback.m_hitNormalWorld);
-
-        auto toHit = callback.m_rayToWorld - callback.m_rayFromWorld;
-        rc->toHit = glm::normalize(bt_to_glm(toHit));
-
-        auto fromHit = callback.m_rayFromWorld - callback.m_rayToWorld;
-        rc->fromHit = glm::normalize(bt_to_glm(fromHit));
+        if (callback.m_collisionObject->getUserPointer()) {
+            rc->entity = ((phys_ent_ref *) callback.m_collisionObject->getUserPointer())->ce;
+        }
     }
 
     return rc->hit;

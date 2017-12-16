@@ -68,14 +68,6 @@ clamp(T t, T lower, T upper) {
     return t;
 }
 
-struct raycast_info_generic {
-    bool hit;
-    glm::vec3 hitCoord;     /* world hit coord */
-    glm::vec3 hitNormal;    /* world hit normal */
-    glm::vec3 toHit;
-    glm::vec3 fromHit;
-};
-
 struct raycast_info_block {
     bool hit;
     bool inside;
@@ -87,16 +79,16 @@ struct raycast_info_block {
     glm::vec3 hitCoord;     /* intersection point in ship space */
 };
 
-struct raycast_info_entity {
+struct raycast_info_world {
     bool hit;
     c_entity entity;
     glm::vec3 hitCoord;
+    glm::vec3 hitNormal;
 };
 
 struct raycast_info {
     raycast_info_block block;
-    raycast_info_entity entity;
-    raycast_info_generic generic;
+    raycast_info_world entity;
 };
 
 static inline unsigned

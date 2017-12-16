@@ -74,12 +74,12 @@ void projectile_linear_manager::simulate(float dt) {
     for (auto i = 0u; i < buffer.num; ) {
         auto new_pos = projectile_pool.position[i] + projectile_pool.velocity[i] * dt;
 
-        raycast_info_generic rc_gen;
-        phys_raycast_generic(projectile_pool.position[i], new_pos,
-            phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc_gen);
+        raycast_info_world rc;
+        phys_raycast_world(projectile_pool.position[i], new_pos,
+            phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc);
 
-        if (rc_gen.hit) {
-            new_pos = rc_gen.hitCoord;
+        if (rc.hit) {
+            new_pos = rc.hitCoord;
             projectile_pool.velocity[i] = glm::vec3(0);
             projectile_pool.lifetime[i] = after_collision_lifetime;
         }
