@@ -491,6 +491,10 @@ void render() {
     /* Reenable depth write */
     glDepthMask(GL_TRUE);
 
+    glUseProgram(simple_shader);
+
+    current_game_state->render(frame);
+
     if (draw_hud) {
         /* draw the ui */
         glDisable(GL_DEPTH_TEST);
@@ -505,10 +509,6 @@ void render() {
 
         glEnable(GL_DEPTH_TEST);
     }
-
-    glUseProgram(simple_shader);
-
-    current_game_state->render(frame);
 
     frame->end();
 
