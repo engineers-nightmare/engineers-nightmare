@@ -92,16 +92,22 @@ struct raycast_info {
 };
 
 static inline unsigned
-normal_to_surface_index(raycast_info_block const *rc)
+normal_to_surface_index(int nx, int ny, int nz)
 {
-    if (rc->n.x == 1) return 0;
-    if (rc->n.x == -1) return 1;
-    if (rc->n.y == 1) return 2;
-    if (rc->n.y == -1) return 3;
-    if (rc->n.z == 1) return 4;
-    if (rc->n.z == -1) return 5;
+    if (nx == 1) return 0;
+    if (nx == -1) return 1;
+    if (ny == 1) return 2;
+    if (ny == -1) return 3;
+    if (nz == 1) return 4;
+    if (nz == -1) return 5;
 
     return 0;   /* unreachable */
+}
+
+static inline unsigned
+normal_to_surface_index(raycast_info_block const *rc)
+{
+    return normal_to_surface_index(rc->n.x, rc->n.y, rc->n.z);
 }
 
 static inline glm::ivec3
