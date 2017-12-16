@@ -26,6 +26,7 @@
 
 #include "physics.h"
 #include "char.h"
+#include "common.h"
 
 
 // static helper method
@@ -859,30 +860,35 @@ void en_char_controller::stand(btCollisionWorld *collisionWorld)
     reset(collisionWorld);
 }
 
-
 /* Not part of CC, but reuses the same callbacks etc. */
-phys_ent_ref *
-phys_raycast(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollisionWorld *world)
+bool
+phys_raycast_entity(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, btCollisionWorld *world, raycast_info_entity *rc)
 {
+    rc->hit = false;
+
     btVector3 start_bt = glm_to_bt(start);
     btVector3 end_bt = glm_to_bt(end);
     en_ray_result_callback callback(ignore, start_bt, end_bt);
     world->rayTest(start_bt, end_bt, callback);
 
     if (callback.hasHit()) {
-        return (phys_ent_ref *)callback.m_collisionObject->getUserPointer();
+        if (callback.m_collisionObject->getUserPointer()) {
+            rc->hit = true;
+            rc->entity = ((phys_ent_ref *) callback.m_collisionObject->getUserPointer())->ce;
+            rc->hitCoord = glm::vec3(callback.m_hitPointWorld.x(), callback.m_hitPointWorld.y(),
+                                     callback.m_hitPointWorld.z());
+        }
     }
 
-    return nullptr;
+    return rc->hit;
 }
 
 /* Not part of CC, but reuses the same callbacks etc. */
-generic_raycast_info
+bool
 phys_raycast_generic(glm::vec3 start, glm::vec3 end,
-        btCollisionObject *ignore, btCollisionWorld *world)
+        btCollisionObject *ignore, btCollisionWorld *world, raycast_info_generic *rc)
 {
-    generic_raycast_info result;
-    result.hit = false;
+    rc->hit = false;
 
     btVector3 start_bt = glm_to_bt(start);
     btVector3 end_bt = glm_to_bt(end);
@@ -891,17 +897,17 @@ phys_raycast_generic(glm::vec3 start, glm::vec3 end,
     world->rayTest(start_bt, end_bt, callback);
 
     if (callback.hasHit()) {
-        result.hit = true;
+        rc->hit = true;
 
-        result.hitCoord = bt_to_glm(callback.m_hitPointWorld);
-        result.hitNormal = bt_to_glm(callback.m_hitNormalWorld);
+        rc->hitCoord = bt_to_glm(callback.m_hitPointWorld);
+        rc->hitNormal = bt_to_glm(callback.m_hitNormalWorld);
 
         auto toHit = callback.m_rayToWorld - callback.m_rayFromWorld;
-        result.toHit = glm::normalize(bt_to_glm(toHit));
+        rc->toHit = glm::normalize(bt_to_glm(toHit));
 
         auto fromHit = callback.m_rayFromWorld - callback.m_rayToWorld;
-        result.fromHit = glm::normalize(bt_to_glm(fromHit));
+        rc->fromHit = glm::normalize(bt_to_glm(fromHit));
     }
 
-    return result;
+    return rc->hit;
 }

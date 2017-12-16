@@ -37,7 +37,7 @@ struct paint_surface_tool : tool
 
     paint_surface_tool() : select_type(surface_wall), replace_type(surface_wall) {}
 
-    bool can_use(const block_raycast_info *rc) const {
+    bool can_use(const raycast_info_block *rc) const {
         auto *block = rc->block;
         auto bl = rc->bl;
         auto index = normal_to_surface_index(rc);
@@ -76,25 +76,25 @@ struct paint_surface_tool : tool
         return (block && block->type == block_frame);
     }
 
-    void use(block_raycast_info *rc) override {
-        if (!rc->hit)
+    void use(raycast_info *rc) override {
+        if (!rc->block.hit)
             return;
 
-        int index = normal_to_surface_index(rc);
+        int index = normal_to_surface_index(&rc->block);
         auto si = (surface_index)index;
 
-        if (can_use(rc)) {
+        if (can_use(&rc->block)) {
             switch (state) {
             case paint_state::started: {
-                finish_paint(rc->bl);
+                finish_paint(rc->block.bl);
 
                 state = paint_state::idle;
                 break;
             }
             case paint_state::idle: {
-                start_block = rc->bl;
+                start_block = rc->block.bl;
                 start_index = si;
-                select_type = rc->block->surfs[index];
+                select_type = rc->block.block->surfs[index];
 
                 state = paint_state::started;
                 break;
@@ -142,7 +142,7 @@ struct paint_surface_tool : tool
         }
     }
 
-    void alt_use(block_raycast_info *rc) override {
+    void alt_use(raycast_info *rc) override {
         switch (mode) {
         case replace_mode::all:
             mode = replace_mode::match;
@@ -153,7 +153,7 @@ struct paint_surface_tool : tool
         }
     }
 
-    void long_use(block_raycast_info *rc) override {
+    void long_use(raycast_info *rc) override {
         state = paint_state::idle;
     }
 
@@ -174,8 +174,8 @@ struct paint_surface_tool : tool
         }
     }
 
-    void preview(block_raycast_info *rc, frame_data *frame) override {
-        auto index = normal_to_surface_index(rc);
+    void preview(raycast_info *rc, frame_data *frame) override {
+        auto index = normal_to_surface_index(&rc->block);
 
         if (state == paint_state::started) {
             auto mesh = asset_man.get_surface_mesh(index, replace_type);
@@ -194,10 +194,10 @@ struct paint_surface_tool : tool
             glUseProgram(simple_shader);
         }
 
-        if (!rc->hit)
+        if (!rc->block.hit)
             return;
 
-        if (can_use(rc)) {
+        if (can_use(&rc->block)) {
             switch (state) {
             case paint_state::started: {
                 auto cur = start_block;
@@ -216,8 +216,8 @@ struct paint_surface_tool : tool
                     i[1] = 1;
                 }
 
-                auto min = glm::min(start_block, rc->bl);
-                auto max = glm::max(start_block, rc->bl);
+                auto min = glm::min(start_block, rc->block.bl);
+                auto max = glm::max(start_block, rc->block.bl);
 
                 auto s = glm::value_ptr(min);
                 auto e = glm::value_ptr(max);
@@ -254,7 +254,7 @@ struct paint_surface_tool : tool
                 auto material = asset_man.get_world_texture_index("white");
 
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
-                mat.ptr->world_matrix = mat_position(glm::vec3(rc->bl));
+                mat.ptr->world_matrix = mat_position(glm::vec3(rc->block.bl));
                 mat.ptr->material = material;
                 mat.bind(1, frame);
 

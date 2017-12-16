@@ -16,36 +16,36 @@ extern asset_manager asset_man;
 
 struct remove_block_tool : tool
 {
-    bool can_use(block_raycast_info *rc) {
-        return rc->hit && !rc->inside;
+    bool can_use(raycast_info *rc) {
+        return rc->block.hit && !rc->block.inside;
     }
 
-    void use(block_raycast_info *rc) override
+    void use(raycast_info *rc) override
     {
         if (!can_use(rc))
             return;
 
-        ship->remove_block(rc->bl);
+        ship->remove_block(rc->block.bl);
     }
 
-    void alt_use(block_raycast_info *rc) override {}
+    void alt_use(raycast_info *rc) override {}
 
-    void long_use(block_raycast_info *rc) override {}
+    void long_use(raycast_info *rc) override {}
 
     void cycle_mode() override {}
 
-    void preview(block_raycast_info *rc, frame_data *frame) override
+    void preview(raycast_info *rc, frame_data *frame) override
     {
         if (!can_use(rc))
             return;
 
-        block *bl = rc->block;
+        block *bl = rc->block.block;
         if (bl->type != block_empty && bl->type != block_untouched) {
             auto mesh = asset_man.get_mesh("frame");
             auto material = asset_man.get_world_texture_index("red");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);
-            mat.ptr->world_matrix = mat_position(glm::vec3(rc->bl));
+            mat.ptr->world_matrix = mat_position(glm::vec3(rc->block.bl));
             mat.ptr->material = material;
             mat.bind(1, frame);
 

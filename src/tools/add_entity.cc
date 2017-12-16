@@ -39,18 +39,18 @@ struct add_entity_tool : tool {
 
     // todo: we need to check against entities already placed in the world for interpenetration
     // todo: we need to check to ensure that this placement won't embed us in a block/is on a full base
-    bool can_use(block_raycast_info *rc) {
-        if (!rc->hit) {
+    bool can_use(raycast_info *rc) {
+        if (!rc->block.hit) {
             return false;
         }
 
-        block *bl = rc->block;
+        block *bl = rc->block.block;
 
         if (!bl) {
             return false;
         }
 
-        int index = normal_to_surface_index(rc);
+        int index = normal_to_surface_index(&rc->block);
 
         if (~bl->surfs[index] & surface_phys) {
             return false;
@@ -81,38 +81,38 @@ struct add_entity_tool : tool {
         }
     }
 
-    void use(block_raycast_info *rc) override {
+    void use(raycast_info *rc) override {
         if (!can_use(rc)) {
             return;
         }
 
-        auto index = normal_to_surface_index(rc);
+        auto index = normal_to_surface_index(&rc->block);
 
-        chunk *ch = ship->get_chunk_containing(rc->p);
+        chunk *ch = ship->get_chunk_containing(rc->block.p);
         /* the chunk we're placing into is guaranteed to exist, because there's
         * a surface facing into it */
         assert(ch);
 
-        glm::mat4 mat = get_place_matrix(rc, index);
+        glm::mat4 mat = get_place_matrix(&rc->block, index);
 
         auto name = entity_names[entity_name_index];
-        auto e = spawn_entity(name, rc->p, index ^ 1, mat);
+        auto e = spawn_entity(name, rc->block.p, index ^ 1, mat);
         ch->entities.push_back(e);
     }
 
     // press to rotate once, hold to rotate continuously
-    void alt_use(block_raycast_info *rc) override {
+    void alt_use(raycast_info *rc) override {
         auto rotate = get_rotate();
 
         cur_rotate += rotate;
         cur_rotate %= 360;
     }
 
-    void long_use(block_raycast_info *rc) override {
+    void long_use(raycast_info *rc) override {
     }
 
     // hold to rotate continuously, press to rotate once
-    void long_alt_use(block_raycast_info *rc) override {
+    void long_alt_use(raycast_info *rc) override {
         auto rotate = get_rotate();
 
         if (frame_info.elapsed >= last_rotate_time + 1.0 / rotate_tick_rate) {
@@ -140,14 +140,14 @@ struct add_entity_tool : tool {
         }
     }
 
-    void preview(block_raycast_info *rc, frame_data *frame) override {
+    void preview(raycast_info *rc, frame_data *frame) override {
         if (!can_use(rc))
             return;
 
-        auto index = normal_to_surface_index(rc);
+        auto index = normal_to_surface_index(&rc->block);
         auto render = entity_stubs[entity_names[entity_name_index]].get_component<renderable_component_stub>();
 
-        glm::mat4 m = get_place_matrix(rc, index);
+        glm::mat4 m = get_place_matrix(&rc->block, index);
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = m;
@@ -178,7 +178,7 @@ struct add_entity_tool : tool {
         sprintf(str, "Place %s", name.c_str());
     }
 
-    glm::mat4 get_place_matrix(const block_raycast_info *rc, unsigned int index) const {
+    glm::mat4 get_place_matrix(const raycast_info_block *rc, unsigned int index) const {
         glm::mat4 m;
         auto rot_axis = glm::vec3{surface_index_to_normal(surface_zp)};
 
@@ -196,7 +196,7 @@ struct add_entity_tool : tool {
             }
             case placement::half_block_snapped: {
                 step *= 2;
-                auto pos = rc->intersection;
+                auto pos = rc->hitCoord;
                 m = mat_rotate_mesh(pos, rc->n);
                 m[3].x = std::round(m[3].x * step) / step;
                 m[3].y = std::round(m[3].y * step) / step;

@@ -623,8 +623,7 @@ action const* get_input(en_action a) {
 
 
 struct play_state : game_state {
-    phys_ent_ref *use_entity = nullptr;
-    float raycast_dist = 0.0f;
+    c_entity use_entity{0};
 
     play_state() {
     }
@@ -669,8 +668,8 @@ struct play_state : game_state {
         /* Use key affordance */
         bind = game_settings.bindings.bindings.find(action_use);
         key = lookup_key((*bind).second.binds.inputs[0]);
-        if (use_entity) {
-            auto name = *type_man.get_instance_data(use_entity->ce).name;
+        if (use_entity.id != 0) {
+            auto name = *type_man.get_instance_data(use_entity).name;
             sprintf(buf2, "%s Use the %s", key, name);
             w = 0; h = 0;
             text->measure(buf2, &w, &h);
@@ -699,12 +698,11 @@ struct play_state : game_state {
             add_text_with_outline(buf2, -w/2, -100);
 
             w = 0; h = 0;
-            sprintf(buf2, "full: %d fast-unify: %d fast-nosplit: %d false-split: %d dist: %2.2f",
+            sprintf(buf2, "full: %d fast-unify: %d fast-nosplit: %d false-split: %d",
                     ship->num_full_rebuilds,
                     ship->num_fast_unifys,
                     ship->num_fast_nosplits,
-                    ship->num_false_splits,
-                    raycast_dist);
+                    ship->num_false_splits);
             text->measure(buf2, &w, &h);
             add_text_with_outline(buf2, -w/2, -150);
         }
@@ -727,10 +725,18 @@ struct play_state : game_state {
         auto *t = tools[pl.active_tool_slot];
 
         if (t) {
-            /* both tool use and overlays need the raycast itself */
-            block_raycast_info rc;
-            ship->raycast(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc);
-            raycast_dist = rc.t;
+            /* both tool use and overlays need the raycast_block itself */
+            raycast_info rc;
+            ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc.block);
+
+            /* interact with ents. do this /after/
+             * anything that may delete the entity
+             */
+           phys_raycast_entity(pl.eye, pl.eye + 2.f * pl.dir,
+                                        phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.entity);
+
+            phys_raycast_generic(pl.eye, pl.eye + 2.f * pl.dir,
+                                 phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.generic);
 
             /* tool use */
             if (pl.use_tool) {
@@ -759,26 +765,22 @@ struct play_state : game_state {
             }
         }
 
-        /* interact with ents. do this /after/
-         * anything that may delete the entity
-         */
-        auto hit_ent = phys_raycast(pl.eye, pl.eye + 2.f * pl.dir,
-            phy->ghostObj.get(), phy->dynamicsWorld.get());
         /* can only interact with entities which have
          * the switch component
          */
         auto &switch_man = component_system_man.managers.switch_component_man;
-        if (hit_ent && !switch_man.exists(hit_ent->ce)) {
-            hit_ent = nullptr;
-        }
+        raycast_info_entity rc_ent;
+        phys_raycast_entity(pl.eye, pl.eye + 2.f * pl.dir,
+                                           phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc_ent);
+        if (rc_ent.hit && switch_man.exists(rc_ent.entity)) {
+            if (rc_ent.entity != use_entity) {
+                use_entity = rc_ent.entity;
+                pl.ui_dirty = true;
+            }
 
-        if (hit_ent != use_entity) {
-            use_entity = hit_ent;
-            pl.ui_dirty = true;
-        }
-
-        if (pl.use && hit_ent) {
-            use_action_on_entity(ship, hit_ent->ce);
+            if (pl.use && rc_ent.entity.id != 0) {
+                use_action_on_entity(ship, rc_ent.entity);
+            }
         }
     }
 
@@ -789,8 +791,8 @@ struct play_state : game_state {
             return;
         }
 
-        block_raycast_info rc;
-        ship->raycast(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc);
+        raycast_info rc;
+        ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc.block);
 
         /* tool preview */
         t->preview(&rc, frame);

@@ -6,6 +6,7 @@
 #include <memory>
 #include "char.h"
 #include "component/c_entity.h"
+#include "common.h"
 
 
 /* in player.h */
@@ -43,15 +44,6 @@ struct physics {
 
 struct sw_mesh;
 
-
-struct generic_raycast_info {
-    bool hit;
-    glm::vec3 hitCoord;         /* world hit coord */
-    glm::vec3 hitNormal;        /* world hit normal */
-    glm::vec3 toHit;
-    glm::vec3 fromHit;
-};
-
 /* Identifies an entity and a mesh/meshpart, to be referenced by the physics system. */
 struct phys_ent_ref
 {
@@ -73,14 +65,13 @@ build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisio
 void
 teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);
 
+bool
+phys_raycast_entity(glm::vec3 start, glm::vec3 end,
+                    btCollisionObject *ignore, btCollisionWorld *world, raycast_info_entity *rc);
 
-phys_ent_ref *
-phys_raycast(glm::vec3 start, glm::vec3 end,
-             btCollisionObject *ignore, btCollisionWorld *world);
-
-generic_raycast_info
+bool
 phys_raycast_generic(glm::vec3 start, glm::vec3 end,
-                     btCollisionObject *ignore, btCollisionWorld *world);
+                     btCollisionObject *ignore, btCollisionWorld *world, raycast_info_generic *rc);
 
 static inline glm::vec3
 bt_to_glm(btVector3 const &v)

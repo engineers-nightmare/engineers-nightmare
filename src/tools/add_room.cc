@@ -29,7 +29,7 @@ const static uint32_t valid_directions =
 struct add_room_tool : tool {
     unsigned room_size = 0;
 
-    bool can_use(const block_raycast_info *rc) {
+    bool can_use(const raycast_info_block *rc) {
         auto *bl = ship->get_block(rc->bl);
         auto index = normal_to_surface_index(rc);
 
@@ -44,31 +44,31 @@ struct add_room_tool : tool {
             bl && bl->surfs[index] != surface_none;
     }
 
-    void use(block_raycast_info *rc) override {
-        if (!rc->hit)
+    void use(raycast_info *rc) override {
+        if (!rc->block.hit)
             return;
 
-        if (!can_use(rc)) return;
+        if (!can_use(&rc->block)) return;
 
         auto size = room_sizes[room_size];
-        auto f = -rc->n;
+        auto f = -rc->block.n;
         auto u = surface_index_to_normal(surface_zp);
         glm::ivec3 ln = glm::ivec3(-f.y, f.x, f.z);
 
-        auto next_block = rc->bl + f;
+        auto next_block = rc->block.bl + f;
         auto front_left = next_block + (ln * (size.y / 2));
         auto back_right = next_block + (f * (size.x - 1)) - ln * (size.y / 2);
 
         // raycast down from hit block to get base
         glm::ivec3 down_block;
-        if (!ship->find_next_block(rc->p, -u, 10, &down_block)) {
+        if (!ship->find_next_block(rc->block.p, -u, 10, &down_block)) {
             return;
         }
         back_right.z = down_block.z + 1;
 
         // raycast up from hit block to get top of new room
         glm::ivec3 up_block;
-        if (!ship->find_next_block(rc->p, u, 10, &up_block)) {
+        if (!ship->find_next_block(rc->block.p, u, 10, &up_block)) {
             up_block = down_block + u * size.z;
         }
         front_left.z = up_block.z - 1;
@@ -86,9 +86,9 @@ struct add_room_tool : tool {
         ship->validate();
     }
 
-    void alt_use(block_raycast_info *rc) override {}
+    void alt_use(raycast_info *rc) override {}
 
-    void long_use(block_raycast_info *rc) override {}
+    void long_use(raycast_info *rc) override {}
 
     void cycle_mode() override {
         room_size++;
@@ -97,17 +97,17 @@ struct add_room_tool : tool {
         }
     }
 
-    void preview(block_raycast_info *rc, frame_data *frame) override {
-        if (!rc->hit)
+    void preview(raycast_info *rc, frame_data *frame) override {
+        if (!rc->block.hit)
             return;
 
-        if (can_use(rc)) {
-            auto f = -rc->n;
+        if (can_use(&rc->block)) {
+            auto f = -rc->block.n;
             auto u = surface_index_to_normal(surface_zp);
 
             // down to get base
             glm::ivec3 down_block;
-            if (!ship->find_next_block(rc->p, -u, 10, &down_block)) {
+            if (!ship->find_next_block(rc->block.p, -u, 10, &down_block)) {
                 return;
             }
 

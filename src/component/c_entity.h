@@ -9,6 +9,10 @@ struct c_entity {
         return this->id == other.id;
     }
 
+    bool operator!=(c_entity const &other) const {
+        return this->id != other.id;
+    }
+
     bool operator<(c_entity const &other) const {
         return this->id < other.id;
     }

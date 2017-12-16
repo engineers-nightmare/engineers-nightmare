@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "timer.h"
+#include "component/c_entity.h"
 
 #ifndef _WIN32
 #define __unused __attribute__(( unused ))
@@ -67,7 +68,15 @@ clamp(T t, T lower, T upper) {
     return t;
 }
 
-struct block_raycast_info {
+struct raycast_info_generic {
+    bool hit;
+    glm::vec3 hitCoord;     /* world hit coord */
+    glm::vec3 hitNormal;    /* world hit normal */
+    glm::vec3 toHit;
+    glm::vec3 fromHit;
+};
+
+struct raycast_info_block {
     bool hit;
     bool inside;
     glm::ivec3 bl;          /* the block we hit */
@@ -75,11 +84,23 @@ struct block_raycast_info {
     glm::ivec3 p;           /* the block along the normal */
     struct block *block;
     float t;                /* distance along the ray */
-    glm::vec3 intersection; /* intersection point in ship space */
+    glm::vec3 hitCoord;     /* intersection point in ship space */
+};
+
+struct raycast_info_entity {
+    bool hit;
+    c_entity entity;
+    glm::vec3 hitCoord;
+};
+
+struct raycast_info {
+    raycast_info_block block;
+    raycast_info_entity entity;
+    raycast_info_generic generic;
 };
 
 static inline unsigned
-normal_to_surface_index(block_raycast_info const *rc)
+normal_to_surface_index(raycast_info_block const *rc)
 {
     if (rc->n.x == 1) return 0;
     if (rc->n.x == -1) return 1;

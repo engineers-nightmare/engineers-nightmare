@@ -143,8 +143,8 @@ max_along_axis(float o, float d)
 }
 
 
-void
-ship_space::raycast(glm::vec3 o, glm::vec3 d, float max_reach_distance, block_raycast_info *rc)
+bool
+ship_space::raycast_block(glm::vec3 o, glm::vec3 d, float max_reach_distance, raycast_info_block *rc)
 {
     /* implementation of the algorithm described in
      * http://www.cse.yorku.ca/~amana/research/grid.pdf
@@ -169,7 +169,7 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, float max_reach_distance, block_ra
     block *bl = nullptr;
 
     bl = this->get_block(glm::ivec3(x,y,z));
-    rc->inside = bl ? bl->type != block_empty && bl->type != block_untouched : 0;
+    rc->inside = bl ? bl->type != block_empty && bl->type != block_untouched : false;
 
     int stepX = d.x > 0 ? 1 : -1;
     int stepY = d.y > 0 ? 1 : -1;
@@ -245,10 +245,11 @@ ship_space::raycast(glm::vec3 o, glm::vec3 d, float max_reach_distance, block_ra
             rc->p.y = y + ny;
             rc->p.z = z + nz;
             rc->t = t;
-            rc->intersection = o + rc->t * d;
-            return;
+            rc->hitCoord = o + rc->t * d;
+            return true;
         }
     }
+    return rc->hit;
 }
 
 /* ensure that the specified block_{x,y,z} can be fetched with a get_block
