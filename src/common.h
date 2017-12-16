@@ -18,6 +18,9 @@
 
 #define MAX_NETWORKS 10
 
+#define MAX_REACH_DISTANCE 5.0f
+
+
 struct frame_info {
     Timer timer{};
 
