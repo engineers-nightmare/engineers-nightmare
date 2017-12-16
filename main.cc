@@ -730,7 +730,7 @@ struct play_state : game_state {
             ship->raycast_block(pl.eye, pl.dir, MAX_REACH_DISTANCE, &rc.block);
 
             phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
-                               phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.entity);
+                               phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc.world);
 
             /* tool use */
             if (pl.use_tool) {

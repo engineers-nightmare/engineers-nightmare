@@ -88,7 +88,7 @@ struct raycast_info_world {
 
 struct raycast_info {
     raycast_info_block block;
-    raycast_info_world entity;
+    raycast_info_world world;
 };
 
 static inline unsigned
