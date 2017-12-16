@@ -4,6 +4,8 @@
 #include "../common.h"
 #include "../ship_space.h"
 #include "../mesh.h"
+#include "../player.h"
+#include "../physics.h"
 #include "tools.h"
 #include "../component/component_system_manager.h"
 
@@ -14,6 +16,7 @@ extern GLuint simple_shader;
 extern ship_space *ship;
 
 extern player pl;
+extern physics *phy;
 
 extern asset_manager asset_man;
 
@@ -24,22 +27,28 @@ extern component_system_manager component_system_man;
 struct remove_entity_tool : tool
 {
     c_entity entity;
+    raycast_info_world rc;
 
-    bool can_use(raycast_info *rc) {
-        return rc->world.hit && c_entity::is_valid(rc->world.entity);
+    void pre_use(player *pl) {
+        phys_raycast_world(pl->eye, pl->eye + 2.f * pl->dir,
+            phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc);
     }
 
-    void use(raycast_info *rc) override {
-        if (!can_use(rc))
+    bool can_use() {
+        return rc.hit && c_entity::is_valid(rc.entity);
+    }
+
+    void use(raycast_info *) override {
+        if (!can_use())
             return;
 
-        destroy_entity(rc->world.entity);
+        destroy_entity(rc.entity);
     }
 
-    void preview(raycast_info *rc, frame_data *frame) override {
-        if (entity != rc->world.entity) {
-            pl.ui_dirty = true;
-            entity = rc->world.entity;
+    void preview(raycast_info *, frame_data *frame) override {
+        if (entity != rc.entity) {
+            pl.ui_dirty = true;    // TODO: untangle this.
+            entity = rc.entity;
         }
     }
 
