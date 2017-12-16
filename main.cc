@@ -771,17 +771,23 @@ struct play_state : game_state {
         raycast_info_world rc_ent;
         phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
                            phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc_ent);
-        if (rc_ent.hit && c_entity::is_valid(rc_ent.entity)) {
-            if (switch_man.exists(rc_ent.entity)) {
-                if (rc_ent.entity != use_entity) {
-                    use_entity = rc_ent.entity;
-                    pl.ui_dirty = true;
-                }
 
-                if (pl.use && c_entity::is_valid(rc_ent.entity)) {
-                    use_action_on_entity(ship, rc_ent.entity);
-                }
+        if (rc_ent.hit &&
+            c_entity::is_valid(rc_ent.entity) &&
+            switch_man.exists(rc_ent.entity)) {
+
+            if (rc_ent.entity != use_entity) {
+                use_entity = rc_ent.entity;
+                pl.ui_dirty = true;
             }
+
+            if (pl.use && c_entity::is_valid(rc_ent.entity)) {
+                use_action_on_entity(ship, rc_ent.entity);
+            }
+        }
+        else if (c_entity::is_valid(use_entity)) {
+            use_entity = rc_ent.entity;
+            pl.ui_dirty = true;
         }
     }
 
