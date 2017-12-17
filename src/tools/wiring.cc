@@ -30,11 +30,19 @@ struct wiring_tool : tool
     void use() override
     {
         if (!can_use())
-            return; /* n/a */
+            return;
 
-        ship->ensure_block(rc.p);
         block *bl = ship->get_block(rc.p);
-        bl->has_wire[normal_to_surface_index(&rc) ^ 1] ^= true;
+        bl->has_wire[normal_to_surface_index(&rc) ^ 1] = true;
+    }
+
+    void alt_use() override
+    {
+        if (!can_use())
+            return;
+
+        block *bl = ship->get_block(rc.p);
+        bl->has_wire[normal_to_surface_index(&rc) ^ 1] = false;
     }
 
     void preview(frame_data *frame) override
