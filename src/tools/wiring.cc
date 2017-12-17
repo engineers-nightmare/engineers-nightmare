@@ -114,6 +114,7 @@ std::vector<wire_pos> find_path(wire_pos from, wire_pos to) {
 
         for_each_neighbor(wp, [&](wire_pos const &n) {
             auto cost = ws.g + 1.f;
+            if (!ship->get_block(n.pos)->has_wire[n.face]) cost += 3.f;
             auto is_new = state.find(n) == state.end();
             auto &ns = state[n];
             if (is_new || cost < ns.g) {
