@@ -15,10 +15,118 @@ extern ship_space *ship;
 
 extern asset_manager asset_man;
 
-struct wire_pos { glm::ivec3 pos; unsigned face; };
+struct wire_pos {
+    glm::ivec3 pos;
+    unsigned face;
+
+    bool operator==(wire_pos const & other) const {
+        return pos == other.pos && face == other.face;
+    }
+
+    bool operator!=(wire_pos const & other) const {
+        return pos != other.pos || face != other.face;
+    }
+
+    struct hash {
+        size_t operator()(wire_pos const &w) const {
+            return ivec3_hash()(w.pos) ^ std::hash<unsigned>()(w.face);
+        }
+    };
+};
 
 static wire_pos from_rc(raycast_info_block const *rc) {
     return wire_pos{ rc->p, normal_to_surface_index(rc) ^ 1 };
+}
+
+template<typename T>
+static void for_each_neighbor(wire_pos w, T const & f) {
+    auto bl = ship->get_block(w.pos);
+    for (auto i = 0u; i < 6u; i++) {
+        // not the current face, and not the opposite one
+        // (would require a span across the middle of the block)
+        if (i != w.face && i != (w.face ^ 1)) {
+            if (bl->surfs[i]) {
+                // around an inside corner
+                f({ w.pos, i });
+            }
+            else {
+                // straight along the surface
+                auto np = w.pos + surface_index_to_normal(i);
+                auto n = ship->get_block(np);
+                if (n && n->surfs[w.face]) {
+                    f({ np, w.face });
+                }
+                else {
+                    // outside corner
+                    auto rp = np + surface_index_to_normal(w.face);
+                    auto r = ship->get_block(rp);
+                    if (r && r->surfs[i ^ 1]) {
+                        f({ rp, i ^ 1 });
+                    }
+                }
+            }
+        }
+    }
+}
+
+static float heuristic(wire_pos from, wire_pos to) {
+    auto manhattan =
+        abs(from.pos.x - to.pos.x) +
+        abs(from.pos.y - to.pos.y) +
+        abs(from.pos.z - to.pos.z);
+    return (float)manhattan;
+}
+
+std::vector<wire_pos> find_path(wire_pos from, wire_pos to) {
+    struct path_state {
+        float g{ 0.f };
+        wire_pos prev;
+    };
+
+    std::unordered_map<wire_pos, path_state, wire_pos::hash> state;
+    state[from] = path_state{ 0.f, from };
+    using workitem = std::tuple<float, wire_pos>;
+    std::vector<workitem> worklist;
+    worklist.emplace_back(0.f, from);
+    std::vector<wire_pos> path;
+
+    auto comp = [](workitem const &a, workitem const &b) {
+        // compare priorities only.
+        return std::get<0>(a) > std::get<0>(b);
+    };
+
+    while (!worklist.empty()) {
+        auto w = worklist.front();
+        std::pop_heap(worklist.begin(), worklist.end(), comp);
+        worklist.pop_back();
+
+        auto wp = std::get<1>(w);
+        if (wp == to) {
+            path.push_back(wp);
+            while (wp != from) {
+                wp = state[wp].prev;
+                path.push_back(wp);
+            }
+            break;
+        }
+
+        auto &ws = state[wp];
+
+        for_each_neighbor(wp, [&](wire_pos const &n) {
+            auto cost = ws.g + 1.f;
+            auto is_new = state.find(n) == state.end();
+            auto &ns = state[n];
+            if (is_new || cost < ns.g) {
+                auto f = cost + heuristic(n, to);
+                worklist.emplace_back(f, n);
+                std::push_heap(worklist.begin(), worklist.end(), comp);
+                ns.prev = wp;
+                ns.g = cost;
+            }
+        });
+    }
+
+    return path;    // no path.
 }
 
 struct wiring_tool : tool
@@ -26,6 +134,8 @@ struct wiring_tool : tool
     raycast_info_block rc;
     enum { idle, placing } state = idle;
     wire_pos start;
+    wire_pos last_end;
+    std::vector<wire_pos> path;
 
     void pre_use(player *pl) override {
         ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, cross_surface, &rc);
@@ -47,11 +157,13 @@ struct wiring_tool : tool
             break;
 
         case placing: {
-            ship->get_block(start.pos)->has_wire[start.face] = true;
-            auto end = from_rc(&rc);
-            ship->get_block(end.pos)->has_wire[end.face] = true;
-            state = idle;
-            } break;
+            if (path.size()) {
+                for (auto &pe : path) {
+                    ship->get_block(pe.pos)->has_wire[pe.face] = true;
+                }
+                state = idle;
+            }
+        } break;
         }
     }
 
@@ -72,24 +184,45 @@ struct wiring_tool : tool
 
     void preview(frame_data *frame) override
     {
+        auto p = from_rc(&rc);
+
+        // TODO: clean this mess up.
         if (state == placing) {
+            if (last_end != p) {
+                last_end = p;
+                path = find_path(start, p);
+            }
+
             auto mesh = asset_man.get_mesh("face_marker");
             auto material = asset_man.get_world_texture_index("red");
 
-            auto mat = frame->alloc_aligned<mesh_instance>(1);
-            mat.ptr->world_matrix = mat_block_face(glm::vec3(start.pos), start.face);
-            mat.ptr->material = material;
-            mat.bind(1, frame);
+            if (!path.size()) {
+                auto mat = frame->alloc_aligned<mesh_instance>(1);
+                mat.ptr->world_matrix = mat_block_face(glm::vec3(start.pos), start.face);
+                mat.ptr->material = material;
+                mat.bind(1, frame);
+
+                glUseProgram(overlay_shader);
+                draw_mesh(mesh.hw);
+                glUseProgram(simple_shader);
+                return;
+            }
 
             glUseProgram(overlay_shader);
-            draw_mesh(mesh.hw);
+            material = asset_man.get_world_texture_index("white");
+            for (auto & pe : path) {
+                auto mat = frame->alloc_aligned<mesh_instance>(1);
+                mat.ptr->world_matrix = mat_block_face(glm::vec3(pe.pos), pe.face);
+                mat.ptr->material = material;
+                mat.bind(1, frame);
+                draw_mesh(mesh.hw);
+            }
+
             glUseProgram(simple_shader);
         }
 
         if (!can_use())
             return; /* n/a */
-
-        auto p = from_rc(&rc);
 
         auto mesh = asset_man.get_mesh("face_marker");
         auto material = asset_man.get_world_texture_index("white");
