@@ -405,6 +405,38 @@ struct time_accumulator
 };
 
 
+void draw_wires() {
+    auto mesh = asset_man.get_mesh("face_marker");
+
+    for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
+        for (int j = ship->mins.y; j <= ship->maxs.y; j++) {
+            for (int i = ship->mins.x; i <= ship->maxs.x; i++) {
+                chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
+                if (ch) {
+                    for (int z = 0; z < CHUNK_SIZE; z++) {
+                        for (int y = 0; y < CHUNK_SIZE; y++) {
+                            for (int x = 0; x < CHUNK_SIZE; x++) {
+                                auto bl = ch->blocks.get(x, y, z);
+                                for (int face = 0; face < 6; face++) {
+                                    if (bl->has_wire[face]) {
+                                        auto params = frame->alloc_aligned<mesh_instance>(1);
+                                        params.ptr->world_matrix = mat_block_face(glm::vec3(i * CHUNK_SIZE + x, j * CHUNK_SIZE + y, k * CHUNK_SIZE + z), face);
+                                        params.ptr->material = 0;
+                                        params.bind(1, frame);
+
+                                        draw_mesh(mesh.hw);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 void render() {
     glEnable(GL_DEPTH_TEST);
     float depthClearValue = 1.0f;
@@ -471,6 +503,7 @@ void render() {
     draw_renderables(frame);
     glUseProgram(simple_shader);
     draw_doors(frame);
+    draw_wires();
 
     /* draw the sky */
     glUseProgram(sky_shader);
