@@ -171,8 +171,8 @@
     <ClCompile Include="src\tools\remove_block.cc" />
     <ClCompile Include="src\tools\remove_surface.cc" />
     <ClCompile Include="src\tools\remove_entity.cc" />
+    <ClCompile Include="src\tools\wiring.cc" />
     <ClCompile Include="src\utils\debugdraw_gl.cc" />
-    <ClCompile Include="src\wiring\wiring.cc" />
     <ClCompile Include="src\wiring\wiring_data.cc" />
   </ItemGroup>
   <ItemGroup>

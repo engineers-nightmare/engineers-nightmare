@@ -62,7 +62,7 @@ set(EN_SOURCES
     src/tools/remove_block.cc
     src/tools/remove_surface.cc
     src/tools/remove_entity.cc
-    src/wiring/wiring.cc
+    src/tools/wiring.cc
     src/wiring/wiring_data.cc
     src/entity_utils.cc
     src/enums/enums.cc

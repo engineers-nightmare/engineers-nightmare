@@ -138,9 +138,6 @@
     <ClCompile Include="src\component\relative_position_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
-    <ClCompile Include="src\wiring\wiring.cc">
-      <Filter>Source Files\wiring</Filter>
-    </ClCompile>
     <ClCompile Include="src\component\power_provider_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
@@ -209,6 +206,9 @@
     </ClCompile>
     <ClCompile Include="src\utils\debugdraw_gl.cc">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tools\wiring.cc">
+      <Filter>Source Files\tools</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -33,5 +33,6 @@ struct tool
     static tool *create_add_entity_tool();
     static tool *create_paint_surface_tool();
     static tool *create_add_room_tool();
+    static tool *create_wiring_tool();
 };
 
