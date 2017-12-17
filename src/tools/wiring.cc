@@ -15,12 +15,17 @@ extern ship_space *ship;
 
 extern asset_manager asset_man;
 
+struct wire_pos { glm::ivec3 pos; unsigned face; };
+
+static wire_pos from_rc(raycast_info_block const *rc) {
+    return wire_pos{ rc->p, normal_to_surface_index(rc) ^ 1 };
+}
+
 struct wiring_tool : tool
 {
     raycast_info_block rc;
     enum { idle, placing } state = idle;
-    glm::ivec3 start_pos;
-    int start_face;
+    wire_pos start;
 
     void pre_use(player *pl) override {
         ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, cross_surface, &rc);
@@ -37,15 +42,14 @@ struct wiring_tool : tool
 
         switch (state) {
         case idle:
-            start_pos = rc.p;
-            start_face = normal_to_surface_index(&rc) ^ 1;
+            start = from_rc(&rc);
             state = placing;
             break;
 
         case placing: {
-            ship->get_block(start_pos)->has_wire[start_face] = true;
-            auto end_face = normal_to_surface_index(&rc) ^ 1;
-            ship->get_block(rc.p)->has_wire[end_face] = true;
+            ship->get_block(start.pos)->has_wire[start.face] = true;
+            auto end = from_rc(&rc);
+            ship->get_block(end.pos)->has_wire[end.face] = true;
             state = idle;
             } break;
         }
@@ -62,19 +66,18 @@ struct wiring_tool : tool
         if (!can_use())
             return;
 
-        ship->get_block(rc.p)->has_wire[normal_to_surface_index(&rc) ^ 1] = false;
+        auto p = from_rc(&rc);
+        ship->get_block(p.pos)->has_wire[p.face] = false;
     }
 
     void preview(frame_data *frame) override
     {
         if (state == placing) {
-            block *bl = ship->get_block(rc.p);
-
             auto mesh = asset_man.get_mesh("face_marker");
             auto material = asset_man.get_world_texture_index("red");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);
-            mat.ptr->world_matrix = mat_block_face(glm::vec3(start_pos), start_face);
+            mat.ptr->world_matrix = mat_block_face(glm::vec3(start.pos), start.face);
             mat.ptr->material = material;
             mat.bind(1, frame);
 
@@ -86,13 +89,13 @@ struct wiring_tool : tool
         if (!can_use())
             return; /* n/a */
 
-        block *bl = ship->get_block(rc.p);
+        auto p = from_rc(&rc);
 
         auto mesh = asset_man.get_mesh("face_marker");
         auto material = asset_man.get_world_texture_index("white");
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
-        mat.ptr->world_matrix = mat_block_face(glm::vec3(rc.p), normal_to_surface_index(&rc) ^ 1);
+        mat.ptr->world_matrix = mat_block_face(glm::vec3(p.pos), p.face);
         mat.ptr->material = material;
         mat.bind(1, frame);
 
