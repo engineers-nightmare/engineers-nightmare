@@ -269,7 +269,7 @@ struct wiring_tool : tool
                     new_wire, total_run, alt_use);
             }
             else {
-                sprintf(str, "Invalid placement!    %s: Remove wiring");
+                sprintf(str, "Invalid placement!    %s: Remove wiring", alt_use);
             }
             break;
         }
