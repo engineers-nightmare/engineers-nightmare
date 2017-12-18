@@ -475,8 +475,6 @@ void render() {
     camera_params.ptr->aspect = (float)wnd.width / wnd.height;
     camera_params.bind(0, frame);
 
-    asset_man.bind_world_textures(0);
-
     prepare_chunks();
 
     glUseProgram(simple_shader);

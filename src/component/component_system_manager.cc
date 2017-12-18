@@ -462,8 +462,6 @@ draw_renderables(frame_data *frame)
 
         draw_mesh(mesh.hw);
     }
-
-    asset_man.bind_world_textures(0);
 }
 
 

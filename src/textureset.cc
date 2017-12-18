@@ -17,6 +17,7 @@
 texture_set::texture_set(GLenum target, int dim, int array_size)
     : texobj(0), dim(dim), array_size(array_size), target(target), slots(0) {
     glGenTextures(1, &texobj);
+    glActiveTexture(GL_TEXTURE8);
     glBindTexture(target, texobj);
     if (target == GL_TEXTURE_CUBE_MAP) {
         glTexStorage2D(target, 1, GL_RGBA8, dim, dim);

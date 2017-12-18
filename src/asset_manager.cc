@@ -109,16 +109,6 @@ void asset_manager::load_asset_manifest(char const *filename) {
                 }
             }
         }
-        else if (!strcmp(asset_type, asset_type::texture)) {
-            char const *asset_name;
-            config_setting_lookup_string(asset_setting, "name", &asset_name);
-            char const *asset_file;
-            config_setting_lookup_string(asset_setting, "file", &asset_file);
-
-            auto slot = world_textures->load(asset_file);
-            world_texture_to_index[asset_name] = slot;
-
-        }
         else if (!strcmp(asset_type, asset_type::skybox)) {
             char const *asset_name;
             config_setting_lookup_string(asset_setting, "name", &asset_name);
@@ -148,9 +138,6 @@ void asset_manager::load_asset_manifest(char const *filename) {
 }
 
 void asset_manager::load_assets() {
-    world_textures = new texture_set(GL_TEXTURE_2D_ARRAY, WORLD_TEXTURE_DIMENSION, MAX_WORLD_TEXTURES);
-    render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 2);
-
     auto asset_files = get_file_list("assets", [](tinydir_file const &f) { return !strcmp(f.extension, "manifest"); });
     for (auto const &f : asset_files) {
         load_asset_manifest(f.path);
@@ -160,10 +147,8 @@ void asset_manager::load_assets() {
         mesh.second.upload_mesh();
         mesh.second.load_physics();
     }
-}
 
-unsigned asset_manager::get_world_texture_index(const std::string & tex) const {
-    return world_texture_to_index.at(tex);
+    render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 2);
 }
 
 mesh_data & asset_manager::get_mesh(const std::string & mesh) {
@@ -172,10 +157,6 @@ mesh_data & asset_manager::get_mesh(const std::string & mesh) {
 
 mesh_data &asset_manager::get_surface_mesh(unsigned surface_index, unsigned surface_type) {
     return meshes.at(surf_to_mesh[surface_index][surface_type]);
-}
-
-void asset_manager::bind_world_textures(int i) {
-    world_textures->bind(i);
 }
 
 void asset_manager::bind_render_textures(int i) {

@@ -14,7 +14,6 @@
 
 #define RENDER_DIM 1024
 #define WORLD_TEXTURE_DIMENSION     32
-#define MAX_WORLD_TEXTURES          64
 
 #define MAX_NETWORKS 10
 
