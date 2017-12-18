@@ -12,7 +12,7 @@ extern GLuint overlay_shader;
 extern GLuint simple_shader;
 
 extern ship_space *ship;
-
+extern player pl;
 extern asset_manager asset_man;
 
 struct wire_pos {
@@ -115,6 +115,7 @@ std::vector<wire_pos> find_path(wire_pos from, wire_pos to) {
         for_each_neighbor(wp, [&](wire_pos const &n) {
             auto cost = ws.g + 1.f;
             if (!ship->get_block(n.pos)->has_wire[n.face]) cost += 3.f;
+            if (n.face != surface_zm && n.face != surface_zp) cost += 4.f;
             auto is_new = state.find(n) == state.end();
             auto &ns = state[n];
             if (is_new || cost < ns.g) {
@@ -137,6 +138,8 @@ struct wiring_tool : tool
     wire_pos start;
     wire_pos last_end;
     std::vector<wire_pos> path;
+    int total_run = 0;
+    int new_wire = 0;
 
     void pre_use(player *pl) override {
         ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, cross_surface, &rc);
@@ -187,11 +190,15 @@ struct wiring_tool : tool
     {
         auto p = from_rc(&rc);
 
+        total_run = 0;
+        new_wire = 0;
+
         // TODO: clean this mess up.
         if (state == placing) {
             if (last_end != p) {
                 last_end = p;
                 path = find_path(start, p);
+                pl.ui_dirty = true;
             }
 
             auto mesh = asset_man.get_mesh("face_marker");
@@ -212,11 +219,22 @@ struct wiring_tool : tool
             glUseProgram(overlay_shader);
             material = asset_man.get_world_texture_index("white");
             for (auto & pe : path) {
+                total_run++;
+                if (!ship->get_block(pe.pos)->has_wire[pe.face]) {
+                    auto mat = frame->alloc_aligned<mesh_instance>(1);
+                    mat.ptr->world_matrix = mat_block_face(glm::vec3(pe.pos), pe.face);
+                    mat.ptr->material = material;
+                    mat.bind(1, frame);
+                    draw_mesh(mesh.hw);
+                    new_wire++;
+                }
+
+                auto mesh2 = asset_man.get_surface_mesh(pe.face, surface_wall);
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
-                mat.ptr->world_matrix = mat_block_face(glm::vec3(pe.pos), pe.face);
+                mat.ptr->world_matrix = mat_position(glm::vec3(pe.pos));       // this is stupid.
                 mat.ptr->material = material;
                 mat.bind(1, frame);
-                draw_mesh(mesh.hw);
+                draw_mesh(mesh2.hw);
             }
 
             glUseProgram(simple_shader);
@@ -240,7 +258,18 @@ struct wiring_tool : tool
 
     void get_description(char *str) override
     {
-        strcpy(str, "Wiring");
+        switch (state) {
+        case idle:
+            strcpy(str, "Place wiring    [Mouse Right]: Remove wiring"); break;
+        case placing:
+            if (total_run) {
+                sprintf(str, "Finish run: %dm of new wire, total run %dm    [Mouse Right]: Cancel",
+                    new_wire, total_run);
+            }
+            else {
+                strcpy(str, "Invalid placement!    [Mouse Right]: Cancel");
+            }
+        }
     }
 
     void select() override { state = idle; }
