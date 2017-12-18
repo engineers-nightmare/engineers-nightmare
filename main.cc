@@ -645,7 +645,16 @@ update()
         particle_man->simulate(fast_tick_accum.period);
 
         phy->tick(fast_tick_accum.period);
+    }
 
+    auto &phys_man = component_system_man.managers.physics_component_man;
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    for (auto i = 0u; i < phys_man.buffer.num; i++) {
+        auto ce = phys_man.instance_pool.entity[i];
+        assert (pos_man.exists(ce));
+
+        auto inst = pos_man.get_instance_data(ce);
+        *inst.mat = bt_to_mat4(phys_man.instance_pool.rigid[i]->getWorldTransform());
     }
 }
 
