@@ -760,7 +760,7 @@ ship_space::set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index, surface
     else {
         update_topology_for_remove_surface(a, b);
         block->has_wire[index] = false;
-        other_block->has_wire[index] = false;
+        other_block->has_wire[index ^ 1] = false;
     }
 }
 
