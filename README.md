@@ -34,7 +34,6 @@ or
  * assimp
  * bullet
  * freetype6
- * glm
  * libconfig
  * libepoxy
  * mman-win32 (For Windows build)
