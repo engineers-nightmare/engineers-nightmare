@@ -52,7 +52,7 @@ struct mesh_data {
     sw_mesh *sw = nullptr;
     hw_mesh *hw = nullptr;
     btTriangleMesh *phys_mesh = nullptr;
-    btCollisionShape *phys_shape = nullptr;
+    btConvexHullShape *phys_shape = nullptr;
 
     mesh_data() = default;
 
@@ -69,7 +69,7 @@ struct mesh_data {
     void load_physics() {
         assert(sw);
 
-        build_static_physics_mesh(sw, &phys_mesh, &phys_shape);
+        build_dynamic_physics_mesh(sw, &phys_mesh, &phys_shape);
     }
 };
 

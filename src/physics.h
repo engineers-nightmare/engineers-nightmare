@@ -57,10 +57,21 @@ build_static_physics_rb(int x, int y, int z, btCollisionShape *shape, btRigidBod
 void
 build_static_physics_rb_mat(glm::mat4 *m, btCollisionShape *shape, btRigidBody **rb);
 
+void
+build_dynamic_physics_rb_mat(glm::mat4 *m, btConvexHullShape  *shape, btRigidBody **rb, float mass);
+
+void convert_static_rb_to_dynamic(btRigidBody **rb, float mass);
 
 void
 build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisionShape **shape);
 
+void
+build_dynamic_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btConvexHullShape **shape);
+
+void activate_neighbors(btRigidBody *const *rb);
+
+void
+teardown_dynamic_physics_setup(btTriangleMesh **mesh, btConvexHullShape **shape, btRigidBody **rb);
 
 void
 teardown_static_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);

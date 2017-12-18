@@ -28,7 +28,7 @@ physics::physics(player *p)
     /* some default gravity
      * z is up and down
      */
-    this->dynamicsWorld->setGravity(btVector3(0, 0, -10));
+    this->dynamicsWorld->setGravity(btVector3(0, 0, 0));
 
     /* store a pointer to our player so physics can drive his position */
     this->pl = p;
