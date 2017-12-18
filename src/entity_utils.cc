@@ -178,9 +178,6 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     *pos.position = p;
     *pos.mat = mat;
 
-    auto render = render_man.get_instance_data(ce);
-    *render.material = asset_man.get_world_texture_index(render_stub->material);
-
     return ce;
 }
 

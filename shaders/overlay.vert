@@ -5,6 +5,7 @@
 
 layout(location=0) in vec4 pos;
 layout(location=2) in vec3 norm;
+layout(location=3) in vec2 uv;
 
 layout(std140, binding=0) uniform per_camera {
 
@@ -16,26 +17,26 @@ layout(std140, binding=0) uniform per_camera {
 layout(std140, binding=1) uniform per_object {
 
 	mat4 world_matrix;
-	int material;
+	vec4 color;
 
 };
 
+out vec3 ws_pos;
+out vec3 ws_norm;
 out vec3 texcoord;
+out vec4 out_color;
 
 void main(void)
 {
     vec4 world_pos = world_matrix * pos;
 	gl_Position = view_proj_matrix * world_pos;
 
-    texcoord.z = material;
+    texcoord.z = 0;
 
-    vec3 n = abs(normalize(norm));
-    /* Quick & dirty triplanar mapping */
-    if (n.x > 0.8) {
-        texcoord.xy = pos.yz;
-    } else if (n.y > 0.8) {
-        texcoord.xy = pos.xz;
-    } else {
-        texcoord.xy = pos.xy;
-    }
+    vec3 n = normalize(mat3(world_matrix) * norm);
+    texcoord.xy = uv;
+
+    ws_pos = world_pos.xyz;
+    ws_norm = n;
+    out_color = color;
 }

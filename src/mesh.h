@@ -74,5 +74,11 @@ struct mesh_data {
 
 struct mesh_instance {
     glm::mat4 world_matrix;
-    alignas(glm::vec4) int material;
+    glm::vec4 color;
+};
+
+struct display_mesh_instance {
+    glm::mat4 world_matrix;
+    int material;
+    int pad[3];
 };

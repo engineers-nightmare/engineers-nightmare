@@ -43,11 +43,10 @@ struct remove_block_tool : tool
         block *bl = rc.block;
         if (bl->type != block_empty && bl->type != block_untouched) {
             auto mesh = asset_man.get_mesh("frame");
-            auto material = asset_man.get_world_texture_index("red");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);
             mat.ptr->world_matrix = mat_position(glm::vec3(rc.bl));
-            mat.ptr->material = material;
+            mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
             mat.bind(1, frame);
 
             glUseProgram(overlay_shader);

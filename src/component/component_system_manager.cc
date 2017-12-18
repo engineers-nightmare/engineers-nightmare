@@ -433,14 +433,15 @@ draw_renderables(frame_data *frame)
             continue;
         }
 
-        auto params = frame->alloc_aligned<mesh_instance>(1);
-        params.ptr->world_matrix = *pos_man.get_instance_data(ce).mat;
-        params.ptr->material = material;
+        auto params = frame->alloc_aligned<glm::mat4>(1);
+        *(params.ptr) = *pos_man.get_instance_data(ce).mat;
         params.bind(1, frame);
 
         draw_mesh(mesh.hw);
     }
 
+    // TODO: stop using this hack entirely.
+    // Display meshes need to come with correct UVs.
     glUseProgram(modelspace_uv_shader);
 
     asset_man.bind_render_textures(0);
@@ -454,7 +455,7 @@ draw_renderables(frame_data *frame)
             continue;
         }
 
-        auto params = frame->alloc_aligned<mesh_instance>(1);
+        auto params = frame->alloc_aligned<display_mesh_instance>(1);
         params.ptr->world_matrix = *pos_man.get_instance_data(ce).mat;
         params.ptr->material = i;
         params.bind(1, frame);

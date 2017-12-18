@@ -204,12 +204,11 @@ struct wiring_tool : tool
             }
 
             auto mesh = asset_man.get_mesh("face_marker");
-            auto material = asset_man.get_world_texture_index("red");
 
             if (!path.size()) {
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
                 mat.ptr->world_matrix = mat_block_face(glm::vec3(start.pos), start.face);
-                mat.ptr->material = material;
+                mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
                 mat.bind(1, frame);
 
                 glUseProgram(overlay_shader);
@@ -219,13 +218,12 @@ struct wiring_tool : tool
             }
 
             glUseProgram(overlay_shader);
-            material = asset_man.get_world_texture_index("white");
             for (auto & pe : path) {
                 total_run++;
                 if (!ship->get_block(pe.pos)->has_wire[pe.face]) {
                     auto mat = frame->alloc_aligned<mesh_instance>(1);
                     mat.ptr->world_matrix = mat_block_face(glm::vec3(pe.pos), pe.face);
-                    mat.ptr->material = material;
+                    mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
                     mat.bind(1, frame);
                     draw_mesh(mesh.hw);
                     new_wire++;
@@ -234,7 +232,7 @@ struct wiring_tool : tool
                 auto mesh2 = asset_man.get_surface_mesh(pe.face, surface_wall);
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
                 mat.ptr->world_matrix = mat_position(glm::vec3(pe.pos));       // this is stupid.
-                mat.ptr->material = material;
+                mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
                 mat.bind(1, frame);
                 draw_mesh(mesh2.hw);
             }
@@ -246,11 +244,10 @@ struct wiring_tool : tool
             return; /* n/a */
 
         auto mesh = asset_man.get_mesh("face_marker");
-        auto material = asset_man.get_world_texture_index("white");
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = mat_block_face(glm::vec3(p.pos), p.face);
-        mat.ptr->material = material;
+        mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
         mat.bind(1, frame);
 
         glUseProgram(overlay_shader);

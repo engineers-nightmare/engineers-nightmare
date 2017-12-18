@@ -423,9 +423,8 @@ void draw_wires() {
                                 auto bl = ch->blocks.get(x, y, z);
                                 for (int face = 0; face < 6; face++) {
                                     if (bl->has_wire[face]) {
-                                        auto params = frame->alloc_aligned<mesh_instance>(1);
-                                        params.ptr->world_matrix = mat_block_face(glm::vec3(i * CHUNK_SIZE + x, j * CHUNK_SIZE + y, k * CHUNK_SIZE + z), face);
-                                        params.ptr->material = 0;
+                                        auto params = frame->alloc_aligned<glm::mat4>(1);
+                                        *(params.ptr) = mat_block_face(glm::vec3(i * CHUNK_SIZE + x, j * CHUNK_SIZE + y, k * CHUNK_SIZE + z), face);
                                         params.bind(1, frame);
 
                                         draw_mesh(mesh.hw);

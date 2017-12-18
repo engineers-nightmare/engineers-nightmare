@@ -187,13 +187,11 @@ struct paint_surface_tool : tool
 
         if (state == paint_state::started) {
             auto mesh = asset_man.get_surface_mesh(index, replace_type);
-            auto material = asset_man.get_world_texture_index("red");
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);
             mat.ptr->world_matrix = mat_position(glm::vec3(start_block));
-            mat.ptr->material = material;
+            mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
             mat.bind(1, frame);
-
 
             glUseProgram(overlay_shader);
             glEnable(GL_POLYGON_OFFSET_FILL);
@@ -237,11 +235,10 @@ struct paint_surface_tool : tool
                         }
 
                         auto mesh = asset_man.get_surface_mesh(index, replace_type);
-                        auto material = asset_man.get_world_texture_index("red");
 
                         auto mat = frame->alloc_aligned<mesh_instance>(1);
                         mat.ptr->world_matrix = mat_position(glm::vec3(cur));
-                        mat.ptr->material = material;
+                        mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
                         mat.bind(1, frame);
 
                         glUseProgram(overlay_shader);
@@ -256,11 +253,10 @@ struct paint_surface_tool : tool
             }
             case paint_state::idle: {
                 auto mesh = asset_man.get_surface_mesh(index, replace_type);
-                auto material = asset_man.get_world_texture_index("white");
 
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
                 mat.ptr->world_matrix = mat_position(glm::vec3(rc.bl));
-                mat.ptr->material = material;
+                mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
                 mat.bind(1, frame);
 
                 glUseProgram(overlay_shader);
