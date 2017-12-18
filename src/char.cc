@@ -868,15 +868,15 @@ phys_raycast_world(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, bt
     rc->hit = false;
     rc->entity = c_entity{0};
 
-    btVector3 start_bt = glm_to_bt(start);
-    btVector3 end_bt = glm_to_bt(end);
+    btVector3 start_bt = vec3_to_bt(start);
+    btVector3 end_bt = vec3_to_bt(end);
     en_ray_result_callback callback(ignore, start_bt, end_bt);
     world->rayTest(start_bt, end_bt, callback);
 
     if (callback.hasHit()) {
         rc->hit = true;
-        rc->hitCoord = bt_to_glm(callback.m_hitPointWorld);
-        rc->hitNormal = bt_to_glm(callback.m_hitNormalWorld);
+        rc->hitCoord = bt_to_vec3(callback.m_hitPointWorld);
+        rc->hitNormal = bt_to_vec3(callback.m_hitNormalWorld);
         if (callback.m_collisionObject->getUserPointer()) {
             rc->entity = ((phys_ent_ref *) callback.m_collisionObject->getUserPointer())->ce;
         }

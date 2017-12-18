@@ -70,13 +70,39 @@ phys_raycast_world(glm::vec3 start, glm::vec3 end,
                    btCollisionObject *ignore, btCollisionWorld *world, raycast_info_world *rc);
 
 static inline glm::vec3
-bt_to_glm(btVector3 const &v)
+bt_to_vec3(btVector3 const &v)
 {
     return glm::vec3(v.x(), v.y(), v.z());
 }
 
 static inline btVector3
-glm_to_bt(glm::vec3 v)
+vec3_to_bt(const glm::vec3 &v)
 {
     return btVector3(v.x, v.y, v.z);
+}
+
+static inline btTransform
+mat4_to_bt(const glm::mat4 &m)
+{
+    btMatrix3x3 bm(
+        m[0][0], m[1][0], m[2][0],
+        m[0][1], m[1][1], m[2][1],
+        m[0][2], m[1][2], m[2][2] );
+    return btTransform(bm, btVector3(m[3][0], m[3][1], m[3][2]));
+}
+
+static inline glm::mat4
+bt_to_mat4(const btTransform &t)
+{
+    btVector3 v0 = t.getBasis().getColumn(0);
+    btVector3 v1 = t.getBasis().getColumn(1);
+    btVector3 v2 = t.getBasis().getColumn(2);
+    btVector3 v3 = t.getOrigin();
+
+    glm::mat4 m(
+        v0.x(), v0.y(), v0.z(), 0.f,
+        v1.x(), v1.y(), v1.z(), 0.f,
+        v2.x(), v2.y(), v2.z(), 0.f,
+        v3.x(), v3.y(), v3.z(), 1.f );
+    return m;
 }
