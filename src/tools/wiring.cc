@@ -6,6 +6,8 @@
 #include "../mesh.h"
 #include "../player.h"
 #include "tools.h"
+#include "../input.h"
+#include "../settings.h"
 
 
 extern GLuint overlay_shader;
@@ -14,6 +16,7 @@ extern GLuint simple_shader;
 extern ship_space *ship;
 extern player pl;
 extern asset_manager asset_man;
+extern en_settings game_settings;
 
 struct wire_pos {
     glm::ivec3 pos;
@@ -258,17 +261,21 @@ struct wiring_tool : tool
 
     void get_description(char *str) override
     {
+        auto bind = game_settings.bindings.bindings.find(action_alt_use_tool);
+        auto alt_use = lookup_key((*bind).second.binds.inputs[0]);
+
         switch (state) {
         case idle:
-            strcpy(str, "Place wiring    [Mouse Right]: Remove wiring"); break;
+            sprintf(str, "Place wiring   %s: Remove wiring", alt_use); break;
         case placing:
             if (total_run) {
-                sprintf(str, "Finish run: %dm of new wire, total run %dm    [Mouse Right]: Cancel",
-                    new_wire, total_run);
+                sprintf(str, "Finish run: %dm of new wire, total run %dm    %s: Cancel",
+                    new_wire, total_run, alt_use);
             }
             else {
-                strcpy(str, "Invalid placement!    [Mouse Right]: Cancel");
+                sprintf(str, "Invalid placement!    %s: Remove wiring");
             }
+            break;
         }
     }
 
