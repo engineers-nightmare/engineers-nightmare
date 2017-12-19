@@ -3,8 +3,8 @@
 #include "common.h"
 #include <libconfig.h>
 #include "libconfig_shim.h"
-#include <soloud_wav.h>
-#include <soloud_wavstream.h>
+#include "soloud_wav.h"
+#include "soloud_wavstream.h"
 
 asset_manager::asset_manager()
     : meshes(),

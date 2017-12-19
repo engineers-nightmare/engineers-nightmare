@@ -41,8 +41,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;src\glm;windows-dependencies\getopt;windows-dependencies\soloud</IncludePath>
-    <LibraryPath>windows-dependencies\assimp\lib64;windows-dependencies\bullet\lib64;windows-dependencies\epoxy\lib64;windows-dependencies\freetype\lib64;windows-dependencies\libconfig\lib64;windows-dependencies\mman-win32\lib64;windows-dependencies\sdl2\lib\x64;windows-dependencies\sdl2_image\lib\x64;windows-dependencies\soloud;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;src\glm;windows-dependencies\getopt;src\soloud\include</IncludePath>
+    <LibraryPath>windows-dependencies\assimp\lib64;windows-dependencies\bullet\lib64;windows-dependencies\epoxy\lib64;windows-dependencies\freetype\lib64;windows-dependencies\libconfig\lib64;windows-dependencies\mman-win32\lib64;windows-dependencies\sdl2\lib\x64;windows-dependencies\sdl2_image\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);windows-dependencies\assimp\include;windows-dependencies\epoxy\include;windows-dependencies\freetype\include;windows-dependencies\libconfig\include;windows-dependencies\mman-win32\include;windows-dependencies\sdl2\include;windows-dependencies\sdl2_image\include;windows-dependencies\bullet\src;src\glm;windows-dependencies\getopt</IncludePath>
@@ -56,9 +56,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;WITH_WINMM;WITH_NULL</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -89,10 +91,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;WITH_NULL;WITH_WASAPI</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>src\soloud\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -159,6 +162,36 @@
     <ClCompile Include="src\settings.cc" />
     <ClCompile Include="src\shader.cc" />
     <ClCompile Include="src\ship_space.cc" />
+    <ClCompile Include="src\soloud\src\audiosource\wav\soloud_wav.cpp" />
+    <ClCompile Include="src\soloud\src\audiosource\wav\soloud_wavstream.cpp" />
+    <ClCompile Include="src\soloud\src\audiosource\wav\stb_vorbis.c" />
+    <ClCompile Include="src\soloud\src\backend\null\soloud_null.cpp" />
+    <ClCompile Include="src\soloud\src\backend\wasapi\soloud_wasapi.cpp" />
+    <ClCompile Include="src\soloud\src\backend\winmm\soloud_winmm.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_audiosource.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_bus.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_core_3d.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_core_basicops.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_core_faderops.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_core_filterops.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_core_getters.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_core_setters.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_core_voicegroup.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_core_voiceops.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_fader.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_fft.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_fft_lut.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_file.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_filter.cpp" />
+    <ClCompile Include="src\soloud\src\core\soloud_thread.cpp" />
+    <ClCompile Include="src\soloud\src\filter\soloud_bassboostfilter.cpp" />
+    <ClCompile Include="src\soloud\src\filter\soloud_biquadresonantfilter.cpp" />
+    <ClCompile Include="src\soloud\src\filter\soloud_dcremovalfilter.cpp" />
+    <ClCompile Include="src\soloud\src\filter\soloud_echofilter.cpp" />
+    <ClCompile Include="src\soloud\src\filter\soloud_fftfilter.cpp" />
+    <ClCompile Include="src\soloud\src\filter\soloud_flangerfilter.cpp" />
+    <ClCompile Include="src\soloud\src\filter\soloud_lofifilter.cpp" />
     <ClCompile Include="src\sprites.cc" />
     <ClCompile Include="src\text.cc" />
     <ClCompile Include="src\textureset.cc" />
@@ -227,6 +260,7 @@
     <ClInclude Include="src\settings.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\ship_space.h" />
+    <ClInclude Include="src\soloud\src\audiosource\wav\stb_vorbis.h" />
     <ClInclude Include="src\text.h" />
     <ClInclude Include="src\textureset.h" />
     <ClInclude Include="src\timer.h" />

@@ -3,7 +3,8 @@
 #include <unordered_map>
 #include <string>
 #include <array>
-#include <soloud.h>
+#include "soloud.h"
+#include "soloud_audiosource.h"
 
 #include "mesh.h"
 #include "block.h"

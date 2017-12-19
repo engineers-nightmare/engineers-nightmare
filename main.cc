@@ -17,6 +17,7 @@
 #include <iostream>
 #include <memory>
 #include "src/libconfig_shim.h"
+#include "soloud.h"
 
 #include "src/asset_manager.h"
 #include "src/bullet_debug_draw.h"
