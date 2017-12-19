@@ -59,6 +59,7 @@ bool draw_hud = true;
 bool draw_debug_text = false;
 bool draw_debug_chunks = false;
 bool draw_debug_axis = false;
+bool draw_debug_physics = false;
 bool draw_fps = false;
 
 auto hfov = glm::radians(90.f);
@@ -263,6 +264,7 @@ init()
     pl.disable_gravity = false;
 
     phy = new physics(&pl);
+    phy->dynamicsWorld->setDebugDrawer(new BulletDebugDraw());
 
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
@@ -558,7 +560,11 @@ void render() {
         dd::axisTriad(at, 0.01f, 0.1f, 0, false);
     }
 
-    if (draw_debug_chunks || draw_debug_axis) {
+    if (draw_debug_physics) {
+        phy->dynamicsWorld->debugDrawWorld();
+    }
+
+    if (draw_debug_chunks || draw_debug_axis || draw_debug_physics) {
         dd::flush(SDL_GetTicks());
     }
 }
@@ -1035,13 +1041,14 @@ struct menu_state : game_state {
             ImGui::Separator();
 
             // debug
-            bool draw_debug = draw_debug_text && draw_debug_chunks && draw_debug_axis;
+            bool draw_debug = draw_debug_text && draw_debug_chunks && draw_debug_axis && draw_debug_physics;
             if (ImGui::Checkbox("Draw Debug All", &draw_debug)) {
-                draw_debug_text = draw_debug_chunks = draw_debug_axis = draw_debug;
+                draw_debug_text = draw_debug_chunks = draw_debug_axis = draw_debug_physics = draw_debug;
             }
             ImGui::Checkbox("Draw Debug Text", &draw_debug_text);
             ImGui::Checkbox("Draw Chunk Debug", &draw_debug_chunks);
             ImGui::Checkbox("Draw Axis Debug", &draw_debug_axis);
+            ImGui::Checkbox("Draw Physics Debug", &draw_debug_physics);
 
             ImGui::Dummy(ImVec2{ 10, 10 });
             if (ImGui::Button("Back")) {

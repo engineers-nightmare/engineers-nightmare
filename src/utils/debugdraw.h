@@ -181,7 +181,7 @@
 #endif // DEBUG_DRAW_MAX_POINTS
 
 #ifndef DEBUG_DRAW_MAX_LINES
-#define DEBUG_DRAW_MAX_LINES 32768
+#define DEBUG_DRAW_MAX_LINES 10*1024*1024
 #endif // DEBUG_DRAW_MAX_LINES
 
 //
@@ -194,7 +194,7 @@
 // with this many entries.
 //
 #ifndef DEBUG_DRAW_VERTEX_BUFFER_SIZE
-#define DEBUG_DRAW_VERTEX_BUFFER_SIZE 4096
+#define DEBUG_DRAW_VERTEX_BUFFER_SIZE 4096*8
 #endif // DEBUG_DRAW_VERTEX_BUFFER_SIZE
 
 //
@@ -1990,6 +1990,8 @@ void RenderInterface::drawLineList(const DrawVertex *, int, bool)               
 // ================ End of implementation =================
 #endif // DEBUG_DRAW_IMPLEMENTATION
 // ================ End of implementation =================
+
+#include <epoxy/gl.h>
 
 class DDRenderInterfaceCoreGL final
     : public dd::RenderInterface {
