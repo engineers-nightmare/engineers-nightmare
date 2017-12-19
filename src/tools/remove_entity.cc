@@ -52,7 +52,7 @@ struct remove_entity_tool : tool
         auto po = pos.get_instance_data(entity);
         auto sa = sam.get_instance_data(entity);
 
-        convert_static_rb_to_dynamic(*ph.rigid, 1);
+        convert_static_rb_to_dynamic(*ph.rigid, *ph.mass);
         (*ph.rigid)->applyCentralForce(vec3_to_bt(glm::sphericalRand(1.0f)));
         *sa.attached = false;
     }
