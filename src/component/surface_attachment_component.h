@@ -13,6 +13,7 @@ struct surface_attachment_component_manager : component_manager {
         c_entity *entity;
         glm::ivec3 *block;
         int *face;
+        bool *attached;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -27,6 +28,8 @@ struct surface_attachment_component_manager : component_manager {
         d.block = instance_pool.block + inst.index;
 
         d.face = instance_pool.face + inst.index;
+
+        d.attached = instance_pool.attached + inst.index;
 
         return d;
     }

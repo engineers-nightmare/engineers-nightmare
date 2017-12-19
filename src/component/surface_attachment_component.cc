@@ -21,6 +21,7 @@ surface_attachment_component_manager::create_component_instance_data(unsigned co
     size_t size = sizeof(c_entity) * count;
     size = sizeof(glm::ivec3) * count + align_size<glm::ivec3>(size);
     size = sizeof(int) * count + align_size<int>(size);
+    size = sizeof(bool) * count + align_size<bool>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -31,10 +32,12 @@ surface_attachment_component_manager::create_component_instance_data(unsigned co
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.block = align_ptr((glm::ivec3 *)(new_pool.entity + count));
     new_pool.face = align_ptr((int *)(new_pool.block + count));
+    new_pool.attached = align_ptr((bool *)(new_pool.face + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.block, instance_pool.block, buffer.num * sizeof(glm::ivec3));
     memcpy(new_pool.face, instance_pool.face, buffer.num * sizeof(int));
+    memcpy(new_pool.attached, instance_pool.attached, buffer.num * sizeof(bool));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -51,6 +54,7 @@ surface_attachment_component_manager::destroy_instance(instance i) {
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
     instance_pool.block[i.index] = instance_pool.block[last_index];
     instance_pool.face[i.index] = instance_pool.face[last_index];
+    instance_pool.attached[i.index] = instance_pool.attached[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
@@ -81,6 +85,8 @@ surface_attachment_component_stub::assign_component_to_entity(c_entity entity) {
     *data.block = glm::ivec3(0);
 
     *data.face = 0;
+
+    *data.attached = false;
 };
 
 std::unique_ptr<component_stub> surface_attachment_component_stub::from_config(const config_setting_t *config) {
