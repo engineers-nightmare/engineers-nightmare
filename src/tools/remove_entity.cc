@@ -1,5 +1,7 @@
 #include <epoxy/gl.h>
 
+#include "../glm/glm/gtc/random.hpp"
+
 #include "../asset_manager.h"
 #include "../common.h"
 #include "../ship_space.h"
@@ -42,7 +44,12 @@ struct remove_entity_tool : tool
         if (!can_use())
             return;
 
-        destroy_entity(rc.entity);
+        auto &phys = component_system_man.managers.physics_component_man;
+        auto &pos = component_system_man.managers.relative_position_component_man;
+        auto ph = phys.get_instance_data(entity);
+        auto po = pos.get_instance_data(entity);
+        convert_static_rb_to_dynamic(ph.rigid, 1);
+        (*ph.rigid)->applyCentralForce(vec3_to_bt(glm::sphericalRand(1.0f)));
     }
 
     void preview(frame_data *frame) override {
