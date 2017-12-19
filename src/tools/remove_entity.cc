@@ -46,10 +46,15 @@ struct remove_entity_tool : tool
 
         auto &phys = component_system_man.managers.physics_component_man;
         auto &pos = component_system_man.managers.relative_position_component_man;
+        auto &sam = component_system_man.managers.surface_attachment_component_man;
+
         auto ph = phys.get_instance_data(entity);
         auto po = pos.get_instance_data(entity);
+        auto sa = sam.get_instance_data(entity);
+
         convert_static_rb_to_dynamic(*ph.rigid, 1);
         (*ph.rigid)->applyCentralForce(vec3_to_bt(glm::sphericalRand(1.0f)));
+        *sa.attached = false;
     }
 
     void preview(frame_data *frame) override {

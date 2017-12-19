@@ -172,6 +172,7 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     auto surface = surface_man.get_instance_data(ce);
     *surface.block = p;
     *surface.face = face;
+    *surface.attached = true;
 
     auto pos = pos_man.get_instance_data(ce);
     *pos.position = p;

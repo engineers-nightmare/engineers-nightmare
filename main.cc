@@ -679,6 +679,8 @@ struct play_state : game_state {
 
     void rebuild_ui() override {
         auto &type_man = component_system_man.managers.type_component_man;
+        auto &switch_man = component_system_man.managers.switch_component_man;
+        auto &surf_man = component_system_man.managers.surface_attachment_component_man;
 
         float w = 0;
         float h = 0;
@@ -717,13 +719,26 @@ struct play_state : game_state {
         /* Use key affordance */
         bind = game_settings.bindings.bindings.find(action_use);
         key = lookup_key((*bind).second.binds.inputs[0]);
+        char *pre = nullptr;
         if (c_entity::is_valid(use_entity)) {
-            auto name = *type_man.get_instance_data(use_entity).name;
-            sprintf(buf2, "%s Use the %s", key, name);
-            w = 0; h = 0;
-            text->measure(buf2, &w, &h);
-            add_text_with_outline(buf2, -w/2, -200);
+            auto sa = surf_man.get_instance_data(use_entity);
+            if (!*sa.attached) {
+                pre = const_cast<char *>("Remove");
+            }
+            else if (switch_man.exists(use_entity)) {
+                pre = const_cast<char *>("Use");
+            }
+
+            if (pre) {
+                auto name = *type_man.get_instance_data(use_entity).name;
+                sprintf(buf2, "%s %s the %s", key, pre, name);
+                w = 0;
+                h = 0;
+                text->measure(buf2, &w, &h);
+                add_text_with_outline(buf2, -w / 2, -200);
+            }
         }
+
 
         /* debug text */
         if (draw_debug_text) {
@@ -807,25 +822,27 @@ struct play_state : game_state {
          * the switch component
          */
         auto &switch_man = component_system_man.managers.switch_component_man;
+        auto &surf_man = component_system_man.managers.surface_attachment_component_man;
         raycast_info_world rc_ent;
         phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
                            phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc_ent);
 
-        if (rc_ent.hit &&
-            c_entity::is_valid(rc_ent.entity) &&
-            switch_man.exists(rc_ent.entity)) {
-
-            if (rc_ent.entity != use_entity) {
-                use_entity = rc_ent.entity;
-                pl.ui_dirty = true;
-            }
-
-            if (pl.use && c_entity::is_valid(rc_ent.entity)) {
-                use_action_on_entity(ship, rc_ent.entity);
+        auto old_entity = use_entity;
+        use_entity = rc_ent.entity;
+        if (rc_ent.hit && c_entity::is_valid(rc_ent.entity)) {
+            // if entity is not bolted down, remove from world
+            // otherwise, interact
+            auto sa = surf_man.get_instance_data(rc_ent.entity);
+            if (!*sa.attached && pl.use) {
+                destroy_entity(rc_ent.entity);
+                use_entity.id = 0;
+            } else if (switch_man.exists(rc_ent.entity)) {
+                if (pl.use && c_entity::is_valid(rc_ent.entity)) {
+                    use_action_on_entity(ship, rc_ent.entity);
+                }
             }
         }
-        else if (c_entity::is_valid(use_entity)) {
-            use_entity = rc_ent.entity;
+        if (old_entity != use_entity) {
             pl.ui_dirty = true;
         }
     }
@@ -1227,7 +1244,7 @@ run()
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui::Render();
         }
-        
+
         // reset back to default framebuffer
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
