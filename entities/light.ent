@@ -15,6 +15,7 @@ entity: {
         },
         physics: {
             mesh: "panel_4x4",
+            mass: 0.45,
         },
         surface_attachment: {
         },

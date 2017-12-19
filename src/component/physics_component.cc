@@ -21,6 +21,7 @@ physics_component_manager::create_component_instance_data(unsigned count) {
     size_t size = sizeof(c_entity) * count;
     size = sizeof(const char*) * count + align_size<const char*>(size);
     size = sizeof(btRigidBody *) * count + align_size<btRigidBody *>(size);
+    size = sizeof(float) * count + align_size<float>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -31,10 +32,12 @@ physics_component_manager::create_component_instance_data(unsigned count) {
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.mesh = align_ptr((const char* *)(new_pool.entity + count));
     new_pool.rigid = align_ptr((btRigidBody * *)(new_pool.mesh + count));
+    new_pool.mass = align_ptr((float *)(new_pool.rigid + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.mesh, instance_pool.mesh, buffer.num * sizeof(const char*));
     memcpy(new_pool.rigid, instance_pool.rigid, buffer.num * sizeof(btRigidBody *));
+    memcpy(new_pool.mass, instance_pool.mass, buffer.num * sizeof(float));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -51,6 +54,7 @@ physics_component_manager::destroy_instance(instance i) {
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
     instance_pool.mesh[i.index] = instance_pool.mesh[last_index];
     instance_pool.rigid[i.index] = instance_pool.rigid[last_index];
+    instance_pool.mass[i.index] = instance_pool.mass[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
@@ -82,7 +86,11 @@ physics_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.rigid = nullptr;
 
+    *data.mass = 1.0;
+
     *data.mesh = mesh.c_str();
+
+    *data.mass = mass;
 };
 
 std::unique_ptr<component_stub> physics_component_stub::from_config(const config_setting_t *config) {
@@ -90,6 +98,9 @@ std::unique_ptr<component_stub> physics_component_stub::from_config(const config
 
     auto mesh_member = config_setting_get_member(config, "mesh");
     physics_stub->mesh = config_setting_get_string(mesh_member);
+
+    auto mass_member = config_setting_get_member(config, "mass");
+    physics_stub->mass = config_setting_get_float(mass_member);
 
     return std::move(physics_stub);
 }

@@ -13,6 +13,7 @@ struct physics_component_manager : component_manager {
         c_entity *entity;
         const char* *mesh;
         btRigidBody * *rigid;
+        float *mass;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -28,6 +29,8 @@ struct physics_component_manager : component_manager {
 
         d.rigid = instance_pool.rigid + inst.index;
 
+        d.mass = instance_pool.mass + inst.index;
+
         return d;
     }
 };
@@ -36,6 +39,8 @@ struct physics_component_stub : component_stub {
     physics_component_stub() = default;
 
     std::string mesh{};
+
+    float mass{};
 
     void
     assign_component_to_entity(c_entity entity) override;

@@ -18,6 +18,7 @@ entity: {
         },
         physics: {
             mesh: "display_panel",
+            mass: 1.0,
         },
         surface_attachment: {
         },

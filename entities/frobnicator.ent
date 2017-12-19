@@ -15,6 +15,7 @@ entity: {
         },
         physics: {
             mesh: "o2_gen",
+            mass: 2.0,
         },
         surface_attachment: {
         },

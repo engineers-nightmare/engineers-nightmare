@@ -15,6 +15,7 @@ entity: {
         },
         physics: {
             mesh: "warning_light",
+            mass: 0.45,
         },
         surface_attachment: {
         },
