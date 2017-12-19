@@ -48,7 +48,7 @@ struct remove_entity_tool : tool
         auto &pos = component_system_man.managers.relative_position_component_man;
         auto ph = phys.get_instance_data(entity);
         auto po = pos.get_instance_data(entity);
-        convert_static_rb_to_dynamic(ph.rigid, 1);
+        convert_static_rb_to_dynamic(*ph.rigid, 1);
         (*ph.rigid)->applyCentralForce(vec3_to_bt(glm::sphericalRand(1.0f)));
     }
 

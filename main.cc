@@ -316,7 +316,7 @@ destroy_entity(c_entity e) {
         auto *per = (phys_ent_ref *) (*phys_data.rigid)->getUserPointer();
         delete per;
 
-        teardown_dynamic_physics_setup(nullptr, nullptr, phys_data.rigid);
+        teardown_physics_setup(nullptr, nullptr, phys_data.rigid);
     }
 
     component_system_man.managers.destroy_entity_instance(e);

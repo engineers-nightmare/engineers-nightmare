@@ -162,7 +162,7 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     *physics.rigid = nullptr;
     std::string m = *physics.mesh;
     auto const &phys_mesh = asset_man.get_mesh(m);
-    build_static_physics_rb_mat(&mat, phys_mesh.phys_shape, physics.rigid);
+    build_rigidbody(mat, phys_mesh.phys_shape, physics.rigid);
     /* so that we can get back to the entity from a phys raycast */
     /* TODO: these should really come from a dense pool rather than the generic allocator */
     auto per = new phys_ent_ref;
