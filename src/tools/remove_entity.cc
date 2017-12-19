@@ -37,7 +37,14 @@ struct remove_entity_tool : tool
     }
 
     bool can_use() {
-        return rc.hit && c_entity::is_valid(rc.entity);
+        auto valid = rc.hit && c_entity::is_valid(entity);
+
+        auto &sam = component_system_man.managers.surface_attachment_component_man;
+        if (!valid || !sam.exists(entity)) {
+            return valid;
+        }
+
+        return valid && *sam.get_instance_data(entity).attached;
     }
 
     void use() override {
@@ -47,6 +54,9 @@ struct remove_entity_tool : tool
         auto &phys = component_system_man.managers.physics_component_man;
         auto &pos = component_system_man.managers.relative_position_component_man;
         auto &sam = component_system_man.managers.surface_attachment_component_man;
+        auto &rend = component_system_man.managers.renderable_component_man;
+
+        *rend.get_instance_data(entity).draw = true;
 
         auto ph = phys.get_instance_data(entity);
         auto po = pos.get_instance_data(entity);
@@ -69,12 +79,12 @@ struct remove_entity_tool : tool
             pl.ui_dirty = true;    // TODO: untangle this.
             entity = rc.entity;
 
-            if (c_entity::is_valid(entity) && rend.exists(entity)) {
+            if (can_use() && c_entity::is_valid(entity) && rend.exists(entity)) {
                 *rend.get_instance_data(entity).draw = false;
             }
         }
 
-        if (c_entity::is_valid(entity) && rend.exists(entity)) {
+        if (can_use() && c_entity::is_valid(entity) && rend.exists(entity)) {
             auto mat = frame->alloc_aligned<mesh_instance>(1);
             mat.ptr->world_matrix =  *pos_man.get_instance_data(entity).mat;
             mat.bind(1, frame);
