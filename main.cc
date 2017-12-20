@@ -264,7 +264,7 @@ init()
     pl.disable_gravity = false;
 
     phy = new physics(&pl);
-    phy->dynamicsWorld->setDebugDrawer(new BulletDebugDraw());
+    //phy->dynamicsWorld->setDebugDrawer(new BulletDebugDraw());
 
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
