@@ -34,6 +34,8 @@ physics::physics(player *p)
     /* store a pointer to our player so physics can drive his position */
     this->pl = p;
 
+    rb_controller = std::make_unique<en_rb_controller>(mat_position(pl->pos));
+    dynamicsWorld->addRigidBody(rb_controller.get());
 }
 
 void
@@ -55,8 +57,11 @@ physics::tick_controller(float dt)
         pl->ui_dirty = true;
     }
 
+    if (pl->jump) {
+        rb_controller->applyCentralImpulse(vec3_to_bt(glm::normalize(pl->dir) * 125.0f));
     }
     if (pl->crouch) {
+        rb_controller->setLinearVelocity({0, 0, 0});
     }
 }
 
@@ -65,7 +70,7 @@ physics::tick(float dt)
 {
     dynamicsWorld->stepSimulation(dt, 10);
 
-    btTransform trans = this->ghostObj->getWorldTransform();
+    btTransform trans = this->rb_controller->getWorldTransform();
 
     this->pl->pos.x = trans.getOrigin().getX();
     this->pl->pos.y = trans.getOrigin().getY();

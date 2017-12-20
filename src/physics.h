@@ -29,9 +29,10 @@ struct physics {
     player *pl;
 
     /* character control guff */
+    std::unique_ptr<en_rb_controller> rb_controller;
 
     /* initialise our physics state */
-    physics(player *pl);
+    explicit physics(player *pl);
 
     /* call each physics tick */
     void tick_controller(float dt);
@@ -65,19 +66,19 @@ bool
 phys_raycast_world(glm::vec3 start, glm::vec3 end,
                    btCollisionObject *ignore, btCollisionWorld *world, raycast_info_world *rc);
 
-static inline glm::vec3
+inline glm::vec3
 bt_to_vec3(btVector3 const &v)
 {
     return glm::vec3(v.x(), v.y(), v.z());
 }
 
-static inline btVector3
+inline btVector3
 vec3_to_bt(const glm::vec3 &v)
 {
     return btVector3(v.x, v.y, v.z);
 }
 
-static inline btTransform
+inline btTransform
 mat4_to_bt(const glm::mat4 &m)
 {
     btMatrix3x3 bm(
@@ -87,7 +88,7 @@ mat4_to_bt(const glm::mat4 &m)
     return btTransform(bm, btVector3(m[3][0], m[3][1], m[3][2]));
 }
 
-static inline glm::mat4
+inline glm::mat4
 bt_to_mat4(const btTransform &t)
 {
     btVector3 v0 = t.getBasis().getColumn(0);

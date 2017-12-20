@@ -76,7 +76,7 @@ void projectile_linear_manager::simulate(float dt) {
 
         raycast_info_world rc;
         phys_raycast_world(projectile_pool.position[i], new_pos,
-            phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc);
+            phy->rb_controller.get(), phy->dynamicsWorld.get(), &rc);
 
         if (rc.hit) {
             new_pos = rc.hitCoord;

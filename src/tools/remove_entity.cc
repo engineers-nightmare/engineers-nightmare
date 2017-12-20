@@ -33,7 +33,7 @@ struct remove_entity_tool : tool
 
     void pre_use(player *pl) {
         phys_raycast_world(pl->eye, pl->eye + 2.f * pl->dir,
-            phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc);
+            phy->rb_controller.get(), phy->dynamicsWorld.get(), &rc);
     }
 
     bool can_use() {

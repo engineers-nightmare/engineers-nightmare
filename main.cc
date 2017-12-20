@@ -826,7 +826,7 @@ struct play_state : game_state {
         auto &surf_man = component_system_man.managers.surface_attachment_component_man;
         raycast_info_world rc_ent;
         phys_raycast_world(pl.eye, pl.eye + 2.f * pl.dir,
-                           phy->ghostObj.get(), phy->dynamicsWorld.get(), &rc_ent);
+                           phy->rb_controller.get(), phy->dynamicsWorld.get(), &rc_ent);
 
         auto old_entity = use_entity;
         use_entity = rc_ent.entity;
