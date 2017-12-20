@@ -29,9 +29,6 @@ struct physics {
     player *pl;
 
     /* character control guff */
-    std::unique_ptr<btConvexShape> standShape, crouchShape;
-    std::unique_ptr<btPairCachingGhostObject> ghostObj;
-    std::unique_ptr<en_char_controller> controller;
 
     /* initialise our physics state */
     physics(player *pl);

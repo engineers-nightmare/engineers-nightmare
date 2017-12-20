@@ -24,8 +24,7 @@ physics::physics(player *p)
         dispatcher.get(),
         broadphase.get(),
         solver.get(),
-        collisionConfiguration.get())),
-    ghostObj(new btPairCachingGhostObject())
+        collisionConfiguration.get()))
 {
     /* some default gravity
      * z is up and down
@@ -35,31 +34,6 @@ physics::physics(player *p)
     /* store a pointer to our player so physics can drive his position */
     this->pl = p;
 
-    /* setup player rigid body */
-    /* player height is 2 * radius + height
-     * therefore, height for capsule is
-     * total height - 2 * radius
-     */
-    auto standHeight = std::max(0.f, PLAYER_STAND_HEIGHT - 2 * PLAYER_RADIUS);
-    standShape.reset(new btCapsuleShapeZ(PLAYER_RADIUS, standHeight));
-    auto crouchHeight = std::max(0.f, PLAYER_CROUCH_HEIGHT - 2 * PLAYER_RADIUS);
-    crouchShape.reset(new btCapsuleShapeZ(PLAYER_RADIUS, crouchHeight));
-    float maxStepHeight = 0.15f;
-
-    /* setup the character controller. this gets a bit fiddly. */
-    btTransform startTransform;
-    startTransform.setIdentity();
-    startTransform.setOrigin(btVector3(pl->pos.x, pl->pos.y, pl->pos.z));
-    ghostObj->setWorldTransform(startTransform);
-    broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
-    ghostObj->setCollisionShape(standShape.get());
-    ghostObj->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
-    controller.reset(new en_char_controller(ghostObj.get(), standShape.get(), crouchShape.get(), btScalar(maxStepHeight)));
-
-    dynamicsWorld->addCollisionObject(ghostObj.get(), btBroadphaseProxy::CharacterFilter,
-            btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
-    dynamicsWorld->addAction(controller.get());
-    controller->setUpAxis(2);
 }
 
 void
@@ -78,44 +52,11 @@ physics::tick_controller(float dt)
     if (pl->gravity) {
         pl->disable_gravity ^= true;
 
-        if( this->pl->disable_gravity ){
-            this->controller->setGravity(0);
-        } else {
-            /* http://bulletphysics.org/Bullet/BulletFull/btKinematicCharacterController_8cpp_source.html : 144
-             * 3G acceleration.
-             */
-            this->controller->setGravity(9.8f * 3);
-        }
-
         pl->ui_dirty = true;
     }
 
-    float speed = MOVE_SPEED;
-    if (!this->controller->onGround())
-        speed *= AIR_CONTROL_FACTOR;
-    else if (this->controller->isCrouching())
-        speed *= CROUCH_FACTOR;
-
-    pl->height = this->controller->isCrouching() ? PLAYER_CROUCH_HEIGHT : PLAYER_STAND_HEIGHT;
-
-    fwd *= this->pl->move.y * speed;
-    right *= this->pl->move.x * speed;
-
-    this->controller->setWalkDirection(fwd + right);
-
-    if (pl->jump && this->controller->onGround())
-        this->controller->jump();
-
-    if (pl->reset) {
-        /* reset position (for debug) */
-        this->controller->warp(btVector3(3.0f, 2.0f, 3.0f));
     }
-
     if (pl->crouch) {
-        this->controller->crouch(dynamicsWorld.get());
-    }
-    else if (pl->crouch_end) {
-        this->controller->crouchEnd();
     }
 }
 
