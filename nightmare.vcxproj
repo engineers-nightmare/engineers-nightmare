@@ -179,6 +179,7 @@
     <ClInclude Include="src\asset_manager.h" />
     <ClInclude Include="src\blob.h" />
     <ClInclude Include="src\block.h" />
+    <ClInclude Include="src\bullet_debug_draw.h" />
     <ClInclude Include="src\char.h" />
     <ClInclude Include="src\chunk.h" />
     <ClInclude Include="src\common.h" />

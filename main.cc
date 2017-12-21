@@ -19,6 +19,7 @@
 #include "src/libconfig_shim.h"
 
 #include "src/asset_manager.h"
+#include "src/bullet_debug_draw.h"
 #include "src/common.h"
 #include "src/component/component_system_manager.h"
 #include "src/config.h"

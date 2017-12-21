@@ -392,6 +392,9 @@
     <ClInclude Include="src\utils\debugdraw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\bullet_debug_draw.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="entities\display.ent">

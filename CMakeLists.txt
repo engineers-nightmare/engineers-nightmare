@@ -18,6 +18,7 @@ add_executable(nightmare main.cc)
 set(EN_SOURCES
     src/asset_manager.cc
     src/atlas.cc
+    src/bullet_debug_draw.h
     src/blob.cc
     src/char.cc
     src/component/component_system_manager.cc
