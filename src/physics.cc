@@ -70,9 +70,5 @@ physics::tick(float dt)
 {
     dynamicsWorld->stepSimulation(dt, 10);
 
-    btTransform trans = this->rb_controller->getWorldTransform();
-
-    this->pl->pos.x = trans.getOrigin().getX();
-    this->pl->pos.y = trans.getOrigin().getY();
-    this->pl->pos.z = trans.getOrigin().getZ();
+    pl->pos = bt_to_vec3(rb_controller->getCenterOfMassPosition());
 }

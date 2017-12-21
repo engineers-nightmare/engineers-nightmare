@@ -460,7 +460,7 @@ void render() {
         );
 
     /* pl.pos is center of capsule */
-    pl.eye = pl.pos + glm::vec3(0, 0, pl.height / 2 - EYE_OFFSET_Z);
+    pl.eye = pl.pos;
 
     auto vfov = hfov * (float)wnd.height / wnd.width;
 
