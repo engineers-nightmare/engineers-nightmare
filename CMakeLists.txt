@@ -127,6 +127,7 @@ set(EN_HEADERS
     src/entity_utils.h
     src/enums/enums.h
     src/utils/debugdraw.h
+    src/utils/tinypng.h
 )
 
 set(IMGUI_SOURCES

@@ -233,6 +233,7 @@
     <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\tools\tools.h" />
     <ClInclude Include="src\utils\debugdraw.h" />
+    <ClInclude Include="src\utils\tinypng.h" />
     <ClInclude Include="src\winunistd.h" />
     <ClInclude Include="src\wiring\wiring.h" />
     <ClInclude Include="src\wiring\wiring_data.h" />

@@ -401,6 +401,9 @@
     <ClInclude Include="src\utils\debugdraw.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
+    <ClInclude Include="src\utils\tinypng.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="entities\display.ent">
