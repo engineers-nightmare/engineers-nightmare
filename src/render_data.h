@@ -11,6 +11,12 @@
 #define FRAME_DATA_SIZE     (16u * 1024 * 1024)
 #define NUM_INFLIGHT_FRAMES 3
 
+struct screenshot_render_data {
+    GLuint fbo = 0;
+    GLuint color_rb;
+    GLuint depth_rb;
+};
+
 struct frame_data {
     GLuint bo;
     void *base_ptr;

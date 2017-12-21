@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <epoxy/gl.h>
+#include <ctime>
 #include <functional>
 #include <glm/glm.hpp>
 #include <stdio.h>
@@ -42,6 +43,7 @@
 #define APP_NAME        "Engineer's Nightmare"
 #define DEFAULT_WIDTH   1024
 #define DEFAULT_HEIGHT  768
+#define PANO_SHOT_RES   2000
 
 #define MOUSE_Y_LIMIT      1.54f
 #define MAX_AXIS_PER_EVENT 128
@@ -53,6 +55,9 @@
 #include "src/imgui_impl_sdl_gl3.h"
 
 #include "src/utils/debugdraw.h"
+
+#define TINYPNG_IMPLEMENTATION
+#include "src/utils/tinypng.h"
 
 bool exit_requested = false;
 
@@ -70,8 +75,8 @@ en_settings game_settings;
 struct {
     SDL_Window *ptr;
     SDL_GLContext gl_ctx;
-    int width;
-    int height;
+    unsigned width;
+    unsigned height;
     bool has_focus;
 } wnd;
 
@@ -82,6 +87,20 @@ struct per_camera_params {
     glm::mat4 inv_centered_view_proj_matrix;
     float aspect;
 };
+
+enum class screenshot_type {
+    normal,
+    pano,
+};
+
+struct screenshot_data {
+    bool requested = false;
+    screenshot_type type = screenshot_type::normal;
+    bool draw_hud = false;
+} screenshot_request;
+
+screenshot_render_data shot_pano_render_data;
+screenshot_render_data shot_normal_render_data;
 
 void GLAPIENTRY
 gl_debug_callback(GLenum source __unused,
@@ -174,6 +193,41 @@ ImGuiContext *default_context;
 std::array<ImGuiContext*, 2> offscreen_contexts{};
 
 DDRenderInterfaceCoreGL *ddRenderIfaceGL;
+
+void
+gen_shot_normal_rbos() {
+    /* don't run if haven't configured fbo */
+    if (shot_normal_render_data.fbo == 0) {
+        return;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, shot_normal_render_data.fbo);
+
+    glDeleteRenderbuffers(1, &shot_normal_render_data.color_rb);
+    glDeleteRenderbuffers(1, &shot_normal_render_data.depth_rb);
+
+    glGenRenderbuffers(1, &shot_normal_render_data.color_rb);
+    glGenRenderbuffers(1, &shot_normal_render_data.depth_rb);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, shot_normal_render_data.color_rb);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, wnd.width, wnd.height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        GL_RENDERBUFFER, shot_normal_render_data.color_rb);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, shot_normal_render_data.depth_rb);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, wnd.width, wnd.height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+        GL_RENDERBUFFER, shot_normal_render_data.depth_rb);
+
+    //Does the GPU support current FBO configuration?
+    if (GL_FRAMEBUFFER_COMPLETE != glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
+        assert(false || !"normal screenshot FBO invalid.");
+    }
+
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void
 init()
 {
@@ -203,6 +257,36 @@ init()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);         /* pointers given by other libs may not be aligned */
     glEnable(GL_DEPTH_TEST);
     glPolygonOffset(-0.1f, -0.1f);
+
+    // screenshot fbo
+    {
+        glGenFramebuffers(1, &shot_pano_render_data.fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, shot_pano_render_data.fbo);
+
+        glGenRenderbuffers(1, &shot_pano_render_data.color_rb);
+        glGenRenderbuffers(1, &shot_pano_render_data.depth_rb);
+
+        glBindRenderbuffer(GL_RENDERBUFFER, shot_pano_render_data.color_rb);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, PANO_SHOT_RES, PANO_SHOT_RES);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+            GL_RENDERBUFFER, shot_pano_render_data.color_rb);
+
+        glBindRenderbuffer(GL_RENDERBUFFER, shot_pano_render_data.depth_rb);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, PANO_SHOT_RES, PANO_SHOT_RES);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+            GL_RENDERBUFFER, shot_pano_render_data.depth_rb);
+
+        //Does the GPU support current FBO configuration?
+        if (GL_FRAMEBUFFER_COMPLETE != glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
+            assert(false || !"pano screenshot FBO invalid.");
+        }
+
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glGenFramebuffers(1, &shot_normal_render_data.fbo);
+        gen_shot_normal_rbos();
+    }
 
     printf("Loading entities\n");
     load_entities();
@@ -306,6 +390,9 @@ resize(int width, int height)
     glViewport(0, 0, width, height);
     wnd.width = width;
     wnd.height = height;
+
+    gen_shot_normal_rbos();
+
     printf("Resized to %dx%d\n", width, height);
 }
 
@@ -671,6 +758,170 @@ action const* get_input(en_action a) {
     return &game_settings.bindings.bindings[a];
 }
 
+void save_png(const char *filename, const tpImage &image)
+{
+    tpSavePNG(filename, &image);
+
+}
+
+void write_screenshot(char const * filename, unsigned width, unsigned height) {
+    // make it
+
+    const auto line_size = 4 * width;
+    const auto pix_count = line_size * height;
+    auto pixels = new GLubyte[pix_count];
+    auto line = new GLubyte[4 * width];
+
+    // choose it
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+    // pack it
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+    // grab it
+    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+    // tweak it
+    tpImage t{(int)width, (int)height, nullptr};
+    for (auto i = 0u; i < height / 2; i++) {
+        memcpy(line, &pixels[line_size * i], line_size);
+        memcpy(&pixels[line_size * i], &pixels[pix_count - line_size - line_size * i], line_size);
+        memcpy(&pixels[pix_count - line_size - line_size * i], line, line_size);
+    }
+
+    // fixup alpha
+    for (auto i = 0u; i < pix_count; i += 4) {
+        pixels[i + 3] = 255;
+    }
+    t.pix = (tpPixel*)pixels;
+
+    // write it
+    save_png(filename, t);
+
+    // now remove it
+    delete[] pixels;
+    delete[] line;
+}
+
+
+void
+take_normal_shot() {
+
+    bool old_draw_hud;
+    time_t time;
+
+    time = std::time(nullptr);
+    old_draw_hud = draw_hud;
+    draw_hud = screenshot_request.draw_hud;
+
+    char buf[256];
+    char filename[256];
+    std::strftime(buf, 256, "shot/EN-%Y-%m-%d_%H-%M-%S", std::localtime(&time));
+    sprintf(filename, "%s.png", buf);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, shot_normal_render_data.fbo);
+
+    GLfloat clear = 1;
+    glClearBufferfv(GL_DEPTH, 0, &clear);
+
+    render();
+
+    write_screenshot(filename, wnd.width, wnd.height);
+
+    draw_hud = old_draw_hud;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void
+take_pano_shot() {
+    bool old_draw_hud;
+    time_t time;
+
+    time = std::time(nullptr);
+
+    old_draw_hud = draw_hud;
+    draw_hud = screenshot_request.draw_hud;
+
+    auto old_angle = pl.angle;
+    auto old_elev = pl.elev;
+    auto old_width = wnd.width;
+    auto old_height = wnd.height;
+
+    wnd.width = PANO_SHOT_RES;
+    wnd.height = PANO_SHOT_RES;
+
+    char buf[256];
+    char filename[256];
+
+    std::strftime(buf, 256, "shot/PANO-%Y-%m-%d_%H-%M-%S", std::localtime(&time));
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, shot_pano_render_data.fbo);
+    glViewport(0, 0, PANO_SHOT_RES, PANO_SHOT_RES);
+
+    for (auto which_shot = 0u; which_shot < 6; ++which_shot) {
+        switch (which_shot) {
+        case 0:
+            pl.angle = 0.25f * 2.f *  glm::pi<float>();
+            pl.elev = 0.f;
+            break;
+        case 1:
+            pl.angle = 0.5f * 2.f *  glm::pi<float>();
+            pl.elev = 0.f;
+            break;
+        case 2:
+            pl.angle = 0.75f * 2.f *  glm::pi<float>();
+            pl.elev = 0.f;
+            break;
+        case 3:
+            pl.angle = 1.f * 2.f *  glm::pi<float>();
+            pl.elev = 0.f;
+            break;
+        case 4:
+            pl.angle = 1.f * 2.f *  glm::pi<float>();
+            pl.elev = 0.25f * 2.f *  glm::pi<float>() - 0.000001f;
+            break;
+        case 5:
+            pl.angle = 1.f * 2.f *  glm::pi<float>();
+            pl.elev = -0.25f * 2.f *  glm::pi<float>() + 0.000001f;
+            break;
+        }
+
+        GLfloat clear = 1;
+        glClearBufferfv(GL_DEPTH, 0, &clear);
+
+        render();
+
+        sprintf(filename, "%s_%d.png", buf, which_shot);
+
+        write_screenshot(filename, PANO_SHOT_RES, PANO_SHOT_RES);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, old_width, old_height);
+
+    pl.angle = old_angle;
+    pl.elev = old_elev;
+    draw_hud = old_draw_hud;
+    wnd.width = old_width;
+    wnd.height = old_height;
+}
+
+void
+take_screenshot() {
+    if (!screenshot_request.requested) {
+        return;
+    }
+
+    switch (screenshot_request.type) {
+    case screenshot_type::normal:
+        take_normal_shot();
+        break;
+    case screenshot_type::pano:
+        take_pano_shot();
+        break;
+    }
+}
 
 struct play_state : game_state {
     c_entity use_entity;
@@ -884,16 +1135,16 @@ struct play_state : game_state {
 
     void handle_input() override {
         /* look */
-        auto look_x     = get_input(action_look_x)->value;
-        auto look_y     = get_input(action_look_y)->value;
+        auto look_x         = get_input(action_look_x)->value;
+        auto look_y         = get_input(action_look_y)->value;
 
         /* movement */
-        auto moveX      = get_input(action_right)->active - get_input(action_left)->active;
-        auto moveY      = get_input(action_forward)->active - get_input(action_back)->active;
+        auto moveX          = get_input(action_right)->active - get_input(action_left)->active;
+        auto moveY          = get_input(action_forward)->active - get_input(action_back)->active;
 
         /* crouch */
-        auto crouch     = get_input(action_crouch)->active;
-        auto crouch_end = get_input(action_crouch)->just_inactive;
+        auto crouch         = get_input(action_crouch)->active;
+        auto crouch_end     = get_input(action_crouch)->just_inactive;
 
         /* momentary */
         auto jump       = get_input(action_jump)->just_active;
@@ -920,6 +1171,8 @@ struct play_state : game_state {
         auto input_alt_use_tool = get_input(action_alt_use_tool);
         auto alt_use_tool       = input_alt_use_tool->just_pressed;
         auto long_alt_use_tool  = input_alt_use_tool->held;
+        auto take_shot          = get_input(action_take_screenshot)->just_active;
+        auto take_pano          = get_input(action_take_pano_screenshot)->just_active;
 
         /* persistent */
 
@@ -979,6 +1232,17 @@ struct play_state : game_state {
 
         if (get_input(action_menu)->just_active) {
             set_game_state(create_menu_state());
+        }
+
+        if (take_shot) {
+            screenshot_request.requested = true;
+            screenshot_request.type = screenshot_type::normal;
+            screenshot_request.draw_hud = true;
+        }
+        else if (take_pano) {
+            screenshot_request.requested = true;
+            screenshot_request.type = screenshot_type::pano;
+            screenshot_request.draw_hud = false;
         }
     }
 };
@@ -1258,7 +1522,23 @@ run()
 
         render();
 
+        glViewport(0, 0, wnd.width, wnd.height);
+
+        render();
+
         SDL_GL_SwapWindow(wnd.ptr);
+
+        if (screenshot_request.requested) {
+            take_screenshot();
+
+            screenshot_request.requested = false;
+        }
+
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        float depthClearValue = 1.0f;
+        glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
 
         if (exit_requested) return;
     }
