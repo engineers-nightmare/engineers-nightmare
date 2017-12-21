@@ -6,6 +6,7 @@
 // Brief:  Debug Draw - an immediate-mode, renderer agnostic, lightweight debug drawing API.
 // ================================================================================================
 
+#pragma once
 #ifndef DEBUG_DRAW_HPP
 #define DEBUG_DRAW_HPP
 
