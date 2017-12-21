@@ -389,9 +389,10 @@ static int tpStored( tpState* s )
 	// read LEN and NLEN, should complement each other
 	uint16_t LEN = (uint16_t)tpReadBits( s, 16 );
 	uint16_t NLEN = (uint16_t)tpReadBits( s, 16 );
+    char* p;
 	TP_CHECK( LEN == (uint16_t)(~NLEN), "Failed to find LEN and NLEN as complements within stored (uncompressed) stream." );
 	TP_CHECK( s->bits_left / 8 <= (int)LEN, "Stored block extends beyond end of input stream." );
-	char* p = tpPtr( s );
+	p = tpPtr( s );
 	TP_MEMCPY( s->out, p, LEN );
 	s->out += LEN;
 	return 1;
@@ -468,6 +469,11 @@ static int tpBlock( tpState* s )
 	while ( 1 )
 	{
 		int symbol = tpDecode( s, s->lit, s->nlit );
+        uint32_t length;
+        int distance_symbol;
+        int backwards_distance;
+        char* src;
+        char* dst;
 
 		if ( symbol < 256 )
 		{
@@ -479,13 +485,13 @@ static int tpBlock( tpState* s )
 		else if ( symbol > 256 )
 		{
 			symbol -= 257;
-			int length = tpReadBits( s, g_tpLenExtraBits[ symbol ] ) + g_tpLenBase[ symbol ];
-			int distance_symbol = tpDecode( s, s->dst, s->ndst );
-			int backwards_distance = tpReadBits( s, g_tpDistExtraBits[ distance_symbol ] ) + g_tpDistBase[ distance_symbol ];
+			length = tpReadBits( s, g_tpLenExtraBits[ symbol ] ) + g_tpLenBase[ symbol ];
+			distance_symbol = tpDecode( s, s->dst, s->ndst );
+			backwards_distance = tpReadBits( s, g_tpDistExtraBits[ distance_symbol ] ) + g_tpDistBase[ distance_symbol ];
 			TP_CHECK( s->out - backwards_distance >= s->begin, "Attempted to write before out buffer (invalid backwards distance)." );
 			TP_CHECK( s->out + length <= s->out_end, "Attempted to overwrite out buffer while outputting a string." );
-			char* src = s->out - backwards_distance;
-			char* dst = s->out;
+			src = s->out - backwards_distance;
+			dst = s->out;
 			s->out += length;
 
 			switch ( backwards_distance )
@@ -979,8 +985,9 @@ tpImage tpLoadPNGMem( const void* png_data, int png_length )
 
 	if ( color_type == 3 )
 	{
+        uint32_t trns_len;
 		TP_CHECK( plte, "color type of indexed requires a PLTE chunk" );
-		uint32_t trns_len = tpGetChunkByteLength( trns );
+		trns_len = tpGetChunkByteLength( trns );
 		tpDepalette( img.w, img.h, out, img.pix, plte, trns, trns_len );
 	}
 	else tpConvert( bpp, img.w, img.h, out, img.pix );
@@ -1056,6 +1063,7 @@ tpIndexedImage tpLoadIndexedPNGMem( const void *png_data, int png_length )
 	tpIndexedImage img = { 0 };
 	uint8_t* data = 0;
 	tpRawPNG png;
+    int plte_len;
 	png.p = (uint8_t*)png_data;
 	png.end = (uint8_t*)png_data + png_length;
 
@@ -1127,7 +1135,7 @@ tpIndexedImage tpLoadIndexedPNGMem( const void *png_data, int png_length )
 	TP_CHECK( tpUnfilter( img.w, img.h, bpp, out ), "invalid filter byte found" );
 	tpUnpackIndexedRows( img.w, img.h, out, img.pix );
 
-	int plte_len = tpGetChunkByteLength( plte ) / 3;
+	plte_len = tpGetChunkByteLength( plte ) / 3;
 	tpUnpackPalette( img.palette, plte, plte_len, trns, tpGetChunkByteLength( trns ) );
 	img.palette_len = (uint8_t)plte_len;
 
