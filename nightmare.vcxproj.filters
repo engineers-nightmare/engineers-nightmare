@@ -43,6 +43,12 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{df6e9907-c6a5-43be-9255-dc66585caba6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\utils">
+      <UniqueIdentifier>{4d7fd92d-f8d0-4a5d-a94b-ea3614bfa656}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\utils">
+      <UniqueIdentifier>{c0a61e5a-44d6-4c01-bde3-73b6b130e26d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\blob.cc">
@@ -204,11 +210,11 @@
     <ClCompile Include="src\component\placeable_component.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\utils\debugdraw_gl.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\tools\wiring.cc">
       <Filter>Source Files\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\debugdraw_gl.cc">
+      <Filter>Source Files\utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -389,11 +395,11 @@
     <ClInclude Include="src\component\placeable_component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\utils\debugdraw.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\bullet_debug_draw.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\debugdraw.h">
+      <Filter>Header Files\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

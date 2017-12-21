@@ -3,6 +3,7 @@
 #include <LinearMath/btIDebugDraw.h>
 
 #include "glm/glm/ext.hpp"
+#include "utils/debugdraw.h"
 
 class BulletDebugDraw : public btIDebugDraw
 {
