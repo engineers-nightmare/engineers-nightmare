@@ -17,10 +17,20 @@
 
 template <typename T>
 struct settings {
-    virtual ~settings() {}
+    virtual ~settings() = default;
 
-    virtual void merge_with(T) = 0;
-    virtual T get_delta(T) = 0;
+    virtual void merge_with(const T &) = 0;
+    virtual T get_delta(const T &) const = 0;
+};
+
+struct audio_settings : settings<audio_settings> {
+    /* music/sound/etc volumes */
+    /* num channels */
+
+    float global_volume = INVALID_SETTINGS_FLOAT;
+
+    void merge_with(const audio_settings&) override;
+    audio_settings get_delta(const audio_settings &) const override;
 };
 
 struct video_settings : settings<video_settings> {
@@ -37,8 +47,8 @@ struct video_settings : settings<video_settings> {
 
     float fov = INVALID_SETTINGS_FLOAT;
 
-    void merge_with(video_settings) override;
-    video_settings get_delta(video_settings) override;
+    void merge_with(const video_settings &) override;
+    video_settings get_delta(const video_settings &) const override;
 };
 
 struct input_settings : settings<input_settings> {
@@ -46,22 +56,23 @@ struct input_settings : settings<input_settings> {
     float mouse_x_sensitivity = INVALID_SETTINGS_FLOAT;
     float mouse_y_sensitivity = INVALID_SETTINGS_FLOAT;
 
-    void merge_with(input_settings) override;
-    input_settings get_delta(input_settings) override;
+    void merge_with(const input_settings &) override;
+    input_settings get_delta(const input_settings &) const override;
 };
 
 struct binding_settings : settings<binding_settings> {
     std::unordered_map<en_action, action, std::hash<int>> bindings;
 
-    void merge_with(binding_settings) override;
-    binding_settings get_delta(binding_settings) override;
+    void merge_with(const binding_settings &) override;
+    binding_settings get_delta(const binding_settings &) const override;
 };
 
 struct en_settings : settings<en_settings> {
+    audio_settings audio;
     video_settings video;
     input_settings input;
     binding_settings bindings;
 
-    void merge_with(en_settings) override;
-    en_settings get_delta(en_settings) override;
+    void merge_with(const en_settings &) override;
+    en_settings get_delta(const en_settings &) const override;
 };

@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-void input_settings::merge_with(input_settings other) {
+void input_settings::merge_with(const input_settings &other) {
     // bool mouse_invert
     // float mouse_x_sensitivity
     // float mouse_y_sensitivity
@@ -17,7 +17,7 @@ void input_settings::merge_with(input_settings other) {
         this->mouse_y_sensitivity = other.mouse_y_sensitivity;
 }
 
-void binding_settings::merge_with(binding_settings other) {
+void binding_settings::merge_with(const binding_settings &other) {
     for (auto &actionPair : other.bindings) {
         auto input = actionPair.first;
         auto action = &actionPair.second;
@@ -49,15 +49,16 @@ void binding_settings::merge_with(binding_settings other) {
     }
 }
 
-void video_settings::merge_with(video_settings other) {
-    if (other.mode != window_mode::invalid)
-        this->mode = other.mode;
-
-    if (other.fov != INVALID_SETTINGS_FLOAT)
-        this->fov = other.fov;
+void audio_settings::merge_with(const audio_settings &other) {
+    if (other.global_volume != INVALID_SETTINGS_FLOAT)
+        this->global_volume = other.global_volume;
 }
 
-input_settings input_settings::get_delta(input_settings other) {
+void video_settings::merge_with(const video_settings &other) {
+    /* nothing yet */
+}
+
+input_settings input_settings::get_delta(const input_settings &other) const {
     // relies on fields being initialized to INVALID_SETTINGS_{type}
     input_settings delta;
 
@@ -76,7 +77,7 @@ input_settings input_settings::get_delta(input_settings other) {
     return delta;
 }
 
-binding_settings binding_settings::get_delta(binding_settings other) {
+binding_settings binding_settings::get_delta(const binding_settings &other) const {
     // relies on fields being initialized to INVALID_SETTINGS_{type}
     binding_settings delta;
 
@@ -131,15 +132,19 @@ binding_settings binding_settings::get_delta(binding_settings other) {
     return delta;
 }
 
-video_settings video_settings::get_delta(video_settings other) {
-    video_settings delta;
+video_settings video_settings::get_delta(const video_settings &other) const {
+    // relies on fields being initialized to INVALID_SETTINGS_{type}
 
-    if (other.mode != mode) {
-        delta.mode = other.mode;
-    }
+    // no video settings yet. return default
+    return video_settings();
+}
 
-    if (other.fov != fov) {
-        delta.fov = other.fov;
+audio_settings audio_settings::get_delta(const audio_settings &other) const {
+    // relies on fields being initialized to INVALID_SETTINGS_{type}
+    audio_settings delta;
+
+    if (other.global_volume != global_volume) {
+        delta.global_volume = other.global_volume;
     }
 
     return delta;
