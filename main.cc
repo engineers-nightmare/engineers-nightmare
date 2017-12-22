@@ -334,6 +334,7 @@ init()
 
     audio = new SoLoud::Soloud();
     audio->init();
+    audio->setGlobalVolume(game_settings.audio.global_volume);
 
     // Absorb all the init time so we dont try to catch up
     frame_info.tick();
@@ -1237,6 +1238,11 @@ struct menu_state : game_state {
             bool invert = game_settings.input.mouse_invert == -1.0f;
             settings_dirty |= ImGui::Checkbox("Invert Mouse", &invert);
             game_settings.input.mouse_invert = invert ? -1.0f : 1.0f;
+
+            float vol = audio->getGlobalVolume();
+            settings_dirty |= ImGui::SliderFloat("Volume", &vol, 0.0f, 1.0f);
+            game_settings.audio.global_volume = vol;
+            audio->setGlobalVolume(vol);
 
             ImGui::Separator();
             ImGui::Checkbox("Draw FPS", &draw_fps);
