@@ -17,8 +17,7 @@ c_entity
 spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat);
 
 void
-use_action_on_entity(ship_space *ship, c_entity ce);
+pop_entity_off(c_entity entity);
 
-/* todo: support free-placed entities*/
 void
-place_entity_attaches(raycast_info_block* rc, int index, c_entity e);
+use_action_on_entity(ship_space *ship, c_entity ce);

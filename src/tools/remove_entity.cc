@@ -10,6 +10,7 @@
 #include "../physics.h"
 #include "tools.h"
 #include "../component/component_system_manager.h"
+#include "../entity_utils.h"
 
 
 extern GLuint simple_shader;
@@ -51,20 +52,10 @@ struct remove_entity_tool : tool
         if (!can_use())
             return;
 
-        auto &phys = component_system_man.managers.physics_component_man;
-        auto &pos = component_system_man.managers.relative_position_component_man;
-        auto &sam = component_system_man.managers.surface_attachment_component_man;
         auto &rend = component_system_man.managers.renderable_component_man;
-
         *rend.get_instance_data(entity).draw = true;
 
-        auto ph = phys.get_instance_data(entity);
-        auto po = pos.get_instance_data(entity);
-        auto sa = sam.get_instance_data(entity);
-
-        convert_static_rb_to_dynamic(*ph.rigid, *ph.mass);
-        (*ph.rigid)->applyCentralForce(vec3_to_bt(glm::sphericalRand(1.0f)));
-        *sa.attached = false;
+        pop_entity_off(entity);
     }
 
     void preview(frame_data *frame) override {

@@ -3,6 +3,7 @@
 //
 
 #include <libconfig.h>
+#include <glm/ext.hpp>
 #include "libconfig_shim.h"
 #include "entity_utils.h"
 #include "asset_manager.h"
@@ -179,6 +180,28 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     *pos.mat = mat;
 
     return ce;
+}
+
+void pop_entity_off(c_entity entity) {
+    auto &phys = component_system_man.managers.physics_component_man;
+    auto &pos = component_system_man.managers.relative_position_component_man;
+    auto &sam = component_system_man.managers.surface_attachment_component_man;
+
+    auto ph = phys.get_instance_data(entity);
+    auto sa = sam.get_instance_data(entity);
+
+    convert_static_rb_to_dynamic(*ph.rigid, *ph.mass);
+    (*ph.rigid)->applyCentralForce(vec3_to_bt(glm::sphericalRand(1.0f)));
+    *sa.attached = false;
+
+    auto *ch = ship->get_chunk_containing(*sa.block);
+    for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
+        auto ce = *it;
+        if (ce == entity) {
+            ch->entities.erase(it);
+            break;
+        }
+    }
 }
 
 void

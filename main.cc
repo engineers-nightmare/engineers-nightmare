@@ -53,6 +53,7 @@
 #include "src/imgui_impl_sdl_gl3.h"
 
 #include "src/utils/debugdraw.h"
+#include "src/entity_utils.h"
 
 bool exit_requested = false;
 
@@ -350,15 +351,13 @@ remove_ents_from_surface(glm::ivec3 b, int face)
         //todo: fix height here. hardcoded is wrong
         auto height = 1;
         if (p.x == b.x && p.y == b.y && p.z <= b.z && p.z + height > b.z && f == face) {
-            destroy_entity(ce);
-            it = ch->entities.erase(it);
+            pop_entity_off(ce);
         }
         else {
             ++it;
         }
     }
 }
-
 
 std::array<tool*, 8> tools {
     //tool::create_fire_projectile_tool(&pl),
@@ -371,7 +370,6 @@ std::array<tool*, 8> tools {
     tool::create_add_room_tool(),
     tool::create_wiring_tool(),
 };
-
 
 void
 add_text_with_outline(char const *s, float x, float y, float r = 1, float g = 1, float b = 1)
