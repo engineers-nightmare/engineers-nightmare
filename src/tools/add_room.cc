@@ -37,7 +37,6 @@ struct add_room_tool : tool {
     }
 
     bool can_use() {
-        auto *bl = ship->get_block(rc.bl);
         auto index = normal_to_surface_index(&rc);
 
         auto u = surface_index_to_normal(surface_zp);
@@ -47,7 +46,7 @@ struct add_room_tool : tool {
             return false;
         }
 
-        return (valid_directions & (1 << index));
+        return static_cast<bool>(valid_directions & (1 << index));
     }
 
     void use() override {

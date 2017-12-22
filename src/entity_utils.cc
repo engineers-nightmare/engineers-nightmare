@@ -182,9 +182,55 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     return ce;
 }
 
+c_entity
+spawn_floating_generic_entity(glm::mat4 mat, const std::string &mesh, const std::string &phys_mesh) {
+    auto ce = c_entity::spawn();
+
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &physics_man = component_system_man.managers.physics_component_man;
+    auto &surface_man = component_system_man.managers.surface_attachment_component_man;
+    auto &render_man = component_system_man.managers.renderable_component_man;
+    auto &type_man = component_system_man.managers.type_component_man;
+
+    pos_man.assign_entity(ce);
+    physics_man.assign_entity(ce);
+    surface_man.assign_entity(ce);
+    render_man.assign_entity(ce);
+    type_man.assign_entity(ce);
+
+    auto physics = physics_man.get_instance_data(ce);
+    *physics.rigid = nullptr;
+    *physics.mesh = phys_mesh.c_str();
+    *physics.mass = 0.2f;
+    auto const &pm = asset_man.get_mesh(phys_mesh);
+    build_rigidbody(mat, pm.phys_shape, physics.rigid);
+    /* so that we can get back to the entity from a phys raycast */
+    /* TODO: these should really come from a dense pool rather than the generic allocator */
+    auto per = new phys_ent_ref;
+    per->ce = ce;
+    (*physics.rigid)->setUserPointer(per);
+
+    auto surface = surface_man.get_instance_data(ce);
+    *surface.attached = false;
+
+    auto pos = pos_man.get_instance_data(ce);
+    *pos.mat = mat;
+
+    auto render = render_man.get_instance_data(ce);
+    *render.mesh = mesh.c_str();
+    *render.draw = true;
+
+    auto type = type_man.get_instance_data(ce);
+    // todo: fix this
+    *type.name = "Generic";
+
+    pop_entity_off(ce);
+
+    return ce;
+}
+
 void pop_entity_off(c_entity entity) {
     auto &phys = component_system_man.managers.physics_component_man;
-    auto &pos = component_system_man.managers.relative_position_component_man;
     auto &sam = component_system_man.managers.surface_attachment_component_man;
 
     auto ph = phys.get_instance_data(entity);
@@ -195,7 +241,7 @@ void pop_entity_off(c_entity entity) {
     *sa.attached = false;
 
     auto *ch = ship->get_chunk_containing(*sa.block);
-    for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
+    for (auto it = ch->entities.begin(); it != ch->entities.end(); ++it) {
         auto ce = *it;
         if (ce == entity) {
             ch->entities.erase(it);

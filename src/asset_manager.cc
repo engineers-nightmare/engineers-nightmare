@@ -156,7 +156,11 @@ mesh_data & asset_manager::get_mesh(const std::string & mesh) {
 }
 
 mesh_data &asset_manager::get_surface_mesh(unsigned surface_index, unsigned surface_type) {
-    return meshes.at(surf_to_mesh[surface_index][surface_type]);
+    return meshes.at(get_surface_mesh_name(surface_index, surface_type));
+}
+
+const std::string &asset_manager::get_surface_mesh_name(unsigned surface_index, unsigned surface_type) {
+    return surf_to_mesh[surface_index][surface_type];
 }
 
 void asset_manager::bind_render_textures(int i) {

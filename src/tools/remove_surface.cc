@@ -7,6 +7,7 @@
 #include "../block.h"
 #include "../player.h"
 #include "tools.h"
+#include "../entity_utils.h"
 
 
 extern GLuint overlay_shader;
@@ -20,7 +21,7 @@ struct remove_surface_tool : tool
 {
     raycast_info_block rc;
 
-    void pre_use(player *pl) {
+    void pre_use(player *pl) override {
         ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, cross_surface, &rc);
     }
 
@@ -36,11 +37,16 @@ struct remove_surface_tool : tool
 
         auto index = normal_to_surface_index(&rc);
 
+        auto &mesh = asset_man.get_surface_mesh_name(index, rc.block->surfs[index]);
+        auto &phys_mesh = asset_man.get_surface_mesh_name(index, rc.block->surfs[index]);
+
         ship->set_surface(rc.bl, rc.p, (surface_index)index, surface_none);
 
         /* remove any ents using the surface */
         remove_ents_from_surface(rc.p, index ^ 1);
         remove_ents_from_surface(rc.bl, index);
+
+        spawn_floating_generic_entity(mat_position(glm::vec3(rc.bl)), mesh, phys_mesh);
     }
 
     void preview(frame_data *frame) override
