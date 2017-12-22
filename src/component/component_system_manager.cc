@@ -127,8 +127,6 @@ tick_doors(ship_space *ship)
             continue;
         }
 
-        auto old_pos = door_man.instance_pool.pos[i];
-
         door_man.instance_pool.desired_pos[i] = *reader.data > 0 ? 1.0f : 0.0f;
 
         auto desired_state = door_man.instance_pool.desired_pos[i];
@@ -138,8 +136,6 @@ tick_doors(ship_space *ship)
 
         auto delta = clamp(door_man.instance_pool.pos[i] - desired_state, -0.1f, 0.1f);
         door_man.instance_pool.pos[i] -= delta;
-
-        auto pos = door_man.instance_pool.pos[i];
     }
 }
 
