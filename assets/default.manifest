@@ -203,6 +203,27 @@ assets = (
     scale = 0.0333
     offset = [0.0,0.0,0.0]
 },
+{
+    name = "surface_wall"
+    type = "mesh"
+    file = "mesh/surface_wall.obj"
+    scale = 0.0625
+    offset = [0.0,0.0,0.0]
+},
+{
+    name = "surface_grate"
+    type = "mesh"
+    file = "mesh/surface_grate.obj"
+    scale = 0.0625
+    offset = [0.0,0.0,0.0]
+},
+{
+    name = "surface_glass"
+    type = "mesh"
+    file = "mesh/surface_glass.obj"
+    scale = 0.0625
+    offset = [0.0,0.0,0.0]
+},
 
 {
     name = "starry-night"
