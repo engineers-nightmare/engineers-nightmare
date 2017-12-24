@@ -20,7 +20,7 @@ def fail(args):
 def main():
     files = [f for f in glob.glob('gen/enum/*')]
 
-    pattern = re.compile(r'\s*(\w+)\s*(?:=\s*(\d+))?\s*')
+    pattern = re.compile(r'\s*(\w+)\s*(?:=\s*(\d+))?\s*(?:,\s*"([^"]*)")?\s*')
     tab = "    "
 
     output_dir = "src/enums/"
@@ -58,8 +58,10 @@ def main():
                 input_file = fl
 
                 next_value = 0
+                desc = ""
 
                 fields = collections.OrderedDict()
+                descs = collections.OrderedDict()
 
                 for line in open(input_file, 'r'):
                     line = line.strip()
@@ -79,6 +81,12 @@ def main():
 
                     value_string = match.group(2)
 
+                    desc_string = match.group(3)
+                    if desc_string is not None:
+                        desc = desc_string
+                    else:
+                        desc = enum_name
+
                     if value_string is not None:
                         value = int(value_string)
 
@@ -88,6 +96,7 @@ def main():
                         next_value = value
 
                     fields[field_name] = next_value
+                    descs[field_name] = desc
 
                     next_value += 1
 
@@ -100,6 +109,8 @@ def main():
                 header.write(tab + "invalid = -1,\n")
                 header.write("};\n")
                 header.write("\n")
+                header.write("const char* get_enum_description(%s value);\n" % enum_name)
+                header.write("\n")
                 header.write("const char* get_enum_string(%s value);\n" % enum_name)
                 header.write("\n")
                 header.write("template<> %s get_enum<%s>(const char *e);\n" % (enum_name, enum_name))
@@ -107,10 +118,24 @@ def main():
                 header.write("%s config_setting_get_%s(const config_setting_t *setting);\n" % (enum_name, enum_name))
                 header.write("\n")
                 header.write("int config_setting_set_%s(config_setting_t *setting, %s value);\n" % (enum_name, enum_name))
+                header.write("\n")
+                header.write("int config_setting_lookup_%s(const config_setting_t *setting, const char *name, %s *value);\n" % (enum_name, enum_name))
 
 
                 source.write("\n")
                 source.write("// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n")
+                source.write("const char* get_enum_description(%s value) {\n" % enum_name)
+                source.write(tab + "switch(value)\n")
+                source.write(tab + "{\n")
+                for field_name in fields.keys():
+                    source.write(tab + "case %s::%s:\n" % (enum_name, field_name))
+                    source.write(tab + tab + "return \"%s\";\n" % descs[field_name])
+                source.write(tab + "default:\n")
+                source.write(tab + tab + "assert(false);\n")
+                source.write(tab + tab + "return nullptr;\n")
+                source.write(tab + "}\n")
+                source.write("}\n")
+                source.write("\n")
                 source.write("const char* get_enum_string(%s value) {\n" % enum_name)
                 source.write(tab + "switch(value)\n")
                 source.write(tab + "{\n")
@@ -141,6 +166,16 @@ def main():
                 source.write("int config_setting_set_%s(config_setting_t *setting, %s value) {\n" % (enum_name, enum_name))
                 source.write(tab + "auto str = get_enum_string(value);\n")
                 source.write(tab + "return (config_setting_set_string(setting, str));\n")
+                source.write("}\n")
+                source.write("\n")
+                source.write("int config_setting_lookup_%s(const config_setting_t *setting, const char *name, %s *value) {\n" % (enum_name, enum_name))
+                source.write(tab + "auto *member = config_setting_get_member(setting, name);\n")
+                source.write(tab + "if(!member) {\n")
+                source.write(tab + tab + "return CONFIG_FALSE;\n")
+                source.write(tab + "}\n")
+                source.write("\n")
+                source.write(tab + "*value = (%s)config_setting_get_%s(member);\n" % (enum_name, enum_name))
+                source.write(tab + "return CONFIG_TRUE;\n")
                 source.write("}\n")
 
     return 0
