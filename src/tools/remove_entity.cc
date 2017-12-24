@@ -55,6 +55,8 @@ struct remove_entity_tool : tool
         auto &rend = component_system_man.managers.renderable_component_man;
         *rend.get_instance_data(entity).draw = true;
 
+        auto &sam = component_system_man.managers.surface_attachment_component_man;
+        auto face = (*sam.get_instance_data(entity).face) ^ 1;
         pop_entity_off(entity);
     }
 

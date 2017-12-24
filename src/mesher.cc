@@ -48,15 +48,17 @@ void build_rigidbody(const glm::mat4 &m, btCollisionShape *shape, btRigidBody **
         btRigidBody::btRigidBodyConstructionInfo
             ci(0, ms, shape, btVector3(0, 0, 0));
         *rb = new btRigidBody(ci);
+        (*rb)->setSleepingThresholds(0.1f, 0.1f);
+        (*rb)->setCollisionFlags((*rb)->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
         phy->dynamicsWorld->addRigidBody(*rb);
     }
 }
 
 void convert_static_rb_to_dynamic(btRigidBody *rb, float mass) {
     phy->dynamicsWorld->removeRigidBody(rb);
+    rb->setCollisionFlags(rb->getCollisionFlags() & ~btCollisionObject::CF_STATIC_OBJECT);
     btVector3 inertia(0, 0, 0);
     rb->getCollisionShape()->calculateLocalInertia(mass, inertia);
-    rb->setSleepingThresholds(0.1f, 0.1f);
     rb->setMassProps(mass, inertia);
     phy->dynamicsWorld->addRigidBody(rb);
     rb->activate();

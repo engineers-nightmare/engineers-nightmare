@@ -37,8 +37,7 @@ struct remove_surface_tool : tool
 
         auto index = normal_to_surface_index(&rc);
 
-        auto &mesh = asset_man.get_surface_mesh_name(index, rc.block->surfs[index]);
-        auto &phys_mesh = asset_man.get_surface_mesh_name(index, rc.block->surfs[index]);
+        auto &mesh = asset_man.get_popped_surface_mesh_name(rc.block->surfs[index]);
 
         ship->set_surface(rc.bl, rc.p, (surface_index)index, surface_none);
 
@@ -46,7 +45,7 @@ struct remove_surface_tool : tool
         remove_ents_from_surface(rc.p, index ^ 1);
         remove_ents_from_surface(rc.bl, index);
 
-        spawn_floating_generic_entity(mat_position(glm::vec3(rc.bl)), mesh, phys_mesh);
+        spawn_floating_generic_entity(mat_block_face(glm::vec3(rc.p), index ^ 1), mesh, mesh);
     }
 
     void preview(frame_data *frame) override

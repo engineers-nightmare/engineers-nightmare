@@ -182,6 +182,7 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     return ce;
 }
 
+extern physics *phy;
 c_entity
 spawn_floating_generic_entity(glm::mat4 mat, const std::string &mesh, const std::string &phys_mesh) {
     auto ce = c_entity::spawn();
@@ -237,7 +238,6 @@ void pop_entity_off(c_entity entity) {
     auto sa = sam.get_instance_data(entity);
 
     convert_static_rb_to_dynamic(*ph.rigid, *ph.mass);
-    (*ph.rigid)->applyCentralForce(vec3_to_bt(glm::sphericalRand(1.0f)));
     *sa.attached = false;
 
     auto *ch = ship->get_chunk_containing(*sa.block);
