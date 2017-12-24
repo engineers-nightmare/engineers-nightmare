@@ -28,6 +28,10 @@ asset_manager::asset_manager()
     surf_to_mesh[surface_yp][surface_glass] = "glass_y_quad_p";
     surf_to_mesh[surface_zm][surface_glass] = "glass_z_quad";
     surf_to_mesh[surface_zp][surface_glass] = "glass_z_quad_p";
+
+    surf_type_to_mesh[surface_wall] = "surface_wall";
+    surf_type_to_mesh[surface_grate] = "surface_grate";
+    surf_type_to_mesh[surface_glass] = "surface_glass";
 }
 
 template<typename Func>
@@ -161,6 +165,10 @@ mesh_data &asset_manager::get_surface_mesh(unsigned surface_index, unsigned surf
 
 const std::string &asset_manager::get_surface_mesh_name(unsigned surface_index, unsigned surface_type) {
     return surf_to_mesh[surface_index][surface_type];
+}
+
+const std::string &asset_manager::get_popped_surface_mesh_name(unsigned surface_type) {
+    return surf_type_to_mesh[surface_type];
 }
 
 void asset_manager::bind_render_textures(int i) {

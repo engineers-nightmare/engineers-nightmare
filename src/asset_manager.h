@@ -12,6 +12,7 @@ class asset_manager
 {
     std::unordered_map<std::string, mesh_data> meshes;
     std::array<std::array<std::string, face_count>, 256> surf_to_mesh;
+    std::array<std::string, 256> surf_type_to_mesh;
 
     texture_set *render_textures{nullptr};
     std::unordered_map<std::string, texture_set *> skyboxes {};
@@ -28,6 +29,7 @@ public:
 
     mesh_data & get_surface_mesh(unsigned surface_index, unsigned surface_type);
     const std::string &get_surface_mesh_name(unsigned surface_index, unsigned surface_type);
+    const std::string &get_popped_surface_mesh_name(unsigned surface_type);
 
     void bind_render_textures(int i);
 
