@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#define CHUNK_SIZE 8
+#define CHUNK_SIZE 4
 
 class btTriangleMesh;
 class btCollisionShape;
@@ -32,11 +32,6 @@ struct topo_info {
 };
 
 struct chunk {
-    /* with a CHUNK_SIZE of 8
-     * we have 8^3 blocks
-     * this means a chunk represents
-     * 8m^3
-     */
     fixed_cube<block, CHUNK_SIZE> blocks;
     fixed_cube<topo_info, CHUNK_SIZE> topo;
 
