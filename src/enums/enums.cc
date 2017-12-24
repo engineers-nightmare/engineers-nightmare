@@ -7,6 +7,82 @@
 
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+const char* get_enum_description(window_mode value) {
+    switch(value)
+    {
+    case window_mode::windowed:
+        return "Windowed";
+    case window_mode::fullscreen:
+        return "Fullscreen";
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
+const char* get_enum_string(window_mode value) {
+    switch(value)
+    {
+    case window_mode::windowed:
+        return "windowed";
+    case window_mode::fullscreen:
+        return "fullscreen";
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
+template<> window_mode get_enum<window_mode>(const char *e) {
+    auto val{window_mode::invalid};
+    if (!strcmp(e, "windowed")) {
+        val = window_mode::windowed;
+    }
+    if (!strcmp(e, "fullscreen")) {
+        val = window_mode::fullscreen;
+    }
+    assert(val != window_mode::invalid);
+    return val;
+}
+
+window_mode config_setting_get_window_mode(const config_setting_t *setting) {
+    const char *str = config_setting_get_string(setting);
+    return get_enum<window_mode>(str);
+}
+
+int config_setting_set_window_mode(config_setting_t *setting, window_mode value) {
+    auto str = get_enum_string(value);
+    return (config_setting_set_string(setting, str));
+}
+
+int config_setting_lookup_window_mode(const config_setting_t *setting, const char *name, window_mode *value) {
+    auto *member = config_setting_get_member(setting, name);
+    if(!member) {
+        return CONFIG_FALSE;
+    }
+
+    *value = (window_mode)config_setting_get_window_mode(member);
+    return CONFIG_TRUE;
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+const char* get_enum_description(placement value) {
+    switch(value)
+    {
+    case placement::full_block_snapped:
+        return "placement";
+    case placement::half_block_snapped:
+        return "placement";
+    case placement::quarter_block_snapped:
+        return "placement";
+    case placement::eighth_block_snapped:
+        return "placement";
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
 const char* get_enum_string(placement value) {
     switch(value)
     {
@@ -52,7 +128,34 @@ int config_setting_set_placement(config_setting_t *setting, placement value) {
     return (config_setting_set_string(setting, str));
 }
 
+int config_setting_lookup_placement(const config_setting_t *setting, const char *name, placement *value) {
+    auto *member = config_setting_get_member(setting, name);
+    if(!member) {
+        return CONFIG_FALSE;
+    }
+
+    *value = (placement)config_setting_get_placement(member);
+    return CONFIG_TRUE;
+}
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+const char* get_enum_description(rotation value) {
+    switch(value)
+    {
+    case rotation::axis_aligned:
+        return "rotation";
+    case rotation::rot_45:
+        return "rotation";
+    case rotation::rot_15:
+        return "rotation";
+    case rotation::no_rotation:
+        return "rotation";
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
 const char* get_enum_string(rotation value) {
     switch(value)
     {
@@ -96,4 +199,14 @@ rotation config_setting_get_rotation(const config_setting_t *setting) {
 int config_setting_set_rotation(config_setting_t *setting, rotation value) {
     auto str = get_enum_string(value);
     return (config_setting_set_string(setting, str));
+}
+
+int config_setting_lookup_rotation(const config_setting_t *setting, const char *name, rotation *value) {
+    auto *member = config_setting_get_member(setting, name);
+    if(!member) {
+        return CONFIG_FALSE;
+    }
+
+    *value = (rotation)config_setting_get_rotation(member);
+    return CONFIG_TRUE;
 }

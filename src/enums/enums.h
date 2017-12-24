@@ -11,6 +11,26 @@ template<typename T>
 
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+enum class window_mode
+{
+    windowed = 0,
+    fullscreen = 1,
+    invalid = -1,
+};
+
+const char* get_enum_description(window_mode value);
+
+const char* get_enum_string(window_mode value);
+
+template<> window_mode get_enum<window_mode>(const char *e);
+
+window_mode config_setting_get_window_mode(const config_setting_t *setting);
+
+int config_setting_set_window_mode(config_setting_t *setting, window_mode value);
+
+int config_setting_lookup_window_mode(const config_setting_t *setting, const char *name, window_mode *value);
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 enum class placement
 {
     full_block_snapped = 0,
@@ -20,6 +40,8 @@ enum class placement
     invalid = -1,
 };
 
+const char* get_enum_description(placement value);
+
 const char* get_enum_string(placement value);
 
 template<> placement get_enum<placement>(const char *e);
@@ -27,6 +49,8 @@ template<> placement get_enum<placement>(const char *e);
 placement config_setting_get_placement(const config_setting_t *setting);
 
 int config_setting_set_placement(config_setting_t *setting, placement value);
+
+int config_setting_lookup_placement(const config_setting_t *setting, const char *name, placement *value);
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 enum class rotation
@@ -38,6 +62,8 @@ enum class rotation
     invalid = -1,
 };
 
+const char* get_enum_description(rotation value);
+
 const char* get_enum_string(rotation value);
 
 template<> rotation get_enum<rotation>(const char *e);
@@ -45,3 +71,5 @@ template<> rotation get_enum<rotation>(const char *e);
 rotation config_setting_get_rotation(const config_setting_t *setting);
 
 int config_setting_set_rotation(config_setting_t *setting, rotation value);
+
+int config_setting_lookup_rotation(const config_setting_t *setting, const char *name, rotation *value);
