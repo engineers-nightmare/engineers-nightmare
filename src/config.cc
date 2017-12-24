@@ -1,6 +1,8 @@
 #include "config.h"
 
 #include <libconfig.h>
+
+#include <utility>
 #include "libconfig_shim.h"
 
 #define BASE_CONFIG_PATH "configs/base/"
@@ -69,7 +71,7 @@ void
 save_settings(en_settings to_save) {
     en_settings base = load_settings(en_config_base);
 
-    en_settings delta = base.get_delta(to_save);
+    en_settings delta = base.get_delta(std::move(to_save));
 
     save_binding_settings(delta.bindings);
     save_video_settings(delta.video);
@@ -131,8 +133,8 @@ save_video_settings(video_settings to_save) {
     video = config_setting_add(root, "video", CONFIG_TYPE_GROUP);
 
     if (to_save.mode != window_mode::invalid) {
-        auto invert_config = config_setting_add(video, "mode", CONFIG_TYPE_FLOAT);
-        config_setting_set_window_mode(invert_config, to_save.mode);
+        auto mode = config_setting_add(video, "mode", CONFIG_TYPE_STRING);
+        config_setting_set_window_mode(mode, to_save.mode);
     }
 
     // of course it worked, what could go wrong?
