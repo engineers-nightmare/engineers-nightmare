@@ -40,7 +40,7 @@
 #include "src/wiring/wiring_data.h"
 
 #define APP_NAME        "Engineer's Nightmare"
-#define DEFAULT_WIDTH   1024
+#define DEFAULT_WIDTH   1366
 #define DEFAULT_HEIGHT  768
 
 #define MOUSE_Y_LIMIT      1.54f
