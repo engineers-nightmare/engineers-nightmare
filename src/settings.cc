@@ -50,9 +50,11 @@ void binding_settings::merge_with(binding_settings other) {
 }
 
 void video_settings::merge_with(video_settings other) {
-    /* nothing yet */
     if (other.mode != window_mode::invalid)
         this->mode = other.mode;
+
+    if (other.fov != INVALID_SETTINGS_FLOAT)
+        this->fov = other.fov;
 }
 
 input_settings input_settings::get_delta(input_settings other) {
@@ -134,6 +136,10 @@ video_settings video_settings::get_delta(video_settings other) {
 
     if (other.mode != mode) {
         delta.mode = other.mode;
+    }
+
+    if (other.fov != fov) {
+        delta.fov = other.fov;
     }
 
     return delta;

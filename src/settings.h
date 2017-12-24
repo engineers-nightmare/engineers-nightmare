@@ -35,6 +35,8 @@ struct video_settings : settings<video_settings> {
 
     window_mode mode = window_mode::invalid;
 
+    float fov = INVALID_SETTINGS_FLOAT;
+
     void merge_with(video_settings) override;
     video_settings get_delta(video_settings) override;
 };

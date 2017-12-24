@@ -137,6 +137,11 @@ save_video_settings(video_settings to_save) {
         config_setting_set_window_mode(mode, to_save.mode);
     }
 
+    if (to_save.fov != INVALID_SETTINGS_FLOAT) {
+        auto mode = config_setting_add(video, "fov", CONFIG_TYPE_FLOAT);
+        config_setting_set_float(mode, to_save.fov);
+    }
+
     // of course it worked, what could go wrong?
     config_write_file(&video_config, USER_VIDEO_CONFIG_PATH);
 
@@ -289,6 +294,7 @@ load_video_settings(en_config_type config_type) {
 
     if (video_config_setting != nullptr) {
         window_mode mode = window_mode::windowed;
+        auto fov = 60.0;
 
         /* window_mode */
         int success = config_setting_lookup_window_mode(
@@ -296,6 +302,13 @@ load_video_settings(en_config_type config_type) {
 
         if (success == CONFIG_TRUE) {
             loaded_video.mode = mode;
+        }
+
+        success = config_setting_lookup_float(
+            video_config_setting, "fov", &fov);
+
+        if (success == CONFIG_TRUE) {
+            loaded_video.fov = (float)fov;
         }
     }
 
