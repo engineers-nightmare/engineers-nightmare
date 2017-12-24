@@ -421,7 +421,6 @@ draw_renderables(frame_data *frame)
 
     for (auto i = 0u; i < render_man.buffer.num; i++) {
         auto ce = render_man.instance_pool.entity[i];
-        auto & material = render_man.instance_pool.material[i];
         auto & mesh_name = render_man.instance_pool.mesh[i];
         auto & mesh = asset_man.get_mesh(mesh_name);
 

@@ -22,19 +22,6 @@
 
 #include "physics.h"
 
-// static helper method
-    static btVector3
-getNormalizedVector(const btVector3& v)
-{
-    btVector3 n(0, 0, 0);
-
-    if (v.length() > SIMD_EPSILON) {
-        n = v.normalized();
-    }
-    return n;
-}
-
-
 ///@todo Interact with dynamic objects,
 ///Ride kinematicly animated platforms properly
 ///More realistic (or maybe just a config option) falling
@@ -52,7 +39,7 @@ public:
         if (rayResult.m_collisionObject == m_me)
             return 1.0;
 
-        return ClosestRayResultCallback::addSingleResult (rayResult, normalInWorldSpace);
+        return btCollisionWorld::ClosestRayResultCallback::addSingleResult (rayResult, normalInWorldSpace);
     }
 
 protected:

@@ -157,7 +157,6 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     auto &pos_man = component_system_man.managers.relative_position_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
     auto &surface_man = component_system_man.managers.surface_attachment_component_man;
-    auto &render_man = component_system_man.managers.renderable_component_man;
 
     auto physics = physics_man.get_instance_data(ce);
     *physics.rigid = nullptr;
