@@ -252,6 +252,6 @@ chunk::prepare_phys(int x, int y, int z)
         &this->phys_chunk.phys_mesh,
         &this->phys_chunk.phys_shape);
 
-    auto mat = mat_position({x, y, z});
+    auto mat = mat_position({CHUNK_SIZE * x, CHUNK_SIZE * y, CHUNK_SIZE * z});
     build_rigidbody(mat, this->phys_chunk.phys_shape, &this->phys_chunk.phys_body);
 }
