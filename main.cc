@@ -175,6 +175,22 @@ ImGuiContext *default_context;
 std::array<ImGuiContext*, 2> offscreen_contexts{};
 
 DDRenderInterfaceCoreGL *ddRenderIfaceGL;
+
+void apply_video_settings() {
+    unsigned new_mode{0};
+    switch (game_settings.video.mode) {
+        case window_mode::windowed:
+            new_mode = 0;
+            break;
+        case window_mode::fullscreen:
+            new_mode = SDL_WINDOW_FULLSCREEN_DESKTOP;
+            break;
+        default:
+            assert(false);
+    }
+    SDL_SetWindowFullscreen(wnd.ptr, new_mode);
+}
+
 void
 init()
 {
@@ -297,6 +313,8 @@ init()
 
     // Absorb all the init time so we dont try to catch up
     frame_info.tick();
+
+    apply_video_settings();
 }
 
 
@@ -660,8 +678,6 @@ update()
     }
 }
 
-
-
 action const* get_input(en_action a) {
     return &game_settings.bindings.bindings[a];
 }
@@ -986,6 +1002,8 @@ struct menu_state : game_state {
         Keybinds,
     } state{MenuState::Main};
 
+    bool settings_dirty = false;
+
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
     menu_state() {
@@ -1017,6 +1035,13 @@ struct menu_state : game_state {
     }
 
     void handle_main_menu() {
+        // todo: use a proper state transition system
+        if (settings_dirty) {
+            save_settings(game_settings);
+            apply_video_settings();
+            settings_dirty = false;
+        }
+
         ImGui::Begin("", nullptr, menu_flags);
         {
             ImGui::Text("Engineer's Nightmare");
@@ -1040,13 +1065,20 @@ struct menu_state : game_state {
     void handle_settings_menu() {
         ImGui::Begin("", nullptr, menu_flags);
         {
-            bool dirty = false;
-
             ImGui::Text("Settings");
             ImGui::Separator();
 
+            std::array<const char*, 2> modes{
+                get_enum_description(window_mode::windowed),
+                get_enum_description(window_mode::fullscreen),
+            };
+            auto mode = game_settings.video.mode;
+
+            settings_dirty |= ImGui::Combo("Window Mode", (int*)&mode, modes.data(), modes.size());
+            game_settings.video.mode = mode;
+
             bool invert = game_settings.input.mouse_invert == -1.0f;
-            dirty |= ImGui::Checkbox("Invert Mouse", &invert);
+            settings_dirty |= ImGui::Checkbox("Invert Mouse", &invert);
             game_settings.input.mouse_invert = invert ? -1.0f : 1.0f;
 
             ImGui::Separator();
@@ -1066,10 +1098,6 @@ struct menu_state : game_state {
             ImGui::Dummy(ImVec2{ 10, 10 });
             if (ImGui::Button("Back")) {
                 state = MenuState::Main;
-            }
-
-            if (dirty) {
-                save_settings(game_settings);
             }
         }
         ImGui::End();
