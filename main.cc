@@ -64,8 +64,6 @@ bool draw_debug_axis = false;
 bool draw_debug_physics = false;
 bool draw_fps = false;
 
-auto hfov = glm::radians(90.f);
-
 en_settings game_settings;
 
 struct {
@@ -477,7 +475,7 @@ void render() {
     /* pl.pos is center of capsule */
     pl.eye = pl.pos;
 
-    auto vfov = hfov * (float)wnd.height / wnd.width;
+    auto vfov = glm::radians(game_settings.video.fov);
 
     glm::mat4 proj = glm::perspective(vfov, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
     glm::mat4 view = glm::lookAt(pl.eye, pl.eye + pl.dir, glm::vec3(0, 0, 1));
@@ -1073,9 +1071,12 @@ struct menu_state : game_state {
                 get_enum_description(window_mode::fullscreen),
             };
             auto mode = game_settings.video.mode;
-
             settings_dirty |= ImGui::Combo("Window Mode", (int*)&mode, modes.data(), modes.size());
             game_settings.video.mode = mode;
+
+            auto fov = glm::radians(game_settings.video.fov);
+            settings_dirty |= ImGui::SliderAngle("Field of View", &fov, 50.0f, 120.0f);
+            game_settings.video.fov = glm::degrees(fov);
 
             bool invert = game_settings.input.mouse_invert == -1.0f;
             settings_dirty |= ImGui::Checkbox("Invert Mouse", &invert);
