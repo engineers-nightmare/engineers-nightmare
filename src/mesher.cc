@@ -21,7 +21,7 @@ static void
 stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
                 sw_mesh *src, glm::vec3 offset)
 {
-    unsigned index_base = (unsigned)verts->size();
+    auto index_base = (unsigned)verts->size();
 
     for (unsigned int i = 0; i < src->num_vertices; i++) {
         vertex v = src->verts[i];
@@ -66,8 +66,8 @@ void convert_static_rb_to_dynamic(btRigidBody *rb, float mass) {
 void
 build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisionShape **shape)
 {
-    btTriangleMesh *phys = NULL;
-    btCollisionShape *new_shape = NULL;
+    btTriangleMesh *phys = nullptr;
+    btCollisionShape *new_shape = nullptr;
 
     if (src->num_indices) {
         /* If we have some content in our mesh, transfer it to bullet */

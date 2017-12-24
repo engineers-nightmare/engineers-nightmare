@@ -70,5 +70,6 @@ physics::tick(float dt)
 {
     dynamicsWorld->stepSimulation(dt, 10);
 
-    pl->pos = bt_to_vec3(rb_controller->getCenterOfMassPosition());
+    auto trans = bt_to_mat4(rb_controller->getWorldTransform());
+    pl->pos =  trans[3];
 }
