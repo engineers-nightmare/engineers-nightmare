@@ -5,6 +5,7 @@
 #include <float.h>
 
 #include "input.h"
+#include "enums/enums.h"
 
 /* to support merging, we need a way of defaulting values
  * to indicate not present, rather than just set to same value
@@ -12,6 +13,7 @@
  */
 #define INVALID_SETTINGS_INT INT_MAX
 #define INVALID_SETTINGS_FLOAT FLT_MAX
+#define INVALID_SETTINGS_ENUM INT_MAX
 
 template <typename T>
 struct settings {
@@ -30,6 +32,8 @@ struct video_settings : settings<video_settings> {
     /* shadows */               /* shadows on or off/quality */
     /* anisotropy */            /* less eye bleed */
     /* antialiasing */          /* SMAA, CSAAS, FXAA, ETCAA*/
+
+    window_mode mode = window_mode::invalid;
 
     void merge_with(video_settings) override;
     video_settings get_delta(video_settings) override;

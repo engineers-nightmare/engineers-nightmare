@@ -78,7 +78,7 @@ save_settings(en_settings to_save) {
 
 void
 save_binding_settings(binding_settings to_save) {
-    config_t bindings_config;
+    config_t bindings_config{};
     config_setting_t *binds;
     config_setting_t *root;
 
@@ -120,12 +120,30 @@ save_binding_settings(binding_settings to_save) {
 
 void
 save_video_settings(video_settings to_save) {
-    //config_write_file(&to_save, USER_VIDEO_CONFIG_PATH);
+    config_t video_config{};
+    config_setting_t *video;
+    config_setting_t *root;
+
+    config_init(&video_config);
+
+    root = config_root_setting(&video_config);
+
+    video = config_setting_add(root, "video", CONFIG_TYPE_GROUP);
+
+    if (to_save.mode != window_mode::invalid) {
+        auto invert_config = config_setting_add(video, "mode", CONFIG_TYPE_FLOAT);
+        config_setting_set_window_mode(invert_config, to_save.mode);
+    }
+
+    // of course it worked, what could go wrong?
+    config_write_file(&video_config, USER_VIDEO_CONFIG_PATH);
+
+    config_destroy(&video_config);
 }
 
 void
 save_input_settings(input_settings to_save) {
-    config_t input_config;
+    config_t input_config{};
     config_setting_t *input;
     config_setting_t *root;
 
@@ -171,7 +189,7 @@ load_settings(en_config_type config_type) {
 binding_settings
 load_binding_settings(en_config_type config_type) {
     binding_settings loaded_bindings;
-    config_t cfg;
+    config_t cfg{};
     config_setting_t *binds_config_setting = nullptr;
 
     const char* config_path = get_keys_config_path(config_type);
@@ -249,7 +267,35 @@ load_binding_settings(en_config_type config_type) {
 video_settings
 load_video_settings(en_config_type config_type) {
     video_settings loaded_video;
-    /* nothing configured yet */
+    config_t cfg{};
+    config_setting_t *video_config_setting = nullptr;
+
+    const char* config_path = get_video_config_path(config_type);
+
+    config_init(&cfg);
+
+    if (!config_read_file(&cfg, config_path))
+    {
+        printf("%s:%d - %s reading %s\n", config_error_file(&cfg),
+               config_error_line(&cfg), config_error_text(&cfg), config_path);
+        config_destroy(&cfg);
+
+        return loaded_video;
+    }
+
+    video_config_setting = config_lookup(&cfg, "video");
+
+    if (video_config_setting != nullptr) {
+        window_mode mode = window_mode::windowed;
+
+        /* window_mode */
+        int success = config_setting_lookup_window_mode(
+            video_config_setting, "mode", &mode);
+
+        if (success == CONFIG_TRUE) {
+            loaded_video.mode = mode;
+        }
+    }
 
     return loaded_video;
 }
@@ -257,7 +303,7 @@ load_video_settings(en_config_type config_type) {
 input_settings
 load_input_settings(en_config_type config_type) {
     input_settings loaded_inputs;
-    config_t cfg;
+    config_t cfg{};
     config_setting_t *input_config_setting = nullptr;
 
     const char* config_path = get_input_config_path(config_type);

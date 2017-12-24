@@ -51,6 +51,8 @@ void binding_settings::merge_with(binding_settings other) {
 
 void video_settings::merge_with(video_settings other) {
     /* nothing yet */
+    if (other.mode != window_mode::invalid)
+        this->mode = other.mode;
 }
 
 input_settings input_settings::get_delta(input_settings other) {
@@ -128,8 +130,11 @@ binding_settings binding_settings::get_delta(binding_settings other) {
 }
 
 video_settings video_settings::get_delta(video_settings other) {
-    // relies on fields being initialized to INVALID_SETTINGS_{type}
+    video_settings delta;
 
-    // no video settings yet. return default
-    return video_settings();
+    if (other.mode != mode) {
+        delta.mode = other.mode;
+    }
+
+    return delta;
 }
