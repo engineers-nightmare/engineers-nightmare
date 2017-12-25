@@ -272,8 +272,7 @@ init()
     frames = new frame_data[NUM_INFLIGHT_FRAMES];
     frame_index = 0;
 
-    pl.angle = 0;
-    pl.elev = 0;
+    pl.rot = glm::quat(1, 0, 0, 0);
     pl.pos = glm::vec3(3.0f,2.0f,3.0f);
     pl.active_tool_slot = 0;
     pl.ui_dirty = true;
@@ -466,11 +465,9 @@ void render() {
 
     frame->begin();
 
-    pl.dir = glm::vec3(
-        cosf(pl.angle) * cosf(pl.elev),
-        sinf(pl.angle) * cosf(pl.elev),
-        sinf(pl.elev)
-        );
+    auto m = glm::mat4_cast(glm::normalize(pl.rot));
+    pl.dir = -glm::vec3(m[2]);
+    m = glm::transpose(m);
 
     /* pl.pos is center of capsule */
     pl.eye = pl.pos;
@@ -478,8 +475,8 @@ void render() {
     auto vfov = glm::radians(game_settings.video.fov);
 
     glm::mat4 proj = glm::perspective(vfov, (float)wnd.width / wnd.height, 0.01f, 1000.0f);
-    glm::mat4 view = glm::lookAt(pl.eye, pl.eye + pl.dir, glm::vec3(0, 0, 1));
-    glm::mat4 centered_view = glm::lookAt(glm::vec3(0), pl.dir, glm::vec3(0, 0, 1));
+    glm::mat4 view = m * glm::translate(glm::vec3(-pl.eye));
+    glm::mat4 centered_view = m;
 
     auto camera_params = frame->alloc_aligned<per_camera_params>(1);
 
@@ -934,13 +931,10 @@ struct play_state : game_state {
 
         float mouse_invert = game_settings.input.mouse_invert;
 
-        pl.angle += game_settings.input.mouse_x_sensitivity * look_x;
-        pl.elev += game_settings.input.mouse_y_sensitivity * mouse_invert * look_y;
+        auto pitch = glm::angleAxis(game_settings.input.mouse_y_sensitivity * look_y, glm::vec3{ 1.f,0.f,0.f });
+        auto yaw = glm::angleAxis(game_settings.input.mouse_x_sensitivity * look_x, glm::vec3{ 0.f,1.f,0.f });
 
-        if (pl.elev < -MOUSE_Y_LIMIT)
-            pl.elev = -MOUSE_Y_LIMIT;
-        if (pl.elev > MOUSE_Y_LIMIT)
-            pl.elev = MOUSE_Y_LIMIT;
+        pl.rot = pl.rot * pitch * yaw;
 
         pl.move = glm::vec2((float) moveX, (float) moveY);
 

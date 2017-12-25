@@ -45,12 +45,6 @@ physics::tick_controller(float dt)
      * TODO: untangle.
      */
 
-    float c = cosf(this->pl->angle);
-    float s = sinf(this->pl->angle);
-
-    btVector3 fwd(c, s, 0);
-    btVector3 right(s, -c, 0);
-
     if (pl->gravity) {
         pl->disable_gravity ^= true;
 

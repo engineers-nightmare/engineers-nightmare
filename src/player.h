@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #define PLAYER_RADIUS          0.23f
 #define PLAYER_STAND_HEIGHT    1.5f
@@ -10,8 +11,7 @@
 #define EYE_OFFSET_Z    0.1f
 
 struct player {
-    float angle;
-    float elev;
+    glm::quat rot;
     glm::vec3 pos;
     glm::vec3 dir;  /* computed */
     glm::vec3 eye;  /* computed */
