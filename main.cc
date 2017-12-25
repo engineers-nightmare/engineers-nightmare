@@ -273,7 +273,7 @@ init()
     frame_index = 0;
 
     pl.rot = glm::quat(1, 0, 0, 0);
-    pl.pos = glm::vec3(3.0f,2.0f,3.0f);
+    pl.pos = glm::vec3(2.5f,2.5f,2.5f);
     pl.active_tool_slot = 0;
     pl.ui_dirty = true;
     pl.disable_gravity = false;
