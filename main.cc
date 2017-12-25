@@ -931,7 +931,7 @@ struct play_state : game_state {
 
         float mouse_invert = game_settings.input.mouse_invert;
 
-        auto pitch = glm::angleAxis(game_settings.input.mouse_y_sensitivity * look_y, glm::vec3{ 1.f,0.f,0.f });
+        auto pitch = glm::angleAxis(game_settings.input.mouse_y_sensitivity * look_y * mouse_invert, glm::vec3{ 1.f,0.f,0.f });
         auto yaw = glm::angleAxis(game_settings.input.mouse_x_sensitivity * look_x, glm::vec3{ 0.f,1.f,0.f });
 
         pl.rot = pl.rot * pitch * yaw;
