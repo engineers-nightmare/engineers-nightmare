@@ -1065,7 +1065,7 @@ struct menu_state : game_state {
                 get_enum_description(window_mode::fullscreen),
             };
             auto mode = game_settings.video.mode;
-            settings_dirty |= ImGui::Combo("Window Mode", (int*)&mode, modes.data(), modes.size());
+            settings_dirty |= ImGui::Combo("Window Mode", (int*)&mode, modes.data(), (int)modes.size());
             game_settings.video.mode = mode;
 
             auto fov = glm::radians(game_settings.video.fov);
