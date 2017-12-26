@@ -421,9 +421,35 @@ struct time_accumulator
     }
 };
 
+unsigned shuffle_adj_bits_for_face(unsigned bits, unsigned face) {
+    // crazy bit shuffle to get from adj faces to the local face's 4 adjacency bits
+    switch (face) {
+    case surface_zm:
+        return bits;
+    case surface_zp:
+        return (bits & 0x0c) | ((bits & 1) << 1) | ((bits & 2) >> 1);
+    case surface_xm:
+        return bits >> 2;
+    case surface_xp:
+        return ((bits & 0x30) >> 2) | ((bits & 4) >> 1) | ((bits & 8) >> 3);
+    case surface_ym:
+        return ((bits & 1) << 1) | ((bits & 2) >> 1) | ((bits & 0x30) >> 2);
+    case surface_yp:
+        return (bits & 3) | ((bits & 0x30) >> 2);
+    default:
+        return 0;   // unreachable
+    }
+}
+
 
 void draw_wires() {
-    auto mesh = asset_man.get_mesh("face_marker");
+    auto mesh = asset_man.get_mesh("wire_end");
+    mesh_data* meshes[] = {
+        &asset_man.get_mesh("wire_1"),
+        &asset_man.get_mesh("wire_2"),
+        &asset_man.get_mesh("wire_4"),
+        &asset_man.get_mesh("wire_8"),
+    };
 
     for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
         for (int j = ship->mins.y; j <= ship->maxs.y; j++) {
@@ -440,7 +466,20 @@ void draw_wires() {
                                         *(params.ptr) = mat_block_face(glm::vec3(i * CHUNK_SIZE + x, j * CHUNK_SIZE + y, k * CHUNK_SIZE + z), face);
                                         params.bind(1, frame);
 
-                                        draw_mesh(mesh.hw);
+                                        auto bits = shuffle_adj_bits_for_face(bl->wire_bits[face], face);
+
+                                        if (bits & 1)
+                                            draw_mesh(meshes[0]->hw);
+                                        if (bits & 2)
+                                            draw_mesh(meshes[1]->hw);
+                                        if (bits & 4)
+                                            draw_mesh(meshes[2]->hw);
+                                        if (bits & 8)
+                                            draw_mesh(meshes[3]->hw);
+
+                                        if (!(bits & (bits - 1))) {
+                                            draw_mesh(mesh.hw);
+                                        }
                                     }
                                 }
                             }

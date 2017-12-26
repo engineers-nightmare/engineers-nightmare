@@ -224,6 +224,41 @@ assets = (
     scale = 0.0625
     offset = [0.0,0.0,0.0]
 },
+{
+    name = "wire_1"
+    type = "mesh"
+    file = "mesh/wire_1.obj"
+    scale = 0.03125
+    offset = [0.0,0.0,0.0]
+},
+{
+    name = "wire_2"
+    type = "mesh"
+    file = "mesh/wire_2.obj"
+    scale = 0.03125
+    offset = [0.0,0.0,0.0]
+},
+{
+    name = "wire_4"
+    type = "mesh"
+    file = "mesh/wire_4.obj"
+    scale = 0.03125
+    offset = [0.0,0.0,0.0]
+},
+{
+    name = "wire_8"
+    type = "mesh"
+    file = "mesh/wire_8.obj"
+    scale = 0.03125
+    offset = [0.0,0.0,0.0]
+},
+{
+    name = "wire_end"
+    type = "mesh"
+    file = "mesh/wire_end.obj"
+    scale = 0.03125
+    offset = [0.0,0.0,0.0]
+},
 
 {
     name = "starry-night"
