@@ -41,6 +41,41 @@ static wire_pos from_rc(raycast_info_block const *rc) {
     return wire_pos{ rc->p, normal_to_surface_index(rc) ^ 1 };
 }
 
+static unsigned get_neighbor_bits(wire_pos w, std::unordered_set<wire_pos, wire_pos::hash> const & ws) {
+    unsigned bits = 0u;
+    auto bl = ship->get_block(w.pos);
+    for (auto i = 0u; i < 6u; i++) {
+        if (i == w.face || i == (w.face ^ 1)) continue;
+        if (bl->surfs[i]) {
+            // inside corner
+            if (ws.count({ w.pos, i })) {
+                bits |= 1 << i;
+            }
+        }
+        else {
+            auto np = w.pos + surface_index_to_normal(i);
+            auto n = ship->get_block(np);
+            if (n && n->surfs[w.face]) {
+                // straight along surface
+                if (ws.count({ np, w.face })) {
+                    bits |= 1 << i;
+                }
+            }
+            else {
+                auto rp = np + surface_index_to_normal(w.face);
+                auto r = ship->get_block(rp);
+                if (r && r->surfs[i ^ 1]) {
+                    // outside corner
+                    if (ws.count({ rp, i ^ 1 })) {
+                        bits |= 1 << i;
+                    }
+                }
+            }
+        }
+    }
+    return bits;
+}
+
 template<typename T>
 static void for_each_neighbor(wire_pos w, T const & f) {
     auto bl = ship->get_block(w.pos);
@@ -167,6 +202,10 @@ struct wiring_tool : tool
                 for (auto &pe : path) {
                     ship->get_block(pe.pos)->has_wire[pe.face] = true;
                 }
+                std::unordered_set<wire_pos, wire_pos::hash> ps(path.begin(), path.end());
+                for (auto &pe : path) {
+                    ship->get_block(pe.pos)->wire_bits[pe.face] |= get_neighbor_bits(pe, ps);
+                }
                 state = idle;
             }
         } break;
@@ -186,6 +225,7 @@ struct wiring_tool : tool
 
         auto p = from_rc(&rc);
         ship->get_block(p.pos)->has_wire[p.face] = false;
+        ship->get_block(p.pos)->wire_bits[p.face] = 0;
     }
 
     void preview(frame_data *frame) override

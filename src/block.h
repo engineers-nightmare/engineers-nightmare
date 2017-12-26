@@ -48,6 +48,7 @@ struct block {
 
     surface_type surfs[face_count]{};
     bool has_wire[face_count]{};
+    unsigned wire_bits[face_count]{};
 };
 
 static inline unsigned char  /* bool */
