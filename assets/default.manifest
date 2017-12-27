@@ -18,21 +18,18 @@ assets = (
     type = "mesh"
     file = "mesh/surface_glass.obj"
     scale = 0.0625
-    offset = [0.0,0.0,-0.5]
 },
 {
     name = "fp_surface_wall"
     type = "mesh"
     file = "mesh/surface_wall.obj"
     scale = 0.0625
-    offset = [0.0,0.0,-0.5]
 },
 {
     name = "fp_surface_grate"
     type = "mesh"
     file = "mesh/surface_grate.obj"
     scale = 0.0625
-    offset = [0.0,0.0,-0.5]
 },
 {
     name = "display"

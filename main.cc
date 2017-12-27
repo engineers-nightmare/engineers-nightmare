@@ -500,9 +500,9 @@ void draw_wires() {
     }
 }
 
-static glm::vec3 fp_item_offset{ 0.2f, 0.2f, -0.1f };
-static float fp_item_scale{ 0.2f };
-static glm::quat fp_item_rot{ 3.f, 1.5f, -3.f, 2.f };
+static glm::vec3 fp_item_offset{ 0.115f, 0.2f, -0.12f };
+static float fp_item_scale{ 0.175f };
+static glm::quat fp_item_rot{ -1.571f, -0.143f, 2.429f, 1.286f };
 
 glm::mat4 get_fp_item_matrix() {
     auto m = glm::mat4_cast(glm::normalize(pl.rot));
