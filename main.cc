@@ -500,6 +500,17 @@ void draw_wires() {
     }
 }
 
+static glm::vec3 fp_item_offset{ 0.2f, 0.2f, -0.1f };
+static float fp_item_scale{ 0.2f };
+static glm::quat fp_item_rot{ 3.f, 1.5f, -3.f, 2.f };
+
+glm::mat4 get_fp_item_matrix() {
+    auto m = glm::mat4_cast(glm::normalize(pl.rot));
+    auto right = glm::vec3(m[0]);
+    auto up = glm::vec3(m[1]);
+    return glm::scale(mat_position(pl.eye + pl.dir * fp_item_offset.y + right * fp_item_offset.x + up * fp_item_offset.z), glm::vec3(fp_item_scale)) * m * glm::mat4_cast(glm::normalize(fp_item_rot));
+}
+
 
 void render() {
     glEnable(GL_DEPTH_TEST);
@@ -1129,6 +1140,11 @@ struct menu_state : game_state {
             ImGui::Checkbox("Draw Chunk Debug", &draw_debug_chunks);
             ImGui::Checkbox("Draw Axis Debug", &draw_debug_axis);
             ImGui::Checkbox("Draw Physics Debug", &draw_debug_physics);
+
+            ImGui::Separator();
+            ImGui::SliderFloat3("FP item offset", glm::value_ptr(fp_item_offset), -0.5f, 0.5f);
+            ImGui::SliderFloat("FP item scale", &fp_item_scale, 0.f, 1.f);
+            ImGui::SliderFloat4("FP item rot", glm::value_ptr(fp_item_rot), -5.f, 5.f);
 
             ImGui::Dummy(ImVec2{ 10, 10 });
             if (ImGui::Button("Back")) {
