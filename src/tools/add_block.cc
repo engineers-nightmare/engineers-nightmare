@@ -46,7 +46,7 @@ struct add_block_tool : tool
     void preview(frame_data *frame) override
     {
         auto mesh = asset_man.get_mesh("frame");
-        auto mesh2 = asset_man.get_mesh("frame2");
+        auto mesh2 = asset_man.get_mesh("fp_frame");
 
         auto m = glm::mat4_cast(glm::normalize(pl.rot));
         auto right = glm::vec3(m[0]);

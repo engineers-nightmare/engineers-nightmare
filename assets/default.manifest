@@ -7,7 +7,7 @@ assets = (
     offset = [0.5,0.5,0.0]
 },
 {
-    name = "frame2"
+    name = "fp_frame"
     type = "mesh"
     file = "mesh/mv-frame.obj"
     scale = 0.0625
