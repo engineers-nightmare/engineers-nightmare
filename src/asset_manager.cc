@@ -155,19 +155,15 @@ void asset_manager::load_assets() {
     render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 2);
 }
 
-mesh_data & asset_manager::get_mesh(const std::string & mesh) {
+const mesh_data & asset_manager::get_mesh(const std::string & mesh) const {
     return meshes.at(mesh);
 }
 
-mesh_data &asset_manager::get_surface_mesh(unsigned surface_index, unsigned surface_type) {
-    return meshes.at(get_surface_mesh_name(surface_index, surface_type));
+const mesh_data & asset_manager::get_surface_mesh(unsigned surface_type) const {
+    return meshes.at(surf_type_to_mesh[surface_type]);
 }
 
-const std::string &asset_manager::get_surface_mesh_name(unsigned surface_index, unsigned surface_type) {
-    return surf_to_mesh[surface_index][surface_type];
-}
-
-const std::string &asset_manager::get_popped_surface_mesh_name(unsigned surface_type) {
+const std::string & asset_manager::get_surface_mesh_name(unsigned surface_type) const {
     return surf_type_to_mesh[surface_type];
 }
 

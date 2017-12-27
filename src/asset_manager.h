@@ -25,11 +25,11 @@ public:
 
     void load_assets();
 
-    mesh_data & get_mesh(const std::string &);
+    const mesh_data & get_mesh(const std::string & mesh) const;
 
-    mesh_data & get_surface_mesh(unsigned surface_index, unsigned surface_type);
-    const std::string &get_surface_mesh_name(unsigned surface_index, unsigned surface_type);
-    const std::string &get_popped_surface_mesh_name(unsigned surface_type);
+    const mesh_data & get_surface_mesh(unsigned surface_type) const;
+
+    const std::string & get_surface_mesh_name(unsigned surface_type) const;
 
     void bind_render_textures(int i);
 

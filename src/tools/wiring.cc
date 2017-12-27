@@ -245,7 +245,7 @@ struct wiring_tool : tool
 
             auto mesh = asset_man.get_mesh("face_marker");
 
-            if (!path.size()) {
+            if (path.empty()) {
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
                 mat.ptr->world_matrix = mat_block_face(glm::vec3(start.pos), start.face);
                 mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
@@ -268,13 +268,6 @@ struct wiring_tool : tool
                     draw_mesh(mesh.hw);
                     new_wire++;
                 }
-
-                auto mesh2 = asset_man.get_surface_mesh(pe.face, surface_wall);
-                auto mat = frame->alloc_aligned<mesh_instance>(1);
-                mat.ptr->world_matrix = mat_position(glm::vec3(pe.pos));       // this is stupid.
-                mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
-                mat.bind(1, frame);
-                draw_mesh(mesh2.hw);
             }
 
             glUseProgram(simple_shader);

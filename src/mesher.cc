@@ -35,6 +35,31 @@ stamp_at_offset(std::vector<vertex> *verts, std::vector<unsigned> *indices,
         indices->push_back(index_base + src->indices[i]);
 }
 
+static void
+stamp_at_mat(std::vector<vertex> *verts, std::vector<unsigned> *indices,
+                sw_mesh *src, glm::mat4 mat)
+{
+    auto index_base = (unsigned)verts->size();
+
+    for (unsigned int i = 0; i < src->num_vertices; i++) {
+        auto v = src->verts[i];
+        auto nv = mat * glm::vec4(v.x, v.y, v.z, 1);
+        v.x = nv.x;
+        v.y = nv.y;
+        v.z = nv.z;
+
+        auto norm = glm::unpackSnorm3x10_1x2(v.normal_packed);
+        norm.w = 0;
+        norm = mat * norm;
+        v.normal_packed = glm::packSnorm3x10_1x2(norm);
+
+        verts->push_back(v);
+    }
+
+    for (unsigned int i = 0; i < src->num_indices; i++)
+        indices->push_back(index_base + src->indices[i]);
+}
+
 void build_rigidbody(const glm::mat4 &m, btCollisionShape *shape, btRigidBody **rb) {
     if (*rb) {
         /* We already have a rigid body set up; just swap out its collision shape. */
@@ -182,8 +207,9 @@ chunk::prepare_render()
                     // Only frame side of surface gets generated
                     for (unsigned surf = 0; surf < 6; surf++) {
                         if (b->surfs[surf] != surface_none) {
-                            auto mesh = &asset_man.get_surface_mesh(surf, b->surfs[surf]);
-                            stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k));
+                            auto mesh = &asset_man.get_surface_mesh(b->surfs[surf]);
+                            auto mat = mat_block_surface({i, j, k}, surf ^ 1);
+                            stamp_at_mat(&verts, &indices, mesh->sw, mat);
                         }
                     }
                 }
@@ -230,8 +256,9 @@ chunk::prepare_phys(int x, int y, int z)
                     // Only generate in blocks that have framing
                     for (unsigned surf = 0; surf < 6; surf++) {
                         if (b->surfs[surf] != surface_none) {
-                            auto mesh = &asset_man.get_surface_mesh(surf, b->surfs[surf]);
-                            stamp_at_offset(&verts, &indices, mesh->sw, glm::vec3(i, j, k));
+                            auto mesh = &asset_man.get_surface_mesh(b->surfs[surf]);
+                            auto mat = mat_block_surface({i, j, k}, surf ^ 1);
+                            stamp_at_mat(&verts, &indices, mesh->sw, mat);
                         }
                     }
                 }

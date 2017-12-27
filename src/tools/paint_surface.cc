@@ -186,10 +186,10 @@ struct paint_surface_tool : tool
         auto index = normal_to_surface_index(&rc);
 
         if (state == paint_state::started) {
-            auto mesh = asset_man.get_surface_mesh(index, replace_type);
+            auto mesh = asset_man.get_surface_mesh(replace_type);
 
             auto mat = frame->alloc_aligned<mesh_instance>(1);
-            mat.ptr->world_matrix = mat_position(glm::vec3(start_block));
+            mat.ptr->world_matrix = mat_block_surface(start_block, index ^ 1);
             mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
             mat.bind(1, frame);
 
@@ -234,10 +234,10 @@ struct paint_surface_tool : tool
                             continue;
                         }
 
-                        auto mesh = asset_man.get_surface_mesh(index, replace_type);
+                        auto mesh = asset_man.get_surface_mesh(replace_type);
 
                         auto mat = frame->alloc_aligned<mesh_instance>(1);
-                        mat.ptr->world_matrix = mat_position(glm::vec3(cur));
+                        mat.ptr->world_matrix = mat_block_surface(cur, index ^ 1);
                         mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
                         mat.bind(1, frame);
 
@@ -252,10 +252,10 @@ struct paint_surface_tool : tool
                 break;
             }
             case paint_state::idle: {
-                auto mesh = asset_man.get_surface_mesh(index, replace_type);
+                auto mesh = asset_man.get_surface_mesh(replace_type);
 
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
-                mat.ptr->world_matrix = mat_position(glm::vec3(rc.bl));
+                mat.ptr->world_matrix = mat_block_surface(glm::vec3(rc.bl), index ^ 1);
                 mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
                 mat.bind(1, frame);
 

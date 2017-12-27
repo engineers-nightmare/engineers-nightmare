@@ -444,7 +444,7 @@ unsigned shuffle_adj_bits_for_face(unsigned bits, unsigned face) {
 
 void draw_wires() {
     auto mesh = asset_man.get_mesh("wire_end");
-    mesh_data* meshes[] = {
+    const mesh_data* meshes[] = {
         &asset_man.get_mesh("wire_1"),
         &asset_man.get_mesh("wire_2"),
         &asset_man.get_mesh("wire_4"),

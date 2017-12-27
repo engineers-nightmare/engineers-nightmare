@@ -151,8 +151,16 @@ static inline glm::mat4
 mat_block_face(glm::vec3 p, int face)
 {
     auto norm = glm::vec3(surface_index_to_normal(face));
-    auto pos = glm::vec3(p) + glm::vec3(0.5f) + 0.5f * norm;
+    auto pos = p + glm::vec3(0.5f) + 0.5f * norm;
     return mat_rotate_mesh(pos, -norm);
+}
+
+static inline glm::mat4
+mat_block_surface(glm::vec3 p, int face)
+{
+    auto norm = glm::vec3(surface_index_to_normal(face));
+    auto pos = p + glm::vec3(0.5f) + 0.5f * -norm;
+    return mat_rotate_mesh(pos, norm);
 }
 
 static inline glm::mat4
