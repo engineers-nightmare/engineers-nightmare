@@ -746,6 +746,11 @@ ship_space::set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index, surface
     auto block = ensure_block(a);
     auto other_block = ensure_block(b);
 
+    auto old = block->surfs[index];
+
+    if (old == st)
+        return;
+
     block->surfs[index] = st;
     get_chunk_containing(a)->render_chunk.valid = false;
     get_chunk_containing(a)->phys_chunk.valid = false;
@@ -754,11 +759,14 @@ ship_space::set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index, surface
     get_chunk_containing(b)->render_chunk.valid = false;
     get_chunk_containing(b)->phys_chunk.valid = false;
 
-    if (st != surface_none) {
+    if (air_permeable(st) && !air_permeable(old)) {
+        update_topology_for_remove_surface(a, b);
+    }
+    else if (air_permeable(old) && !air_permeable(st)) {
         update_topology_for_add_surface(a, b, index);
     }
-    else {
-        update_topology_for_remove_surface(a, b);
+
+    if (st == surface_none) {
         block->has_wire[index] = false;
         other_block->has_wire[index ^ 1] = false;
         block->wire_bits[index] = 0;
