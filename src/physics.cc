@@ -45,12 +45,6 @@ physics::tick_controller(float dt)
      * TODO: untangle.
      */
 
-    if (pl->gravity) {
-        pl->disable_gravity ^= true;
-
-        pl->ui_dirty = true;
-    }
-
     if (pl->jump) {
         rb_controller->applyCentralImpulse(vec3_to_bt(glm::normalize(pl->dir) * 125.0f));
     }

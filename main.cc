@@ -276,7 +276,6 @@ init()
     pl.pos = glm::vec3(2.5f,2.5f,2.5f);
     pl.active_tool_slot = 0;
     pl.ui_dirty = true;
-    pl.disable_gravity = false;
 
     phy = new physics(&pl);
     phy->dynamicsWorld->setDebugDrawer(new BulletDebugDraw());
@@ -753,14 +752,6 @@ struct play_state : game_state {
         sprintf(buf2, "%s: %s", key, buf);
         text->measure(buf2, &w, &h);
         add_text_with_outline(buf2, -w/2, -360);
-
-        /* Gravity state (temp) */
-        w = 0; h = 0;
-        bind = game_settings.bindings.bindings.find(action_gravity);
-        key = lookup_key((*bind).second.binds.inputs[0]);
-        sprintf(buf, "Gravity: %s (%s to toggle)", pl.disable_gravity ? "OFF" : "ON", key);
-        text->measure(buf, &w, &h);
-        add_text_with_outline(buf, -w/2, -430);
 
         /* Use key affordance */
         bind = game_settings.bindings.bindings.find(action_use);

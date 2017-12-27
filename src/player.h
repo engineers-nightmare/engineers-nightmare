@@ -41,9 +41,6 @@ struct player {
 
     bool ui_dirty;
 
-    /* used within physics to toggle gravity */
-    bool disable_gravity;
-
     bool fire_projectile;
 };
 
