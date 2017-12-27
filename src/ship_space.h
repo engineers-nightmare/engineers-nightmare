@@ -138,7 +138,6 @@ struct ship_space {
      */
     block *get_block_neighbor(glm::ivec3 block, enum surface_index si);
 
-
     void remove_block(glm::ivec3 p);
 
     /* removes a cuboid defined by min and max extents

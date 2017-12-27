@@ -40,8 +40,7 @@ struct add_block_tool : tool
 
         bl->type = block_frame;
         /* dirty the chunk */
-        ship->get_chunk_containing(rc.p)->render_chunk.valid = false;
-        ship->get_chunk_containing(rc.p)->phys_chunk.valid = false;
+        ship->get_chunk_containing(rc.p)->dirty();
     }
 
     void preview(frame_data *frame) override

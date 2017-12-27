@@ -44,6 +44,11 @@ struct chunk {
 
     void prepare_render();
     void prepare_phys(int x, int y, int z);
+
+    void dirty() {
+        render_chunk.valid = false;
+        phys_chunk.valid = false;
+    }
 };
 
 /* must be called once before the mesher can be used */

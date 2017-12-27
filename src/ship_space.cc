@@ -752,12 +752,10 @@ ship_space::set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index, surface
         return;
 
     block->surfs[index] = st;
-    get_chunk_containing(a)->render_chunk.valid = false;
-    get_chunk_containing(a)->phys_chunk.valid = false;
+    get_chunk_containing(a)->dirty();
 
     other_block->surfs[index ^ 1] = st;
-    get_chunk_containing(b)->render_chunk.valid = false;
-    get_chunk_containing(b)->phys_chunk.valid = false;
+    get_chunk_containing(b)->dirty();
 
     if (air_permeable(st) && !air_permeable(old)) {
         update_topology_for_remove_surface(a, b);
@@ -799,9 +797,7 @@ ship_space::remove_block(glm::ivec3 p)
         }
     }
 
-    /* dirty the chunk */
-    get_chunk_containing(p)->render_chunk.valid = false;
-    get_chunk_containing(p)->phys_chunk.valid = false;
+    get_chunk_containing(p)->dirty();
 }
 
 bool ship_space::find_next_block(glm::ivec3 start, glm::ivec3 dir, unsigned limit, glm::ivec3 *found) {
@@ -840,8 +836,7 @@ void ship_space::cut_out_cuboid(glm::ivec3 mins, glm::ivec3 maxs, surface_type t
                 if (bl->type == block_untouched)
                     bl->type = block_frame;
 
-                get_chunk_containing(p)->phys_chunk.valid = false;
-                get_chunk_containing(p)->render_chunk.valid = false;
+                get_chunk_containing(p)->dirty();
             }
         }
     }
