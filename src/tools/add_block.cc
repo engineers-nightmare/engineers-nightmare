@@ -38,13 +38,10 @@ struct add_block_tool : tool
 
         block *bl = ship->get_block(rc.p);
 
-        /* can only build on the side of an existing frame */
-        if (bl && rc.block->type == block_frame) {
-            bl->type = block_frame;
-            /* dirty the chunk */
-            ship->get_chunk_containing(rc.p)->render_chunk.valid = false;
-            ship->get_chunk_containing(rc.p)->phys_chunk.valid = false;
-        }
+        bl->type = block_frame;
+        /* dirty the chunk */
+        ship->get_chunk_containing(rc.p)->render_chunk.valid = false;
+        ship->get_chunk_containing(rc.p)->phys_chunk.valid = false;
     }
 
     void preview(frame_data *frame) override
@@ -65,21 +62,14 @@ struct add_block_tool : tool
         if (!can_use())
             return; /* n/a */
 
-        block *bl = ship->get_block(rc.p);
+        auto mat2 = frame->alloc_aligned<mesh_instance>(1);
+        mat2.ptr->world_matrix = mat_position(glm::vec3(rc.p));
+        mat2.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        mat2.bind(1, frame);
 
-        /* can only build on the side of an existing frame */
-        if ((!bl || bl->type == block_empty || bl->type == block_untouched) && rc.block->type == block_frame) {
-            auto mesh = asset_man.get_mesh("frame");
-
-            auto mat = frame->alloc_aligned<mesh_instance>(1);
-            mat.ptr->world_matrix = mat_position(glm::vec3(rc.p));
-            mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
-            mat.bind(1, frame);
-
-            glUseProgram(overlay_shader);
-            draw_mesh(mesh.hw);
-            glUseProgram(simple_shader);
-        }
+        glUseProgram(overlay_shader);
+        draw_mesh(mesh.hw);
+        glUseProgram(simple_shader);
     }
 
     void get_description(char *str) override
