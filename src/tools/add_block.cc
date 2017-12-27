@@ -10,6 +10,7 @@
 
 extern GLuint overlay_shader;
 extern GLuint simple_shader;
+extern player pl;
 
 extern ship_space *ship;
 
@@ -48,6 +49,19 @@ struct add_block_tool : tool
 
     void preview(frame_data *frame) override
     {
+        auto mesh = asset_man.get_mesh("frame");
+        auto mesh2 = asset_man.get_mesh("frame2");
+
+        auto m = glm::mat4_cast(glm::normalize(pl.rot));
+        auto right = glm::vec3(m[0]);
+        auto up = glm::vec3(m[1]);
+
+        auto mat = frame->alloc_aligned<mesh_instance>(1);
+        mat.ptr->world_matrix = glm::scale(mat_position(pl.eye + pl.dir * 0.2f + right * 0.2f - up * 0.1f), glm::vec3(0.2f)) * m * glm::mat4_cast(glm::normalize(glm::quat(1.f,2.f,3.f,2.f)));
+        mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        mat.bind(1, frame);
+        draw_mesh(mesh2.hw);
+
         if (!can_use())
             return; /* n/a */
 
