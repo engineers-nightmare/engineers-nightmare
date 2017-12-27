@@ -16,7 +16,7 @@ extern GLuint simple_shader;
 extern ship_space *ship;
 
 extern asset_manager asset_man;
-
+extern player pl;
 
 struct paint_surface_tool : tool
 {
@@ -36,6 +36,20 @@ struct paint_surface_tool : tool
         started,
         idle,
     } state = paint_state::idle;
+
+    const mesh_data *get_fp_mesh() const {
+        switch (replace_type) {
+            case surface_wall:
+                return &asset_man.get_mesh("fp_surface_wall");
+            case surface_grate:
+                return &asset_man.get_mesh("fp_surface_grate");
+            case surface_glass:
+                return &asset_man.get_mesh("fp_surface_glass");
+            default:
+                assert(false);
+                return nullptr;
+        }
+    }
 
     void pre_use(player *pl) override {
         ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, 
@@ -199,6 +213,18 @@ struct paint_surface_tool : tool
             glDisable(GL_POLYGON_OFFSET_FILL);
             glUseProgram(simple_shader);
         }
+
+        auto fp_mesh = get_fp_mesh();
+
+        auto m = glm::mat4_cast(glm::normalize(pl.rot));
+        auto right = glm::vec3(m[0]);
+        auto up = glm::vec3(m[1]);
+
+        auto mat = frame->alloc_aligned<mesh_instance>(1);
+        mat.ptr->world_matrix = glm::scale(mat_position(pl.eye + pl.dir * 0.2f + right * 0.2f - up * 0.1f), glm::vec3(0.2f)) * m * glm::mat4_cast(glm::normalize(glm::quat(1.f,2.f,3.f,2.f)));
+        mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        mat.bind(1, frame);
+        draw_mesh(fp_mesh->hw);
 
         if (can_use()) {
             switch (state) {
