@@ -766,6 +766,48 @@ ship_space::set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index, surface
     }
 }
 
+void
+ship_space::remove_block(glm::ivec3 p)
+{
+    block *bl = get_block(p);
+
+    /* block removal */
+    bl->type = block_empty;
+
+    /* strip any orphaned surfaces */
+    for (int index = 0; index < 6; index++) {
+        if (bl->surfs[index] & surface_phys) {
+
+            auto s = surface_index_to_normal(index);
+
+            auto r = p + s;
+            block *other_side = get_block(r);
+
+            if (!other_side) {
+                /* expand: but this should always exist. */
+            }
+            else if (other_side->type != block_frame) {
+                /* if the other side has no frame, then there is nothing left to support this
+                * surface pair -- remove it */
+                bl->surfs[index] = surface_none;
+                other_side->surfs[index ^ 1] = surface_none;
+                get_chunk_containing(r)->render_chunk.valid = false;
+                get_chunk_containing(r)->phys_chunk.valid = false;
+
+                /* pop any dependent ents */
+                remove_ents_from_surface(p, index);
+                remove_ents_from_surface(r, index ^ 1);
+
+                update_topology_for_remove_surface(p, r);
+            }
+        }
+    }
+
+    /* dirty the chunk */
+    get_chunk_containing(p)->render_chunk.valid = false;
+    get_chunk_containing(p)->phys_chunk.valid = false;
+}
+
 bool ship_space::find_next_block(glm::ivec3 start, glm::ivec3 dir, unsigned limit, glm::ivec3 *found) {
     auto cur = start + dir;
 

@@ -139,45 +139,7 @@ struct ship_space {
     block *get_block_neighbor(glm::ivec3 block, enum surface_index si);
 
 
-    void remove_block(glm::ivec3 p) {
-        block *bl = get_block(p);
-
-        /* block removal */
-        bl->type = block_empty;
-
-        /* strip any orphaned surfaces */
-        for (int index = 0; index < 6; index++) {
-            if (bl->surfs[index] & surface_phys) {
-
-                auto s = surface_index_to_normal(index);
-
-                auto r = p + s;
-                block *other_side = get_block(r);
-
-                if (!other_side) {
-                    /* expand: but this should always exist. */
-                }
-                else if (other_side->type != block_frame) {
-                    /* if the other side has no frame, then there is nothing left to support this
-                    * surface pair -- remove it */
-                    bl->surfs[index] = surface_none;
-                    other_side->surfs[index ^ 1] = surface_none;
-                    get_chunk_containing(r)->render_chunk.valid = false;
-                    get_chunk_containing(r)->phys_chunk.valid = false;
-
-                    /* pop any dependent ents */
-                    remove_ents_from_surface(p, index);
-                    remove_ents_from_surface(r, index ^ 1);
-
-                    update_topology_for_remove_surface(p, r);
-                }
-            }
-        }
-
-        /* dirty the chunk */
-        get_chunk_containing(p)->render_chunk.valid = false;
-        get_chunk_containing(p)->phys_chunk.valid = false;
-    }
+    void remove_block(glm::ivec3 p);
 
     /* removes a cuboid defined by min and max extents
      * set border surfaces where block present to {type}
