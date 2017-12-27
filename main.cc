@@ -442,12 +442,19 @@ unsigned shuffle_adj_bits_for_face(unsigned bits, unsigned face) {
 
 
 void draw_wires() {
-    auto mesh = asset_man.get_mesh("wire_end");
-    const mesh_data* meshes[] = {
+    const mesh_data* outside_meshes[] = {
         &asset_man.get_mesh("wire_1"),
         &asset_man.get_mesh("wire_2"),
         &asset_man.get_mesh("wire_4"),
         &asset_man.get_mesh("wire_8"),
+        &asset_man.get_mesh("wire_end"),
+    };
+    const mesh_data* inside_meshes[] = {
+        &asset_man.get_mesh("wire_1i"),
+        &asset_man.get_mesh("wire_2i"),
+        &asset_man.get_mesh("wire_4i"),
+        &asset_man.get_mesh("wire_8i"),
+        &asset_man.get_mesh("wire_endi"),
     };
 
     for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
@@ -459,6 +466,9 @@ void draw_wires() {
                         for (int y = 0; y < CHUNK_SIZE; y++) {
                             for (int x = 0; x < CHUNK_SIZE; x++) {
                                 auto bl = ch->blocks.get(x, y, z);
+
+                                auto meshes = bl->type == block_frame ? inside_meshes : outside_meshes;
+
                                 for (int face = 0; face < 6; face++) {
                                     if (bl->has_wire[face]) {
                                         auto params = frame->alloc_aligned<glm::mat4>(1);
@@ -477,7 +487,7 @@ void draw_wires() {
                                             draw_mesh(meshes[3]->hw);
 
                                         if (!(bits & (bits - 1))) {
-                                            draw_mesh(mesh.hw);
+                                            draw_mesh(meshes[4]->hw);
                                         }
                                     }
                                 }
