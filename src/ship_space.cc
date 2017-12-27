@@ -776,29 +776,17 @@ ship_space::remove_block(glm::ivec3 p)
 
     /* strip any orphaned surfaces */
     for (int index = 0; index < 6; index++) {
-        if (bl->surfs[index] & surface_phys) {
+        if (bl->surfs[index]) {
 
             auto s = surface_index_to_normal(index);
 
             auto r = p + s;
             block *other_side = get_block(r);
 
-            if (!other_side) {
-                /* expand: but this should always exist. */
-            }
-            else if (other_side->type != block_frame) {
-                /* if the other side has no frame, then there is nothing left to support this
-                * surface pair -- remove it */
-                bl->surfs[index] = surface_none;
-                other_side->surfs[index ^ 1] = surface_none;
-                get_chunk_containing(r)->render_chunk.valid = false;
-                get_chunk_containing(r)->phys_chunk.valid = false;
-
-                /* pop any dependent ents */
+            if (other_side->type != block_frame) {
+                set_surface(p, s, (surface_index)index, surface_none);
                 remove_ents_from_surface(p, index);
                 remove_ents_from_surface(r, index ^ 1);
-
-                update_topology_for_remove_surface(p, r);
             }
         }
     }
