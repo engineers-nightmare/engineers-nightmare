@@ -653,6 +653,7 @@ void render() {
     if (draw_debug_chunks || draw_debug_axis || draw_debug_physics) {
         dd::flush(SDL_GetTicks());
     }
+    dd::flush(SDL_GetTicks());
 
     current_game_state->render(frame);
 
