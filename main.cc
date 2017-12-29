@@ -307,10 +307,10 @@ init()
 
     glGenVertexArrays(1, &sky_vao);
 
+    apply_video_settings();
+
     // Absorb all the init time so we dont try to catch up
     frame_info.tick();
-
-    apply_video_settings();
 }
 
 
