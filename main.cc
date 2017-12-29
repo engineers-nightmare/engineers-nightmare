@@ -1315,6 +1315,8 @@ run()
 
         ImGui::SetCurrentContext(offscreen_contexts[0]);
         ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+        ImGui::GetIO().DisplaySize = ImVec2(RENDER_DIM, RENDER_DIM);
+        ImGui::GetIO().DisplayFramebufferScale = ImVec2(1, 1);
 
         auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
@@ -1343,6 +1345,9 @@ run()
 
         ImGui::SetCurrentContext(offscreen_contexts[1]);
         ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+        ImGui::GetIO().DisplaySize = ImVec2(RENDER_DIM, RENDER_DIM);
+        ImGui::GetIO().DisplayFramebufferScale = ImVec2(1, 1);
+
         ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
         {
             ImGui::Begin("Second Window", nullptr, flags);
