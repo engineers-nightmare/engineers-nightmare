@@ -1291,7 +1291,7 @@ run()
             }
             ImGui::End();
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_displays_fbo);
-            glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 0);
+            glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, asset_man.render_textures->texobj, 0, 0);
             glViewport(0, 0, RENDER_DIM, RENDER_DIM);
             glClearColor(0, 0.18f, 0.21f, 1);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -1313,7 +1313,7 @@ run()
             }
             ImGui::End();
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_displays_fbo);
-            glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 1);
+            glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, asset_man.render_textures->texobj, 0, 1);
             glViewport(0, 0, RENDER_DIM, RENDER_DIM);
             glClearColor(1, 0.0f, 0.18f, 1);
             glClear(GL_COLOR_BUFFER_BIT);

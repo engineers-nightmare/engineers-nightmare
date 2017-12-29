@@ -14,12 +14,13 @@ class asset_manager
     std::array<std::array<std::string, face_count>, 256> surf_to_mesh;
     std::array<std::string, 256> surf_type_to_mesh;
 
-    texture_set *render_textures{nullptr};
     std::unordered_map<std::string, texture_set *> skyboxes {};
 
     void load_asset_manifest(char const *filename);
 
 public:
+    texture_set *render_textures{ nullptr };
+
     asset_manager();
     ~asset_manager() = default;
 
