@@ -167,7 +167,7 @@ prepare_chunks()
     }
 }
 
-GLuint render_fbo;
+GLuint render_displays_fbo;
 
 ImGuiContext *default_context;
 std::array<ImGuiContext*, 2> offscreen_contexts{};
@@ -225,7 +225,7 @@ init()
     particle_man = new particle_manager();
     particle_man->create_particle_data(1000);
 
-    glGenFramebuffers(1, &render_fbo);
+    glGenFramebuffers(1, &render_displays_fbo);
 
     asset_man.load_assets();
 
@@ -1290,7 +1290,7 @@ run()
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             }
             ImGui::End();
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_fbo);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_displays_fbo);
             glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 0);
             glViewport(0, 0, RENDER_DIM, RENDER_DIM);
             glClearColor(0, 0.18f, 0.21f, 1);
@@ -1312,7 +1312,7 @@ run()
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             }
             ImGui::End();
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_fbo);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_displays_fbo);
             glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 2, 0, 1);
             glViewport(0, 0, RENDER_DIM, RENDER_DIM);
             glClearColor(1, 0.0f, 0.18f, 1);
