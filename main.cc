@@ -167,12 +167,18 @@ prepare_chunks()
     }
 }
 
-GLuint render_displays_fbo;
+GLuint render_displays_fbo{ 0 };
 
 ImGuiContext *default_context;
 std::array<ImGuiContext*, 2> offscreen_contexts{};
 
 DDRenderInterfaceCoreGL *ddRenderIfaceGL;
+
+struct {
+    GLuint fbo = 0;
+    GLuint depth = 0;
+    GLuint color = 0;
+} main_pass;
 
 void apply_video_settings() {
     unsigned new_mode{0};
@@ -313,7 +319,6 @@ init()
     frame_info.tick();
 }
 
-
 void
 resize(int width, int height)
 {
@@ -321,6 +326,36 @@ resize(int width, int height)
     glViewport(0, 0, width, height);
     wnd.width = width;
     wnd.height = height;
+
+    /* TODO: DSA */
+    glActiveTexture(GL_TEXTURE3);
+
+    if (!main_pass.fbo) {
+        glGenFramebuffers(1, &main_pass.fbo);
+    }
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, main_pass.fbo);
+
+    if (main_pass.depth) {
+        glDeleteTextures(1, &main_pass.depth);
+    }
+
+    glGenTextures(1, &main_pass.depth);
+    glBindTexture(GL_TEXTURE_2D, main_pass.depth);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT24, width, height);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, main_pass.depth, 0);
+
+    if (main_pass.color) {
+        glDeleteTextures(1, &main_pass.color);
+    }
+
+    glGenTextures(1, &main_pass.color);
+    glBindTexture(GL_TEXTURE_2D, main_pass.color);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, main_pass.color, 0);
+
+    glActiveTexture(GL_TEXTURE0);
+
     printf("Resized to %dx%d\n", width, height);
 }
 
@@ -513,6 +548,8 @@ glm::mat4 get_fp_item_matrix() {
 
 
 void render() {
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, main_pass.fbo);
+
     glEnable(GL_DEPTH_TEST);
     float depthClearValue = 1.0f;
     glClearBufferfv(GL_DEPTH, 0, &depthClearValue);
@@ -597,25 +634,6 @@ void render() {
 
     glUseProgram(simple_shader);
 
-    current_game_state->render(frame);
-
-    if (draw_hud) {
-        /* draw the ui */
-        glDisable(GL_DEPTH_TEST);
-
-        glUseProgram(ui_shader);
-        text->draw();
-        glUseProgram(ui_sprites_shader);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        ui_sprites->draw();
-        glDisable(GL_BLEND);
-
-        glEnable(GL_DEPTH_TEST);
-    }
-
-    frame->end();
-
     if (draw_debug_axis) {
         auto p = pl.eye + glm::normalize(pl.dir * 3.0f);
         auto m = glm::translate(glm::mat4{}, p);
@@ -635,6 +653,32 @@ void render() {
     if (draw_debug_chunks || draw_debug_axis || draw_debug_physics) {
         dd::flush(SDL_GetTicks());
     }
+
+    current_game_state->render(frame);
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, main_pass.fbo);
+    glBlitFramebuffer(0, 0, wnd.width, wnd.height, 0, 0, wnd.width, wnd.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+    glViewport(0, 0, wnd.width, wnd.height);
+
+    if (draw_hud) {
+        /* draw the ui */
+        glDisable(GL_DEPTH_TEST);
+
+        glUseProgram(ui_shader);
+        text->draw();
+        glUseProgram(ui_sprites_shader);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        ui_sprites->draw();
+        glDisable(GL_BLEND);
+
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    frame->end();
 }
 
 
@@ -1176,8 +1220,7 @@ struct menu_state : game_state {
                 }
             }
         }
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        glViewport(0, 0, wnd.width, wnd.height);
+
         ImGui::Render();
     }
 };
@@ -1319,9 +1362,6 @@ run()
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui::Render();
         }
-
-        // reset back to default framebuffer
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
         /* SDL_PollEvent above has already pumped the input, so current key state is available */
         handle_input();
