@@ -11,6 +11,7 @@
 #include "tinydir.h"
 
 extern ship_space *ship;
+extern physics *phy;
 
 extern asset_manager asset_man;
 extern component_system_manager component_system_man;
@@ -62,7 +63,6 @@ load_entities() {
         std::unordered_map<std::string, bool> found{
             { "type",               false },
             { "renderable",         false },
-            { "physics",            false },
             { "relative_position",  false },
             { "surface_attachment", false },
         };
@@ -108,11 +108,6 @@ load_entities() {
                     found[component->name] = true;
                 }
 
-                auto physics_stub = dynamic_cast<physics_component_stub*>(stub_ptr);
-                if (physics_stub) {
-                    found[component->name] = true;
-                }
-
                 auto surf_stub = dynamic_cast<surface_attachment_component_stub*>(stub_ptr);
                 if (surf_stub) {
                     found[component->name] = true;
@@ -147,9 +142,6 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
 
     auto & entity = entity_stubs[name];
 
-    auto render_stub = entity.get_component<renderable_component_stub>();
-    assert(render_stub);
-
     for (auto &comp : entity.components) {
         comp->assign_component_to_entity(ce);
     }
@@ -181,7 +173,44 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     return ce;
 }
 
-extern physics *phy;
+c_entity
+spawn_unplaceable_entity(const std::string &name, glm::mat4 world) {
+    auto ce = c_entity::spawn();
+
+    auto & entity = entity_stubs[name];
+
+    assert(!entity.get_component<placeable_component_stub>());
+
+    for (auto &comp : entity.components) {
+        comp->assign_component_to_entity(ce);
+    }
+
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &physics_man = component_system_man.managers.physics_component_man;
+    auto &surface_man = component_system_man.managers.surface_attachment_component_man;
+
+    if (physics_man.exists(ce)) {
+        auto physics = physics_man.get_instance_data(ce);
+        *physics.rigid = nullptr;
+        std::string m = *physics.mesh;
+        auto const &phys_mesh = asset_man.get_mesh(m);
+        build_rigidbody(world, phys_mesh.phys_shape, physics.rigid);
+        /* so that we can get back to the entity from a phys raycast */
+        /* TODO: these should really come from a dense pool rather than the generic allocator */
+        auto per = new phys_ent_ref;
+        per->ce = ce;
+        (*physics.rigid)->setUserPointer(per);
+    }
+
+    auto surface = surface_man.get_instance_data(ce);
+    *surface.attached = false;
+
+    auto pos = pos_man.get_instance_data(ce);
+    *pos.mat = world;
+
+    return ce;
+}
+
 c_entity
 spawn_floating_generic_entity(glm::mat4 mat, const std::string &mesh, const std::string &phys_mesh) {
     auto ce = c_entity::spawn();

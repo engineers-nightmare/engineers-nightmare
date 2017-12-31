@@ -137,7 +137,6 @@ struct game_state {
     static game_state *create_menu_state();
 };
 
-
 game_state *current_game_state = game_state::create_play_state();
 
 void
@@ -650,12 +649,12 @@ void render() {
         phy->dynamicsWorld->debugDrawWorld();
     }
 
+    current_game_state->render(frame);
+
     if (draw_debug_chunks || draw_debug_axis || draw_debug_physics) {
         dd::flush(SDL_GetTicks());
     }
     dd::flush(SDL_GetTicks());
-
-    current_game_state->render(frame);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, main_pass.fbo);
@@ -720,6 +719,7 @@ update()
         tick_sensor_comparators(ship);
         tick_proximity_sensors(ship, &pl);
         tick_doors(ship);
+        tick_builders();
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);

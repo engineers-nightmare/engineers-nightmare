@@ -48,6 +48,9 @@ void
 tick_proximity_sensors(ship_space *ship, player *pl);
 
 void
+tick_builders();
+
+void
 draw_renderables(frame_data *frame);
 
 void

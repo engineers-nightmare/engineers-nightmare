@@ -100,7 +100,7 @@ std::unique_ptr<component_stub> physics_component_stub::from_config(const config
     physics_stub->mesh = config_setting_get_string(mesh_member);
 
     auto mass_member = config_setting_get_member(config, "mass");
-    physics_stub->mass = config_setting_get_float(mass_member);
+    physics_stub->mass = (float)config_setting_get_float(mass_member);
 
     return std::move(physics_stub);
 }

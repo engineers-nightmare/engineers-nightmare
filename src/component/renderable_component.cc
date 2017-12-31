@@ -20,7 +20,6 @@ renderable_component_manager::create_component_instance_data(unsigned count) {
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(const char*) * count + align_size<const char*>(size);
-    size = sizeof(unsigned) * count + align_size<unsigned>(size);
     size = sizeof(bool) * count + align_size<bool>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
@@ -31,12 +30,10 @@ renderable_component_manager::create_component_instance_data(unsigned count) {
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.mesh = align_ptr((const char* *)(new_pool.entity + count));
-    new_pool.material = align_ptr((unsigned *)(new_pool.mesh + count));
-    new_pool.draw = align_ptr((bool *)(new_pool.material + count));
+    new_pool.draw = align_ptr((bool *)(new_pool.mesh + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.mesh, instance_pool.mesh, buffer.num * sizeof(const char*));
-    memcpy(new_pool.material, instance_pool.material, buffer.num * sizeof(unsigned));
     memcpy(new_pool.draw, instance_pool.draw, buffer.num * sizeof(bool));
 
     free(buffer.buffer);
@@ -53,7 +50,6 @@ renderable_component_manager::destroy_instance(instance i) {
 
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
     instance_pool.mesh[i.index] = instance_pool.mesh[last_index];
-    instance_pool.material[i.index] = instance_pool.material[last_index];
     instance_pool.draw[i.index] = instance_pool.draw[last_index];
 
     entity_instance_map[last_entity] = i.index;
@@ -84,13 +80,9 @@ renderable_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.mesh = nullptr;
 
-    *data.material = 0;
-
     *data.draw = true;
 
     *data.mesh = mesh.c_str();
-
-    *data.material = 0;//material.c_str();
 };
 
 std::unique_ptr<component_stub> renderable_component_stub::from_config(const config_setting_t *config) {
@@ -98,9 +90,6 @@ std::unique_ptr<component_stub> renderable_component_stub::from_config(const con
 
     auto mesh_member = config_setting_get_member(config, "mesh");
     renderable_stub->mesh = config_setting_get_string(mesh_member);
-
-    auto material_member = config_setting_get_member(config, "material");
-    renderable_stub->material = config_setting_get_string(material_member);
 
     return std::move(renderable_stub);
 }

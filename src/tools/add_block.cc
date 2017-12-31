@@ -8,6 +8,8 @@
 #include "../player.h"
 #include "tools.h"
 #include "../utils/debugdraw.h"
+#include "../entity_utils.h"
+#include "../component/component_system_manager.h"
 
 
 extern GLuint overlay_shader;
@@ -15,14 +17,16 @@ extern GLuint simple_shader;
 extern player pl;
 
 extern ship_space *ship;
+extern component_system_manager component_system_man;
 
 extern asset_manager asset_man;
 extern glm::mat4 get_fp_item_matrix();
 
+std::unordered_map<c_entity, std::vector<glm::vec3>> in_progress_frames;
+
 struct add_block_tool : tool
 {
     raycast_info_block rc;
-    std::vector<vertex> place_verts;
     unsigned verts_index = UINT_MAX;
 
     void pre_use(player *pl) override {
@@ -30,7 +34,7 @@ struct add_block_tool : tool
     }
 
     bool can_use() {
-        return verts_index == UINT_MAX && rc.hit && !rc.inside;
+        return rc.hit && !rc.inside;
     }
 
     void use() override
@@ -47,22 +51,33 @@ struct add_block_tool : tool
         /* dirty the chunk */
         ship->get_chunk_containing(rc.p)->dirty();
 
+        auto pos = glm::vec3(get_fp_item_matrix()[3]);
+        auto entity = spawn_unplaceable_entity("Builder Bot", mat_position(pos));
+        auto bld = component_system_man.managers.builder_component_man.get_instance_data(entity);
+
         auto &mesh = asset_man.get_mesh("frame");
 
         auto src = mesh.sw;
 
         auto mat = mat_position(rc.p);
 
-        place_verts.resize(src->num_vertices);
-        for (unsigned int i = 0; i < src->num_vertices; i++) {
+        auto num = src->num_vertices;
+        auto step = 1u;
+        if (num > 50) {
+            step = num / 50;
+            num = num / step;
+        }
+
+        auto place_verts = &in_progress_frames[entity];
+        place_verts->reserve(num);
+        for (auto i = 0u; i < src->num_vertices; i += step) {
             vertex v = src->verts[i];
             auto nv = mat * glm::vec4(v.x, v.y, v.z, 1);
-            v.x = nv.x;
-            v.y = nv.y;
-            v.z = nv.z;
-            place_verts[i] = v;
+            place_verts->emplace_back(nv);
         }
-        verts_index = 0;
+
+        *bld.build_index = 0;
+        *bld.desired_pos = rc.p;
     }
 
     void preview(frame_data *frame) override
@@ -75,19 +90,6 @@ struct add_block_tool : tool
         mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
         mat.bind(1, frame);
         draw_mesh(mesh2.hw);
-
-        if (verts_index != UINT_MAX) {
-            if (verts_index >= place_verts.size()) {
-                verts_index = UINT_MAX;
-            }
-            else {
-                auto plv = place_verts[verts_index];
-                auto end = glm::vec3{plv.x, plv.y, plv.z};
-                auto st = glm::vec3(get_fp_item_matrix()[3]);
-                dd::line(glm::value_ptr(st), glm::value_ptr(end), dd::colors::CornflowerBlue, 60);
-                verts_index += 25;
-            }
-        }
 
         if (!can_use())
             return; /* n/a */

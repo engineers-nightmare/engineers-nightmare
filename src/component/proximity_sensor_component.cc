@@ -89,7 +89,7 @@ std::unique_ptr<component_stub> proximity_sensor_component_stub::from_config(con
     auto proximity_sensor_stub = std::make_unique<proximity_sensor_component_stub>();
 
     auto range_member = config_setting_get_member(config, "range");
-    proximity_sensor_stub->range = config_setting_get_float(range_member);
+    proximity_sensor_stub->range = (float)config_setting_get_float(range_member);
 
     return std::move(proximity_sensor_stub);
 }

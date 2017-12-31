@@ -1,15 +1,19 @@
 #include <glm/gtc/random.hpp>
 #include <memory>
+#include <glm/gtc/epsilon.hpp>
+#include <glm/ext.hpp>
 
 #include "component_system_manager.h"
 #include "../asset_manager.h"
 #include "../particle.h"
-#include "../mesh.h"
+#include "../utils/debugdraw.h"
 
 extern asset_manager asset_man;
 extern component_system_manager component_system_man;
 
+extern void destroy_entity(c_entity e);
 extern particle_manager *particle_man;
+extern std::unordered_map<c_entity, std::vector<glm::vec3>> in_progress_frames;
 
 /* I have no clue how we're going to actually handle these */
 const char *comms_msg_type_switch_state = "switch_state";
@@ -408,6 +412,63 @@ tick_readers(ship_space *ship) {
             /* TODO: record /when/ we last got a matching packet */
         }
     }
+}
+
+void tick_builders() {
+    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &bld_man = component_system_man.managers.builder_component_man;
+
+    for (auto i = 0u; i < bld_man.buffer.num; i++) {
+        auto ce = bld_man.instance_pool.entity[i];
+
+        assert(bld_man.exists(ce));
+        assert(pos_man.exists(ce));
+
+        auto pos = pos_man.get_instance_data(ce);
+
+        auto speed = bld_man.instance_pool.speed[i];
+        auto desired = bld_man.instance_pool.desired_pos[i];
+        auto &index = bld_man.instance_pool.build_index[i];
+        auto cur = glm::vec3((*pos.mat)[3]);
+        auto dir = desired - cur;
+        auto dist = glm::dot(dir, dir);
+        if (dist >= 1.0f) {
+            dir = glm::normalize(dir);
+            *pos.mat = mat_position(cur + dir / 10.0f);
+        }
+        if (dist <= 2.0f) {
+            auto const &verts = in_progress_frames[ce];
+            if (index < verts.size()) {
+                auto const &end = verts[index];
+                auto st = cur;
+                dd::line(glm::value_ptr(st), glm::value_ptr(end), dd::colors::Yellow, 60);
+                index++;
+            }
+            else {
+                in_progress_frames.erase(ce);
+                destroy_entity(ce);
+            }
+        }
+    }
+
+    /*
+        auto &mesh = asset_man.get_mesh("frame");
+
+        auto src = mesh.sw;
+
+        auto mat = mat_position(rc.p);
+
+        place_verts.resize(src->num_vertices);
+        for (unsigned int i = 0; i < src->num_vertices; i++) {
+            vertex v = src->verts[i];
+            auto nv = mat * glm::vec4(v.x, v.y, v.z, 1);
+            v.x = nv.x;
+            v.y = nv.y;
+            v.z = nv.z;
+            place_verts[i] = v;
+        }
+        verts_index = 0;
+    */
 }
 
 extern GLuint modelspace_uv_shader;
