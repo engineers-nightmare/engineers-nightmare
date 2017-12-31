@@ -1,5 +1,5 @@
-stub,std::string,string,,mesh,.c_str()
-stub,float,float,,mass,
+stub,std::string,string,,mesh,.c_str(),
+stub,float,float,,mass,,(float)
 body,const char*,mesh,nullptr
 body,btRigidBody *,rigid,nullptr
 body,float,mass,1.0

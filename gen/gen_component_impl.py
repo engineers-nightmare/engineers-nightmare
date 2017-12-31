@@ -234,7 +234,7 @@ std::unique_ptr<component_stub> %(comp_name)s_component_stub::from_config(const 
 
 impl_template_13_each="""
     auto %(name)s_member = config_setting_get_member(config, "%(name)s");
-    %(comp_name)s_stub->%(name)s = config_setting_get_%(type)s(%(name)s_member);
+    %(comp_name)s_stub->%(name)s = %(cast)sconfig_setting_get_%(type)s(%(name)s_member);
 """
 
 impl_template_14="""
@@ -284,7 +284,7 @@ def main():
                     body_fields.append({'type': parts[1], 'name': parts[2], 'default': parts[3], 'prev': prev, 'comp_name': component_name})
                     prev = parts[2]
                 elif parts[0] == 'stub':
-                    stub_fields.append({'otype': parts[1], 'type': parts[2], 'pre': parts[3], 'name': parts[4], 'extra': parts[5], 'comp_name': component_name})
+                    stub_fields.append({'otype': parts[1], 'type': parts[2], 'pre': parts[3], 'name': parts[4], 'extra': parts[5], 'cast': parts[6], 'comp_name': component_name})
 
         print("  header: src/component/%s_component.h" % component_name)
         with open("src/component/%s_component.h" % component_name, "w") as g:

@@ -1,0 +1,18 @@
+entity: {
+    components: {
+        type: {
+            name: "Builder Bot",
+        },
+        renderable: {
+            mesh: "panel_1x1",
+        },
+        builder: {
+            speed: 10.0,
+            rot_speed: 10.0,
+        },
+        relative_position: {
+        },
+        surface_attachment: {
+        },
+    };
+};

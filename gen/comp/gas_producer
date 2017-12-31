@@ -1,6 +1,6 @@
-stub,unsigned,int,,gas_type,
-stub,float,float,,flow_rate,
-stub,float,float,,max_pressure,
+stub,unsigned,int,,gas_type,,
+stub,float,float,,flow_rate,,(float)
+stub,float,float,,max_pressure,,(float)
 body,unsigned,gas_type,0
 body,float,flow_rate,0.1
 body,float,max_pressure,1.0

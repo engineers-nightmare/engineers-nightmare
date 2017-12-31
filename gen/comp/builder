@@ -1,0 +1,6 @@
+stub,float,float,,speed,,(float)
+stub,float,float,,rot_speed,,(float)
+body,float,speed,10
+body,float,rot_speed,10
+body,glm::vec3,desired_pos,glm::vec3{0}
+body,int,build_index,0

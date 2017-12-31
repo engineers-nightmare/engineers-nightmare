@@ -1,5 +1,5 @@
-stub,std::string,string,,name,.c_str()
-stub,std::string,string,,desc,.c_str()
+stub,std::string,string,,name,.c_str(),
+stub,std::string,string,,desc,.c_str(),
 body,char const *,name,nullptr
 body,c_entity,source,{}
 body,char const *,desc,nullptr
