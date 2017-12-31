@@ -42,5 +42,6 @@ struct player {
     bool ui_dirty;
 
     bool fire_projectile;
+    float thing;
 };
 

@@ -853,10 +853,10 @@ struct play_state : game_state {
             float pressure = z ? (z->air_amount / t->size) : 0.0f;
 
             if (t != outside) {
-                sprintf(buf2, "[INSIDE %p %d %.1f atmo]", t, t->size, pressure);
+                sprintf(buf2, "[INSIDE %p %d %.1f atmo %.2f]", t, t->size, pressure, pl.thing);
             }
             else {
-                sprintf(buf2, "[OUTSIDE %p %d %.1f atmo]", t, t->size, pressure);
+                sprintf(buf2, "[OUTSIDE %p %d %.1f atmo %.2f]", t, t->size, pressure, pl.thing);
             }
 
             w = 0; h = 0;
