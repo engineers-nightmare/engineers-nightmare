@@ -112,5 +112,14 @@ physics::tick(float dt)
     dynamicsWorld->contactTest(innerReachCollider.get(), inner);
 
     pl->thing = inner.p;
+
+    auto limit = 0.1f;
+    if (inner.p > -limit && inner.p < 0.f) {
+        auto factor = 1.f - inner.p / -limit;
+        auto dir = glm::normalize(inner.deepest);
+        auto proj = glm::dot(dir, bt_to_vec3(rb_controller->getLinearVelocity()));
+        if (proj < 0)
+            rb_controller->applyCentralImpulse(vec3_to_bt(-120.f * proj * dir));
+    }
     pl->ui_dirty = true;
 }
