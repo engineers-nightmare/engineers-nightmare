@@ -56,6 +56,14 @@ physics::tick_controller(float dt)
      * TODO: untangle.
      */
 
+    auto m = glm::mat4_cast(glm::normalize(pl->rot));
+    auto right = glm::vec3(m[0]);
+    auto up = glm::vec3(m[1]);
+
+    rb_controller->setDamping(.5f, .2f);
+    rb_controller->applyCentralImpulse(vec3_to_bt(right * pl->move.x) * 5.f);
+    rb_controller->applyCentralImpulse(vec3_to_bt(pl->dir * pl->move.y) * 5.f);
+
     if (pl->jump) {
         rb_controller->applyCentralImpulse(vec3_to_bt(glm::normalize(pl->dir) * 125.0f));
     }
