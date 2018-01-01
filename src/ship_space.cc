@@ -790,7 +790,7 @@ ship_space::remove_block(glm::ivec3 p)
             block *other_side = get_block(r);
 
             if (other_side->type != block_frame) {
-                set_surface(p, s, (surface_index)index, surface_none);
+                set_surface(p, r, (surface_index)index, surface_none);
                 remove_ents_from_surface(p, index);
                 remove_ents_from_surface(r, index ^ 1);
             }
