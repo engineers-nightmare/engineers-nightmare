@@ -60,16 +60,19 @@ physics::tick_controller(float dt)
     auto right = glm::vec3(m[0]);
     auto up = glm::vec3(m[1]);
 
-    rb_controller->setDamping(.5f, .2f);
-    rb_controller->applyCentralImpulse(vec3_to_bt(right * pl->move.x) * 5.f);
-    rb_controller->applyCentralImpulse(vec3_to_bt(pl->dir * pl->move.y) * 5.f);
-    rb_controller->applyCentralImpulse(vec3_to_bt(up * pl->move.z) * 5.f);
+    if (pl->jump_state == player::on_structure) {
+        
+        rb_controller->setDamping(.5f, 0.f);
+        rb_controller->applyCentralImpulse(vec3_to_bt(right * pl->move.x) * 5.f);
+        rb_controller->applyCentralImpulse(vec3_to_bt(pl->dir * pl->move.y) * 5.f);
+        rb_controller->applyCentralImpulse(vec3_to_bt(up * pl->move.z) * 5.f);
 
-    if (pl->jump) {
-        rb_controller->applyCentralImpulse(vec3_to_bt(glm::normalize(pl->dir) * 125.0f));
-    }
-    if (pl->crouch) {
-        rb_controller->setLinearVelocity({0, 0, 0});
+        if (pl->jump) {
+            pl->jump_depth = pl->thing;
+            pl->jump_state = player::leaving_structure;
+            rb_controller->applyCentralImpulse(vec3_to_bt(glm::normalize(pl->dir) * 125.0f));
+            rb_controller->setDamping(0.f, 0.f);
+        }
     }
 }
 
@@ -121,14 +124,34 @@ physics::tick(float dt)
     dynamicsWorld->contactTest(innerReachCollider.get(), inner);
 
     pl->thing = inner.p;
-
-    auto limit = 0.1f;
-    if (inner.p > -limit && inner.p < 0.f) {
-        auto factor = 1.f - inner.p / -limit;
-        auto dir = glm::normalize(inner.deepest);
-        auto proj = glm::dot(dir, bt_to_vec3(rb_controller->getLinearVelocity()));
-        if (proj < 0)
-            rb_controller->applyCentralImpulse(vec3_to_bt(-120.f * proj * dir));
-    }
     pl->ui_dirty = true;
+
+    switch (pl->jump_state) {
+    case player::on_structure: {
+        auto limit = 0.1f;
+        if (inner.p > -limit && inner.p < 0.f) {
+            auto factor = 1.f - inner.p / -limit;
+            auto dir = glm::normalize(inner.deepest);
+            auto proj = glm::dot(dir, bt_to_vec3(rb_controller->getLinearVelocity()));
+            if (proj < 0)
+                rb_controller->applyCentralImpulse(vec3_to_bt(-120.f * proj * dir));
+        }
+    } break;
+
+    case player::leaving_structure: {
+        if (inner.p < pl->jump_depth) {
+            // jump didnt leave reach volume. we're still on structure.
+            pl->jump_state = player::on_structure;
+        }
+        if (inner.p == 0.f) {
+            pl->jump_state = player::off_structure;
+        }
+    } break;
+
+    case player::off_structure: {
+        if (inner.p < 0.f) {
+            pl->jump_state = player::on_structure;
+        }
+    } break;
+    }
 }

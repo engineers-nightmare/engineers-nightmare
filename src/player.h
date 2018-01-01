@@ -43,5 +43,8 @@ struct player {
 
     bool fire_projectile;
     float thing;
+
+    enum { on_structure, leaving_structure, off_structure } jump_state{ on_structure };
+    float jump_depth;
 };
 
