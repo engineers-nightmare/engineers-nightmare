@@ -15,7 +15,7 @@ struct player {
     glm::vec3 pos;
     glm::vec3 dir;  /* computed */
     glm::vec3 eye;  /* computed */
-    glm::vec2 move;
+    glm::vec3 move;
 
     float height;   /* filled by physics */
 

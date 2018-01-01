@@ -991,6 +991,7 @@ struct play_state : game_state {
         /* movement */
         auto moveX      = get_input(action_right)->active - get_input(action_left)->active;
         auto moveY      = get_input(action_forward)->active - get_input(action_back)->active;
+        auto moveZ      = get_input(action_up)->active - get_input(action_down)->active;
 
         /* crouch */
         auto crouch     = get_input(action_crouch)->active;
@@ -1031,7 +1032,7 @@ struct play_state : game_state {
 
         pl.rot = pl.rot * pitch * yaw;
 
-        pl.move = glm::vec2((float) moveX, (float) moveY);
+        pl.move = { (float)moveX, (float)moveY, (float)moveZ };
 
         pl.jump              = jump;
         pl.crouch            = crouch;

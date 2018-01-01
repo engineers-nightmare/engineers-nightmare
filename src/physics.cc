@@ -63,6 +63,7 @@ physics::tick_controller(float dt)
     rb_controller->setDamping(.5f, .2f);
     rb_controller->applyCentralImpulse(vec3_to_bt(right * pl->move.x) * 5.f);
     rb_controller->applyCentralImpulse(vec3_to_bt(pl->dir * pl->move.y) * 5.f);
+    rb_controller->applyCentralImpulse(vec3_to_bt(up * pl->move.z) * 5.f);
 
     if (pl->jump) {
         rb_controller->applyCentralImpulse(vec3_to_bt(glm::normalize(pl->dir) * 125.0f));
