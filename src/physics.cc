@@ -40,7 +40,7 @@ physics::physics(player *p)
     rb_controller = std::make_unique<en_rb_controller>(mat_position(pl->pos));
     dynamicsWorld->addRigidBody(rb_controller.get());
 
-    innerReachSphere = std::make_unique<btSphereShape>(1.5f);
+    innerReachSphere = std::make_unique<btSphereShape>(0.8f);
     btTransform t{};
     auto *ms = new btDefaultMotionState(t);
     btRigidBody::btRigidBodyConstructionInfo
