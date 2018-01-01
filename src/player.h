@@ -21,6 +21,8 @@ struct player {
 
     unsigned int active_tool_slot;
 
+    float roll;
+
     bool jump;
 
     bool use;

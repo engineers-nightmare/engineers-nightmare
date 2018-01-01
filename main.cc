@@ -989,9 +989,10 @@ struct play_state : game_state {
         auto look_y     = get_input(action_look_y)->value;
 
         /* movement */
-        auto moveX      = get_input(action_right)->active - get_input(action_left)->active;
-        auto moveY      = get_input(action_forward)->active - get_input(action_back)->active;
-        auto moveZ      = get_input(action_up)->active - get_input(action_down)->active;
+        auto move_x     = get_input(action_right)->active - get_input(action_left)->active;
+        auto move_y     = get_input(action_forward)->active - get_input(action_back)->active;
+        auto move_z     = get_input(action_up)->active - get_input(action_down)->active;
+        auto roll       = get_input(action_roll_right)->value - get_input(action_roll_left)->value;
 
         /* crouch */
         auto crouch     = get_input(action_crouch)->active;
@@ -1012,7 +1013,6 @@ struct play_state : game_state {
         auto slot7      = get_input(action_slot8)->just_active;
         auto slot8      = get_input(action_slot9)->just_active;
         auto slot9      = get_input(action_slot0)->just_active;
-        auto gravity    = get_input(action_gravity)->just_active;
         auto next_tool  = get_input(action_tool_next)->just_active;
         auto prev_tool  = get_input(action_tool_prev)->just_active;
 
@@ -1032,15 +1032,15 @@ struct play_state : game_state {
 
         pl.rot = pl.rot * pitch * yaw;
 
-        pl.move = { (float)moveX, (float)moveY, (float)moveZ };
+        pl.move = { (float)move_x, (float)move_y, (float)move_z };
 
+        pl.roll              = roll;
         pl.jump              = jump;
         pl.crouch            = crouch;
         pl.reset             = reset;
         pl.crouch_end        = crouch_end;
         pl.use               = use;
         pl.cycle_mode        = cycle_mode;
-        pl.gravity           = gravity;
         pl.use_tool          = use_tool;
         pl.alt_use_tool      = alt_use_tool;
         pl.long_use_tool     = long_use_tool;
