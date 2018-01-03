@@ -422,7 +422,7 @@ std::array<tool*, 8> tools {
     tool::create_remove_surface_tool(),
     tool::create_add_entity_tool(),
     tool::create_remove_entity_tool(),
-    tool::create_add_room_tool(),
+    tool::create_cut_wall_tool(),
     tool::create_wiring_tool(),
 };
 
@@ -641,7 +641,7 @@ void render() {
     glUseProgram(simple_shader);
 
     if (draw_debug_axis) {
-        auto p = pl.eye + glm::normalize(pl.dir * 3.0f);
+        auto p = pl.eye + glm::normalize(pl.dir) * 0.1f;
         auto m = glm::translate(glm::mat4{}, p);
         ddMat4x4 at{
             m[0].x, m[0].y, m[0].z, m[0].w,
@@ -649,7 +649,7 @@ void render() {
             m[2].x, m[2].y, m[2].z, m[2].w,
             m[3].x, m[3].y, m[3].z, m[3].w,
         };
-        dd::axisTriad(at, 0.01f, 0.1f, 0, false);
+        dd::axisTriad(at, 0.001f, 0.01f, 0, true);
     }
 
     if (draw_debug_physics) {
