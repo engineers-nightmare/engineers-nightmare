@@ -1027,14 +1027,9 @@ struct play_state : game_state {
 
         float mouse_invert = game_settings.input.mouse_invert;
 
-        auto pitch = glm::angleAxis(game_settings.input.mouse_y_sensitivity * look_y * mouse_invert, glm::vec3{ 1.f,0.f,0.f });
-        auto yaw = glm::angleAxis(game_settings.input.mouse_x_sensitivity * look_x, glm::vec3{ 0.f,1.f,0.f });
-
-        pl.rot = pl.rot * pitch * yaw;
-
         pl.move = { (float)move_x, (float)move_y, (float)move_z };
 
-        pl.roll              = roll;
+        pl.roll = glm::lerp(pl.roll, roll, 0.05f);
         pl.jump              = jump;
         pl.crouch            = crouch;
         pl.reset             = reset;
@@ -1045,6 +1040,11 @@ struct play_state : game_state {
         pl.alt_use_tool      = alt_use_tool;
         pl.long_use_tool     = long_use_tool;
         pl.long_alt_use_tool = long_alt_use_tool;
+
+        auto pitch = glm::angleAxis(game_settings.input.mouse_y_sensitivity * look_y * mouse_invert, glm::vec3{ 1.f,0.f,0.f });
+        auto yaw = glm::angleAxis(game_settings.input.mouse_x_sensitivity * look_x, glm::vec3{ 0.f,1.f,0.f });
+        auto roll_quat = glm::angleAxis(-.03f * pl.roll, glm::vec3{0.f, 0.f, 1.f});
+        pl.rot = pl.rot * pitch * yaw * roll_quat;
 
         // blech. Tool gets used below, then fire projectile gets hit here
         if (pl.fire_projectile) {
