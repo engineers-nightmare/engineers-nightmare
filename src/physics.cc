@@ -63,9 +63,16 @@ physics::tick_controller(float dt)
     if (pl->jump_state == player::on_structure) {
         
         rb_controller->setDamping(.8f, 0.f);
-        rb_controller->applyCentralImpulse(vec3_to_bt(right * pl->move.x) * 2.f);
-        rb_controller->applyCentralImpulse(vec3_to_bt(pl->dir * pl->move.y) * 2.f);
-        rb_controller->applyCentralImpulse(vec3_to_bt(up * pl->move.z) * 2.f);
+
+        auto move = pl->move;
+        auto len = glm::length(move);
+        if (len > 1.f) {
+            move /= len;
+        }
+        
+        rb_controller->applyCentralImpulse(vec3_to_bt(right * move.x) * 2.f);
+        rb_controller->applyCentralImpulse(vec3_to_bt(pl->dir * move.y) * 2.f);
+        rb_controller->applyCentralImpulse(vec3_to_bt(up * move.z) * 2.f);
 
         if (pl->jump) {
             pl->jump_depth = pl->thing;
