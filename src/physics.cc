@@ -142,6 +142,11 @@ physics::tick(float dt)
             if (proj < 0)
                 rb_controller->applyCentralImpulse(vec3_to_bt(-120.f * proj * dir));
         }
+
+        // somehow detached, now we're off-structure.
+        if (inner.p == 0.f) {
+            pl->jump_state = player::off_structure;
+        }
     } break;
 
     case player::leaving_structure: {
