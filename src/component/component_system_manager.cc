@@ -29,11 +29,6 @@ tick_gas_producers(ship_space *ship)
 
     for (auto i = 0u; i < gas_man.buffer.num; i++) {
         auto ce = gas_man.instance_pool.entity[i];
-        assert(cwire_man.exists(ce));
-
-        /* gas producers require: power, position */
-        assert(power_man.exists(ce) || !"gas producer must be powerable");
-        assert(pos_man.exists(ce) || !"gas producer must have position");
 
         auto power = power_man.get_instance_data(ce);
         auto position = pos_man.get_instance_data(ce);
@@ -106,18 +101,12 @@ tick_gas_producers(ship_space *ship)
 void
 tick_doors(ship_space *ship)
 {
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
     auto &door_man = component_system_man.managers.door_component_man;
     auto &reader_man = component_system_man.managers.reader_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
 
     for (auto i = 0u; i < door_man.buffer.num; i++) {
         auto ce = door_man.instance_pool.entity[i];
-
-        /* doors require: powered */
-        assert(power_man.exists(ce) || !"doors must be powerable");
-        assert(pos_man.exists(ce) || !"doors must be positioned");
-        assert(reader_man.exists(ce) || !"doors must have reader");
 
         auto power = power_man.get_instance_data(ce);
         auto reader = reader_man.get_instance_data(ce);
@@ -158,17 +147,11 @@ tick_power_consumers(ship_space *ship) {
 void
 tick_light_components(ship_space *ship) {
     auto &light_man = component_system_man.managers.light_component_man;
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
     auto &reader_man = component_system_man.managers.reader_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
 
     for (auto i = 0u; i < light_man.buffer.num; i++) {
         auto ce = light_man.instance_pool.entity[i];
-
-        /* all lights currently require: position, power, reader */
-        assert(pos_man.exists(ce) || !"lights must have a position");
-        assert(power_man.exists(ce) || !"lights must have power");
-        assert(reader_man.exists(ce) || !"lights must have reader");
 
         auto power = power_man.get_instance_data(ce);
         auto light = light_man.get_instance_data(ce);
@@ -196,9 +179,6 @@ tick_pressure_sensors(ship_space* ship) {
     for (auto i = 0u; i < pressure_man.buffer.num; i++) {
         auto ce = pressure_man.instance_pool.entity[i];
         assert(cwire_man.exists(ce));
-
-        /* all pressure sensors currently require: position */
-        assert(pos_man.exists(ce) || !"pressure sensors must have a position");
 
         auto pos = *pos_man.get_instance_data(ce).position;
         auto network = *cwire_man.get_instance_data(ce).network;
@@ -232,7 +212,6 @@ tick_sensor_comparators(ship_space *ship) {
 
     for (auto i = 0u; i < comparator_man.buffer.num; i++) {
         auto ce = comparator_man.instance_pool.entity[i];
-        assert(cwire_man.exists(ce));
 
         auto sensor_1 = FLT_MAX;
         auto sensor_2 = FLT_MAX;
@@ -293,12 +272,6 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
 
     for (auto i = 0u; i < proximity_man.buffer.num; i++) {
         auto ce = proximity_man.instance_pool.entity[i];
-        assert(cwire_man.exists(ce));
-
-        /* all proximity sensors currently require: position and power */
-        assert(pos_man.exists(ce) || !"proximity sensors must have a position");
-        assert(surface_man.exists(ce) || !"proximity sensors must have a surface");
-        assert(power_man.exists(ce) || !"proximity sensors must have power");
 
         // Cannot detect or generate messages if the sensor isn't powered
         if (!*power_man.get_instance_data(ce).powered) {
@@ -384,7 +357,6 @@ tick_readers(ship_space *ship) {
 
     for (auto i = 0u; i < reader_man.buffer.num; i++) {
         auto ce = reader_man.instance_pool.entity[i];
-        assert(cwire_man.exists(ce));
 
         auto const &cwire = cwire_man.get_instance_data(ce);
         auto const &net = ship->get_comms_network(*cwire.network);

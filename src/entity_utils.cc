@@ -42,6 +42,8 @@ load_entities() {
 
     tinydir_close(&dir);
 
+    auto failed_load = false;
+
     for (auto &f : files) {
         config_t cfg{};
         config_setting_t *entity_config_setting = nullptr;
@@ -59,13 +61,14 @@ load_entities() {
         entity_data entity{};
 
         // required to be a valid entity
-        std::unordered_map<std::string, bool> found{
-            { "type",               false },
-            { "renderable",         false },
-            { "physics",            false },
-            { "relative_position",  false },
-            { "surface_attachment", false },
-        };
+        std::unordered_map<std::string, bool> required_dependencies;
+        auto req_deps = component_stub::get_required_dependencies();
+        for (auto &&dep : req_deps) {
+            required_dependencies[dep] = false;
+        }
+
+        // component-defined dependencies
+        std::unordered_map<std::string, std::unordered_map<std::string, bool>> dependencies;
 
         printf("Loading entity from %s\n", f.c_str());
 
@@ -89,41 +92,51 @@ load_entities() {
 
                 auto stub_ptr = component_system_man.managers.get_stub(component->name, component).release();
 
-                entity.components.emplace_back(stub_ptr);
-
                 auto type_stub = dynamic_cast<type_component_stub*>(stub_ptr);
                 if (type_stub) {
                     entity.name = type_stub->name;
-
-                    found[component->name] = true;
                 }
 
-                auto render_stub = dynamic_cast<renderable_component_stub*>(stub_ptr);
-                if (render_stub) {
-                    found[component->name] = true;
+                auto deps = stub_ptr->get_dependencies();
+                dependencies[component->name] = {};
+                for (auto &&dep : deps) {
+                    dependencies[component->name][dep] = false;
                 }
 
-                auto pos_stub = dynamic_cast<relative_position_component_stub*>(stub_ptr);
-                if (pos_stub) {
-                    found[component->name] = true;
-                }
+                entity.components.emplace_back(stub_ptr);
+            }
 
-                auto physics_stub = dynamic_cast<physics_component_stub*>(stub_ptr);
-                if (physics_stub) {
-                    found[component->name] = true;
-                }
+            std::set<std::string> keys;
+            for (auto &&comp : dependencies) {
+                keys.insert(comp.first);
+            }
 
-                auto surf_stub = dynamic_cast<surface_attachment_component_stub*>(stub_ptr);
-                if (surf_stub) {
-                    found[component->name] = true;
+            for (auto &&comp : dependencies) {
+                for (auto &&dep : comp.second) {
+                    dep.second = keys.count(dep.first) != 0;
                 }
             }
 
+            for (auto &&dep: required_dependencies) {
+                dep.second = keys.count(dep.first) != 0;
+            }
+
             auto valid = true;
-            for (auto &find : found) {
-                if (!find.second) {
-                    printf("!! Entity %s in %s missing %s component\n", f.c_str(), entity.name.c_str(), find.first.c_str());
+            for (auto &&comp : dependencies) {
+                for (auto &&dep : comp.second) {
+                    if (!dep.second) {
+                        valid = false;
+                        failed_load = true;
+                        printf ("!! Entity \"%s\" in %s missing '%s' component dependency [%s]\n", entity.name.c_str(), f.c_str(), comp.first.c_str(), dep.first.c_str());
+                    }
+                }
+            }
+
+            for (auto &req : required_dependencies) {
+                if (!req.second) {
+                    printf("!! Entity \"%s\" in %s missing required [%s] component\n", entity.name.c_str(), f.c_str(), req.first.c_str());
                     valid = false;
+                    failed_load = true;
                 }
             }
 
@@ -134,6 +147,8 @@ load_entities() {
 
         config_destroy(&cfg);
     }
+
+    assert(failed_load != true);
 
     for (auto &entity : entity_stubs) {
         std::string name = entity.first;
