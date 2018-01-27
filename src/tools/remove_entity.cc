@@ -60,7 +60,7 @@ struct remove_entity_tool : tool
 
     void preview(frame_data *frame) override {
         auto &rend = component_system_man.managers.renderable_component_man;
-        auto &pos_man = component_system_man.managers.relative_position_component_man;
+        auto &pos_man = component_system_man.managers.position_component_man;
 
         if (entity != rc.entity) {
             if (c_entity::is_valid(entity) && rend.exists(entity)) {

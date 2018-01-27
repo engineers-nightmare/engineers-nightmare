@@ -8,7 +8,7 @@
 #include "component_manager.h"
 #include "../enums/enums.h"
 
-struct relative_position_component_manager : component_manager {
+struct position_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
         glm::vec3 *position;
@@ -32,8 +32,8 @@ struct relative_position_component_manager : component_manager {
     }
 };
 
-struct relative_position_component_stub : component_stub {
-    relative_position_component_stub() = default;
+struct position_component_stub : component_stub {
+    position_component_stub() = default;
 
     void
     assign_component_to_entity(c_entity entity) override;

@@ -11,7 +11,7 @@ entity: {
             rot: "rot_15",
             place: "half_block_snapped",
         },
-        relative_position: {
+        position: {
         },
         physics: {
             mesh: "o2_gen",

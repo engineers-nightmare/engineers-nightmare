@@ -11,7 +11,7 @@ entity: {
             rot: "rot_15",
             place: "quarter_block_snapped",
         },
-        relative_position: {
+        position: {
         },
         physics: {
             mesh: "warning_light",

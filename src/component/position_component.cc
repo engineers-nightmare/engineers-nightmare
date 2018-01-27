@@ -5,13 +5,13 @@
 #include <memory>
 
 #include "../memory.h"
-#include "relative_position_component.h"
+#include "position_component.h"
 #include "component_system_manager.h"
 
 extern component_system_manager component_system_man;
 
 void
-relative_position_component_manager::create_component_instance_data(unsigned count) {
+position_component_manager::create_component_instance_data(unsigned count) {
     if (count <= buffer.allocated)
         return;
 
@@ -43,7 +43,7 @@ relative_position_component_manager::create_component_instance_data(unsigned cou
 }
 
 void
-relative_position_component_manager::destroy_instance(instance i) {
+position_component_manager::destroy_instance(instance i) {
     auto last_index = buffer.num - 1;
     auto last_entity = instance_pool.entity[last_index];
     auto current_entity = instance_pool.entity[i.index];
@@ -59,9 +59,9 @@ relative_position_component_manager::destroy_instance(instance i) {
 }
 
 void
-relative_position_component_manager::entity(c_entity e) {
+position_component_manager::entity(c_entity e) {
     if (buffer.num >= buffer.allocated) {
-        printf("Increasing size of relative_position buffer. Please adjust\n");
+        printf("Increasing size of position buffer. Please adjust\n");
         create_component_instance_data(std::max(1u, buffer.allocated) * 2);
     }
 
@@ -71,8 +71,8 @@ relative_position_component_manager::entity(c_entity e) {
 }
 
 void
-relative_position_component_stub::assign_component_to_entity(c_entity entity) {
-    auto &man = component_system_man.managers.relative_position_component_man;
+position_component_stub::assign_component_to_entity(c_entity entity) {
+    auto &man = component_system_man.managers.position_component_man;
 
     man.assign_entity(entity);
 
@@ -83,13 +83,13 @@ relative_position_component_stub::assign_component_to_entity(c_entity entity) {
     *data.mat = glm::mat4(0);
 };
 
-std::unique_ptr<component_stub> relative_position_component_stub::from_config(const config_setting_t *config) {
-    auto relative_position_stub = std::make_unique<relative_position_component_stub>();
+std::unique_ptr<component_stub> position_component_stub::from_config(const config_setting_t *config) {
+    auto position_stub = std::make_unique<position_component_stub>();
 
-    return std::move(relative_position_stub);
+    return std::move(position_stub);
 }
 
-std::vector<std::string> relative_position_component_stub::get_dependencies() {
+std::vector<std::string> position_component_stub::get_dependencies() {
     return {
         
     };

@@ -169,7 +169,7 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
         comp->assign_component_to_entity(ce);
     }
 
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
     auto &surface_man = component_system_man.managers.surface_attachment_component_man;
 
@@ -201,7 +201,7 @@ c_entity
 spawn_floating_generic_entity(glm::mat4 mat, const std::string &mesh, const std::string &phys_mesh) {
     auto ce = c_entity::spawn();
 
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
     auto &surface_man = component_system_man.managers.surface_attachment_component_man;
     auto &render_man = component_system_man.managers.renderable_component_man;
@@ -266,7 +266,7 @@ void pop_entity_off(c_entity entity) {
 
 void
 use_action_on_entity(ship_space *ship, c_entity ce) {
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
     auto &switch_man = component_system_man.managers.switch_component_man;
     auto &type_man = component_system_man.managers.type_component_man;
     auto &cwire_man = component_system_man.managers.wire_comms_component_man;

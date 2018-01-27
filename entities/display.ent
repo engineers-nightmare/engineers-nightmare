@@ -14,7 +14,7 @@ entity: {
         display: {
             mesh: "display_panel",
         },
-        relative_position: {
+        position: {
         },
         physics: {
             mesh: "display_panel",

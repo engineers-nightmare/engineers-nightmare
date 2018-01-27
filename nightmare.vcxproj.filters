@@ -156,7 +156,7 @@
     <ClCompile Include="src\component\type_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
-    <ClCompile Include="src\component\relative_position_component.cc">
+    <ClCompile Include="src\component\position_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
     <ClCompile Include="src\component\power_provider_component.cc">
@@ -422,7 +422,7 @@
     <ClInclude Include="src\render_data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\component\relative_position_component.h">
+    <ClInclude Include="src\component\position_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\libconfig_shim.h">

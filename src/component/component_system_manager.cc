@@ -24,7 +24,7 @@ tick_gas_producers(ship_space *ship)
 {
     auto &gas_man = component_system_man.managers.gas_producer_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
     auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     for (auto i = 0u; i < gas_man.buffer.num; i++) {
@@ -173,7 +173,7 @@ tick_light_components(ship_space *ship) {
 void
 tick_pressure_sensors(ship_space* ship) {
     auto &pressure_man = component_system_man.managers.pressure_sensor_component_man;
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
     auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     for (auto i = 0u; i < pressure_man.buffer.num; i++) {
@@ -265,7 +265,7 @@ tick_sensor_comparators(ship_space *ship) {
 void
 tick_proximity_sensors(ship_space *ship, player *pl) {
     auto &proximity_man = component_system_man.managers.proximity_sensor_component_man;
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
     auto &surface_man = component_system_man.managers.surface_attachment_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
     auto &cwire_man = component_system_man.managers.wire_comms_component_man;
@@ -388,7 +388,7 @@ void
 draw_renderables(frame_data *frame)
 {
     auto &render_man = component_system_man.managers.renderable_component_man;
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
     auto &display_man = component_system_man.managers.display_component_man;
 
     for (auto i = 0u; i < render_man.buffer.num; i++) {
@@ -436,7 +436,7 @@ void
 draw_doors(frame_data *frame)
 {
     auto &door_man = component_system_man.managers.door_component_man;
-    auto &pos_man = component_system_man.managers.relative_position_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
 
     for (auto i = 0u; i < door_man.buffer.num; i++) {
         auto ce = door_man.instance_pool.entity[i];
