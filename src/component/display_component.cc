@@ -87,3 +87,9 @@ std::unique_ptr<component_stub> display_component_stub::from_config(const config
 
     return std::move(display_stub);
 }
+
+std::vector<std::string> display_component_stub::get_dependencies() {
+    return {
+        
+    };
+}

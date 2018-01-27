@@ -93,3 +93,9 @@ std::unique_ptr<component_stub> proximity_sensor_component_stub::from_config(con
 
     return std::move(proximity_sensor_stub);
 }
+
+std::vector<std::string> proximity_sensor_component_stub::get_dependencies() {
+    return {
+        "power", "power", "wire_comms", 
+    };
+}

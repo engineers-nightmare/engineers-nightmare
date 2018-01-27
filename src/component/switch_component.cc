@@ -82,3 +82,9 @@ std::unique_ptr<component_stub> switch_component_stub::from_config(const config_
 
     return std::move(switch_stub);
 }
+
+std::vector<std::string> switch_component_stub::get_dependencies() {
+    return {
+        
+    };
+}

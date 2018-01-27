@@ -115,3 +115,9 @@ std::unique_ptr<component_stub> gas_producer_component_stub::from_config(const c
 
     return std::move(gas_producer_stub);
 }
+
+std::vector<std::string> gas_producer_component_stub::get_dependencies() {
+    return {
+        "power", "wire_comms", 
+    };
+}

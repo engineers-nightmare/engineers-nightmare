@@ -1,4 +1,5 @@
 stub,std::string,string,,mesh,.c_str()
+depends,power,reader
 body,const char*,mesh,nullptr
 body,float,pos,1
 body,float,desired_pos,1

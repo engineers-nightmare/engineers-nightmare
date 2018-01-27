@@ -88,3 +88,9 @@ std::unique_ptr<component_stub> relative_position_component_stub::from_config(co
 
     return std::move(relative_position_stub);
 }
+
+std::vector<std::string> relative_position_component_stub::get_dependencies() {
+    return {
+        
+    };
+}

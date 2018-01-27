@@ -104,3 +104,9 @@ std::unique_ptr<component_stub> renderable_component_stub::from_config(const con
 
     return std::move(renderable_stub);
 }
+
+std::vector<std::string> renderable_component_stub::get_dependencies() {
+    return {
+        
+    };
+}

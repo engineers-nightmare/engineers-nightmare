@@ -1,3 +1,4 @@
 stub,float,float,,intensity,
+depends,power,reader
 body,float,intensity,0
 body,float,requested_intensity,1

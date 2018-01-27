@@ -110,3 +110,9 @@ std::unique_ptr<component_stub> power_component_stub::from_config(const config_s
 
     return std::move(power_stub);
 }
+
+std::vector<std::string> power_component_stub::get_dependencies() {
+    return {
+        
+    };
+}

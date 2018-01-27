@@ -110,3 +110,9 @@ std::unique_ptr<component_stub> reader_component_stub::from_config(const config_
 
     return std::move(reader_stub);
 }
+
+std::vector<std::string> reader_component_stub::get_dependencies() {
+    return {
+        "wire_comms", 
+    };
+}

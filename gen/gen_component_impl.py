@@ -118,6 +118,9 @@ header_template_8="""
     assign_component_to_entity(c_entity entity) override;
 
     static std::unique_ptr<component_stub> from_config(config_setting_t const *config);
+
+    std::vector<std::string>
+    get_dependencies() override;
 };
 """
 
@@ -242,6 +245,20 @@ impl_template_14="""
 }
 """
 
+impl_template_15="""
+std::vector<std::string> %(comp_name)s_component_stub::get_dependencies() {
+    return {
+        """
+
+impl_template_16_each_dep=""""%s", """
+
+impl_template_17="""
+    };
+}
+"""
+
+
+
 
 import os
 import sys
@@ -275,6 +292,7 @@ def main():
         print("Genning from %s to " % fl)
         stub_fields = []
         body_fields = []
+        dependencies = []
         component_name = os.path.basename(fl)
         with open(fl, 'r') as f:
             prev = 'entity';
@@ -285,6 +303,8 @@ def main():
                     prev = parts[2]
                 elif parts[0] == 'stub':
                     stub_fields.append({'otype': parts[1], 'type': parts[2], 'pre': parts[3], 'name': parts[4], 'extra': parts[5], 'comp_name': component_name})
+                elif parts[0] == 'depends':
+                    dependencies = parts[1:]
 
         print("  header: src/component/%s_component.h" % component_name)
         with open("src/component/%s_component.h" % component_name, "w") as g:
@@ -327,6 +347,11 @@ def main():
             for fi in stub_fields:
                 g.write(impl_template_13_each % fi)
             g.write(impl_template_14 % fc)
+            g.write(impl_template_15 % fc)
+            if len(dependencies) > 0:
+                for dep in dependencies:
+                    g.write(impl_template_16_each_dep % dep)
+            g.write(impl_template_17 % fc)
 
     return 0
 

@@ -93,3 +93,9 @@ std::unique_ptr<component_stub> type_component_stub::from_config(const config_se
 
     return std::move(type_stub);
 }
+
+std::vector<std::string> type_component_stub::get_dependencies() {
+    return {
+        
+    };
+}

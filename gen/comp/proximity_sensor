@@ -1,3 +1,4 @@
 stub,float,float,,range,
+depends,power,power,wire_comms
 body,float,range,0
 body,bool,is_detected,false

@@ -99,3 +99,9 @@ std::unique_ptr<component_stub> power_provider_component_stub::from_config(const
 
     return std::move(power_provider_stub);
 }
+
+std::vector<std::string> power_provider_component_stub::get_dependencies() {
+    return {
+        
+    };
+}

@@ -93,3 +93,9 @@ std::unique_ptr<component_stub> pressure_sensor_component_stub::from_config(cons
 
     return std::move(pressure_sensor_stub);
 }
+
+std::vector<std::string> pressure_sensor_component_stub::get_dependencies() {
+    return {
+        "wire_comms", 
+    };
+}

@@ -82,3 +82,9 @@ std::unique_ptr<component_stub> wire_comms_component_stub::from_config(const con
 
     return std::move(wire_comms_stub);
 }
+
+std::vector<std::string> wire_comms_component_stub::get_dependencies() {
+    return {
+        
+    };
+}

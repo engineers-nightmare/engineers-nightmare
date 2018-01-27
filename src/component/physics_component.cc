@@ -104,3 +104,9 @@ std::unique_ptr<component_stub> physics_component_stub::from_config(const config
 
     return std::move(physics_stub);
 }
+
+std::vector<std::string> physics_component_stub::get_dependencies() {
+    return {
+        
+    };
+}

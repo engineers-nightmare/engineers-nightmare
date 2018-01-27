@@ -38,4 +38,7 @@ struct display_component_stub : component_stub {
     assign_component_to_entity(c_entity entity) override;
 
     static std::unique_ptr<component_stub> from_config(config_setting_t const *config);
+
+    std::vector<std::string>
+    get_dependencies() override;
 };

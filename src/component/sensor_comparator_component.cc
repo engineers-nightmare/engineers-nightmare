@@ -93,3 +93,9 @@ std::unique_ptr<component_stub> sensor_comparator_component_stub::from_config(co
 
     return std::move(sensor_comparator_stub);
 }
+
+std::vector<std::string> sensor_comparator_component_stub::get_dependencies() {
+    return {
+        "wire_comms", 
+    };
+}

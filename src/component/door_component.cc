@@ -105,3 +105,9 @@ std::unique_ptr<component_stub> door_component_stub::from_config(const config_se
 
     return std::move(door_stub);
 }
+
+std::vector<std::string> door_component_stub::get_dependencies() {
+    return {
+        "power", "reader", 
+    };
+}

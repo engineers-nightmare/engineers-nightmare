@@ -1,3 +1,4 @@
 stub,unsigned,int,,type,
+depends,wire_comms
 body,float,pressure,0
 body,unsigned,type,0

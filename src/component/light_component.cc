@@ -93,3 +93,9 @@ std::unique_ptr<component_stub> light_component_stub::from_config(const config_s
 
     return std::move(light_stub);
 }
+
+std::vector<std::string> light_component_stub::get_dependencies() {
+    return {
+        "power", "reader", 
+    };
+}

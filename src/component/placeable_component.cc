@@ -80,3 +80,9 @@ std::unique_ptr<component_stub> placeable_component_stub::from_config(const conf
 
     return std::move(placeable_stub);
 }
+
+std::vector<std::string> placeable_component_stub::get_dependencies() {
+    return {
+        
+    };
+}

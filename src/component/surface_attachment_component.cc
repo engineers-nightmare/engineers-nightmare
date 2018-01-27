@@ -94,3 +94,9 @@ std::unique_ptr<component_stub> surface_attachment_component_stub::from_config(c
 
     return std::move(surface_attachment_stub);
 }
+
+std::vector<std::string> surface_attachment_component_stub::get_dependencies() {
+    return {
+        
+    };
+}
