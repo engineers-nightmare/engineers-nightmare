@@ -60,7 +60,7 @@ void
 build_dynamic_physics_mesh(sw_mesh const * src, btConvexHullShape **shape);
 
 void
-teardown_physics_setup(btTriangleMesh **mesh, btConvexHullShape **shape, btRigidBody **rb);
+teardown_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);
 
 bool
 phys_raycast_world(glm::vec3 start, glm::vec3 end,

@@ -43,12 +43,14 @@ set(EN_SOURCES
     src/config.cc
     src/input.cc
     src/imgui_impl_sdl_gl3.cc
+    src/load.cc
     src/mesh.cc
     src/mesher.cc
     src/mock_ship_junk.cc
     src/particle.cc
     src/physics.cc
     src/projectile/projectile.cc
+    src/save.cc
     src/settings.cc
     src/shader.cc
     src/ship_space.cc
@@ -104,6 +106,7 @@ set(EN_HEADERS
     src/input.h
     src/imgui_impl_sdl_gl3.h
     src/libconfig_shim.h
+    src/load.h
     src/memory.h
     src/mesh.h
     src/particle.h
@@ -111,6 +114,7 @@ set(EN_HEADERS
     src/player.h
     src/projectile/projectile.h
     src/render_data.h
+    src/save.h
     src/scopetimer.h
     src/settings.h
     src/shader.h

@@ -889,3 +889,23 @@ void ship_space::cut_out_cuboid(glm::ivec3 mins, glm::ivec3 maxs, surface_type t
         }
     }
 }
+
+bool ship_space::topo_to_pos(topo_info *t, glm::ivec3* out) {
+    for (auto chunk : chunks) {
+        auto a = chunk.second->topo.get(0, 0, 0);
+        auto b = a + CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
+
+        if (t < a || t >= b)
+            continue;
+
+        auto index = t - a;
+        auto local = glm::ivec3(index % CHUNK_SIZE,
+            (index / CHUNK_SIZE) % CHUNK_SIZE,
+            (index / CHUNK_SIZE / CHUNK_SIZE));
+
+        *out = chunk.first * CHUNK_SIZE + local;
+        return true;
+    }
+
+    return false;
+}

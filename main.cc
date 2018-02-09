@@ -8,11 +8,9 @@
 #include <epoxy/gl.h>
 #include <functional>
 #include <glm/glm.hpp>
-#include <stdio.h>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <unordered_map>
-#include <array>
 #include <libconfig.h>
 #include <iostream>
 #include <memory>
@@ -39,6 +37,14 @@
 #include "src/tools/tools.h"
 #include "src/wiring/wiring.h"
 #include "src/wiring/wiring_data.h"
+#include "src/utils/debugdraw.h"
+#include "src/entity_utils.h"
+#include "src/save.h"
+#include "src/load.h"
+
+#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
+#include "src/imgui/imgui.h"
+#include "src/imgui_impl_sdl_gl3.h"
 
 #define APP_NAME        "Engineer's Nightmare"
 #define DEFAULT_WIDTH   1366
@@ -48,13 +54,6 @@
 #define MAX_AXIS_PER_EVENT 128
 
 #define MAX_REACH_DISTANCE 5.0f
-
-#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-#include "src/imgui/imgui.h"
-#include "src/imgui_impl_sdl_gl3.h"
-
-#include "src/utils/debugdraw.h"
-#include "src/entity_utils.h"
 
 bool exit_requested = false;
 
@@ -164,6 +163,21 @@ prepare_chunks()
                 if (ch) {
                     ch->prepare_render();
                     ch->prepare_phys(i, j, k);
+                }
+            }
+        }
+    }
+}
+
+void
+teardown_chunks()
+{
+    for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
+        for (int j = ship->mins.y; j <= ship->maxs.y; j++) {
+            for (int i = ship->mins.x; i <= ship->maxs.x; i++) {
+                chunk *ch = ship->get_chunk(glm::ivec3(i, j, k));
+                if (ch) {
+                    teardown_physics_setup(&ch->phys_chunk.phys_mesh, &ch->phys_chunk.phys_shape, &ch->phys_chunk.phys_body);
                 }
             }
         }
@@ -323,6 +337,14 @@ init()
 
     // Absorb all the init time so we dont try to catch up
     frame_info.tick();
+
+    save(ship, "ship.out");
+    auto new_ship = new ship_space();
+    load(new_ship, "ship.out");
+    teardown_chunks();
+    delete ship;
+    ship = new_ship;
+    ship->rebuild_topology();
 }
 
 void
@@ -1096,6 +1118,7 @@ struct play_state : game_state {
 struct menu_state : game_state {
     enum class MenuState {
         Main,
+        Game,
         Settings,
         Keybinds,
     } state{MenuState::Main};
@@ -1115,6 +1138,7 @@ struct menu_state : game_state {
                 case MenuState::Main:
                     set_game_state(create_play_state());
                     break;
+                case MenuState::Game:
                 case MenuState::Settings:
                 case MenuState::Keybinds:
                     state = MenuState::Main;
@@ -1149,12 +1173,44 @@ struct menu_state : game_state {
                 set_game_state(create_play_state());
             }
             ImGui::Dummy(ImVec2{10, 10});
+            if (ImGui::Button("Game")) {
+                state = MenuState::Game;
+            }
+            ImGui::Dummy(ImVec2{10, 10});
             if (ImGui::Button("Settings")) {
                 state = MenuState::Settings;
             }
             ImGui::Dummy(ImVec2{10, 10});
             if (ImGui::Button("Exit Game")) {
                 exit_requested = true;
+            }
+        }
+        ImGui::End();
+    }
+    void handle_game_menu() {
+        ImGui::Begin("", nullptr, menu_flags);
+        {
+            ImGui::Text("Game");
+            ImGui::Separator();
+            ImGui::Dummy(ImVec2{10, 10});
+
+            if (ImGui::Button("Save")) {
+                // we may want to get clever and pause the world or defer this to
+                // a particular time
+                save(ship, "save/ship.out");
+
+                set_game_state(create_play_state());
+            }
+            ImGui::Dummy(ImVec2{10, 10});
+            if (ImGui::Button("Load")) {
+                // we may want to get clever and pause the world or defer this to
+                // a particular time
+                teardown_chunks();
+                delete ship;
+                ship = new ship_space();
+                load(ship, "save/ship.out");
+
+                set_game_state(create_play_state());
             }
         }
         ImGui::End();
@@ -1219,6 +1275,10 @@ struct menu_state : game_state {
             switch (state) {
                 case MenuState::Main: {
                     handle_main_menu();
+                    break;
+                }
+                case MenuState::Game: {
+                    handle_game_menu();
                     break;
                 }
                 case MenuState::Settings: {

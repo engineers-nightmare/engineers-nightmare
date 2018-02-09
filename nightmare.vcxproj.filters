@@ -321,6 +321,12 @@
     <ClCompile Include="src\soloud\src\filter\soloud_lofifilter.cpp">
       <Filter>soloud\filter</Filter>
     </ClCompile>
+    <ClCompile Include="src\load.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\save.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -508,6 +514,9 @@
     </ClInclude>
     <ClInclude Include="src\soloud\src\audiosource\wav\stb_vorbis.h">
       <Filter>soloud\audiosource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\load.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

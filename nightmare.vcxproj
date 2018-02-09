@@ -153,12 +153,14 @@
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\imgui_impl_sdl_gl3.cc" />
     <ClCompile Include="src\input.cc" />
+    <ClCompile Include="src\load.cc" />
     <ClCompile Include="src\mesh.cc" />
     <ClCompile Include="src\mesher.cc" />
     <ClCompile Include="src\mock_ship_junk.cc" />
     <ClCompile Include="src\particle.cc" />
     <ClCompile Include="src\physics.cc" />
     <ClCompile Include="src\projectile\projectile.cc" />
+    <ClCompile Include="src\save.cc" />
     <ClCompile Include="src\settings.cc" />
     <ClCompile Include="src\shader.cc" />
     <ClCompile Include="src\ship_space.cc" />
@@ -249,6 +251,7 @@
     <ClInclude Include="src\imgui_impl_sdl_gl3.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\libconfig_shim.h" />
+    <ClInclude Include="src\load.h" />
     <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\particle.h" />

@@ -144,6 +144,9 @@ struct ship_space {
      * set border surfaces where block present to {type}
      */
     void cut_out_cuboid(glm::ivec3 mins, glm::ivec3 maxs, surface_type type);
+
+    /* convert a topo ptr to the corresponding location. not expected to be fast. */
+    bool topo_to_pos(topo_info *t, glm::ivec3* out);
 };
 
 /* helper */
