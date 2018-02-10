@@ -334,7 +334,7 @@ load_audio_settings(const en_config_type & config_type) {
     if (audio_config_setting != nullptr) {
         auto global_volume = 0.0;
 
-        /* mouse_invert */
+        /* global audio volume */
         int success = config_setting_lookup_float(
             audio_config_setting, "global_volume", &global_volume);
 
