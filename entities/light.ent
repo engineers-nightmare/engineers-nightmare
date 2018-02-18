@@ -7,7 +7,7 @@ entity: {
             mesh: "panel_4x4",
         },
         placeable: {
-            rot: "rot_15",
+            rot: 15,
             place: "quarter_block_snapped",
         },
         position: {

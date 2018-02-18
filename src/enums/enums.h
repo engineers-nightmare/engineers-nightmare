@@ -33,28 +33,6 @@ int config_setting_set_placement(config_setting_t *setting, placement value);
 int config_setting_lookup_placement(const config_setting_t *setting, const char *name, placement *value);
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-enum class rotation
-{
-    axis_aligned = 0,
-    rot_45 = 1,
-    rot_15 = 2,
-    no_rotation = 3,
-    invalid = -1,
-};
-
-const char* get_enum_description(rotation value);
-
-const char* get_enum_string(rotation value);
-
-template<> rotation get_enum<rotation>(const char *e);
-
-rotation config_setting_get_rotation(const config_setting_t *setting);
-
-int config_setting_set_rotation(config_setting_t *setting, rotation value);
-
-int config_setting_lookup_rotation(const config_setting_t *setting, const char *name, rotation *value);
-
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 enum class window_mode
 {
     windowed = 0,

@@ -29,7 +29,7 @@ struct placeable_component_manager : component_manager {
 struct placeable_component_stub : component_stub {
     placeable_component_stub() = default;
 
-    rotation rot{};
+    int rot{};
 
     placement place{};
 

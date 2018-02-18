@@ -7,7 +7,7 @@ entity: {
             mesh: "warning_light",
         },
         placeable: {
-            rot: "rot_15",
+            rot: 15,
             place: "quarter_block_snapped",
         },
         position: {

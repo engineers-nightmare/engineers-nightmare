@@ -7,7 +7,7 @@ entity: {
             mesh: "display",
         },
         placeable: {
-            rot: "no_rotation",
+            rot: 90,
             place: "quarter_block_snapped",
         },
         display: {

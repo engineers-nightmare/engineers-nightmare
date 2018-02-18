@@ -53,26 +53,9 @@ struct add_entity_tool : tool {
         return true;
     }
 
-    unsigned get_rotate() const {
+    int get_rotate() const {
         auto place = entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>();
-
-        switch (place->rot) {
-        case rotation::axis_aligned: {
-            return 90;
-        }
-        case rotation::rot_45: {
-            return 45;
-        }
-        case rotation::rot_15: {
-            return 15;
-        }
-        case rotation::no_rotation: {
-            return 0;
-        }
-        default:
-            assert(false);
-            return 0;
-        }
+        return place->rot;
     }
 
     void use() override {

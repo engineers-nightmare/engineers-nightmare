@@ -7,7 +7,7 @@ entity: {
             mesh: "frobnicator",
         },
         placeable: {
-            rot: "rot_15",
+            rot: 90,
             place: "half_block_snapped",
         },
         position: {

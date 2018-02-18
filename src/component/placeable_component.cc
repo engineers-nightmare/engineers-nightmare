@@ -73,7 +73,7 @@ std::unique_ptr<component_stub> placeable_component_stub::from_config(const conf
     auto placeable_stub = std::make_unique<placeable_component_stub>();
 
     auto rot_member = config_setting_get_member(config, "rot");
-    placeable_stub->rot = config_setting_get_rotation(rot_member);
+    placeable_stub->rot = config_setting_get_int(rot_member);
 
     auto place_member = config_setting_get_member(config, "place");
     placeable_stub->place = config_setting_get_placement(place_member);
