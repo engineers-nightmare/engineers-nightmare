@@ -927,9 +927,7 @@ struct play_state : game_state {
                 t->use();
                 pl.ui_dirty = true;
 
-#ifndef NDEBUG
                 assert(ship->validate());
-#endif // NDEBUG
             }
 
             if (pl.alt_use_tool) {
