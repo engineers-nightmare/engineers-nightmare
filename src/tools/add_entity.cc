@@ -9,6 +9,7 @@
 #include "../ship_space.h"
 #include "../mesh.h"
 #include "../player.h"
+
 #include "tools.h"
 
 #include <libconfig.h>
@@ -20,6 +21,7 @@ extern GLuint overlay_shader;
 extern GLuint simple_shader;
 
 extern ship_space *ship;
+extern player pl;
 
 extern asset_manager asset_man;
 extern component_system_manager component_system_man;
@@ -27,12 +29,7 @@ extern component_system_manager component_system_man;
 extern std::vector<std::string> entity_names;
 extern std::unordered_map<std::string, entity_data> entity_stubs;
 
-extern frame_info frame_info;
-
 struct add_entity_tool : tool {
-    const unsigned rotate_tick_rate = 5; // hz
-    double last_rotate_time = 0;
-    unsigned cur_rotate = 0;
     unsigned entity_name_index = 0;
     raycast_info_block rc;
 
@@ -97,25 +94,6 @@ struct add_entity_tool : tool {
         ch->entities.push_back(e);
     }
 
-    // press to rotate once, hold to rotate continuously
-    void alt_use() override {
-        auto rotate = get_rotate();
-
-        cur_rotate += rotate;
-        cur_rotate %= 360;
-    }
-
-    // hold to rotate continuously, press to rotate once
-    void long_alt_use() override {
-        auto rotate = get_rotate();
-
-        if (frame_info.elapsed >= last_rotate_time + 1.0 / rotate_tick_rate) {
-            cur_rotate += rotate;
-            cur_rotate %= 360;
-            last_rotate_time = frame_info.elapsed;
-        }
-    }
-
     void cycle_mode() override {
         do {
             entity_name_index++;
@@ -123,15 +101,6 @@ struct add_entity_tool : tool {
                 entity_name_index = 0;
             }
         } while (!entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>());
-
-        auto rotate = get_rotate();
-        if (rotate == 0) {
-            cur_rotate = 0;
-        }
-        else {
-            cur_rotate += rotate / 2;
-            cur_rotate = cur_rotate - (cur_rotate % rotate);
-        }
     }
 
     void preview(frame_data *frame) override {
@@ -156,6 +125,26 @@ struct add_entity_tool : tool {
         auto name = entity_names[entity_name_index];
 
         sprintf(str, "Place %s", name.c_str());
+    }
+
+    float get_best_rotation(glm::vec3 axis) const {
+        auto rotate = get_rotate();
+        auto bestdot = std::numeric_limits<float>::lowest();
+        auto best = 0;
+        auto up = glm::transpose(glm::mat3_cast(pl.rot))[1];
+        if (rotate) {
+            for (int angle = 0; angle < 360; angle += rotate) {
+                auto candidate = glm::rotate(glm::mat4(1), -glm::radians((float)angle), axis);
+                auto vec = glm::vec3(glm::transpose(candidate)[1]);
+                auto dot = glm::dot(vec, up);
+
+                if (dot > bestdot) {
+                    best = angle;
+                    bestdot = dot;
+                }
+            }
+        }
+        return (float) best;
     }
 
     glm::mat4 get_place_matrix(unsigned int index) const {
@@ -190,7 +179,7 @@ struct add_entity_tool : tool {
             default:
                 assert(false);
         }
-        m = rotate(m, -glm::radians((float) cur_rotate), rot_axis);
+        m = glm::rotate(m, -glm::radians((float)get_best_rotation(rot_axis)), rot_axis);
         return m;
     }
 };
