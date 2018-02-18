@@ -7,65 +7,6 @@
 
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-const char* get_enum_description(window_mode value) {
-    switch(value)
-    {
-    case window_mode::windowed:
-        return "Windowed";
-    case window_mode::fullscreen:
-        return "Fullscreen";
-    default:
-        assert(false);
-        return nullptr;
-    }
-}
-
-const char* get_enum_string(window_mode value) {
-    switch(value)
-    {
-    case window_mode::windowed:
-        return "windowed";
-    case window_mode::fullscreen:
-        return "fullscreen";
-    default:
-        assert(false);
-        return nullptr;
-    }
-}
-
-template<> window_mode get_enum<window_mode>(const char *e) {
-    auto val{window_mode::invalid};
-    if (!strcmp(e, "windowed")) {
-        val = window_mode::windowed;
-    }
-    if (!strcmp(e, "fullscreen")) {
-        val = window_mode::fullscreen;
-    }
-    assert(val != window_mode::invalid);
-    return val;
-}
-
-window_mode config_setting_get_window_mode(const config_setting_t *setting) {
-    const char *str = config_setting_get_string(setting);
-    return get_enum<window_mode>(str);
-}
-
-int config_setting_set_window_mode(config_setting_t *setting, window_mode value) {
-    auto str = get_enum_string(value);
-    return (config_setting_set_string(setting, str));
-}
-
-int config_setting_lookup_window_mode(const config_setting_t *setting, const char *name, window_mode *value) {
-    auto *member = config_setting_get_member(setting, name);
-    if(!member) {
-        return CONFIG_FALSE;
-    }
-
-    *value = (window_mode)config_setting_get_window_mode(member);
-    return CONFIG_TRUE;
-}
-
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 const char* get_enum_description(placement value) {
     switch(value)
     {
@@ -208,5 +149,64 @@ int config_setting_lookup_rotation(const config_setting_t *setting, const char *
     }
 
     *value = (rotation)config_setting_get_rotation(member);
+    return CONFIG_TRUE;
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+const char* get_enum_description(window_mode value) {
+    switch(value)
+    {
+    case window_mode::windowed:
+        return "Windowed";
+    case window_mode::fullscreen:
+        return "Fullscreen";
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
+const char* get_enum_string(window_mode value) {
+    switch(value)
+    {
+    case window_mode::windowed:
+        return "windowed";
+    case window_mode::fullscreen:
+        return "fullscreen";
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
+template<> window_mode get_enum<window_mode>(const char *e) {
+    auto val{window_mode::invalid};
+    if (!strcmp(e, "windowed")) {
+        val = window_mode::windowed;
+    }
+    if (!strcmp(e, "fullscreen")) {
+        val = window_mode::fullscreen;
+    }
+    assert(val != window_mode::invalid);
+    return val;
+}
+
+window_mode config_setting_get_window_mode(const config_setting_t *setting) {
+    const char *str = config_setting_get_string(setting);
+    return get_enum<window_mode>(str);
+}
+
+int config_setting_set_window_mode(config_setting_t *setting, window_mode value) {
+    auto str = get_enum_string(value);
+    return (config_setting_set_string(setting, str));
+}
+
+int config_setting_lookup_window_mode(const config_setting_t *setting, const char *name, window_mode *value) {
+    auto *member = config_setting_get_member(setting, name);
+    if(!member) {
+        return CONFIG_FALSE;
+    }
+
+    *value = (window_mode)config_setting_get_window_mode(member);
     return CONFIG_TRUE;
 }
