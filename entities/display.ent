@@ -5,7 +5,6 @@ entity: {
         },
         renderable: {
             mesh: "display",
-            material: "display",
         },
         placeable: {
             rot: "no_rotation",

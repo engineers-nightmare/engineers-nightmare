@@ -5,7 +5,6 @@ entity: {
         },
         renderable: {
             mesh: "panel_1x1",
-            material: "no_place",
         },
         placeable: {
             rot: "rot_15",

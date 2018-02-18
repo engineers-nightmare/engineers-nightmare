@@ -5,7 +5,6 @@ entity: {
         },
         renderable: {
             mesh: "o2_gen",
-            material: "frobnicator",
         },
         placeable: {
             rot: "rot_15",

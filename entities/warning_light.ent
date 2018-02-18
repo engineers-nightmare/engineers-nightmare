@@ -5,7 +5,6 @@ entity: {
         },
         renderable: {
             mesh: "warning_light",
-            material: "port",
         },
         placeable: {
             rot: "rot_15",

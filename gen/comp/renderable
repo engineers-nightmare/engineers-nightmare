@@ -1,5 +1,3 @@
 stub,std::string,string,,mesh,.c_str()
-stub,std::string,string,0;//,material,.c_str()
 body,const char*,mesh,nullptr
-body,unsigned,material,0
 body,bool,draw,true

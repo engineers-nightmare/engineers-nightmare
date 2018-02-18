@@ -5,7 +5,6 @@ entity: {
         },
         renderable: {
             mesh: "doorframe_2x2",
-            material: "frame",
         },
         placeable: {
             rot: "axis_aligned",

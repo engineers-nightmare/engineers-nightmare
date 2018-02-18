@@ -12,7 +12,6 @@ struct renderable_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
         const char* *mesh;
-        unsigned *material;
         bool *draw;
     } instance_pool;
 
@@ -27,8 +26,6 @@ struct renderable_component_manager : component_manager {
         d.entity = instance_pool.entity + inst.index;
         d.mesh = instance_pool.mesh + inst.index;
 
-        d.material = instance_pool.material + inst.index;
-
         d.draw = instance_pool.draw + inst.index;
 
         return d;
@@ -39,8 +36,6 @@ struct renderable_component_stub : component_stub {
     renderable_component_stub() = default;
 
     std::string mesh{};
-
-    std::string material{};
 
     void
     assign_component_to_entity(c_entity entity) override;
