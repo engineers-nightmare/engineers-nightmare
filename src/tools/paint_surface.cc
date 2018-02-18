@@ -155,7 +155,7 @@ struct paint_surface_tool : tool
                 c[i[1]] = k;
 
                 auto block = ship->get_block(cur);
-                if (mode == replace_mode::match && block->surfs[start_index] != select_type) {
+                if (!block || block->type != block_frame || (mode == replace_mode::match && block->surfs[start_index] != select_type)) {
                     continue;
                 }
 
@@ -253,7 +253,7 @@ struct paint_surface_tool : tool
                         c[i[0]] = j;
                         c[i[1]] = k;
                         auto block = ship->get_block(cur);
-                        if (mode == replace_mode::match && block->surfs[start_index] != select_type) {
+                        if (!block || block->type != block_frame || (mode == replace_mode::match && block->surfs[start_index] != select_type)) {
                             continue;
                         }
 
