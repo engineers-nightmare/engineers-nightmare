@@ -78,11 +78,9 @@ proximity_sensor_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);        
 
-    *data.range = 0;
+    *data.range = range;
 
     *data.is_detected = false;
-
-    *data.range = range;
 };
 
 std::unique_ptr<component_stub> proximity_sensor_component_stub::from_config(const config_setting_t *config) {

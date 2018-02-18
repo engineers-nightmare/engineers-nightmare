@@ -86,19 +86,13 @@ gas_producer_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);        
 
-    *data.gas_type = 0;
-
-    *data.flow_rate = 0.1;
-
-    *data.max_pressure = 1.0;
-
-    *data.enabled = true;
-
     *data.gas_type = gas_type;
 
     *data.flow_rate = flow_rate;
 
     *data.max_pressure = max_pressure;
+
+    *data.enabled = true;
 };
 
 std::unique_ptr<component_stub> gas_producer_component_stub::from_config(const config_setting_t *config) {

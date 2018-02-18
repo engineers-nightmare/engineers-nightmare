@@ -86,17 +86,13 @@ reader_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);        
 
-    *data.name = nullptr;
+    *data.name = name.c_str();
 
     *data.source = {};
 
-    *data.desc = nullptr;
+    *data.desc = desc.c_str();
 
     *data.data = 0;
-
-    *data.name = name.c_str();
-
-    *data.desc = desc.c_str();
 };
 
 std::unique_ptr<component_stub> reader_component_stub::from_config(const config_setting_t *config) {

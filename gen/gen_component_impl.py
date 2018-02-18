@@ -264,6 +264,12 @@ import os
 import sys
 import glob
 
+def find_matching_stub(body_field, stubs):
+    for x in stubs:
+        if x['name'] == body_field['name']:
+            return x
+    return None
+
 def main():
 
     files = [f for f in glob.glob('gen/comp/*')]
@@ -339,10 +345,11 @@ def main():
             if body_fields:
                 g.write(impl_template_9_1_if_body)
             for fi in body_fields:
-                g.write(impl_template_10_each_body % fi)
-            if body_fields:
-                for fi in stub_fields:
-                    g.write(impl_template_11_each_stub % fi)
+                stub = find_matching_stub(fi, stub_fields)
+                if stub:
+                    g.write(impl_template_11_each_stub % stub)
+                else:
+                    g.write(impl_template_10_each_body % fi)
             g.write(impl_template_12 % fc)
             for fi in stub_fields:
                 g.write(impl_template_13_each % fi)

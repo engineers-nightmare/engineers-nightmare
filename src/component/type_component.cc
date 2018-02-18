@@ -80,8 +80,6 @@ type_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.type = 0;
 
-    *data.name = "";
-
     *data.name = name.c_str();
 };
 

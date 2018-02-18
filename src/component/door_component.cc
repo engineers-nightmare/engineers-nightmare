@@ -86,15 +86,13 @@ door_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);        
 
-    *data.mesh = nullptr;
+    *data.mesh = mesh.c_str();
 
     *data.pos = 1;
 
     *data.desired_pos = 1;
 
     *data.height = 2;
-
-    *data.mesh = mesh.c_str();
 };
 
 std::unique_ptr<component_stub> door_component_stub::from_config(const config_setting_t *config) {

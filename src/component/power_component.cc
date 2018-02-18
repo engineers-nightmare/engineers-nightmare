@@ -86,17 +86,13 @@ power_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);        
 
-    *data.required_power = 0;
+    *data.required_power = required_power;
 
     *data.powered = false;
 
-    *data.max_required_power = 0;
+    *data.max_required_power = max_required_power;
 
     *data.network = 0;
-
-    *data.required_power = required_power;
-
-    *data.max_required_power = max_required_power;
 };
 
 std::unique_ptr<component_stub> power_component_stub::from_config(const config_setting_t *config) {

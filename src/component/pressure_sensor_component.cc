@@ -80,8 +80,6 @@ pressure_sensor_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.pressure = 0;
 
-    *data.type = 0;
-
     *data.type = type;
 };
 

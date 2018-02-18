@@ -82,13 +82,11 @@ power_provider_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);        
 
-    *data.max_provided = 0;
+    *data.max_provided = max_provided;
 
     *data.provided = 0;
 
     *data.network = 0;
-
-    *data.max_provided = max_provided;
 };
 
 std::unique_ptr<component_stub> power_provider_component_stub::from_config(const config_setting_t *config) {

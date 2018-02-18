@@ -80,8 +80,6 @@ sensor_comparator_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.compare_result = 0;
 
-    *data.compare_epsilon = 0;
-
     *data.compare_epsilon = compare_epsilon;
 };
 

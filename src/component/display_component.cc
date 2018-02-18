@@ -74,8 +74,6 @@ display_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);        
 
-    *data.mesh = nullptr;
-
     *data.mesh = mesh.c_str();
 };
 

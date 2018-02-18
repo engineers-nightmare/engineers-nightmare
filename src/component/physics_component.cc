@@ -82,13 +82,9 @@ physics_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);        
 
-    *data.mesh = nullptr;
+    *data.mesh = mesh.c_str();
 
     *data.rigid = nullptr;
-
-    *data.mass = 1.0;
-
-    *data.mesh = mesh.c_str();
 
     *data.mass = mass;
 };

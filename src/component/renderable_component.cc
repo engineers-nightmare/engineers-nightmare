@@ -82,15 +82,11 @@ renderable_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);        
 
-    *data.mesh = nullptr;
-
-    *data.material = 0;
-
-    *data.draw = true;
-
     *data.mesh = mesh.c_str();
 
     *data.material = 0;//material.c_str();
+
+    *data.draw = true;
 };
 
 std::unique_ptr<component_stub> renderable_component_stub::from_config(const config_setting_t *config) {

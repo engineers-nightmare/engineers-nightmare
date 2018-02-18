@@ -78,11 +78,9 @@ light_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);        
 
-    *data.intensity = 0;
+    *data.intensity = intensity;
 
     *data.requested_intensity = 1;
-
-    *data.intensity = intensity;
 };
 
 std::unique_ptr<component_stub> light_component_stub::from_config(const config_setting_t *config) {
