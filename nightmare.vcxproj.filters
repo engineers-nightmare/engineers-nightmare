@@ -518,6 +518,9 @@
     <ClInclude Include="src\load.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\save.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="entities\display.ent">

@@ -259,6 +259,7 @@
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\projectile\projectile.h" />
     <ClInclude Include="src\render_data.h" />
+    <ClInclude Include="src\save.h" />
     <ClInclude Include="src\scopetimer.h" />
     <ClInclude Include="src\settings.h" />
     <ClInclude Include="src\shader.h" />

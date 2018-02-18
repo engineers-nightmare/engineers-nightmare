@@ -178,3 +178,10 @@ static inline glm::mat4
 mat_scale(float x, float y, float z) {
     return mat_scale(glm::vec3(x, y, z));
 }
+
+static inline constexpr uint32_t fourcc(char const tag[5]) {
+    return (unsigned char)(tag[0] << 24) |
+        (unsigned char)(tag[1] << 16) |
+        (unsigned char)(tag[2] << 8) |
+        (unsigned char)(tag[3]);
+}

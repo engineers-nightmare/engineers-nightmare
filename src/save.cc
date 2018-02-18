@@ -56,15 +56,15 @@ void saver::end_lump(long start) {
 }
 
 static void save_chunk(saver *s, std::pair<glm::ivec3, chunk *> chunk) {
-    auto chunk_lump = s->begin_lump('CHNK');
+    auto chunk_lump = s->begin_lump(fourcc("CHNK"));
 
-    auto info_lump = s->begin_lump('INFO');
+    auto info_lump = s->begin_lump(fourcc("INFO"));
     s->write(chunk.first.x);
     s->write(chunk.first.y);
     s->write(chunk.first.z);
     s->end_lump(info_lump);
 
-    auto frames_lump = s->begin_lump('FRAM');
+    auto frames_lump = s->begin_lump(fourcc("FRAM"));
     for (auto k = 0u; k < CHUNK_SIZE; k++) {
         for (auto j = 0u; j < CHUNK_SIZE; j++) {
             for (auto i = 0u; i < CHUNK_SIZE; i++) {
@@ -75,7 +75,7 @@ static void save_chunk(saver *s, std::pair<glm::ivec3, chunk *> chunk) {
     }
     s->end_lump(frames_lump);
 
-    auto surfs_lump = s->begin_lump('SURF');
+    auto surfs_lump = s->begin_lump(fourcc("SURF"));
     for (auto k = 0u; k < CHUNK_SIZE; k++) {
         for (auto j = 0u; j < CHUNK_SIZE; j++) {
             for (auto i = 0u; i < CHUNK_SIZE; i++) {
@@ -88,7 +88,7 @@ static void save_chunk(saver *s, std::pair<glm::ivec3, chunk *> chunk) {
     }
     s->end_lump(surfs_lump);
 
-    auto wire_lump = s->begin_lump('WIRE');
+    auto wire_lump = s->begin_lump(fourcc("WIRE"));
     for (auto k = 0u; k < CHUNK_SIZE; k++) {
         for (auto j = 0u; j < CHUNK_SIZE; j++) {
             for (auto i = 0u; i < CHUNK_SIZE; i++) {
@@ -101,7 +101,7 @@ static void save_chunk(saver *s, std::pair<glm::ivec3, chunk *> chunk) {
     }
     s->end_lump(wire_lump);
 
-    auto conn_lump = s->begin_lump('CONN');
+    auto conn_lump = s->begin_lump(fourcc("CONN"));
     for (auto k = 0u; k < CHUNK_SIZE; k++) {
         for (auto j = 0u; j < CHUNK_SIZE; j++) {
             for (auto i = 0u; i < CHUNK_SIZE; i++) {
@@ -122,7 +122,7 @@ static void save_zone(saver *s, ship_space *ship, std::pair<topo_info *, zone_in
     if (!ship->topo_to_pos(zone.first, &pos))
         return; /* not a real zone. this was probably outside. */
 
-    auto zone_lump = s->begin_lump('ZONE');
+    auto zone_lump = s->begin_lump(fourcc("ZONE"));
 
     s->write(pos.x);
     s->write(pos.y);
@@ -134,7 +134,7 @@ static void save_zone(saver *s, ship_space *ship, std::pair<topo_info *, zone_in
 }
 
 static void save_ship(saver *s, ship_space *ship) {
-    auto ship_lump = s->begin_lump('SHIP');
+    auto ship_lump = s->begin_lump(fourcc("SHIP"));
     for (auto chunk : ship->chunks) {
         save_chunk(s, chunk);
     }

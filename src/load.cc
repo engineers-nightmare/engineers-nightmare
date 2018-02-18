@@ -87,7 +87,7 @@ static uint32_t load_chunk(loader *l, ship_space *ship) {
         chunk_read += read;
         auto size = l->read_length(read);
         chunk_read += read;
-        if (type == 'INFO') {
+        if (type == fourcc("INFO")) {
             assert(size == sizeof(uint32_t) * 3);
 
             chunk_pos.x = l->read<uint32_t>(read);
@@ -98,7 +98,7 @@ static uint32_t load_chunk(loader *l, ship_space *ship) {
 
             chunk_pos.z = l->read<uint32_t>(read);
             chunk_read += read;
-        } else if (type == 'FRAM') {
+        } else if (type == fourcc("FRAM")) {
             assert(size == sizeof(unsigned char) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
 
             for (auto k = 0u; k < CHUNK_SIZE; k++) {
@@ -111,7 +111,7 @@ static uint32_t load_chunk(loader *l, ship_space *ship) {
                     }
                 }
             }
-        } else if (type == 'SURF') {
+        } else if (type == fourcc("SURF")) {
             assert(size == sizeof(unsigned char) * face_count * CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
 
             for (auto k = 0u; k < CHUNK_SIZE; k++) {
@@ -126,7 +126,7 @@ static uint32_t load_chunk(loader *l, ship_space *ship) {
                     }
                 }
             }
-        } else if (type == 'WIRE') {
+        } else if (type == fourcc("WIRE")) {
             assert(size == sizeof(unsigned char) * face_count * CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
 
             for (auto k = 0u; k < CHUNK_SIZE; k++) {
@@ -141,7 +141,7 @@ static uint32_t load_chunk(loader *l, ship_space *ship) {
                     }
                 }
             }
-        } else if (type == 'CONN') {
+        } else if (type == fourcc("CONN")) {
             assert(size == sizeof(uint32_t) * face_count * CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
 
             for (auto k = 0u; k < CHUNK_SIZE; k++) {
@@ -203,9 +203,9 @@ static void load_ship(loader *l, ship_space *ship) {
     while (ship_read < ship_size) {
         auto type = l->read_type(read);
         ship_read += read;
-        if (type == 'CHNK') {
+        if (type == fourcc("CHNK")) {
             ship_read += load_chunk(l, ship);
-        } else if (type == 'ZONE') {
+        } else if (type == fourcc("ZONE")) {
             ship_read += load_zone(l, zones);
         } else {
             // unknown, skip this
@@ -239,7 +239,7 @@ void load(ship_space *ship, char const *filename) {
 
     auto read = 0u;
     auto type = l.read_type(read);
-    assert(type == 'SHIP');
+    assert(type == fourcc("SHIP"));
     load_ship(&l, ship);
     assert(ship->validate());
 }
