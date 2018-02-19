@@ -39,9 +39,6 @@ struct chunk {
     struct render_chunk render_chunk;
     struct phys_chunk phys_chunk;
 
-    /* entities */
-    std::vector<c_entity> entities;
-
     void prepare_render();
     void prepare_phys(int x, int y, int z);
 
