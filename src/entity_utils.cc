@@ -253,15 +253,6 @@ void pop_entity_off(c_entity entity) {
 
     convert_static_rb_to_dynamic(*ph.rigid, *ph.mass);
     *sa.attached = false;
-
-    auto *ch = ship->get_chunk_containing(*sa.block);
-    for (auto it = ch->entities.begin(); it != ch->entities.end(); ++it) {
-        auto ce = *it;
-        if (ce == entity) {
-            ch->entities.erase(it);
-            break;
-        }
-    }
 }
 
 void
