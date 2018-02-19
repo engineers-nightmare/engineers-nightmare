@@ -106,40 +106,20 @@ struct paint_surface_tool : tool
     }
 
     void finish_paint(glm::ivec3 end) {
-        auto cur = start_block;
-
-        int i[2] = { 0, 0 };
-        if (start_index == surface_xm || start_index == surface_xp) {
-            i[0] = 1;
-            i[1] = 2;
-        }
-        else if (start_index == surface_ym || start_index == surface_yp) {
-            i[0] = 0;
-            i[1] = 2;
-        }
-        else {
-            i[0] = 0;
-            i[1] = 1;
-        }
-
         auto min = glm::min(start_block, end);
         auto max = glm::max(start_block, end);
 
-        auto s = glm::value_ptr(min);
-        auto e = glm::value_ptr(max);
-        auto c = glm::value_ptr(cur);
-        for (auto j = s[i[0]]; j <= e[i[0]]; j++) {
-            for (auto k = s[i[1]]; k <= e[i[1]]; k++) {
-                c[i[0]] = j;
-                c[i[1]] = k;
+        for (auto k = min.z; k <= max.z; k++) {
+            for (auto j = min.y; j <= max.y; j++) {
+                for (auto i = min.x; i <= max.x; i++) {
+                    auto pos = glm::ivec3(i, j, k);
+                    auto block = ship->get_block(pos);
+                    if (!block || block->type != block_frame || (mode == replace_mode::match && block->surfs[start_index] != select_type)) {
+                        continue;
+                    }
 
-                auto block = ship->get_block(cur);
-                if (!block || block->type != block_frame || (mode == replace_mode::match && block->surfs[start_index] != select_type)) {
-                    continue;
+                    ship->set_surface(pos, pos + surface_index_to_normal(start_index), start_index, replace_type);
                 }
-
-                auto o = cur + surface_index_to_normal(start_index);
-                ship->set_surface(cur, o, start_index, replace_type);
             }
         }
     }
@@ -202,75 +182,51 @@ struct paint_surface_tool : tool
         mat.bind(1, frame);
         draw_mesh(fp_mesh->hw);
 
+        glUseProgram(overlay_shader);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+
+        auto mesh = asset_man.get_surface_mesh(replace_type);
+
         if (can_use()) {
             switch (state) {
             case paint_state::started: {
-                auto cur = start_block;
-
-                int i[2] = { 0, 0 };
-                if (start_index == surface_xm || start_index == surface_xp) {
-                    i[0] = 1;
-                    i[1] = 2;
-                }
-                else if (start_index == surface_ym || start_index == surface_yp) {
-                    i[0] = 0;
-                    i[1] = 2;
-                }
-                else {
-                    i[0] = 0;
-                    i[1] = 1;
-                }
-
                 auto min = glm::min(start_block, rc.bl);
                 auto max = glm::max(start_block, rc.bl);
 
-                auto s = glm::value_ptr(min);
-                auto e = glm::value_ptr(max);
-                auto c = glm::value_ptr(cur);
-                for (auto j = s[i[0]]; j <= e[i[0]]; j++) {
-                    for (auto k = s[i[1]]; k <= e[i[1]]; k++) {
-                        c[i[0]] = j;
-                        c[i[1]] = k;
-                        auto block = ship->get_block(cur);
-                        if (!block || block->type != block_frame || (mode == replace_mode::match && block->surfs[start_index] != select_type)) {
-                            continue;
+                for (auto k = min.z; k <= max.z; k++) {
+                    for (auto j = min.y; j <= max.y; j++) {
+                        for (auto i = min.x; i <= max.x; i++) {
+                            auto pos = glm::ivec3(i, j, k);
+                            auto block = ship->get_block(pos);
+                            if (!block || block->type != block_frame || (mode == replace_mode::match && block->surfs[start_index] != select_type)) {
+                                continue;
+                            }
+
+                            auto mat = frame->alloc_aligned<mesh_instance>(1);
+                            mat.ptr->world_matrix = mat_block_surface(pos, index ^ 1);
+                            mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
+                            mat.bind(1, frame);
+                            draw_mesh(mesh.hw);
                         }
-
-                        auto mesh = asset_man.get_surface_mesh(replace_type);
-
-                        auto mat = frame->alloc_aligned<mesh_instance>(1);
-                        mat.ptr->world_matrix = mat_block_surface(cur, index ^ 1);
-                        mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
-                        mat.bind(1, frame);
-
-                        glUseProgram(overlay_shader);
-                        glEnable(GL_POLYGON_OFFSET_FILL);
-                        draw_mesh(mesh.hw);
-                        glDisable(GL_POLYGON_OFFSET_FILL);
-                        glUseProgram(simple_shader);
                     }
                 }
+
 
                 break;
             }
             case paint_state::idle: {
-                auto mesh = asset_man.get_surface_mesh(replace_type);
-
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
                 mat.ptr->world_matrix = mat_block_surface(glm::vec3(rc.bl), index ^ 1);
                 mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
                 mat.bind(1, frame);
-
-                glUseProgram(overlay_shader);
-                glEnable(GL_POLYGON_OFFSET_FILL);
                 draw_mesh(mesh.hw);
-                glDisable(GL_POLYGON_OFFSET_FILL);
-                glUseProgram(simple_shader);
-
                 break;
             }
             }
         }
+
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glUseProgram(simple_shader);
     }
 
     void get_description(char *str) override {
