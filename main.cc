@@ -410,29 +410,15 @@ remove_ents_from_surface(glm::ivec3 b, int face)
 {
     auto &surface_man = component_system_man.managers.surface_attachment_component_man;
 
-    chunk *ch = ship->get_chunk_containing(b);
-    for (auto it = ch->entities.begin(); it != ch->entities.end(); /* */) {
-        auto ce = *it;
+    for (auto i = 0u; i < surface_man.buffer.num; i++) {
+        auto ce = surface_man.instance_pool.entity[i];
 
-        /* entities may have been inserted in this chunk which don't have
-         * placement on a surface. don't corrupt everything if we hit one.
-         */
-        if (!surface_man.exists(ce)) {
-            ++it;
-            continue;
-        }
+        auto p = surface_man.instance_pool.block[i];
+        auto f = surface_man.instance_pool.face[i];
 
-        auto surface = surface_man.get_instance_data(ce);
-        auto p = *surface.block;
-        auto f = *surface.face;
-
-        //todo: fix height here. hardcoded is wrong
-        auto height = 1;
-        if (p.x == b.x && p.y == b.y && p.z <= b.z && p.z + height > b.z && f == face) {
+        // TODO: consider multiple attachment points?
+        if (p == b && f == face) {
             pop_entity_off(ce);
-        }
-        else {
-            ++it;
         }
     }
 }
