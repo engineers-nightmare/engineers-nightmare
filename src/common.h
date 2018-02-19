@@ -185,3 +185,7 @@ static inline constexpr uint32_t fourcc(char const tag[5]) {
         (unsigned char)(tag[2] << 8) |
         (unsigned char)(tag[3]);
 }
+
+static inline int idot(glm::ivec3 a, glm::ivec3 b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}

@@ -63,8 +63,6 @@ struct paint_surface_tool : tool
 
         auto *block = rc.block;
         auto bl = rc.bl;
-        auto index = normal_to_surface_index(&rc);
-        auto si = (surface_index)index;
         auto *other = ship->get_block(rc.p);
 
         // if we've started, only allow same plane
@@ -73,27 +71,8 @@ struct paint_surface_tool : tool
                 return false;
             }
 
-            switch ((surface_index)index) {
-            case surface_xp:
-            case surface_xm:
-                if (start_block.x != bl.x && start_index != si)
-                    return false;
-                break;
-            case surface_yp:
-            case surface_ym:
-                if (start_block.y != bl.y && start_index != si)
-                    return false;
-                break;
-            case surface_zp:
-            case surface_zm:
-                if (start_block.z != bl.z && start_index != si)
-                    return false;
-                break;
-            case face_count:
-                assert(false);
+            if (idot(rc.n, rc.bl - start_block) != 0)
                 return false;
-                break;
-            }
         }
 
         return (block && block->type == block_frame);
