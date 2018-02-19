@@ -415,9 +415,10 @@ remove_ents_from_surface(glm::ivec3 b, int face)
 
         auto p = surface_man.instance_pool.block[i];
         auto f = surface_man.instance_pool.face[i];
+        auto attached = surface_man.instance_pool.attached[i];
 
         // TODO: consider multiple attachment points?
-        if (p == b && f == face) {
+        if (attached && p == b && f == face) {
             pop_entity_off(ce);
         }
     }
