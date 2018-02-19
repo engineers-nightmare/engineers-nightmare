@@ -65,16 +65,10 @@ struct add_entity_tool : tool {
 
         auto index = normal_to_surface_index(&rc);
 
-        chunk *ch = ship->get_chunk_containing(rc.p);
-        /* the chunk we're placing into is guaranteed to exist, because there's
-        * a surface facing into it */
-        assert(ch);
-
         glm::mat4 mat = get_place_matrix(index);
 
         auto name = entity_names[entity_name_index];
         auto e = spawn_entity(name, rc.p, index ^ 1, mat);
-        ch->entities.push_back(e);
     }
 
     void cycle_mode() override {
