@@ -84,7 +84,7 @@ struct component_manager {
 
     virtual void entity(c_entity e) = 0;
 
-    bool exists(c_entity  e) {
+    bool exists(c_entity e) {
         return entity_instance_map.find(e) != entity_instance_map.end();
     }
 
