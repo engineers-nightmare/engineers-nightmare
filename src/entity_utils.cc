@@ -156,6 +156,8 @@ load_entities() {
     }
 }
 
+unsigned c_entity::entities_id_ref = 1;
+
 c_entity
 spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     auto ce = c_entity::spawn();

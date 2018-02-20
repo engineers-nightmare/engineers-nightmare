@@ -1,8 +1,9 @@
 #pragma once
 
-static unsigned entities_id_ref = 1;
-
 struct c_entity {
+
+    static unsigned entities_id_ref;
+
     unsigned id{0};
 
     bool operator==(c_entity const &other) const {
