@@ -1,0 +1,16 @@
+entity: {
+    components: {
+        type: {
+            name: "door-kit",
+        },
+        renderable: {
+            mesh: "crate-1",
+        },
+        position: {
+        },
+        physics: {
+            mesh: "crate-1",
+            mass: 1.0,
+        },
+    };
+};
