@@ -38,14 +38,12 @@ struct remove_entity_tool : tool
     }
 
     bool can_use() {
-        auto valid = rc.hit && c_entity::is_valid(entity);
-
-        auto &sam = component_system_man.managers.surface_attachment_component_man;
-        if (!valid || !sam.exists(entity)) {
-            return valid;
+        if (!rc.hit || !c_entity::is_valid(entity)) {
+            return false;
         }
 
-        return valid && *sam.get_instance_data(entity).attached;
+        auto &sam = component_system_man.managers.surface_attachment_component_man;
+        return sam.exists(entity) && *sam.get_instance_data(entity).attached;
     }
 
     void use() override {
@@ -93,12 +91,12 @@ struct remove_entity_tool : tool
 
     void get_description(char *str) override {
         auto &type_man = component_system_man.managers.type_component_man;
-        if (c_entity::is_valid(entity) && type_man.exists(entity)) {
+        if (can_use()) {
             auto type = type_man.get_instance_data(entity);
-            sprintf(str, "Remove %s", *type.name);
+            sprintf(str, "Detach %s", *type.name);
         }
         else {
-            strcpy(str, "Remove entity tool");
+            strcpy(str, "Detach entity tool");
         }
     }
 
