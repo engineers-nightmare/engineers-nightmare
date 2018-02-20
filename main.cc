@@ -388,23 +388,6 @@ resize(int width, int height)
     printf("Resized to %dx%d\n", width, height);
 }
 
-
-void
-destroy_entity(c_entity e) {
-    auto &physics_man = component_system_man.managers.physics_component_man;
-
-    if (physics_man.exists(e)) {
-        auto phys_data = physics_man.get_instance_data(e);
-        auto *per = (phys_ent_ref *) (*phys_data.rigid)->getUserPointer();
-        delete per;
-
-        teardown_physics_setup(nullptr, nullptr, phys_data.rigid);
-    }
-
-    component_system_man.managers.destroy_entity_instance(e);
-}
-
-
 void
 remove_ents_from_surface(glm::ivec3 b, int face)
 {

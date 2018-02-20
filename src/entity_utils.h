@@ -20,6 +20,9 @@ void
 attach_entity_to_surface(c_entity ce, glm::ivec3 p, int face);
 
 void
+destroy_entity(c_entity e);
+
+void
 pop_entity_off(c_entity entity);
 
 void

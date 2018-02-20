@@ -250,6 +250,21 @@ spawn_floating_generic_entity(glm::mat4 mat, const std::string &mesh, const std:
     return ce;
 }
 
+void
+destroy_entity(c_entity e) {
+    auto &physics_man = component_system_man.managers.physics_component_man;
+
+    if (physics_man.exists(e)) {
+        auto phys_data = physics_man.get_instance_data(e);
+        auto *per = (phys_ent_ref *)(*phys_data.rigid)->getUserPointer();
+        delete per;
+
+        teardown_physics_setup(nullptr, nullptr, phys_data.rigid);
+    }
+
+    component_system_man.managers.destroy_entity_instance(e);
+}
+
 void pop_entity_off(c_entity entity) {
     auto &phys = component_system_man.managers.physics_component_man;
     auto &sam = component_system_man.managers.surface_attachment_component_man;
