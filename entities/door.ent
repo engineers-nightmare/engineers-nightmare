@@ -30,6 +30,9 @@ entity: {
             desc: "",
         },
         wire_comms: {
-        }
+        },
+        convert_on_pop: {
+            type: "door-kit",
+        },
     };
 };
