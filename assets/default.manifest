@@ -46,6 +46,13 @@ assets = (
     offset = [0.0,0.0,0.0]
 },
 {
+    name = "crate-1"
+    type = "mesh"
+    file = "mesh/crate-1.obj"
+    scale = 0.0625
+    offset = [0.0,0.0,0.0]
+},
+{
     name = "face_marker"
     type = "mesh"
     file = "mesh/face_marker.obj"
