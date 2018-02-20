@@ -266,14 +266,29 @@ destroy_entity(c_entity e) {
 }
 
 void pop_entity_off(c_entity entity) {
+    auto &convert = component_system_man.managers.convert_on_pop_component_man;
+    auto &pos = component_system_man.managers.position_component_man;
     auto &phys = component_system_man.managers.physics_component_man;
-    auto &sam = component_system_man.managers.surface_attachment_component_man;
 
-    auto ph = phys.get_instance_data(entity);
-    auto sa = sam.get_instance_data(entity);
-
-    convert_static_rb_to_dynamic(*ph.rigid, *ph.mass);
-    *sa.attached = false;
+    if (convert.exists(entity)) {
+        // rip out the matrix, despawn the old entity, spawn one in its place of the target type.
+        // this path is used for large entities which get packed up into "kits" when popped.
+        auto target = *convert.get_instance_data(entity).type;
+        auto mat = *pos.get_instance_data(entity).mat;
+        destroy_entity(entity);
+        auto new_ent = spawn_entity(target, mat);
+        auto ph = phys.get_instance_data(new_ent);
+        convert_static_rb_to_dynamic(*ph.rigid, *ph.mass);
+    }
+    else {
+        // detach the existing entity retaining the rest of its state. this path is used for small
+        // entities whose popped representation is the same as their attached representation.
+        auto &sam = component_system_man.managers.surface_attachment_component_man;
+        auto ph = phys.get_instance_data(entity);
+        auto sa = sam.get_instance_data(entity);
+        *sa.attached = false;
+        convert_static_rb_to_dynamic(*ph.rigid, *ph.mass);
+    }
 }
 
 void
