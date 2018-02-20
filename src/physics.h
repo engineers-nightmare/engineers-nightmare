@@ -57,7 +57,7 @@ void
 build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisionShape **shape);
 
 void
-build_dynamic_physics_mesh(sw_mesh const * src, btConvexHullShape **shape);
+build_dynamic_physics_mesh(sw_mesh const * src, btCollisionShape **shape);
 
 void
 teardown_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidBody **rb);

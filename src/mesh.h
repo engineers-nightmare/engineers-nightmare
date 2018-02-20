@@ -51,7 +51,7 @@ struct mesh_data {
     std::string mesh{};
     sw_mesh *sw = nullptr;
     hw_mesh *hw = nullptr;
-    btConvexHullShape *phys_shape = nullptr;
+    btCollisionShape *phys_shape = nullptr;
 
     mesh_data() = default;
 
