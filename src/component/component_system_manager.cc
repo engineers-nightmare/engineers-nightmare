@@ -57,10 +57,11 @@ tick_gas_producers(ship_space *ship)
             continue;
         }
 
-        auto pos = get_coord_containing(*position.position);
+        auto mat = glm::mat3(*position.mat);
+        auto pos = glm::vec3((*position.mat)[3]);
 
         /* topo node containing the entity */
-        topo_info *t = topo_find(ship->get_topo_info(pos));
+        topo_info *t = topo_find(ship->get_topo_info(get_coord_containing(pos)));
         zone_info *z = ship->get_zone_info(t);
         if (!z) {
             /* if there wasn't a zone, make one */
@@ -81,9 +82,9 @@ tick_gas_producers(ship_space *ship)
 
             if (vis > 0.0f) {
                 /* emit some particles */
-                auto mat = glm::mat3(*position.mat);
+
                 for (auto j = 0; j < 5; j++) {
-                    auto spawn_pos = *position.position
+                    auto spawn_pos = pos
                             + 0.78f * glm::vec3(mat[2])
                             + glm::linearRand(0.25f * (mat[0] + mat[1]), 0.75f * (mat[0] + mat[1]));
                     spawn_pos.x = 0.1f * glm::round(spawn_pos.x / 0.1f);
@@ -180,7 +181,7 @@ tick_pressure_sensors(ship_space* ship) {
         auto ce = pressure_man.instance_pool.entity[i];
         assert(cwire_man.exists(ce));
 
-        auto pos = *pos_man.get_instance_data(ce).position;
+        auto pos = glm::vec3((*pos_man.get_instance_data(ce).mat)[3]);
         auto network = *cwire_man.get_instance_data(ce).network;
 
         glm::ivec3 pos_block = get_coord_containing(pos);
@@ -282,7 +283,7 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
         auto surface = surface_man.get_instance_data(ce);
         bool was_detected = *(proximity.is_detected);
 
-        auto pos = *pos_man.get_instance_data(ce).position;
+        auto pos = glm::vec3((*pos_man.get_instance_data(ce).mat)[3]);
         glm::ivec3 sensor_pos_block = get_coord_containing(pos);
         glm::ivec3 player_pos_block = get_coord_containing(pl->pos);
 

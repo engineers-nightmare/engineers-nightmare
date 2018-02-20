@@ -192,7 +192,6 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     *surface.attached = true;
 
     auto pos = pos_man.get_instance_data(ce);
-    *pos.position = p;
     *pos.mat = mat;
 
     return ce;
@@ -267,11 +266,6 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
     /* used by the player */
     assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
     assert(switch_man.exists(ce) || !"All [usable] entities need switch comp");
-
-    auto pos = *pos_man.get_instance_data(ce).position;
-    auto type = *type_man.get_instance_data(ce).name;
-    printf("player using the %s at %f %f %f\n",
-           type, pos.x, pos.y, pos.z);
 
     if (switch_man.exists(ce)) {
         /* publish new state on all attached comms wires */

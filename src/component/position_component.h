@@ -11,7 +11,6 @@
 struct position_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
-        glm::vec3 *position;
         glm::mat4 *mat;
     } instance_pool;
 
@@ -24,8 +23,6 @@ struct position_component_manager : component_manager {
         auto inst = lookup(e);
 
         d.entity = instance_pool.entity + inst.index;
-        d.position = instance_pool.position + inst.index;
-
         d.mat = instance_pool.mat + inst.index;
 
         return d;
