@@ -101,11 +101,13 @@ struct add_entity_tool : tool {
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = m;
+        mat.ptr->color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         mat.bind(1, frame);
 
-        glUseProgram(simple_shader);
+        glUseProgram(overlay_shader);
         auto mesh = asset_man.get_mesh(render->mesh);
         draw_mesh(mesh.hw);
+        glUseProgram(simple_shader);
     }
 
     void get_description(char *str) override {
