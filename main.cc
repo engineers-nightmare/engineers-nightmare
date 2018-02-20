@@ -822,8 +822,8 @@ struct play_state : game_state {
         key = lookup_key((*bind).second.binds.inputs[0]);
         char *pre = nullptr;
         if (c_entity::is_valid(use_entity)) {
-            auto sa = surf_man.get_instance_data(use_entity);
-            if (!*sa.attached) {
+            if (!surf_man.exists(use_entity) ||
+                !*(surf_man.get_instance_data(use_entity)).attached) {
                 pre = const_cast<char *>("Remove");
             }
             else if (switch_man.exists(use_entity)) {
@@ -935,8 +935,8 @@ struct play_state : game_state {
         if (rc_ent.hit && c_entity::is_valid(rc_ent.entity)) {
             // if entity is not bolted down, remove from world
             // otherwise, interact
-            auto sa = surf_man.get_instance_data(rc_ent.entity);
-            if (!*sa.attached && pl.use) {
+            if ((!surf_man.exists(rc_ent.entity) ||
+                !*(surf_man.get_instance_data(rc_ent.entity)).attached) && pl.use) {
                 destroy_entity(rc_ent.entity);
                 use_entity.id = 0;
             } else if (switch_man.exists(rc_ent.entity)) {
