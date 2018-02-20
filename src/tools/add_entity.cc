@@ -28,6 +28,7 @@ extern component_system_manager component_system_man;
 
 extern std::vector<std::string> entity_names;
 extern std::unordered_map<std::string, entity_data> entity_stubs;
+extern glm::mat4 get_fp_item_matrix();
 
 struct add_entity_tool : tool {
     unsigned entity_name_index = 0;
@@ -91,23 +92,34 @@ struct add_entity_tool : tool {
     }
 
     void preview(frame_data *frame) override {
-        if (!can_use())
-            return;
-
         auto index = normal_to_surface_index(&rc);
         auto render = type().get_component<renderable_component_stub>();
+        auto mesh = asset_man.get_mesh(render->mesh);
 
-        glm::mat4 m = get_place_matrix(index);
+        if (can_use()) {
+            /* draw preview */
+            glm::mat4 m = get_place_matrix(index);
+            auto mat = frame->alloc_aligned<mesh_instance>(1);
+            mat.ptr->world_matrix = m;
+            mat.ptr->color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            mat.bind(1, frame);
+
+            glUseProgram(overlay_shader);
+            draw_mesh(mesh.hw);
+            glUseProgram(simple_shader);
+        }
+
+        /* draw first person mesh */
+        auto convert = type().get_component<convert_on_pop_component_stub>();
+        if (convert) {
+            mesh = asset_man.get_mesh(entity_stubs[convert->type].get_component<renderable_component_stub>()->mesh);
+        }
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
-        mat.ptr->world_matrix = m;
-        mat.ptr->color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        mat.ptr->world_matrix = get_fp_item_matrix();
+        mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
         mat.bind(1, frame);
-
-        glUseProgram(overlay_shader);
-        auto mesh = asset_man.get_mesh(render->mesh);
         draw_mesh(mesh.hw);
-        glUseProgram(simple_shader);
     }
 
     void get_description(char *str) override {
