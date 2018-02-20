@@ -33,6 +33,11 @@ struct add_entity_tool : tool {
     unsigned entity_name_index = 0;
     raycast_info_block rc;
 
+    void select() override {
+        if (!entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>())
+            cycle_mode();   // make sure we've chosen a valid entity.
+    }
+
     void pre_use(player *pl) override {
         ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, cross_surface, &rc);
     }
