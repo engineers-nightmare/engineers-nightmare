@@ -73,7 +73,8 @@ struct add_entity_tool : tool {
         glm::mat4 mat = get_place_matrix(index);
 
         auto name = entity_names[entity_name_index];
-        auto e = spawn_entity(name, rc.p, index ^ 1, mat);
+        auto e = spawn_entity(name, mat);
+        attach_entity_to_surface(e, rc.p, index ^ 1);
     }
 
     void cycle_mode() override {

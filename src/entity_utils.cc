@@ -159,7 +159,7 @@ load_entities() {
 unsigned c_entity::entities_id_ref = 1;
 
 c_entity
-spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
+spawn_entity(const std::string &name, glm::mat4 mat) {
     auto ce = c_entity::spawn();
 
     auto & entity = entity_stubs[name];
@@ -173,7 +173,6 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
 
     auto &pos_man = component_system_man.managers.position_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
-    auto &surface_man = component_system_man.managers.surface_attachment_component_man;
 
     auto physics = physics_man.get_instance_data(ce);
     *physics.rigid = nullptr;
@@ -186,15 +185,21 @@ spawn_entity(const std::string &name, glm::ivec3 p, int face, glm::mat4 mat) {
     per->ce = ce;
     (*physics.rigid)->setUserPointer(per);
 
-    auto surface = surface_man.get_instance_data(ce);
-    *surface.block = p;
-    *surface.face = face;
-    *surface.attached = true;
-
     auto pos = pos_man.get_instance_data(ce);
     *pos.mat = mat;
 
     return ce;
+}
+
+void
+attach_entity_to_surface(c_entity ce, glm::ivec3 p, int face) {
+    auto &surface_man = component_system_man.managers.surface_attachment_component_man;
+    if (surface_man.exists(ce)) {
+        auto surface = surface_man.get_instance_data(ce);
+        *surface.block = p;
+        *surface.face = face;
+        *surface.attached = true;
+    }
 }
 
 extern physics *phy;
