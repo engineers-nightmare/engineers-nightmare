@@ -22,6 +22,7 @@ set(EN_SOURCES
     src/blob.cc
     src/char.cc
     src/component/component_system_manager.cc
+    src/component/convert_on_pop_component.cc
     src/component/display_component.cc
     src/component/door_component.cc
     src/component/gas_producer_component.cc

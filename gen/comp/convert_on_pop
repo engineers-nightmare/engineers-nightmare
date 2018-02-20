@@ -1,0 +1,2 @@
+stub,std::string,string,,type,.c_str()
+body,const char*,type,nullptr

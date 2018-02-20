@@ -327,6 +327,9 @@
     <ClCompile Include="src\save.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\convert_on_pop_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -520,6 +523,9 @@
     </ClInclude>
     <ClInclude Include="src\save.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\convert_on_pop_component.h">
+      <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
