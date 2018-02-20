@@ -33,8 +33,12 @@ struct add_entity_tool : tool {
     unsigned entity_name_index = 0;
     raycast_info_block rc;
 
+    entity_data const &type() const {
+        return entity_stubs[entity_names[entity_name_index]];
+    }
+
     void select() override {
-        if (!entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>())
+        if (!type().get_component<placeable_component_stub>())
             cycle_mode();   // make sure we've chosen a valid entity.
     }
 
@@ -59,7 +63,7 @@ struct add_entity_tool : tool {
     }
 
     int get_rotate() const {
-        auto place = entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>();
+        auto place = type().get_component<placeable_component_stub>();
         return place->rot;
     }
 
@@ -83,7 +87,7 @@ struct add_entity_tool : tool {
             if (entity_name_index >= entity_names.size()) {
                 entity_name_index = 0;
             }
-        } while (!entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>());
+        } while (!type().get_component<placeable_component_stub>());
     }
 
     void preview(frame_data *frame) override {
@@ -91,7 +95,7 @@ struct add_entity_tool : tool {
             return;
 
         auto index = normal_to_surface_index(&rc);
-        auto render = entity_stubs[entity_names[entity_name_index]].get_component<renderable_component_stub>();
+        auto render = type().get_component<renderable_component_stub>();
 
         glm::mat4 m = get_place_matrix(index);
 
@@ -134,7 +138,7 @@ struct add_entity_tool : tool {
         glm::mat4 m;
         auto rot_axis = glm::vec3{surface_index_to_normal(surface_zp)};
 
-        auto place = entity_stubs[entity_names[entity_name_index]].get_component<placeable_component_stub>();
+        auto place = type().get_component<placeable_component_stub>();
 
         float step = 1;
         switch (place->place) {
