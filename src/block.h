@@ -4,6 +4,15 @@ enum block_type {
     block_untouched,
     block_empty,
     block_frame,
+    block_corner_base = 8,
+    block_invcorner_base = 16,
+    block_slope_base = 24,
+    block_slope_extra_base = 32,
+
+    // bits to be combined with block_*_base for variants.
+    block_bit_xp = 1,
+    block_bit_yp = 2,
+    block_bit_zp = 4,
 };
 
 enum surface_type : unsigned char {
