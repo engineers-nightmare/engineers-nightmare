@@ -14,6 +14,13 @@ assets = (
     offset = [0.0,0.0,-0.5]
 },
 {
+    name = "frame-corner"
+    type = "mesh"
+    file = "mesh/frame-corner.obj"
+    scale = 0.0625
+    offset = [0.5,0.5,0.0]
+},
+{
     name = "fp_surface_glass"
     type = "mesh"
     file = "mesh/surface_glass.obj"
