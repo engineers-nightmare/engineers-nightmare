@@ -294,6 +294,24 @@ chunk::prepare_phys(int x, int y, int z)
                         }
                     }
                 }
+                else if ((b->type & ~7) == block_corner_base) {
+                    // A corner piece.
+                    auto mat = frame_render_data.corner_matrices[b->type & 7];
+                    mat[3][0] += i;
+                    mat[3][1] += j;
+                    mat[3][2] += k;
+                    stamp_at_mat(&verts, &indices, frame_render_data.frame_corner_mesh->sw,
+                        mat);
+                }
+                else if ((b->type & ~7) == block_invcorner_base) {
+                    // An inverse corner piece.
+                    auto mat = frame_render_data.corner_matrices[b->type & 7];
+                    mat[3][0] += i;
+                    mat[3][1] += j;
+                    mat[3][2] += k;
+                    stamp_at_mat(&verts, &indices, frame_render_data.frame_invcorner_mesh->sw,
+                        mat);
+                }
             }
         }
     }
