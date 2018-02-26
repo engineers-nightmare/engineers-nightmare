@@ -178,12 +178,26 @@ teardown_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidB
 
 static struct {
     const mesh_data * frame_mesh;
+    const mesh_data * frame_corner_mesh;
+    const mesh_data * frame_invcorner_mesh;
+    glm::mat4 corner_matrices[8];
 } frame_render_data;
 
 void
 mesher_init()
 {
     frame_render_data.frame_mesh = &asset_man.get_mesh("frame");
+    frame_render_data.frame_corner_mesh = &asset_man.get_mesh("frame-corner");
+    frame_render_data.frame_invcorner_mesh = &asset_man.get_mesh("frame-invcorner");
+
+    static const float rots[] = { 0.f, 90.f, 270.f, 180.f };
+   
+    for (auto i = 0; i < 8; i++) {
+        frame_render_data.corner_matrices[i] = glm::translate(glm::vec3(0.5f, 0.5f, 0.5f)) *
+            glm::eulerAngleZ(glm::radians(rots[i & 3])) *
+            glm::eulerAngleY(glm::radians((i & 4) ? 90.f : 0.f)) *
+            glm::translate(glm::vec3(-0.5f, -0.5f, -0.5f));
+    }
 }
 
 void
@@ -212,6 +226,24 @@ chunk::prepare_render()
                             stamp_at_mat(&verts, &indices, mesh->sw, mat);
                         }
                     }
+                }
+                else if ((b->type & ~7) == block_corner_base) {
+                    // A corner piece.
+                    auto mat = frame_render_data.corner_matrices[b->type & 7];
+                    mat[3][0] += i;
+                    mat[3][1] += j;
+                    mat[3][2] += k;
+                    stamp_at_mat(&verts, &indices, frame_render_data.frame_corner_mesh->sw,
+                        mat);
+                }
+                else if ((b->type & ~7) == block_invcorner_base) {
+                    // An inverse corner piece.
+                    auto mat = frame_render_data.corner_matrices[b->type & 7];
+                    mat[3][0] += i;
+                    mat[3][1] += j;
+                    mat[3][2] += k;
+                    stamp_at_mat(&verts, &indices, frame_render_data.frame_invcorner_mesh->sw,
+                        mat);
                 }
             }
         }
