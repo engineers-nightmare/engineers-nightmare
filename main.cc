@@ -296,7 +296,7 @@ init()
     frame_index = 0;
 
     pl.rot = glm::quat(1, 0, 0, 0);
-    pl.pos = glm::vec3(1.5f,1.5f,1.5f);
+    pl.pos = glm::vec3(2.5f,1.5f,1.5f);
     pl.active_tool_slot = 0;
     pl.ui_dirty = true;
 
