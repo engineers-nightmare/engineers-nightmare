@@ -200,6 +200,15 @@ mesher_init()
     }
 }
 
+glm::mat4
+get_corner_matrix(block_type type, glm::ivec3 pos) {
+    auto mat = frame_render_data.corner_matrices[type & 7];
+    mat[3][0] += pos.x;
+    mat[3][1] += pos.y;
+    mat[3][2] += pos.z;
+    return mat;
+}
+
 void
 chunk::prepare_render()
 {
@@ -228,22 +237,12 @@ chunk::prepare_render()
                     }
                 }
                 else if ((b->type & ~7) == block_corner_base) {
-                    // A corner piece.
-                    auto mat = frame_render_data.corner_matrices[b->type & 7];
-                    mat[3][0] += i;
-                    mat[3][1] += j;
-                    mat[3][2] += k;
                     stamp_at_mat(&verts, &indices, frame_render_data.frame_corner_mesh->sw,
-                        mat);
+                        get_corner_matrix(b->type, { i, j, k }));
                 }
                 else if ((b->type & ~7) == block_invcorner_base) {
-                    // An inverse corner piece.
-                    auto mat = frame_render_data.corner_matrices[b->type & 7];
-                    mat[3][0] += i;
-                    mat[3][1] += j;
-                    mat[3][2] += k;
                     stamp_at_mat(&verts, &indices, frame_render_data.frame_invcorner_mesh->sw,
-                        mat);
+                        get_corner_matrix(b->type, { i, j, k }));
                 }
             }
         }
@@ -295,22 +294,12 @@ chunk::prepare_phys(int x, int y, int z)
                     }
                 }
                 else if ((b->type & ~7) == block_corner_base) {
-                    // A corner piece.
-                    auto mat = frame_render_data.corner_matrices[b->type & 7];
-                    mat[3][0] += i;
-                    mat[3][1] += j;
-                    mat[3][2] += k;
                     stamp_at_mat(&verts, &indices, frame_render_data.frame_corner_mesh->sw,
-                        mat);
+                        get_corner_matrix(b->type, { i, j, k }));
                 }
                 else if ((b->type & ~7) == block_invcorner_base) {
-                    // An inverse corner piece.
-                    auto mat = frame_render_data.corner_matrices[b->type & 7];
-                    mat[3][0] += i;
-                    mat[3][1] += j;
-                    mat[3][2] += k;
                     stamp_at_mat(&verts, &indices, frame_render_data.frame_invcorner_mesh->sw,
-                        mat);
+                        get_corner_matrix(b->type, { i, j, k }));
                 }
             }
         }
