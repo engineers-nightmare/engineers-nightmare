@@ -295,7 +295,6 @@ void
 use_action_on_entity(ship_space *ship, c_entity ce) {
     auto &pos_man = component_system_man.managers.position_component_man;
     auto &switch_man = component_system_man.managers.switch_component_man;
-    auto &type_man = component_system_man.managers.type_component_man;
     auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     /* used by the player */

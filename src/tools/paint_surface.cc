@@ -62,7 +62,6 @@ struct paint_surface_tool : tool
             return false;
 
         auto *block = rc.block;
-        auto bl = rc.bl;
         auto *other = ship->get_block(rc.p);
 
         // if we've started, only allow same plane
