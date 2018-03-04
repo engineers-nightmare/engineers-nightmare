@@ -22,8 +22,8 @@ entity: {
         surface_attachment: {
         },
         power: {
-            required_power: 4,
-            max_required_power: 4,
+            required_power: 4.0,
+            max_required_power: 4.0,
         },
         light: {
             intensity: 0.15,

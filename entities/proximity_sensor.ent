@@ -19,8 +19,8 @@ entity: {
         surface_attachment: {
         },
         power: {
-            required_power: 1,
-            max_required_power: 1,
+            required_power: 1.0,
+            max_required_power: 1.0,
         },
         proximity_sensor: {
             range: 5.0,
