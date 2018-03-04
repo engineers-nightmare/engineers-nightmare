@@ -26,4 +26,7 @@ void
 pop_entity_off(c_entity entity);
 
 void
+set_entity_matrix(c_entity ce, glm::mat4 mat);
+
+void
 use_action_on_entity(ship_space *ship, c_entity ce);

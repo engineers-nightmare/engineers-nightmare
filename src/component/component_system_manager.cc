@@ -5,6 +5,7 @@
 #include "../asset_manager.h"
 #include "../particle.h"
 #include "../mesh.h"
+#include "../entity_utils.h"
 
 extern asset_manager asset_man;
 extern component_system_manager component_system_man;

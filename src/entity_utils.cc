@@ -292,6 +292,18 @@ void pop_entity_off(c_entity entity) {
 }
 
 void
+set_entity_matrix(c_entity ce, glm::mat4 mat) {
+    auto &phys_man = component_system_man.managers.physics_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
+
+    auto phy = phys_man.get_instance_data(ce);
+    auto pos = pos_man.get_instance_data(ce);
+
+    (*phy.rigid)->setWorldTransform(mat4_to_bt(mat));
+    *(pos.mat) = mat;
+}
+
+void
 use_action_on_entity(ship_space *ship, c_entity ce) {
     auto &pos_man = component_system_man.managers.position_component_man;
     auto &switch_man = component_system_man.managers.switch_component_man;
