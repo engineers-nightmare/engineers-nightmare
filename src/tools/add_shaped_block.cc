@@ -21,11 +21,12 @@ extern glm::mat4 get_corner_matrix(block_type type, glm::ivec3 pos);
 struct add_shaped_block_tool : tool
 {
     raycast_info_block rc;
+    block_type basic_type = block_corner_base;
     block_type type;
 
     void pre_use(player *pl) override {
         ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, enter_exit_framing, &rc);
-        type = block_corner_base;
+        type = basic_type;
 
         if (rc.hit) {
             auto frac = rc.hitCoord - glm::floor(rc.hitCoord);
@@ -45,6 +46,15 @@ struct add_shaped_block_tool : tool
         return rc.hit && !rc.inside;
     }
 
+    void alt_use() override {
+        if (basic_type == block_corner_base) {
+            basic_type = block_invcorner_base;
+        }
+        else {
+            basic_type = block_corner_base;
+        }
+    }
+
     void use() override
     {
         if (!can_use())
@@ -62,7 +72,7 @@ struct add_shaped_block_tool : tool
 
     void preview(frame_data *frame) override
     {
-        auto mesh = asset_man.get_mesh("frame-corner");
+        auto mesh = asset_man.get_mesh(basic_type == block_corner_base ? "frame-corner" : "frame-invcorner");
         auto mesh2 = asset_man.get_mesh("fp_frame");    // TODO
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
