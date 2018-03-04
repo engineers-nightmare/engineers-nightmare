@@ -16,6 +16,7 @@ extern ship_space *ship;
 
 extern asset_manager asset_man;
 extern glm::mat4 get_fp_item_matrix();
+extern glm::mat4 get_corner_matrix(block_type type, glm::ivec3 pos);
 
 struct add_shaped_block_tool : tool
 {
