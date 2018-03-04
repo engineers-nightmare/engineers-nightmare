@@ -40,15 +40,15 @@ struct add_shaped_block_tool : tool
 
         block *bl = ship->get_block(rc.p);
 
-        bl->type = block_frame;
+        bl->type = block_corner_base;
         /* dirty the chunk */
         ship->get_chunk_containing(rc.p)->dirty();
     }
 
     void preview(frame_data *frame) override
     {
-        auto mesh = asset_man.get_mesh("frame");
-        auto mesh2 = asset_man.get_mesh("fp_frame");
+        auto mesh = asset_man.get_mesh("frame-corner");
+        auto mesh2 = asset_man.get_mesh("fp_frame");    // TODO
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = get_fp_item_matrix();
@@ -60,7 +60,7 @@ struct add_shaped_block_tool : tool
             return; /* n/a */
 
         auto mat2 = frame->alloc_aligned<mesh_instance>(1);
-        mat2.ptr->world_matrix = mat_position(glm::vec3(rc.p));
+        mat2.ptr->world_matrix = get_corner_matrix(block_corner_base, rc.p);
         mat2.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
         mat2.bind(1, frame);
 
