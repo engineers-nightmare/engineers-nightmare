@@ -21,9 +21,11 @@ extern glm::mat4 get_corner_matrix(block_type type, glm::ivec3 pos);
 struct add_shaped_block_tool : tool
 {
     raycast_info_block rc;
+    block_type type;
 
     void pre_use(player *pl) override {
         ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, enter_exit_framing, &rc);
+        type = block_corner_base;
     }
 
     bool can_use() {
@@ -40,7 +42,7 @@ struct add_shaped_block_tool : tool
 
         block *bl = ship->get_block(rc.p);
 
-        bl->type = block_corner_base;
+        bl->type = type;
         /* dirty the chunk */
         ship->get_chunk_containing(rc.p)->dirty();
     }
@@ -60,7 +62,7 @@ struct add_shaped_block_tool : tool
             return; /* n/a */
 
         auto mat2 = frame->alloc_aligned<mesh_instance>(1);
-        mat2.ptr->world_matrix = get_corner_matrix(block_corner_base, rc.p);
+        mat2.ptr->world_matrix = get_corner_matrix(type, rc.p);
         mat2.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
         mat2.bind(1, frame);
 
