@@ -330,6 +330,9 @@
     <ClCompile Include="src\component\convert_on_pop_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
+    <ClCompile Include="src\tools\add_shaped_block.cc">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">

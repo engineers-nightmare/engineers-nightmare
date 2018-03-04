@@ -34,5 +34,6 @@ struct tool
     static tool *create_paint_surface_tool();
     static tool *create_cut_wall_tool();
     static tool *create_wiring_tool();
+    static tool *create_add_shaped_block_tool();
 };
 
