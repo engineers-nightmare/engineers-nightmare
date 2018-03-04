@@ -26,6 +26,19 @@ struct add_shaped_block_tool : tool
     void pre_use(player *pl) override {
         ship->raycast_block(pl->eye, pl->dir, MAX_REACH_DISTANCE, enter_exit_framing, &rc);
         type = block_corner_base;
+
+        if (rc.hit) {
+            auto frac = rc.hitCoord - glm::floor(rc.hitCoord);
+            if (rc.n.x < 0 || (frac.x > 0.5f && rc.n.x == 0)) {
+                type = (block_type)(type | block_bit_xp);
+            }
+            if (rc.n.y < 0 || (frac.y > 0.5f && rc.n.y == 0)) {
+                type = (block_type)(type | block_bit_yp);
+            }
+            if (rc.n.z < 0 || (frac.z > 0.5f && rc.n.z == 0)) {
+                type = (block_type)(type | block_bit_zp);
+            }
+        }
     }
 
     bool can_use() {
