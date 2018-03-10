@@ -654,6 +654,13 @@ void render() {
         dd::flush(SDL_GetTicks());
     }
 
+    auto *t = tools[pl.active_tool_slot];
+
+    if (t) {
+        t->pre_use(&pl);
+        t->preview(frame);
+    }
+
     current_game_state->render(frame);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -952,12 +959,6 @@ struct play_state : game_state {
     }
 
     void render(frame_data *frame) override {
-        auto *t = tools[pl.active_tool_slot];
-
-        if (t) {
-            t->pre_use(&pl);
-            t->preview(frame);
-        }
     }
 
     void set_slot(unsigned slot) {
