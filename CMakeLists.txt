@@ -63,6 +63,7 @@ set(EN_SOURCES
     src/tools/add_entity.cc
     src/tools/cut_wall.cc
     src/tools/paint_surface.cc
+    src/tools/customize_entity.cc
     src/tools/fire_projectile.cc
     src/tools/remove_block.cc
     src/tools/remove_surface.cc
