@@ -53,6 +53,12 @@ assets = (
     scale = 0.0625
 },
 {
+    name = "fp_customize_tool"
+    type = "mesh"
+    file = "mesh/customize.obj"
+    scale = 0.0625
+},
+{
     name = "display"
     type = "mesh"
     file = "mesh/display.obj"
