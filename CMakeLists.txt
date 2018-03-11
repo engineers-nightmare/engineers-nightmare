@@ -58,7 +58,6 @@ set(EN_SOURCES
     src/sprites.cc
     src/text.cc
     src/textureset.cc
-    src/tools/add_block.cc
     src/tools/add_shaped_block.cc
     src/tools/add_entity.cc
     src/tools/cut_wall.cc

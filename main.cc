@@ -409,7 +409,7 @@ remove_ents_from_surface(glm::ivec3 b, int face)
 
 std::array<tool*, 9> tools {
     //tool::create_fire_projectile_tool(&pl),
-    tool::create_add_block_tool(),
+    tool::create_add_shaped_block_tool(),
     tool::create_remove_block_tool(),
     tool::create_paint_surface_tool(),
     tool::create_remove_surface_tool(),
@@ -417,7 +417,6 @@ std::array<tool*, 9> tools {
     tool::create_remove_entity_tool(),
     tool::create_cut_wall_tool(),
     tool::create_wiring_tool(),
-    tool::create_add_shaped_block_tool(),
 };
 
 void

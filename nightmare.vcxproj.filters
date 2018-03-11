@@ -105,9 +105,6 @@
     <ClCompile Include="src\settings.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\tools\add_block.cc">
-      <Filter>Source Files\tools</Filter>
-    </ClCompile>
     <ClCompile Include="src\tools\remove_block.cc">
       <Filter>Source Files\tools</Filter>
     </ClCompile>

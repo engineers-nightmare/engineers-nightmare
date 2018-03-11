@@ -7,7 +7,6 @@
 #include "../player.h"
 #include "tools.h"
 
-
 extern GLuint overlay_shader;
 extern GLuint simple_shader;
 extern player pl;
@@ -38,7 +37,7 @@ mesh_data const * mesh_for_block_type(block_type t) {
 struct add_shaped_block_tool : tool
 {
     raycast_info_block rc;
-    block_type basic_type = block_corner_base;
+    block_type basic_type = block_frame;
     block_type type;
     unsigned bits;
 
@@ -49,6 +48,9 @@ struct add_shaped_block_tool : tool
         if (rc.hit) {
             auto frac = rc.hitCoord - glm::floor(rc.hitCoord);
 
+            if (basic_type == block_frame) {
+                return; /* no variations for this */
+            }
             if (basic_type == block_slope_base) {
                 bits = normal_to_surface_index(&rc);
                 switch (bits) {
@@ -71,7 +73,7 @@ struct add_shaped_block_tool : tool
 
                 type = (block_type)(basic_type + slope_table[bits]);
             }
-            else {
+            else {  /* corner / invcorner */
                 if (rc.n.x < 0 || (frac.x > 0.5f && rc.n.x == 0)) {
                     type = (block_type)(type | block_bit_xp);
                 }
@@ -90,14 +92,17 @@ struct add_shaped_block_tool : tool
     }
 
     void alt_use() override {
-        if (basic_type == block_corner_base) {
+        if (basic_type == block_frame) {
+            basic_type = block_corner_base;
+        }
+        else  if (basic_type == block_corner_base) {
             basic_type = block_invcorner_base;
         }
         else if (basic_type == block_invcorner_base) {
             basic_type = block_slope_base;
         }
         else {
-            basic_type = block_corner_base;
+            basic_type = block_frame;
         }
     }
 
@@ -142,7 +147,7 @@ struct add_shaped_block_tool : tool
 
     void get_description(char *str) override
     {
-        strcpy(str, "Place Shaped Framing");
+        strcpy(str, "Place Framing");
     }
 };
 

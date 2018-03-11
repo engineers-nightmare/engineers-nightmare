@@ -25,7 +25,6 @@ struct tool
     virtual void preview(frame_data *frame) {}
     virtual void get_description(char *str) = 0;
 
-    static tool *create_add_block_tool();
     static tool *create_remove_block_tool();
     static tool *create_remove_surface_tool();
     static tool *create_fire_projectile_tool(player *pl);

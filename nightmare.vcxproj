@@ -198,7 +198,6 @@
     <ClCompile Include="src\sprites.cc" />
     <ClCompile Include="src\text.cc" />
     <ClCompile Include="src\textureset.cc" />
-    <ClCompile Include="src\tools\add_block.cc" />
     <ClCompile Include="src\tools\add_entity.cc" />
     <ClCompile Include="src\tools\add_shaped_block.cc" />
     <ClCompile Include="src\tools\cut_wall.cc" />
