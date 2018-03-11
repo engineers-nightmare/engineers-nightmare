@@ -30,6 +30,7 @@ mesh_data const * mesh_for_block_type(block_type t) {
     case block_corner_base: return &asset_man.get_mesh("frame-corner");
     case block_invcorner_base: return &asset_man.get_mesh("frame-invcorner");
     case block_slope_base: return &asset_man.get_mesh("frame-sloped");
+    case block_slope_extra_base: return &asset_man.get_mesh("frame-sloped");
     default: return nullptr;
     }
 }
