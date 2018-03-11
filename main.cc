@@ -82,6 +82,7 @@ struct per_camera_params {
     glm::mat4 view_proj_matrix;
     glm::mat4 inv_centered_view_proj_matrix;
     float aspect;
+    float time;
 };
 
 void GLAPIENTRY
@@ -264,7 +265,7 @@ init()
     mesher_init();
 
     simple_shader = load_shader("shaders/chunk.vert", "shaders/chunk.frag");
-    overlay_shader = load_shader("shaders/overlay.vert", "shaders/unlit.frag");
+    overlay_shader = load_shader("shaders/overlay.vert", "shaders/overlay.frag");
     ui_shader = load_shader("shaders/ui.vert", "shaders/ui.frag");
     ui_sprites_shader = load_shader("shaders/ui_sprites.vert", "shaders/ui_sprites.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
@@ -407,7 +408,7 @@ remove_ents_from_surface(glm::ivec3 b, int face)
     }
 }
 
-std::array<tool*, 9> tools {
+std::array<tool*, 8> tools {
     //tool::create_fire_projectile_tool(&pl),
     tool::create_add_shaped_block_tool(),
     tool::create_remove_block_tool(),
@@ -579,6 +580,7 @@ void render() {
     camera_params.ptr->view_proj_matrix = mvp;
     camera_params.ptr->inv_centered_view_proj_matrix = glm::inverse(proj * centered_view);
     camera_params.ptr->aspect = (float)wnd.width / wnd.height;
+    camera_params.ptr->time = (float)frame_info.elapsed;
     camera_params.bind(0, frame);
 
     prepare_chunks();

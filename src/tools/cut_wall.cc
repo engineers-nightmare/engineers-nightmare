@@ -81,6 +81,7 @@ struct cut_wall_tool : tool {
                 door_center + u + v,
             };
 
+            glEnable(GL_BLEND);
             glUseProgram(overlay_shader);
             glEnable(GL_POLYGON_OFFSET_FILL);
 
@@ -98,6 +99,7 @@ struct cut_wall_tool : tool {
 
             glDisable(GL_POLYGON_OFFSET_FILL);
             glUseProgram(simple_shader);
+            glDisable(GL_BLEND);
         }
     }
 

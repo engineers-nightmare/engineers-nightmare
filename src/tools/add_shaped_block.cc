@@ -141,7 +141,9 @@ struct add_shaped_block_tool : tool
         mat2.bind(1, frame);
 
         glUseProgram(overlay_shader);
+        glEnable(GL_BLEND);
         draw_mesh(mesh->hw);
+        glDisable(GL_BLEND);
         glUseProgram(simple_shader);
     }
 

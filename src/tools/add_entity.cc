@@ -104,9 +104,11 @@ struct add_entity_tool : tool {
             mat.ptr->color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             mat.bind(1, frame);
 
+            glEnable(GL_BLEND);
             glUseProgram(overlay_shader);
             draw_mesh(mesh.hw);
             glUseProgram(simple_shader);
+            glDisable(GL_BLEND);
         }
 
         /* draw first person mesh */

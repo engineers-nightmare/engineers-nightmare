@@ -166,11 +166,13 @@ struct paint_surface_tool : tool
             mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
             mat.bind(1, frame);
 
+            glEnable(GL_BLEND);
             glUseProgram(overlay_shader);
             glEnable(GL_POLYGON_OFFSET_FILL);
             draw_mesh(mesh.hw);
             glDisable(GL_POLYGON_OFFSET_FILL);
             glUseProgram(simple_shader);
+            glDisable(GL_BLEND);
         }
 
         auto fp_mesh = get_fp_mesh();
@@ -183,6 +185,7 @@ struct paint_surface_tool : tool
 
         glUseProgram(overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
+        glEnable(GL_BLEND);
 
         auto mesh = asset_man.get_surface_mesh(replace_type);
 
@@ -224,6 +227,7 @@ struct paint_surface_tool : tool
             }
         }
 
+        glDisable(GL_BLEND);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glUseProgram(simple_shader);
     }

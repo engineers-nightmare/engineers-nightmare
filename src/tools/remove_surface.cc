@@ -67,9 +67,11 @@ struct remove_surface_tool : tool
         mat.bind(1, frame);
 
         glUseProgram(overlay_shader);
+        glEnable(GL_BLEND);
         glEnable(GL_POLYGON_OFFSET_FILL);
         draw_mesh(mesh.hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
+        glDisable(GL_BLEND);
         glUseProgram(simple_shader);
     }
 

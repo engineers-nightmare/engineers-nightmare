@@ -251,13 +251,16 @@ struct wiring_tool : tool
                 mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
                 mat.bind(1, frame);
 
+                glEnable(GL_BLEND);
                 glUseProgram(overlay_shader);
                 draw_mesh(mesh.hw);
                 glUseProgram(simple_shader);
+                glDisable(GL_BLEND);
                 return;
             }
 
             glUseProgram(overlay_shader);
+            glEnable(GL_BLEND);
             for (auto & pe : path) {
                 total_run++;
                 if (!ship->get_block(pe.pos)->has_wire[pe.face]) {
@@ -269,7 +272,7 @@ struct wiring_tool : tool
                     new_wire++;
                 }
             }
-
+            glDisable(GL_BLEND);
             glUseProgram(simple_shader);
         }
 
@@ -283,9 +286,11 @@ struct wiring_tool : tool
         mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
         mat.bind(1, frame);
 
+        glEnable(GL_BLEND);
         glUseProgram(overlay_shader);
         draw_mesh(mesh.hw);
         glUseProgram(simple_shader);
+        glDisable(GL_BLEND);
     }
 
     void get_description(char *str) override
