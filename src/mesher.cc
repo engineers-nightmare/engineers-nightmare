@@ -108,8 +108,8 @@ build_static_physics_mesh(sw_mesh const * src, btTriangleMesh **mesh, btCollisio
             vertex v3 = src->verts[*x++];
 
             phys->addTriangle(btVector3(v1.x, v1.y, v1.z),
-                              btVector3(v2.x, v2.y, v2.z),
-                              btVector3(v3.x, v3.y, v3.z));
+                btVector3(v2.x, v2.y, v2.z),
+                btVector3(v3.x, v3.y, v3.z));
         }
 
         new_shape = new btBvhTriangleMeshShape(phys, true, true);
@@ -177,10 +177,13 @@ teardown_physics_setup(btTriangleMesh **mesh, btCollisionShape **shape, btRigidB
 }
 
 static struct {
-    const mesh_data * frame_mesh;
-    const mesh_data * frame_corner_mesh;
-    const mesh_data * frame_invcorner_mesh;
+    mesh_data const * frame_mesh;
+    mesh_data const * frame_corner_mesh;
+    mesh_data const * frame_invcorner_mesh;
+    mesh_data const * frame_sloped_mesh;
     glm::mat4 corner_matrices[8];
+    glm::mat4 sloped_matrices[8];
+    glm::mat4 extra_matrices[4];
 } frame_render_data;
 
 void
@@ -189,20 +192,44 @@ mesher_init()
     frame_render_data.frame_mesh = &asset_man.get_mesh("frame");
     frame_render_data.frame_corner_mesh = &asset_man.get_mesh("frame-corner");
     frame_render_data.frame_invcorner_mesh = &asset_man.get_mesh("frame-invcorner");
+    frame_render_data.frame_sloped_mesh = &asset_man.get_mesh("frame-sloped");
 
-    static const float rots[] = { 0.f, 90.f, 270.f, 180.f };
-   
+    static float const rots[] = { 0.f, 90.f, 270.f, 180.f };
+
     for (auto i = 0; i < 8; i++) {
         frame_render_data.corner_matrices[i] = glm::translate(glm::vec3(0.5f, 0.5f, 0.5f)) *
             glm::eulerAngleZ(glm::radians(rots[i & 3])) *
             glm::eulerAngleY(glm::radians((i & 4) ? 90.f : 0.f)) *
             glm::translate(glm::vec3(-0.5f, -0.5f, -0.5f));
     }
+
+    for (auto i = 0; i < 8; i++) {
+        frame_render_data.sloped_matrices[i] = glm::translate(glm::vec3(0.5f, 0.5f, 0.5f)) *
+            glm::eulerAngleZ(glm::radians(rots[i & 3])) *
+            glm::eulerAngleY(glm::radians((i & 4) ? 180.f : 0.f)) *
+            glm::translate(glm::vec3(-0.5f, -0.5f, -0.5f));
+    }
+
+    for (auto i = 0; i < 4; i++) {
+        frame_render_data.extra_matrices[i] = glm::translate(glm::vec3(0.5f, 0.5f, 0.5f)) *
+            glm::eulerAngleZ(glm::radians(rots[i & 3])) *
+            glm::eulerAngleY(glm::radians(90.f)) *
+            glm::translate(glm::vec3(-0.5f, -0.5f, -0.5f));
+    }
 }
 
 glm::mat4
 get_corner_matrix(block_type type, glm::ivec3 pos) {
-    auto mat = frame_render_data.corner_matrices[type & 7];
+    glm::mat4 mat;
+    if ((type & ~3) == block_slope_extra_base) {
+        mat = frame_render_data.extra_matrices[type & 3];
+    }
+    else if ((type & ~7) == block_slope_base) {
+        mat = frame_render_data.sloped_matrices[type & 7];
+    }
+    else {
+        mat = frame_render_data.corner_matrices[type & 7];
+    }
     mat[3][0] += pos.x;
     mat[3][1] += pos.y;
     mat[3][2] += pos.z;
@@ -242,6 +269,14 @@ chunk::prepare_render()
                 }
                 else if ((b->type & ~7) == block_invcorner_base) {
                     stamp_at_mat(&verts, &indices, frame_render_data.frame_invcorner_mesh->sw,
+                        get_corner_matrix(b->type, { i, j, k }));
+                }
+                else if ((b->type & ~7) == block_slope_base) {
+                    stamp_at_mat(&verts, &indices, frame_render_data.frame_sloped_mesh->sw,
+                        get_corner_matrix(b->type, { i, j, k }));
+                }
+                else if ((b->type & ~3) == block_slope_extra_base) {
+                    stamp_at_mat(&verts, &indices, frame_render_data.frame_sloped_mesh->sw,
                         get_corner_matrix(b->type, { i, j, k }));
                 }
             }
@@ -299,6 +334,14 @@ chunk::prepare_phys(int x, int y, int z)
                 }
                 else if ((b->type & ~7) == block_invcorner_base) {
                     stamp_at_mat(&verts, &indices, frame_render_data.frame_invcorner_mesh->sw,
+                        get_corner_matrix(b->type, { i, j, k }));
+                }
+                else if ((b->type & ~7) == block_slope_base) {
+                    stamp_at_mat(&verts, &indices, frame_render_data.frame_sloped_mesh->sw,
+                        get_corner_matrix(b->type, { i, j, k }));
+                }
+                else if ((b->type & ~3) == block_slope_extra_base) {
+                    stamp_at_mat(&verts, &indices, frame_render_data.frame_sloped_mesh->sw,
                         get_corner_matrix(b->type, { i, j, k }));
                 }
             }
