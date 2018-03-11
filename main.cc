@@ -141,6 +141,11 @@ struct game_state {
 };
 
 
+void
+new_imgui_frame() {
+    ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+}
+
 game_state *current_game_state = game_state::create_play_state();
 
 void
@@ -1244,7 +1249,7 @@ struct menu_state : game_state {
 
     void render(frame_data *frame) override {
         ImGui::SetCurrentContext(default_context);
-        ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+        new_imgui_frame();
 
         // center on screen
         ImGui::SetNextWindowPos(ImVec2{ wnd.width / 2.0f, wnd.height / 2.0f }, 0, ImVec2{ 0.5f, 0.5f });
@@ -1362,7 +1367,7 @@ run()
         }
 
         ImGui::SetCurrentContext(offscreen_contexts[0]);
-        ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+        new_imgui_frame();
         ImGui::GetIO().DisplaySize = ImVec2(RENDER_DIM, RENDER_DIM);
         ImGui::GetIO().DisplayFramebufferScale = ImVec2(1, 1);
 
@@ -1392,7 +1397,7 @@ run()
         }
 
         ImGui::SetCurrentContext(offscreen_contexts[1]);
-        ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
+        new_imgui_frame();
         ImGui::GetIO().DisplaySize = ImVec2(RENDER_DIM, RENDER_DIM);
         ImGui::GetIO().DisplayFramebufferScale = ImVec2(1, 1);
 
