@@ -12,7 +12,7 @@
 
 extern GLuint simple_shader;
 extern GLuint highlight_shader;
-extern GLuint modelspace_uv_shader;
+extern GLuint screen_shader;
 
 extern ship_space *ship;
 
@@ -97,7 +97,7 @@ struct customize_entity_tool : tool
         asset_man.bind_render_textures(0);
 
         auto fp_screen = &asset_man.get_mesh("fp_customize_tool_screen");
-        glUseProgram(modelspace_uv_shader);
+        glUseProgram(screen_shader);
         draw_fp_display_mesh(frame, fp_screen, 2);
     }
 

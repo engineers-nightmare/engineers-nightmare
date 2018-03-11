@@ -106,6 +106,7 @@ unsigned frame_index;
 
 GLuint simple_shader, overlay_shader, ui_shader, ui_sprites_shader;
 GLuint sky_shader, particle_shader, modelspace_uv_shader, highlight_shader;
+GLuint screen_shader;
 GLuint palette_tex;
 GLuint sky_vao;
 ship_space *ship;
@@ -277,6 +278,7 @@ init()
     particle_shader = load_shader("shaders/particle.vert", "shaders/particle.frag");
     modelspace_uv_shader = load_shader("shaders/simple_modelspace_uv.vert", "shaders/simple.frag");
     highlight_shader = load_shader("shaders/highlight.vert", "shaders/highlight.frag");
+    screen_shader = load_shader("shaders/chunk.vert", "shaders/simple.frag");
 
     glUseProgram(simple_shader);
 
