@@ -235,6 +235,8 @@ struct wiring_tool : tool
         total_run = 0;
         new_wire = 0;
 
+        auto mesh = asset_man.get_mesh("face_marker");
+
         // TODO: clean this mess up.
         if (state == placing) {
             if (last_end != p) {
@@ -242,8 +244,6 @@ struct wiring_tool : tool
                 path = find_path(start, p);
                 pl.ui_dirty = true;
             }
-
-            auto mesh = asset_man.get_mesh("face_marker");
 
             if (path.empty()) {
                 auto mat = frame->alloc_aligned<mesh_instance>(1);
@@ -278,8 +278,6 @@ struct wiring_tool : tool
 
         if (!can_use())
             return; /* n/a */
-
-        auto mesh = asset_man.get_mesh("face_marker");
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = mat_block_face(glm::vec3(p.pos), p.face);
