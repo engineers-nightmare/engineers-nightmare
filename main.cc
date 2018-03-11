@@ -352,8 +352,6 @@ init()
 void
 resize(int width, int height)
 {
-    /* TODO: resize offscreen (but screen-sized) surfaces, etc. */
-    glViewport(0, 0, width, height);
     wnd.width = width;
     wnd.height = height;
 
