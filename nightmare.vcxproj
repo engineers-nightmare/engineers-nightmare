@@ -201,6 +201,7 @@
     <ClCompile Include="src\textureset.cc" />
     <ClCompile Include="src\tools\add_entity.cc" />
     <ClCompile Include="src\tools\add_shaped_block.cc" />
+    <ClCompile Include="src\tools\customize_entity.cc" />
     <ClCompile Include="src\tools\cut_wall.cc" />
     <ClCompile Include="src\tools\paint_surface.cc" />
     <ClCompile Include="src\tools\fire_projectile.cc" />

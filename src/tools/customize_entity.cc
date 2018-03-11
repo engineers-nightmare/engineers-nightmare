@@ -96,17 +96,23 @@ struct customize_entity_tool : tool
 
         asset_man.bind_render_textures(0);
 
+        auto fp_screen = &asset_man.get_mesh("fp_customize_tool_screen");
+        glUseProgram(modelspace_uv_shader);
+        draw_fp_display_mesh(frame, fp_screen, 2);
+    }
+
+    void do_offscreen_render() {
         ImGui::SetCurrentContext(offscreen_contexts[2]);
         new_imgui_frame();
         ImGui::GetIO().DisplaySize = ImVec2(RENDER_DIM, RENDER_DIM);
         ImGui::GetIO().DisplayFramebufferScale = ImVec2(1, 1);
 
         auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
         // center on screen
         // todo: modify NewFrame() to allow us to use this properly
-        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4}, 0, ImVec2{ 0.5f, 0.5f });
+        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
         {
             ImGui::Begin("First Window", nullptr, flags);
             {
@@ -125,10 +131,6 @@ struct customize_entity_tool : tool
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui::Render();
         }
-
-        auto fp_screen = &asset_man.get_mesh("fp_customize_tool_screen");
-        glUseProgram(modelspace_uv_shader);
-        draw_fp_display_mesh(frame, fp_screen, 2);
     }
 
     void draw_fp_mesh(frame_data *frame, const mesh_data *mesh) const {

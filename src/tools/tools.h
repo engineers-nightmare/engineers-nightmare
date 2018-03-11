@@ -22,6 +22,7 @@ struct tool
 
     virtual void cycle_mode() {}
 
+    virtual void do_offscreen_render() {}
     virtual void preview(frame_data *frame) {}
     virtual void get_description(char *str) = 0;
 

@@ -1421,6 +1421,11 @@ run()
             ImGui::Render();
         }
 
+        auto *t = tools[pl.active_tool_slot];
+        if (t) {
+            t->do_offscreen_render();
+        }
+
         /* SDL_PollEvent above has already pumped the input, so current key state is available */
         handle_input();
 
