@@ -7,7 +7,7 @@ entity: {
             mesh: "o2_gen",
         },
         placeable: {
-            rot: 15,
+            rot: 90,
             place: "half_block_snapped",
         },
         position: {
