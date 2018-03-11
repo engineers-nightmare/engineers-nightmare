@@ -25,6 +25,16 @@ static int slope_table[32] = {
     10,11,9,11,1,5,0,0 
 };
 
+mesh_data const * mesh_for_block_type(block_type t) {
+    if (t == block_frame) return &asset_man.get_mesh("frame");
+    switch (t & ~7) {
+    case block_corner_base: return &asset_man.get_mesh("frame-corner");
+    case block_invcorner_base: return &asset_man.get_mesh("frame-invcorner");
+    case block_slope_base: return &asset_man.get_mesh("frame-sloped");
+    default: return nullptr;
+    }
+}
+
 struct add_shaped_block_tool : tool
 {
     raycast_info_block rc;
@@ -91,15 +101,6 @@ struct add_shaped_block_tool : tool
         }
     }
 
-    mesh_data const * mesh_for_shape() const {
-        switch (basic_type) {
-        case block_corner_base: return &asset_man.get_mesh("frame-corner");
-        case block_invcorner_base: return &asset_man.get_mesh("frame-invcorner");
-        case block_slope_base: return &asset_man.get_mesh("frame-sloped");
-        default: return nullptr;
-        }
-    }
-
     void use() override
     {
         if (!can_use())
@@ -117,7 +118,7 @@ struct add_shaped_block_tool : tool
 
     void preview(frame_data *frame) override
     {
-        auto mesh = mesh_for_shape();
+        auto mesh = mesh_for_block_type(basic_type);
         auto mesh2 = asset_man.get_mesh("fp_frame");    // TODO
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
