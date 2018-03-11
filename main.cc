@@ -278,7 +278,7 @@ init()
     particle_shader = load_shader("shaders/particle.vert", "shaders/particle.frag");
     modelspace_uv_shader = load_shader("shaders/simple_modelspace_uv.vert", "shaders/simple.frag");
     highlight_shader = load_shader("shaders/highlight.vert", "shaders/highlight.frag");
-    screen_shader = load_shader("shaders/chunk.vert", "shaders/simple.frag");
+    screen_shader = load_shader("shaders/layered.vert", "shaders/simple.frag");
 
     glUseProgram(simple_shader);
 
