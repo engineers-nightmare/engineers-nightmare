@@ -20,6 +20,7 @@ wire_comms_component_manager::create_component_instance_data(unsigned count) {
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(unsigned) * count + align_size<unsigned>(size);
+    size = sizeof(char const *) * count + align_size<char const *>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -29,9 +30,11 @@ wire_comms_component_manager::create_component_instance_data(unsigned count) {
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.network = align_ptr((unsigned *)(new_pool.entity + count));
+    new_pool.label = align_ptr((char const * *)(new_pool.network + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.network, instance_pool.network, buffer.num * sizeof(unsigned));
+    memcpy(new_pool.label, instance_pool.label, buffer.num * sizeof(char const *));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -47,6 +50,7 @@ wire_comms_component_manager::destroy_instance(instance i) {
 
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
     instance_pool.network[i.index] = instance_pool.network[last_index];
+    instance_pool.label[i.index] = instance_pool.label[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
@@ -75,6 +79,8 @@ wire_comms_component_stub::assign_component_to_entity(c_entity entity) {
     auto data = man.get_instance_data(entity);        
 
     *data.network = 0;
+
+    *data.label = nullptr;
 };
 
 std::unique_ptr<component_stub> wire_comms_component_stub::from_config(const config_setting_t *config) {

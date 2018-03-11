@@ -12,6 +12,7 @@ struct wire_comms_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
         unsigned *network;
+        char const * *label;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -24,6 +25,8 @@ struct wire_comms_component_manager : component_manager {
 
         d.entity = instance_pool.entity + inst.index;
         d.network = instance_pool.network + inst.index;
+
+        d.label = instance_pool.label + inst.index;
 
         return d;
     }
