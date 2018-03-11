@@ -193,7 +193,7 @@ teardown_chunks()
 GLuint render_displays_fbo{ 0 };
 
 ImGuiContext *default_context;
-std::array<ImGuiContext*, 2> offscreen_contexts{};
+std::array<ImGuiContext*, 3> offscreen_contexts{};
 
 DDRenderInterfaceCoreGL *ddRenderIfaceGL;
 

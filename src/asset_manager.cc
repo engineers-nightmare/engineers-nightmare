@@ -184,7 +184,7 @@ void asset_manager::load_assets() {
         }
     }
 
-    render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 2);
+    render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 3);
 }
 
 const mesh_data & asset_manager::get_mesh(const std::string & mesh) const {
