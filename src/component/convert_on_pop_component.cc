@@ -80,8 +80,7 @@ convert_on_pop_component_stub::assign_component_to_entity(c_entity entity) {
 std::unique_ptr<component_stub> convert_on_pop_component_stub::from_config(const config_setting_t *config) {
     auto convert_on_pop_stub = std::make_unique<convert_on_pop_component_stub>();
 
-    auto type_member = config_setting_get_member(config, "type");
-    convert_on_pop_stub->type = config_setting_get_string(type_member);
+    convert_on_pop_stub->type = load_value_from_config<std::string>(config, "type");
 
     return std::move(convert_on_pop_stub);
 }

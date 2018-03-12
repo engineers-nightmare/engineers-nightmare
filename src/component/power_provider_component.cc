@@ -92,8 +92,7 @@ power_provider_component_stub::assign_component_to_entity(c_entity entity) {
 std::unique_ptr<component_stub> power_provider_component_stub::from_config(const config_setting_t *config) {
     auto power_provider_stub = std::make_unique<power_provider_component_stub>();
 
-    auto max_provided_member = config_setting_get_member(config, "max_provided");
-    power_provider_stub->max_provided = config_setting_get_float(max_provided_member);
+    power_provider_stub->max_provided = load_value_from_config<float>(config, "max_provided");
 
     return std::move(power_provider_stub);
 }
