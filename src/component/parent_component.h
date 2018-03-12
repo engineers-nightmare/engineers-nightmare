@@ -35,6 +35,8 @@ struct parent_component_manager : component_manager {
 struct parent_component_stub : component_stub {
     parent_component_stub() = default;
 
+    glm::mat4 local_mat{};
+
     void
     assign_component_to_entity(c_entity entity) override;
 
