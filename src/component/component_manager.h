@@ -41,6 +41,7 @@ struct entity_data {
 
     std::string name;
     std::vector<std::unique_ptr<component_stub>> components{};
+    std::vector<entity_data> children{};
 
     template<typename T>
     T *get_component() const {
