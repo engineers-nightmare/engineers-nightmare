@@ -58,31 +58,23 @@ load_entities() {
             assert(false);
         }
 
-        entity_data entity{};
-
-        // required to be a valid entity
-        std::unordered_map<std::string, bool> required_dependencies;
-        auto req_deps = component_stub::get_required_dependencies();
-        for (auto &&dep : req_deps) {
-            required_dependencies[dep] = false;
-        }
-
-        // component-defined dependencies
-        std::unordered_map<std::string, std::unordered_map<std::string, bool>> dependencies;
-
         printf("Loading entity from %s\n", f.c_str());
 
         entity_config_setting = config_lookup(&cfg, "entity");
         if (entity_config_setting != nullptr) {
-            /* http://www.hyperrealm.com/libconfig/libconfig_manual.html
-            * states
-            *  > int config_setting_length (const config_setting_t * setting)
-            *  > This function returns the number of settings in a group,
-            *  > or the number of elements in a list or array.
-            *  > For other types of settings, it returns 0.
-            *
-            * so the count can only ever be positive, despite the return type being int
-            */
+
+            entity_data entity{};
+
+            // required to be a valid entity
+            std::unordered_map<std::string, bool> required_dependencies;
+            auto req_deps = component_stub::get_required_dependencies();
+            for (auto &&dep : req_deps) {
+                required_dependencies[dep] = false;
+            }
+
+            // component-defined dependencies
+            std::unordered_map<std::string, std::unordered_map<std::string, bool>> dependencies;
+
             auto components = config_setting_lookup(entity_config_setting, "components");
             auto components_count = (unsigned)config_setting_length(components);
 
