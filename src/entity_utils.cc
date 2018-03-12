@@ -252,6 +252,7 @@ spawn_floating_generic_entity(glm::mat4 mat, const std::string &mesh, const std:
 
 void
 destroy_entity(c_entity e) {
+    // clean up `e` itself
     auto &physics_man = component_system_man.managers.physics_component_man;
 
     if (physics_man.exists(e)) {
@@ -261,6 +262,17 @@ destroy_entity(c_entity e) {
     }
 
     component_system_man.managers.destroy_entity_instance(e);
+
+    auto &parent_man = component_system_man.managers.parent_component_man;
+    // clean up the whole hierarchy descended from `e`
+    for (auto i = 0u; i < parent_man.buffer.num; /* */) {
+        if (parent_man.instance_pool.parent[i] == e) {
+            destroy_entity(parent_man.instance_pool.entity[i]);
+        }
+        else {
+            ++i;
+        }
+    }
 }
 
 void pop_entity_off(c_entity entity) {
