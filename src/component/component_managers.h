@@ -12,6 +12,7 @@
 #include "door_component.h"
 #include "gas_producer_component.h"
 #include "light_component.h"
+#include "parent_component.h"
 #include "physics_component.h"
 #include "placeable_component.h"
 #include "position_component.h"
@@ -36,6 +37,7 @@ struct component_managers {
         door_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         gas_producer_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         light_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        parent_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         physics_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         placeable_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         position_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
@@ -57,6 +59,7 @@ struct component_managers {
     door_component_manager door_component_man{};
     gas_producer_component_manager gas_producer_component_man{};
     light_component_manager light_component_man{};
+    parent_component_manager parent_component_man{};
     physics_component_manager physics_component_man{};
     placeable_component_manager placeable_component_man{};
     position_component_manager position_component_man{};
@@ -87,6 +90,9 @@ struct component_managers {
         }
         if (strcmp(comp_name, "light") == 0) {
             return light_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "parent") == 0) {
+            return parent_component_stub::from_config(config);
         }
         if (strcmp(comp_name, "physics") == 0) {
             return physics_component_stub::from_config(config);
@@ -140,6 +146,7 @@ struct component_managers {
         door_component_man.destroy_entity_instance(ce);
         gas_producer_component_man.destroy_entity_instance(ce);
         light_component_man.destroy_entity_instance(ce);
+        parent_component_man.destroy_entity_instance(ce);
         physics_component_man.destroy_entity_instance(ce);
         placeable_component_man.destroy_entity_instance(ce);
         position_component_man.destroy_entity_instance(ce);

@@ -132,6 +132,7 @@
     <ClCompile Include="src\component\door_component.cc" />
     <ClCompile Include="src\component\gas_producer_component.cc" />
     <ClCompile Include="src\component\light_component.cc" />
+    <ClCompile Include="src\component\parent_component.cc" />
     <ClCompile Include="src\component\physics_component.cc" />
     <ClCompile Include="src\component\placeable_component.cc" />
     <ClCompile Include="src\component\power_component.cc" />
@@ -227,6 +228,7 @@
     <ClInclude Include="src\component\door_component.h" />
     <ClInclude Include="src\component\gas_producer_component.h" />
     <ClInclude Include="src\component\light_component.h" />
+    <ClInclude Include="src\component\parent_component.h" />
     <ClInclude Include="src\component\physics_component.h" />
     <ClInclude Include="src\component\placeable_component.h" />
     <ClInclude Include="src\component\power_component.h" />

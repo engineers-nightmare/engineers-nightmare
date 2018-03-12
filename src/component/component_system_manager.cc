@@ -384,6 +384,18 @@ tick_readers(ship_space *ship) {
     }
 }
 
+void
+build_absolute_transforms() {
+    auto &parent_man = component_system_man.managers.parent_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
+
+    for (auto i = 0u; i < parent_man.buffer.num; i++) {
+        auto ce = parent_man.instance_pool.entity[i];
+        auto parent = parent_man.instance_pool.parent[i];
+        *pos_man.get_instance_data(ce).mat = *pos_man.get_instance_data(parent).mat * parent_man.instance_pool.local_mat[i];
+    }
+}
+
 extern GLuint modelspace_uv_shader;
 
 void

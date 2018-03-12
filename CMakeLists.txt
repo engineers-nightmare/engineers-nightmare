@@ -27,6 +27,7 @@ set(EN_SOURCES
     src/component/door_component.cc
     src/component/gas_producer_component.cc
     src/component/light_component.cc
+    src/component/parent_component.cc
     src/component/physics_component.cc
     src/component/placeable_component.cc
     src/component/power_component.cc
