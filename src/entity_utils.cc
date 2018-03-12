@@ -38,9 +38,9 @@ load_entity(entity_data& entity, config_setting_t *e) {
         auto component = config_setting_get_elem(components, i);
         printf("  Component: %s\n", component->name);
 
-        auto stub_ptr = component_system_man.managers.get_stub(component->name, component).release();
+        auto stub_ptr = component_system_man.managers.get_stub(component->name, component);
 
-        auto type_stub = dynamic_cast<type_component_stub*>(stub_ptr);
+        auto type_stub = dynamic_cast<type_component_stub*>(stub_ptr.get());
         if (type_stub) {
             entity.name = type_stub->name;
         }
@@ -51,7 +51,7 @@ load_entity(entity_data& entity, config_setting_t *e) {
             dependencies[component->name][dep] = false;
         }
 
-        entity.components.emplace_back(stub_ptr);
+        entity.components.emplace_back(std::move(stub_ptr));
     }
 
     std::set<std::string> keys;
