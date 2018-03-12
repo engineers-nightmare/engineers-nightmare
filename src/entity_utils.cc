@@ -256,9 +256,7 @@ destroy_entity(c_entity e) {
 
     if (physics_man.exists(e)) {
         auto phys_data = physics_man.get_instance_data(e);
-        auto *per = (phys_ent_ref *)(*phys_data.rigid)->getUserPointer();
-        delete per;
-
+        delete (phys_ent_ref *)(*phys_data.rigid)->getUserPointer();
         teardown_physics_setup(nullptr, nullptr, phys_data.rigid);
     }
 
