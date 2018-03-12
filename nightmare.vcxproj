@@ -283,6 +283,7 @@
     <None Include="entities\display.ent">
       <FileType>Text</FileType>
     </None>
+    <None Include="entities\door-kit.ent" />
     <None Include="entities\door.ent">
       <FileType>Text</FileType>
     </None>

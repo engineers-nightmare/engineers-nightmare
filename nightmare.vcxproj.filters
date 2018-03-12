@@ -568,5 +568,8 @@
     <None Include="entities\warning_light.ent">
       <Filter>Header Files\entities</Filter>
     </None>
+    <None Include="entities\door-kit.ent">
+      <Filter>Header Files\entities</Filter>
+    </None>
   </ItemGroup>
 </Project>
