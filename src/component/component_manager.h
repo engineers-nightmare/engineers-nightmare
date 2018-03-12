@@ -30,7 +30,7 @@ struct component_stub {
     virtual std::vector<std::string> get_dependencies() = 0;
 
     static std::vector<std::string> get_required_dependencies() {
-        return {"type", "renderable", "physics", "position"};
+        return {"type", "renderable", "position"};
     }
 
     virtual ~component_stub() = default;
