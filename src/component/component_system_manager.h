@@ -86,3 +86,14 @@ std::string load_value_from_config<std::string>(config_setting_t const *s, char 
     auto m = config_setting_get_member(s, key);
     return config_setting_get_string(m);
 }
+
+template<>
+static inline
+glm::mat4 load_value_from_config<glm::mat4>(config_setting_t const *s, char const *key) {
+    auto m = config_setting_get_member(s, key);
+    float v[16]{};
+    for (int i = 0; i < 16; i++) {
+        v[i] = (float)config_setting_get_float_elem(m, i);
+    }
+    return glm::make_mat4(v);
+}

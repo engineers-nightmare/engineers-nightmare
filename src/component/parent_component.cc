@@ -80,11 +80,13 @@ parent_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.parent = c_entity{};
 
-    *data.local_mat = glm::mat4(0);
+    *data.local_mat = local_mat;
 };
 
 std::unique_ptr<component_stub> parent_component_stub::from_config(const config_setting_t *config) {
     auto parent_stub = std::make_unique<parent_component_stub>();
+
+    parent_stub->local_mat = load_value_from_config<glm::mat4>(config, "local_mat");
 
     return std::move(parent_stub);
 }

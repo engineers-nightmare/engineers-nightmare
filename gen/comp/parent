@@ -1,3 +1,4 @@
+stub,glm::mat4,glm::mat4,,local_mat,
 body,c_entity,parent,c_entity{}
 body,glm::mat4,local_mat,glm::mat4(0)
 depends,position
