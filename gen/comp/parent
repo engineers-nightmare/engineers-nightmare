@@ -1,0 +1,3 @@
+body,c_entity,parent,c_entity{}
+body,glm::mat4,local_mat,glm::mat4(0)
+depends,position

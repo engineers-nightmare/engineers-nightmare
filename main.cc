@@ -606,6 +606,7 @@ void render() {
         }
     }
 
+    build_absolute_transforms();
     glUseProgram(simple_shader);
     draw_renderables(frame);
     glUseProgram(simple_shader);

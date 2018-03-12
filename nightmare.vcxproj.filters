@@ -330,6 +330,9 @@
     <ClCompile Include="src\tools\add_shaped_block.cc">
       <Filter>Source Files\tools</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\parent_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -525,6 +528,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\component\convert_on_pop_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\parent_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
