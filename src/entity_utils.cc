@@ -86,6 +86,19 @@ load_entity(entity_data& entity, config_setting_t *e) {
         }
     }
 
+    auto children = config_setting_lookup(e, "children");
+    if (children) {
+        auto children_count = (unsigned)config_setting_length(children);
+
+        for (unsigned i = 0; i < children_count; ++i) {
+            auto child = config_setting_get_elem(children, i);
+            entity_data child_entity;
+            if (!load_entity(child_entity, child))
+                return false;
+            entity.children.emplace_back(std::move(child_entity));
+        }
+    }
+
     return true;
 }
 
