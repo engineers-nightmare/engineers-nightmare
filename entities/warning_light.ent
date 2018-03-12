@@ -31,5 +31,22 @@ entity: {
         },
         wire_comms: {
         },
-    };
+    },
+
+    children: (
+        {
+            components: {
+                renderable: { mesh: "warning_light", },
+                position: {},
+                type: { name: "warning light extra bit" },
+                parent: {
+                    local_mat: (
+                        1.0, 0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0, 0.0,
+                        0.0, 0.0, 1.0, 0.0,
+                        1.0, 0.0, 0.0, 1.0),
+                },
+            },
+        }
+    );
 };
