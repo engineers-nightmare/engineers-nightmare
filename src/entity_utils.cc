@@ -176,6 +176,14 @@ spawn_entity_inner(const entity_data& entity) {
         comp->assign_component_to_entity(ce);
     }
 
+    auto &parent_man = component_system_man.managers.parent_component_man;
+    for (auto &child : entity.children) {
+        /* TODO: children with physics -- we don't have a real matrix for them yet. */
+        auto child_ce = spawn_entity_inner(child);
+        auto child_parent = parent_man.get_instance_data(child_ce);
+        *child_parent.parent = ce;
+    }
+
     return ce;
 }
 
