@@ -168,18 +168,22 @@ load_entities() {
 
 unsigned c_entity::entities_id_ref = 1;
 
-c_entity
-spawn_entity(const std::string &name, glm::mat4 mat) {
+static c_entity
+spawn_entity_inner(const entity_data& entity) {
     auto ce = c_entity::spawn();
-
-    auto & entity = entity_stubs[name];
-
-    auto render_stub = entity.get_component<renderable_component_stub>();
-    assert(render_stub);
 
     for (auto &comp : entity.components) {
         comp->assign_component_to_entity(ce);
     }
+
+    return ce;
+}
+
+c_entity
+spawn_entity(const std::string &name, glm::mat4 mat) {
+
+    auto & entity = entity_stubs[name];
+    auto ce = spawn_entity_inner(entity);
 
     auto &pos_man = component_system_man.managers.position_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
