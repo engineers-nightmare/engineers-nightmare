@@ -174,16 +174,18 @@ spawn_entity(const std::string &name, glm::mat4 mat) {
     auto &pos_man = component_system_man.managers.position_component_man;
     auto &physics_man = component_system_man.managers.physics_component_man;
 
-    auto physics = physics_man.get_instance_data(ce);
-    *physics.rigid = nullptr;
-    std::string m = *physics.mesh;
-    auto const &phys_mesh = asset_man.get_mesh(m);
-    build_rigidbody(mat, phys_mesh.phys_shape, physics.rigid);
-    /* so that we can get back to the entity from a phys raycast */
-    /* TODO: these should really come from a dense pool rather than the generic allocator */
-    auto per = new phys_ent_ref;
-    per->ce = ce;
-    (*physics.rigid)->setUserPointer(per);
+    if (physics_man.exists(ce)) {
+        auto physics = physics_man.get_instance_data(ce);
+        *physics.rigid = nullptr;
+        std::string m = *physics.mesh;
+        auto const &phys_mesh = asset_man.get_mesh(m);
+        build_rigidbody(mat, phys_mesh.phys_shape, physics.rigid);
+        /* so that we can get back to the entity from a phys raycast */
+        /* TODO: these should really come from a dense pool rather than the generic allocator */
+        auto per = new phys_ent_ref;
+        per->ce = ce;
+        (*physics.rigid)->setUserPointer(per);
+    }
 
     auto pos = pos_man.get_instance_data(ce);
     *pos.mat = mat;
