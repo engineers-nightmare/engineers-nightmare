@@ -52,6 +52,7 @@ struct mesh_data {
     sw_mesh *sw = nullptr;
     hw_mesh *hw = nullptr;
     btCollisionShape *phys_shape = nullptr;
+    bool nonconvex = false;
 
     mesh_data() = default;
 

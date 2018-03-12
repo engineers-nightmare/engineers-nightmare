@@ -115,6 +115,11 @@ void asset_manager::load_asset_manifest(char const *filename) {
                     m.sw->verts[i].z += oz;
                 }
             }
+
+            int nonconvex;
+            if (config_setting_lookup_bool(asset_setting, "nonconvex", &nonconvex)) {
+                m.nonconvex = nonconvex != 0;
+            }
         }
         else if (!strcmp(asset_type, asset_type::skybox)) {
             char const *asset_name;
