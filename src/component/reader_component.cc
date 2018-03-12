@@ -98,11 +98,9 @@ reader_component_stub::assign_component_to_entity(c_entity entity) {
 std::unique_ptr<component_stub> reader_component_stub::from_config(const config_setting_t *config) {
     auto reader_stub = std::make_unique<reader_component_stub>();
 
-    auto name_member = config_setting_get_member(config, "name");
-    reader_stub->name = config_setting_get_string(name_member);
+    reader_stub->name = load_value_from_config<std::string>(config, "name");
 
-    auto desc_member = config_setting_get_member(config, "desc");
-    reader_stub->desc = config_setting_get_string(desc_member);
+    reader_stub->desc = load_value_from_config<std::string>(config, "desc");
 
     return std::move(reader_stub);
 }

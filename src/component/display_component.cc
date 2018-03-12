@@ -80,8 +80,7 @@ display_component_stub::assign_component_to_entity(c_entity entity) {
 std::unique_ptr<component_stub> display_component_stub::from_config(const config_setting_t *config) {
     auto display_stub = std::make_unique<display_component_stub>();
 
-    auto mesh_member = config_setting_get_member(config, "mesh");
-    display_stub->mesh = config_setting_get_string(mesh_member);
+    display_stub->mesh = load_value_from_config<std::string>(config, "mesh");
 
     return std::move(display_stub);
 }

@@ -1,4 +1,4 @@
-stub,std::string,string,,mesh,.c_str()
+stub,std::string,std::string,,mesh,.c_str()
 depends,power,reader
 body,const char*,mesh,nullptr
 body,float,pos,1

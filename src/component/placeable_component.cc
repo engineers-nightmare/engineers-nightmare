@@ -72,11 +72,9 @@ placeable_component_stub::assign_component_to_entity(c_entity entity) {
 std::unique_ptr<component_stub> placeable_component_stub::from_config(const config_setting_t *config) {
     auto placeable_stub = std::make_unique<placeable_component_stub>();
 
-    auto rot_member = config_setting_get_member(config, "rot");
-    placeable_stub->rot = config_setting_get_int(rot_member);
+    placeable_stub->rot = load_value_from_config<int>(config, "rot");
 
-    auto place_member = config_setting_get_member(config, "place");
-    placeable_stub->place = config_setting_get_placement(place_member);
+    placeable_stub->place = load_value_from_config<placement>(config, "place");
 
     return std::move(placeable_stub);
 }

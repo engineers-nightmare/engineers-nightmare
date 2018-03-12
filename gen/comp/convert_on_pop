@@ -1,2 +1,2 @@
-stub,std::string,string,,type,.c_str()
+stub,std::string,std::string,,type,.c_str()
 body,const char*,type,nullptr

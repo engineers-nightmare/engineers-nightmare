@@ -98,8 +98,7 @@ door_component_stub::assign_component_to_entity(c_entity entity) {
 std::unique_ptr<component_stub> door_component_stub::from_config(const config_setting_t *config) {
     auto door_stub = std::make_unique<door_component_stub>();
 
-    auto mesh_member = config_setting_get_member(config, "mesh");
-    door_stub->mesh = config_setting_get_string(mesh_member);
+    door_stub->mesh = load_value_from_config<std::string>(config, "mesh");
 
     return std::move(door_stub);
 }

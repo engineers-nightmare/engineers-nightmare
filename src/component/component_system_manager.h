@@ -55,3 +55,34 @@ draw_doors(frame_data *frame);
 
 void
 build_absolute_transforms();
+
+template<typename T>
+T load_value_from_config(config_setting_t const *s, char const *key) = delete;
+
+template<>
+static inline
+float load_value_from_config<float>(config_setting_t const *s, char const *key) {
+    auto m = config_setting_get_member(s, key);
+    return (float)config_setting_get_float(m);
+}
+
+template<>
+static inline
+int load_value_from_config<int>(config_setting_t const *s, char const *key) {
+    auto m = config_setting_get_member(s, key);
+    return config_setting_get_int(m);
+}
+
+template<>
+static inline
+placement load_value_from_config<placement>(config_setting_t const *s, char const *key) {
+    auto m = config_setting_get_member(s, key);
+    return config_setting_get_placement(m);
+}
+
+template<>
+static inline
+std::string load_value_from_config<std::string>(config_setting_t const *s, char const *key) {
+    auto m = config_setting_get_member(s, key);
+    return config_setting_get_string(m);
+}

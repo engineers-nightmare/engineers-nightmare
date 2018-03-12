@@ -236,8 +236,7 @@ std::unique_ptr<component_stub> %(comp_name)s_component_stub::from_config(const 
 """
 
 impl_template_13_each="""
-    auto %(name)s_member = config_setting_get_member(config, "%(name)s");
-    %(comp_name)s_stub->%(name)s = config_setting_get_%(type)s(%(name)s_member);
+    %(comp_name)s_stub->%(name)s = load_value_from_config<%(type)s>(config, "%(name)s");
 """
 
 impl_template_14="""
