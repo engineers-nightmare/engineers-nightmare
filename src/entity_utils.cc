@@ -19,6 +19,76 @@ extern player pl;
 std::vector<std::string> entity_names{};
 std::unordered_map<std::string, entity_data> entity_stubs{};
 
+bool
+load_entity(entity_data& entity, config_setting_t *e) {
+    // required to be a valid entity
+    std::unordered_map<std::string, bool> required_dependencies;
+    auto req_deps = component_stub::get_required_dependencies();
+    for (auto &&dep : req_deps) {
+        required_dependencies[dep] = false;
+    }
+
+    // component-defined dependencies
+    std::unordered_map<std::string, std::unordered_map<std::string, bool>> dependencies;
+
+    auto components = config_setting_lookup(e, "components");
+    auto components_count = (unsigned)config_setting_length(components);
+
+    for (unsigned i = 0; i < components_count; ++i) {
+        auto component = config_setting_get_elem(components, i);
+        printf("  Component: %s\n", component->name);
+
+        auto stub_ptr = component_system_man.managers.get_stub(component->name, component).release();
+
+        auto type_stub = dynamic_cast<type_component_stub*>(stub_ptr);
+        if (type_stub) {
+            entity.name = type_stub->name;
+        }
+
+        auto deps = stub_ptr->get_dependencies();
+        dependencies[component->name] = {};
+        for (auto &&dep : deps) {
+            dependencies[component->name][dep] = false;
+        }
+
+        entity.components.emplace_back(stub_ptr);
+    }
+
+    std::set<std::string> keys;
+    for (auto &&comp : dependencies) {
+        keys.insert(comp.first);
+    }
+
+    for (auto &&comp : dependencies) {
+        for (auto &&dep : comp.second) {
+            dep.second = keys.count(dep.first) != 0;
+        }
+    }
+
+    for (auto &&dep : required_dependencies) {
+        dep.second = keys.count(dep.first) != 0;
+    }
+
+    auto valid = true;
+    for (auto &&comp : dependencies) {
+        for (auto &&dep : comp.second) {
+            if (!dep.second) {
+                printf("!! Entity \"%s\" missing '%s' component dependency [%s]\n", entity.name.c_str(), comp.first.c_str(), dep.first.c_str());
+                return false;
+            }
+        }
+    }
+
+    for (auto &req : required_dependencies) {
+        if (!req.second) {
+            printf("!! Entity \"%s\" missing required [%s] component\n", entity.name.c_str(), req.first.c_str());
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void
 load_entities() {
     std::vector<std::string> files;
@@ -46,7 +116,6 @@ load_entities() {
 
     for (auto &f : files) {
         config_t cfg{};
-        config_setting_t *entity_config_setting = nullptr;
         config_init(&cfg);
 
         if (!config_read_file(&cfg, f.c_str())) {
@@ -60,80 +129,16 @@ load_entities() {
 
         printf("Loading entity from %s\n", f.c_str());
 
-        entity_config_setting = config_lookup(&cfg, "entity");
-        if (entity_config_setting != nullptr) {
+        auto entity_config_setting = config_lookup(&cfg, "entity");
+        if (entity_config_setting) {
 
             entity_data entity{};
 
-            // required to be a valid entity
-            std::unordered_map<std::string, bool> required_dependencies;
-            auto req_deps = component_stub::get_required_dependencies();
-            for (auto &&dep : req_deps) {
-                required_dependencies[dep] = false;
-            }
-
-            // component-defined dependencies
-            std::unordered_map<std::string, std::unordered_map<std::string, bool>> dependencies;
-
-            auto components = config_setting_lookup(entity_config_setting, "components");
-            auto components_count = (unsigned)config_setting_length(components);
-
-            for (unsigned i = 0; i < components_count; ++i) {
-                auto component = config_setting_get_elem(components, i);
-                printf("  Component: %s\n", component->name);
-
-                auto stub_ptr = component_system_man.managers.get_stub(component->name, component).release();
-
-                auto type_stub = dynamic_cast<type_component_stub*>(stub_ptr);
-                if (type_stub) {
-                    entity.name = type_stub->name;
-                }
-
-                auto deps = stub_ptr->get_dependencies();
-                dependencies[component->name] = {};
-                for (auto &&dep : deps) {
-                    dependencies[component->name][dep] = false;
-                }
-
-                entity.components.emplace_back(stub_ptr);
-            }
-
-            std::set<std::string> keys;
-            for (auto &&comp : dependencies) {
-                keys.insert(comp.first);
-            }
-
-            for (auto &&comp : dependencies) {
-                for (auto &&dep : comp.second) {
-                    dep.second = keys.count(dep.first) != 0;
-                }
-            }
-
-            for (auto &&dep: required_dependencies) {
-                dep.second = keys.count(dep.first) != 0;
-            }
-
-            auto valid = true;
-            for (auto &&comp : dependencies) {
-                for (auto &&dep : comp.second) {
-                    if (!dep.second) {
-                        valid = false;
-                        failed_load = true;
-                        printf ("!! Entity \"%s\" in %s missing '%s' component dependency [%s]\n", entity.name.c_str(), f.c_str(), comp.first.c_str(), dep.first.c_str());
-                    }
-                }
-            }
-
-            for (auto &req : required_dependencies) {
-                if (!req.second) {
-                    printf("!! Entity \"%s\" in %s missing required [%s] component\n", entity.name.c_str(), f.c_str(), req.first.c_str());
-                    valid = false;
-                    failed_load = true;
-                }
-            }
-
-            if (valid) {
+            if (load_entity(entity, entity_config_setting)) {
                 entity_stubs[entity.name] = std::move(entity);
+            }
+            else {
+                failed_load = true;
             }
         }
 
