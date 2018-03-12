@@ -53,7 +53,7 @@ struct entity_data {
     }
 
     // disable copy
-    entity_data(const entity_data &) = default;
+    entity_data(const entity_data &) = delete;
     entity_data& operator=(const entity_data &) = delete;
 
     // allow move
