@@ -175,8 +175,13 @@ void asset_manager::load_assets() {
     }
 
     for (auto &mesh : meshes) {
-        mesh.second.upload_mesh();
-        mesh.second.load_physics();
+        mesh.second.hw = upload_mesh(mesh.second.sw);
+        if (mesh.second.nonconvex) {
+            build_static_physics_mesh(mesh.second.sw, &mesh.second.phys_mesh, &mesh.second.phys_shape);
+        }
+        else {
+            build_dynamic_physics_mesh(mesh.second.sw, &mesh.second.phys_shape);
+        }
     }
 
     render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 2);

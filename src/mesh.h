@@ -52,24 +52,13 @@ struct mesh_data {
     sw_mesh *sw = nullptr;
     hw_mesh *hw = nullptr;
     btCollisionShape *phys_shape = nullptr;
+    btTriangleMesh *phys_mesh = nullptr;
     bool nonconvex = false;
 
     mesh_data() = default;
 
     explicit mesh_data(const std::string &mesh) : mesh(mesh) {
         sw = load_mesh(mesh.c_str());
-    }
-
-    void upload_mesh() {
-        assert(sw);
-
-        hw = ::upload_mesh(sw);
-    }
-
-    void load_physics() {
-        assert(sw);
-
-        build_dynamic_physics_mesh(sw, &phys_shape);
     }
 };
 
