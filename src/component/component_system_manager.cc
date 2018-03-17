@@ -149,7 +149,7 @@ tick_power_consumers(ship_space *ship) {
 void
 tick_light_components(ship_space *ship) {
     auto &light_man = component_system_man.managers.light_component_man;
-    auto &reader_man = component_system_man.managers.reader_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
 
     for (auto i = 0u; i < light_man.buffer.num; i++) {
@@ -157,16 +157,29 @@ tick_light_components(ship_space *ship) {
 
         auto power = power_man.get_instance_data(ce);
         auto light = light_man.get_instance_data(ce);
-        auto reader = reader_man.get_instance_data(ce);
 
-        *(light.requested_intensity) = clamp(*(reader.data), 0.0f, 1.0f);
+        if (!*power.powered) {
+            return;
+        }
 
-        auto old_intensity = *(light.intensity);
-        auto new_intensity = *power.powered ? *(light.requested_intensity) : 0.0f;
+        auto const &cwire = cwire_man.get_instance_data(ce);
+        auto const &net = ship->get_comms_network(*cwire.network);
 
-        if (old_intensity != new_intensity) {
-            *(light.intensity) = new_intensity;
-            *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
+        /* todo: origin discrimination */
+        for (auto msg : net.read_buffer) {
+            if (msg.desc != comms_msg_type_switch_state) {
+                continue;
+            }
+
+            *(light.requested_intensity) = clamp(msg.data, 0.0f, 1.0f);
+
+            auto old_intensity = *(light.intensity);
+            auto new_intensity = *power.powered ? *(light.requested_intensity) : 0.0f;
+
+            if (old_intensity != new_intensity) {
+                *(light.intensity) = new_intensity;
+                *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
+            }
         }
     }
 }
