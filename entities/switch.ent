@@ -22,9 +22,6 @@ entity: {
             required_power: 0.1,
             max_required_power: 0.1,
         },
-        light: {
-            intensity: 1.0,
-        },
         reader: {
             name: "light brightness",
             desc: "",
