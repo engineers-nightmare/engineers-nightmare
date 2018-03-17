@@ -104,21 +104,31 @@ void
 tick_doors(ship_space *ship)
 {
     auto &door_man = component_system_man.managers.door_component_man;
-    auto &reader_man = component_system_man.managers.reader_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
 
     for (auto i = 0u; i < door_man.buffer.num; i++) {
         auto ce = door_man.instance_pool.entity[i];
 
         auto power = power_man.get_instance_data(ce);
-        auto reader = reader_man.get_instance_data(ce);
+        auto cwire = cwire_man.get_instance_data(ce);
 
         /* it's a power door, it's not going /anywhere/ without power */
         if (!*power.powered) {
             continue;
         }
 
-        door_man.instance_pool.desired_pos[i] = *reader.data > 0 ? 1.0f : 0.0f;
+        /* todo: origin discrimination */
+        /* todo: what if many transitions requested? */
+        auto const &net = ship->get_comms_network(*cwire.network);
+
+        for (auto msg : net.read_buffer) {
+            if (msg.desc != comms_msg_type_switch_state) {
+                continue;
+            }
+
+            door_man.instance_pool.desired_pos[i] = clamp(msg.data, 0.0f, 1.0f);
+        }
 
         auto desired_state = door_man.instance_pool.desired_pos[i];
         auto in_desired_state = door_man.instance_pool.pos[i] == desired_state;

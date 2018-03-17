@@ -1,4 +1,4 @@
 stub,float,float,,intensity,
-depends,power,reader
+depends,power,wire_comms
 body,float,intensity,0
 body,float,requested_intensity,1
