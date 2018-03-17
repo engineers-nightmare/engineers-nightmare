@@ -101,27 +101,43 @@ struct customize_entity_tool : tool
         draw_fp_display_mesh(frame, fp_screen, 2);
     }
 
-    void do_offscreen_render() {
+    void do_offscreen_render() override {
+        auto &type_man = component_system_man.managers.type_component_man;
+        auto &wire_man = component_system_man.managers.wire_comms_component_man;
+
         ImGui::SetCurrentContext(offscreen_contexts[2]);
         new_imgui_frame();
-        ImGui::GetIO().DisplaySize = ImVec2(RENDER_DIM, RENDER_DIM);
+        const int scale = 6;
+        ImGui::GetIO().DisplaySize = ImVec2(RENDER_DIM / scale, RENDER_DIM / scale);
         ImGui::GetIO().DisplayFramebufferScale = ImVec2(1, 1);
 
         auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
+                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |
+                ImGuiWindowFlags_NoInputs;
         // center on screen
         // todo: modify NewFrame() to allow us to use this properly
-        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
+        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / scale / 2, RENDER_DIM / scale / 2 }, 0, ImVec2{ 0.5f, 0.5f });
         {
-            ImGui::Begin("First Window", nullptr, flags);
+            ImGui::Begin("Customize Tool", nullptr, flags);
             {
-                static float f = 0.0f;
-                ImGui::Text("Hello, world!");
-                ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-                ImGui::Button("Test Window");
-                ImGui::Button("Another Window");
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+                if (!c_entity::is_valid(entity)) {
+                    ImGui::Text("Scanning...");
+                }
+                else {
+                    ImGui::Text("Found:");
+                    auto name = type_man.get_instance_data(entity).name;
+                    ImGui::Text(*name);
+
+                    if (wire_man.exists(entity)) {
+                        auto label = *(wire_man.get_instance_data(entity).label);
+                        if (label != nullptr && strcmp(label, "") == 0) {
+                            ImGui::Text(label);
+                        } else {
+                            ImGui::Text("No label");
+                        }
+                    }
+                }
             }
             ImGui::End();
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_displays_fbo);
