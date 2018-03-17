@@ -10,6 +10,12 @@
 #include "block.h"
 #include "textureset.h"
 
+struct surface_kind {
+    mesh_data const *visual_mesh {};
+    mesh_data const *physics_mesh {};
+    char const *name {};
+};
+
 class asset_manager
 {
     std::unordered_map<std::string, mesh_data> meshes;
@@ -22,6 +28,7 @@ class asset_manager
 
 public:
     texture_set *render_textures{ nullptr };
+    std::unordered_map<unsigned, surface_kind> surf_kinds{};
 
     asset_manager();
     ~asset_manager() = default;
@@ -33,6 +40,8 @@ public:
     const mesh_data & get_surface_mesh(unsigned surface_type) const;
 
     const std::string & get_surface_mesh_name(unsigned surface_type) const;
+
+    const surface_kind &get_surface_kind(unsigned surface_type) const;
 
     SoLoud::AudioSource * get_sound(const std::string &);
 

@@ -162,6 +162,18 @@ void asset_manager::load_assets() {
     }
 
     render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 3);
+
+    surf_kinds[surface_wall].visual_mesh = &get_mesh("surface_wall");
+    surf_kinds[surface_wall].physics_mesh = &get_mesh("surface_wall");
+    surf_kinds[surface_wall].name = "Wall";
+
+    surf_kinds[surface_glass].visual_mesh = &get_mesh("surface_glass");
+    surf_kinds[surface_glass].physics_mesh = &get_mesh("surface_wall");
+    surf_kinds[surface_glass].name = "Glass";
+
+    surf_kinds[surface_grate].visual_mesh = &get_mesh("surface_grate");
+    surf_kinds[surface_grate].physics_mesh = &get_mesh("surface_wall");
+    surf_kinds[surface_grate].name = "Grate";
 }
 
 const mesh_data & asset_manager::get_mesh(const std::string & mesh) const {
@@ -187,4 +199,3 @@ void asset_manager::bind_render_textures(int i) {
 void asset_manager::bind_skybox(const std::string & skybox, int i) {
     skyboxes[skybox]->bind(i);
 }
-
