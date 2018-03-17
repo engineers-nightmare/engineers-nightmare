@@ -134,7 +134,7 @@ struct customize_entity_tool : tool
 
                     if (wire_man.exists(entity)) {
                         auto label = *(wire_man.get_instance_data(entity).label);
-                        if (label != nullptr && strcmp(label, "") == 0) {
+                        if (label != nullptr && strcmp(label, "") != 0) {
                             ImGui::Text(label);
                         } else {
                             ImGui::Text("No label");
