@@ -44,6 +44,7 @@ set(EN_SOURCES
     src/config.cc
     src/input.cc
     src/imgui_impl_sdl_gl3.cc
+    src/game_state.cc
     src/load.cc
     src/mesh.cc
     src/mesher.cc
@@ -106,6 +107,10 @@ set(EN_HEADERS
     src/fixed_cube.h
     src/input.h
     src/imgui_impl_sdl_gl3.h
+    src/game_state.h
+    src/game_state/customize_entity_state.h
+    src/game_state/menu_state.h
+    src/game_state/play_state.h
     src/libconfig_shim.h
     src/load.h
     src/memory.h

@@ -9,6 +9,7 @@
 #include "../component/component_system_manager.h"
 #include "../imgui/imgui.h"
 #include "../imgui_impl_sdl_gl3.h"
+#include "../game_state.h"
 
 extern GLuint simple_shader;
 extern GLuint highlight_shader;
@@ -30,6 +31,8 @@ extern std::array<ImGuiContext*, 3> offscreen_contexts;
 extern GLuint render_displays_fbo;
 extern void new_imgui_frame();
 
+extern void set_next_game_state(game_state *s);
+
 const glm::vec3 fp_item_offset{0.115f, 0.2f, -0.115f };
 const float fp_item_scale{ 0.175f };
 const glm::quat fp_item_rot{-5.f, 5.f, 5.f, 5.f };
@@ -46,17 +49,19 @@ struct customize_entity_tool : tool
     }
 
     bool can_use() {
-        return !(!rc.hit || !c_entity::is_valid(entity));
+        bool valid_hit = !(!rc.hit || !c_entity::is_valid(entity));
+
+        auto &wire_man = component_system_man.managers.wire_comms_component_man;
+
+        // tool is usable if entity contains something configurable by tool
+        return valid_hit && wire_man.exists(entity);
     }
 
     void use() override {
-        return;
-
         if (!can_use())
             return;
 
-        auto &rend = component_system_man.managers.renderable_component_man;
-        *rend.get_instance_data(entity).draw = true;
+        set_next_game_state(game_state::create_customize_entity_state());
     }
 
     void preview(frame_data *frame) override {
