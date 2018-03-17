@@ -233,7 +233,7 @@ struct paint_surface_tool : tool
 
     void get_description(char *str) override {
         auto m = mode == replace_mode::all ? "all" : "matching";
-        sprintf(str, "Paint surface type %d replacing %s\n", (int)replace_type, m);
+        sprintf(str, "Replace surfaces with %s (replacing %s)\n", asset_man.surf_kinds[(int)replace_type].name, m);
     }
 
     void select() override {
