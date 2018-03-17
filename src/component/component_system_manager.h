@@ -42,9 +42,6 @@ void
 tick_sensor_comparators(ship_space *ship);
 
 void
-tick_readers(ship_space *ship);
-
-void
 tick_proximity_sensors(ship_space *ship, player *pl);
 
 void

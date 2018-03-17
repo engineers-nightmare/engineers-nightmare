@@ -20,7 +20,6 @@
 #include "power_provider_component.h"
 #include "pressure_sensor_component.h"
 #include "proximity_sensor_component.h"
-#include "reader_component.h"
 #include "renderable_component.h"
 #include "sensor_comparator_component.h"
 #include "surface_attachment_component.h"
@@ -45,7 +44,6 @@ struct component_managers {
         power_provider_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         pressure_sensor_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         proximity_sensor_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
-        reader_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         renderable_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         sensor_comparator_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         surface_attachment_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
@@ -67,7 +65,6 @@ struct component_managers {
     power_provider_component_manager power_provider_component_man{};
     pressure_sensor_component_manager pressure_sensor_component_man{};
     proximity_sensor_component_manager proximity_sensor_component_man{};
-    reader_component_manager reader_component_man{};
     renderable_component_manager renderable_component_man{};
     sensor_comparator_component_manager sensor_comparator_component_man{};
     surface_attachment_component_manager surface_attachment_component_man{};
@@ -115,9 +112,6 @@ struct component_managers {
         if (strcmp(comp_name, "proximity_sensor") == 0) {
             return proximity_sensor_component_stub::from_config(config);
         }
-        if (strcmp(comp_name, "reader") == 0) {
-            return reader_component_stub::from_config(config);
-        }
         if (strcmp(comp_name, "renderable") == 0) {
             return renderable_component_stub::from_config(config);
         }
@@ -154,7 +148,6 @@ struct component_managers {
         power_provider_component_man.destroy_entity_instance(ce);
         pressure_sensor_component_man.destroy_entity_instance(ce);
         proximity_sensor_component_man.destroy_entity_instance(ce);
-        reader_component_man.destroy_entity_instance(ce);
         renderable_component_man.destroy_entity_instance(ce);
         sensor_comparator_component_man.destroy_entity_instance(ce);
         surface_attachment_component_man.destroy_entity_instance(ce);

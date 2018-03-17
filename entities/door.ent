@@ -25,10 +25,6 @@ entity: {
         door: {
             mesh: "single_door",
         },
-        reader: {
-            name: "desired state",
-            desc: "",
-        },
         wire_comms: {
         },
         convert_on_pop: {

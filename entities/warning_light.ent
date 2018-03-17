@@ -25,10 +25,6 @@ entity: {
         light: {
             intensity: 1.0,
         },
-        reader: {
-            name: "light brightness",
-            desc: "sensor_comparison_state",
-        },
         wire_comms: {
         },
     },

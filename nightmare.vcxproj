@@ -139,7 +139,6 @@
     <ClCompile Include="src\component\power_provider_component.cc" />
     <ClCompile Include="src\component\pressure_sensor_component.cc" />
     <ClCompile Include="src\component\proximity_sensor_component.cc" />
-    <ClCompile Include="src\component\reader_component.cc" />
     <ClCompile Include="src\component\position_component.cc" />
     <ClCompile Include="src\component\renderable_component.cc" />
     <ClCompile Include="src\component\sensor_comparator_component.cc" />
@@ -235,7 +234,6 @@
     <ClInclude Include="src\component\power_provider_component.h" />
     <ClInclude Include="src\component\pressure_sensor_component.h" />
     <ClInclude Include="src\component\proximity_sensor_component.h" />
-    <ClInclude Include="src\component\reader_component.h" />
     <ClInclude Include="src\component\position_component.h" />
     <ClInclude Include="src\component\renderable_component.h" />
     <ClInclude Include="src\component\sensor_comparator_component.h" />
