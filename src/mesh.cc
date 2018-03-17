@@ -73,7 +73,7 @@ load_mesh(char const *filename) {
         }
     }
 
-    printf("\tAfter processing: %zu verts, %zu indices",
+    printf("\tAfter processing: %zu verts, %zu indices\n",
         verts.size(), indices.size());
 
     aiReleaseImport(scene);
