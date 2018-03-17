@@ -13,7 +13,6 @@
 class asset_manager
 {
     std::unordered_map<std::string, mesh_data> meshes;
-    std::array<std::array<std::string, face_count>, 256> surf_to_mesh;
     std::array<std::string, 256> surf_type_to_mesh;
 
     std::unordered_map<std::string, texture_set *> skyboxes {};

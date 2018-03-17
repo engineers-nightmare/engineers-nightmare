@@ -7,30 +7,7 @@
 #include "soloud_wavstream.h"
 
 asset_manager::asset_manager()
-    : meshes(),
-      surf_to_mesh() {
-
-    surf_to_mesh[surface_xm][surface_wall] = "x_quad";
-    surf_to_mesh[surface_xp][surface_wall] = "x_quad_p";
-    surf_to_mesh[surface_ym][surface_wall] = "y_quad";
-    surf_to_mesh[surface_yp][surface_wall] = "y_quad_p";
-    surf_to_mesh[surface_zm][surface_wall] = "z_quad";
-    surf_to_mesh[surface_zp][surface_wall] = "z_quad_p";
-
-    surf_to_mesh[surface_xm][surface_grate] = "grate_x_quad";
-    surf_to_mesh[surface_xp][surface_grate] = "grate_x_quad_p";
-    surf_to_mesh[surface_ym][surface_grate] = "grate_y_quad";
-    surf_to_mesh[surface_yp][surface_grate] = "grate_y_quad_p";
-    surf_to_mesh[surface_zm][surface_grate] = "grate_z_quad";
-    surf_to_mesh[surface_zp][surface_grate] = "grate_z_quad_p";
-
-    surf_to_mesh[surface_xm][surface_glass] = "glass_x_quad";
-    surf_to_mesh[surface_xp][surface_glass] = "glass_x_quad_p";
-    surf_to_mesh[surface_ym][surface_glass] = "glass_y_quad";
-    surf_to_mesh[surface_yp][surface_glass] = "glass_y_quad_p";
-    surf_to_mesh[surface_zm][surface_glass] = "glass_z_quad";
-    surf_to_mesh[surface_zp][surface_glass] = "glass_z_quad_p";
-
+    : meshes() {
     surf_type_to_mesh[surface_wall] = "surface_wall";
     surf_type_to_mesh[surface_grate] = "surface_grate";
     surf_type_to_mesh[surface_glass] = "surface_glass";
