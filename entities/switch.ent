@@ -22,10 +22,6 @@ entity: {
             required_power: 0.1,
             max_required_power: 0.1,
         },
-        reader: {
-            name: "light brightness",
-            desc: "",
-        },
         switch: {
         },
         wire_comms: {

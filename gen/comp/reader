@@ -1,7 +1,0 @@
-stub,std::string,std::string,,name,.c_str()
-stub,std::string,std::string,,desc,.c_str()
-depends,wire_comms
-body,char const *,name,nullptr
-body,c_entity,source,{}
-body,char const *,desc,nullptr
-body,float,data,0

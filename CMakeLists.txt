@@ -34,7 +34,6 @@ set(EN_SOURCES
     src/component/power_provider_component.cc
     src/component/pressure_sensor_component.cc
     src/component/proximity_sensor_component.cc
-    src/component/reader_component.cc
     src/component/position_component.cc
     src/component/renderable_component.cc
     src/component/sensor_comparator_component.cc
@@ -96,7 +95,6 @@ set(EN_HEADERS
     src/component/power_provider_component.h
     src/component/pressure_sensor_component.h
     src/component/proximity_sensor_component.h
-    src/component/reader_component.h
     src/component/position_component.h
     src/component/renderable_component.h
     src/component/sensor_comparator_component.h

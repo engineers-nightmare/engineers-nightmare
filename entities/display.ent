@@ -28,10 +28,6 @@ entity: {
         light: {
             intensity: 0.15,
         },
-        reader: {
-            name: "light brightness",
-            desc: "",
-        },
         wire_comms: {
         },
     };

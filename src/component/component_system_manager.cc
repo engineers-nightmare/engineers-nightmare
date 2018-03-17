@@ -364,39 +364,6 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
     }
 }
 
-
-void
-tick_readers(ship_space *ship) {
-    auto &reader_man = component_system_man.managers.reader_component_man;
-    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
-
-    for (auto i = 0u; i < reader_man.buffer.num; i++) {
-        auto ce = reader_man.instance_pool.entity[i];
-
-        auto const &cwire = cwire_man.get_instance_data(ce);
-        auto const &net = ship->get_comms_network(*cwire.network);
-
-        for (auto msg : net.read_buffer) {
-            /* if we're filtering by source, and missed -- skip this one. */
-            if (reader_man.instance_pool.source[i].id &&
-                reader_man.instance_pool.source[i].id != msg.originator.id) {
-                continue;
-            }
-
-            /* if we're filtering by desc, and missed -- skip */
-            /* we /assume/ that everyone here has their strings interned. */
-            if (reader_man.instance_pool.desc[i] &&
-                reader_man.instance_pool.desc[i] != msg.desc) {
-                continue;
-            }
-
-            reader_man.instance_pool.data[i] = msg.data;
-
-            /* TODO: record /when/ we last got a matching packet */
-        }
-    }
-}
-
 void
 build_absolute_transforms() {
     auto &parent_man = component_system_man.managers.parent_component_man;
