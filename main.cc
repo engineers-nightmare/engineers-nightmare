@@ -1383,7 +1383,7 @@ run()
             ImGui::Begin("First Window", nullptr, flags);
             {
                 static float f = 0.0f;
-                ImGui::Text("Hello, world!");
+                ImGui::Text("Hello from Display 1!");
                 ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
                 ImGui::Button("Test Window");
                 ImGui::Button("Another Window");
@@ -1408,7 +1408,7 @@ run()
             ImGui::Begin("Second Window", nullptr, flags);
             {
                 static float f = 0.0f;
-                ImGui::Text("Goodbye, world!");
+                ImGui::Text("Hello from Display 2!");
                 ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
                 ImGui::Button("Test Window");
                 ImGui::Button("Another Window");
