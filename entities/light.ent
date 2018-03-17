@@ -23,7 +23,7 @@ entity: {
             max_required_power: 2.5,
         },
         light: {
-            intensity: 1.0,
+            intensity: 0.0,
         },
         reader: {
             name: "light brightness",
