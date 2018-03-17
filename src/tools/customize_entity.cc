@@ -50,6 +50,8 @@ struct customize_entity_tool : tool
     }
 
     void use() override {
+        return;
+
         if (!can_use())
             return;
 
