@@ -37,7 +37,7 @@ struct remove_surface_tool : tool
 
         auto index = normal_to_surface_index(&rc);
 
-        const auto &mesh = asset_man.get_surface_mesh_name(rc.block->surfs[index]);
+        auto const &mesh = asset_man.surf_kinds.at(rc.block->surfs[index]).legacy_mesh_name;
 
         ship->set_surface(rc.bl, rc.p, (surface_index)index, surface_none);
 
@@ -59,7 +59,7 @@ struct remove_surface_tool : tool
         block *bl = rc.block;
         auto index = normal_to_surface_index(&rc);
 
-        auto &mesh = asset_man.get_surface_mesh(bl->surfs[index]);
+        auto &mesh = asset_man.surf_kinds.at(rc.block->surfs[index]).visual_mesh;
 
         auto mat = frame->alloc_aligned<mesh_instance>(1);
         mat.ptr->world_matrix = mat_block_surface(glm::vec3(rc.bl), index ^ 1);
@@ -69,7 +69,7 @@ struct remove_surface_tool : tool
         glUseProgram(overlay_shader);
         glEnable(GL_BLEND);
         glEnable(GL_POLYGON_OFFSET_FILL);
-        draw_mesh(mesh.hw);
+        draw_mesh(mesh->hw);
         glDisable(GL_POLYGON_OFFSET_FILL);
         glDisable(GL_BLEND);
         glUseProgram(simple_shader);

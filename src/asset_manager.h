@@ -13,6 +13,7 @@
 struct surface_kind {
     mesh_data const *visual_mesh {};
     mesh_data const *physics_mesh {};
+    char const *legacy_mesh_name {};
     char const *name {};
 };
 
@@ -36,12 +37,6 @@ public:
     void load_assets();
 
     const mesh_data & get_mesh(const std::string & mesh) const;
-
-    const mesh_data & get_surface_mesh(unsigned surface_type) const;
-
-    const std::string & get_surface_mesh_name(unsigned surface_type) const;
-
-    const surface_kind &get_surface_kind(unsigned surface_type) const;
 
     SoLoud::AudioSource * get_sound(const std::string &);
 

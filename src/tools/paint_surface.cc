@@ -158,9 +158,10 @@ struct paint_surface_tool : tool
     void preview(frame_data *frame) override {
         auto index = normal_to_surface_index(&rc);
 
-        if (state == paint_state::started) {
-            auto mesh = asset_man.get_surface_mesh(replace_type);
+        auto mesh = asset_man.surf_kinds[replace_type].visual_mesh;
 
+        if (state == paint_state::started) {
+            
             auto mat = frame->alloc_aligned<mesh_instance>(1);
             mat.ptr->world_matrix = mat_block_surface(start_block, index ^ 1);
             mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
@@ -169,7 +170,7 @@ struct paint_surface_tool : tool
             glEnable(GL_BLEND);
             glUseProgram(overlay_shader);
             glEnable(GL_POLYGON_OFFSET_FILL);
-            draw_mesh(mesh.hw);
+            draw_mesh(mesh->hw);
             glDisable(GL_POLYGON_OFFSET_FILL);
             glUseProgram(simple_shader);
             glDisable(GL_BLEND);
@@ -186,8 +187,6 @@ struct paint_surface_tool : tool
         glUseProgram(overlay_shader);
         glEnable(GL_POLYGON_OFFSET_FILL);
         glEnable(GL_BLEND);
-
-        auto mesh = asset_man.get_surface_mesh(replace_type);
 
         if (can_use()) {
             switch (state) {
@@ -208,7 +207,7 @@ struct paint_surface_tool : tool
                             mat.ptr->world_matrix = mat_block_surface(pos, index ^ 1);
                             mat.ptr->color = glm::vec4(1.f, 0.f, 0.f, 1.f);
                             mat.bind(1, frame);
-                            draw_mesh(mesh.hw);
+                            draw_mesh(mesh->hw);
                         }
                     }
                 }
@@ -221,7 +220,7 @@ struct paint_surface_tool : tool
                 mat.ptr->world_matrix = mat_block_surface(glm::vec3(rc.bl), index ^ 1);
                 mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
                 mat.bind(1, frame);
-                draw_mesh(mesh.hw);
+                draw_mesh(mesh->hw);
                 break;
             }
             }

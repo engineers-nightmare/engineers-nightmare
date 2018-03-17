@@ -8,9 +8,6 @@
 
 asset_manager::asset_manager()
     : meshes() {
-    surf_type_to_mesh[surface_wall] = "surface_wall";
-    surf_type_to_mesh[surface_grate] = "surface_grate";
-    surf_type_to_mesh[surface_glass] = "surface_glass";
 }
 
 template<typename Func>
@@ -165,27 +162,22 @@ void asset_manager::load_assets() {
 
     surf_kinds[surface_wall].visual_mesh = &get_mesh("surface_wall");
     surf_kinds[surface_wall].physics_mesh = &get_mesh("surface_wall");
+    surf_kinds[surface_wall].legacy_mesh_name = "surface_wall";
     surf_kinds[surface_wall].name = "Wall";
 
     surf_kinds[surface_glass].visual_mesh = &get_mesh("surface_glass");
     surf_kinds[surface_glass].physics_mesh = &get_mesh("surface_wall");
+    surf_kinds[surface_glass].legacy_mesh_name = "surface_glass";
     surf_kinds[surface_glass].name = "Glass";
 
     surf_kinds[surface_grate].visual_mesh = &get_mesh("surface_grate");
     surf_kinds[surface_grate].physics_mesh = &get_mesh("surface_wall");
+    surf_kinds[surface_grate].legacy_mesh_name = "surface_grate";
     surf_kinds[surface_grate].name = "Grate";
 }
 
 const mesh_data & asset_manager::get_mesh(const std::string & mesh) const {
     return meshes.at(mesh);
-}
-
-const mesh_data & asset_manager::get_surface_mesh(unsigned surface_type) const {
-    return meshes.at(surf_type_to_mesh[surface_type]);
-}
-
-const std::string & asset_manager::get_surface_mesh_name(unsigned surface_type) const {
-    return surf_type_to_mesh[surface_type];
 }
 
 SoLoud::AudioSource * asset_manager::get_sound(const std::string & sound) {
