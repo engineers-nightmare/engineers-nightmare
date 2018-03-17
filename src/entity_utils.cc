@@ -341,13 +341,15 @@ void
 use_action_on_entity(ship_space *ship, c_entity ce) {
     auto &pos_man = component_system_man.managers.position_component_man;
     auto &switch_man = component_system_man.managers.switch_component_man;
+    auto &power_man = component_system_man.managers.power_component_man;
     auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     /* used by the player */
     assert(pos_man.exists(ce) || !"All [usable] entities probably need position");
     assert(switch_man.exists(ce) || !"All [usable] entities need switch comp");
+    assert(power_man.exists(ce) || !"All [usable] entities need switch comp");
 
-    if (switch_man.exists(ce)) {
+    if (switch_man.exists(ce) && *power_man.get_instance_data(ce).powered) {
         /* publish new state on all attached comms wires */
         auto & enabled = *switch_man.get_instance_data(ce).enabled;
         enabled ^= true;
