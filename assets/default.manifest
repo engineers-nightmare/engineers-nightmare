@@ -116,16 +116,6 @@ assets = (
     file = "mesh/frobnicator.dae"
 },
 {
-    name = "single_door_frame"
-    type = "mesh"
-    file = "mesh/single_door_frame.dae"
-},
-{
-    name = "single_door"
-    type = "mesh"
-    file = "mesh/single_door.dae"
-},
-{
     name = "warning_light"
     type = "mesh"
     file = "mesh/warning_light.dae"
