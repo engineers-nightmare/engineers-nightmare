@@ -362,6 +362,36 @@ void ImGui_ImplSdlGL3_Shutdown()
     ImGui::Shutdown();
 }
 
+void ImGui_ImplSdlGL3_NewFrameOffscreen(int w, int h)
+{
+    if (!g_FontTexture)
+        ImGui_ImplSdlGL3_CreateDeviceObjects();
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    io.DisplaySize = ImVec2((float)w, (float)h);
+    io.DisplayFramebufferScale = ImVec2(1, 1);
+
+    // Setup time step
+    Uint32	time = SDL_GetTicks();
+    double current_time = time / 1000.0;
+    io.DeltaTime = g_Time > 0.0 ? (float)(current_time - g_Time) : (float)(1.0f / 60.0f);
+    g_Time = current_time;
+
+    io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+
+    io.MouseDown[0] = false;
+    io.MouseDown[1] = false;
+    io.MouseDown[2] = false;
+    g_MousePressed[0] = g_MousePressed[1] = g_MousePressed[2] = false;
+
+    io.MouseWheel = g_MouseWheel;
+    g_MouseWheel = 0.0f;
+
+    // Start the frame. This call will update the io.WantCaptureMouse, io.WantCaptureKeyboard flag that you can use to dispatch inputs (or not) to your application.
+    ImGui::NewFrame();
+}
+
 void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window)
 {
     if (!g_FontTexture)
