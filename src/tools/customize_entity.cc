@@ -106,10 +106,8 @@ struct customize_entity_tool : tool
         auto &wire_man = component_system_man.managers.wire_comms_component_man;
 
         ImGui::SetCurrentContext(offscreen_contexts[2]);
-        new_imgui_frame();
         const int scale = 6;
-        ImGui::GetIO().DisplaySize = ImVec2(RENDER_DIM / scale, RENDER_DIM / scale);
-        ImGui::GetIO().DisplayFramebufferScale = ImVec2(1, 1);
+        ImGui_ImplSdlGL3_NewFrameOffscreen(RENDER_DIM / scale, RENDER_DIM / scale);
 
         auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
