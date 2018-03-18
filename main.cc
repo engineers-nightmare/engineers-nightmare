@@ -147,23 +147,18 @@ new_imgui_frame() {
     ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
 }
 
-game_state *current_game_state = game_state::create_play_state();
-game_state *next_game_state = nullptr;
+std::unique_ptr<game_state> current_game_state(game_state::create_play_state());
+std::unique_ptr<game_state> next_game_state;
 
 void set_next_game_state(game_state *s) {
-    delete next_game_state;
-
-    next_game_state = s;
+    next_game_state.reset(s);
 }
 
 void
 set_game_state()
 {
     if (next_game_state != nullptr) {
-        delete current_game_state;
-
-        current_game_state = next_game_state;
-        next_game_state = nullptr;
+        current_game_state = std::move(next_game_state);
         pl.ui_dirty = true; /* state change always requires a ui rebuild. */
     }
 }

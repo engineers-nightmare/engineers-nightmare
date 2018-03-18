@@ -149,6 +149,9 @@
     <ClCompile Include="src\config.cc" />
     <ClCompile Include="src\entity_utils.cc" />
     <ClCompile Include="src\enums\enums.cc" />
+    <ClCompile Include="src\game_state\customize_entity_state.cc" />
+    <ClCompile Include="src\game_state\menu_state.cc" />
+    <ClCompile Include="src\game_state\play_state.cc" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
@@ -245,6 +248,7 @@
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\enums\enums.h" />
     <ClInclude Include="src\fixed_cube.h" />
+    <ClInclude Include="src\game_state.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
     <ClInclude Include="src\imgui\imgui.h" />
     <ClInclude Include="src\imgui\imgui_internal.h" />

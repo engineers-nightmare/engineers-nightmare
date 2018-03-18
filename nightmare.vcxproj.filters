@@ -64,6 +64,9 @@
     <Filter Include="soloud\audiosource">
       <UniqueIdentifier>{f001c34d-b385-428a-a876-44090e1ece22}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\game_states">
+      <UniqueIdentifier>{1dee5e5d-1056-4dae-b6b5-c4312edcadf7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\blob.cc">
@@ -216,9 +219,6 @@
     <ClCompile Include="src\tools\paint_surface.cc">
       <Filter>Source Files\tools</Filter>
     </ClCompile>
-    <ClCompile Include="src\component\placeable_component.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\tools\wiring.cc">
       <Filter>Source Files\tools</Filter>
     </ClCompile>
@@ -332,6 +332,18 @@
     </ClCompile>
     <ClCompile Include="src\tools\customize_entity.cc">
       <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\placeable_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game_state\customize_entity_state.cc">
+      <Filter>Source Files\game_states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game_state\menu_state.cc">
+      <Filter>Source Files\game_states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game_state\play_state.cc">
+      <Filter>Source Files\game_states</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -529,6 +541,9 @@
     </ClInclude>
     <ClInclude Include="src\component\parent_component.h">
       <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game_state.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
