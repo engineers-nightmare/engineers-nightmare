@@ -40,12 +40,19 @@ struct customize_entity_state : game_state {
     c_entity entity;
 
     bool settings_dirty = false;
+    char entity_label[256];
 
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
     explicit customize_entity_state(c_entity e) : entity(e) {
         warp_mouse_to_center_screen();
         state = MenuState::Comms;
+
+        if (c_entity::is_valid(entity)) {
+            auto &wire_man = component_system_man.managers.wire_comms_component_man;
+            auto wire = wire_man.get_instance_data(entity);
+            strcpy(entity_label, (*wire.label) ? *wire.label : "");
+        }
     }
 
     void handle_input() override {
@@ -68,39 +75,30 @@ struct customize_entity_state : game_state {
     }
 
     void handle_comms_menu() {
-        auto &type_man = component_system_man.managers.type_component_man;
-        auto &wire_man = component_system_man.managers.wire_comms_component_man;
-
-        auto type = type_man.get_instance_data(entity);
-        auto wire = wire_man.get_instance_data(entity);
-
         ImGui::Begin("Comms Configuration", nullptr, menu_flags);
         {
             if (!c_entity::is_valid(entity)) {
                 ImGui::Text("Invalid Entity %d", entity.id);
             }
             else {
-                auto *label = new char[256];
-
-                if (*wire.label != nullptr) {
-                    strcpy(label, *wire.label);
-                }
-                else {
-                    strcpy(label, "");
-                }
+                auto &type_man = component_system_man.managers.type_component_man;
+                auto type = type_man.get_instance_data(entity);
 
                 ImGui::Text("%s", *type.name);
                 ImGui::Separator();
                 ImGui::Dummy(ImVec2{10, 10});
-                bool isDone = ImGui::InputText("Label", label, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
+                bool isDone = ImGui::InputText("Label", entity_label, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
                 ImGui::Dummy(ImVec2{10, 10});
                 isDone = ImGui::Button("Finish") || isDone;
                 if (isDone) {
+                    auto &wire_man = component_system_man.managers.wire_comms_component_man;
+                    auto wire = wire_man.get_instance_data(entity);
+
+                    free((void *) *wire.label);
+                    *wire.label = strdup(entity_label);
+
                     set_next_game_state(create_play_state());
                 }
-
-                delete[] *wire.label;
-                *wire.label = label;
             }
         }
         ImGui::End();
