@@ -618,7 +618,6 @@ void render() {
     glUseProgram(simple_shader);
     draw_renderables(frame);
     glUseProgram(simple_shader);
-    draw_doors(frame);
     draw_wires();
 
     /* draw the sky */

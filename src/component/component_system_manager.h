@@ -48,9 +48,6 @@ void
 draw_renderables(frame_data *frame);
 
 void
-draw_doors(frame_data *frame);
-
-void
 build_absolute_transforms();
 
 template<typename T>
