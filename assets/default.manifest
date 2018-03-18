@@ -155,6 +155,34 @@ assets = (
     offset = [0.0,0.0,0.0]
 },
 {
+    name = "wire_b_1"
+    type = "mesh"
+    file = "mesh/wire_b_1.obj"
+    scale = 0.03125
+    offset = [0.0,0.0,0.0]
+},
+{
+    name = "wire_b_2"
+    type = "mesh"
+    file = "mesh/wire_b_2.obj"
+    scale = 0.03125
+    offset = [0.0,0.0,0.0]
+},
+{
+    name = "wire_b_4"
+    type = "mesh"
+    file = "mesh/wire_b_4.obj"
+    scale = 0.03125
+    offset = [0.0,0.0,0.0]
+},
+{
+    name = "wire_b_8"
+    type = "mesh"
+    file = "mesh/wire_b_8.obj"
+    scale = 0.03125
+    offset = [0.0,0.0,0.0]
+},
+{
     name = "wire_1"
     type = "mesh"
     file = "mesh/wire_1.obj"
