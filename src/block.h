@@ -65,9 +65,3 @@ air_permeable(surface_type s)
 {
     return ~s & surface_blocks_air;
 }
-
-static inline unsigned char  /* bool */
-light_permeable(surface_type s)
-{
-    return ~s & surface_blocks_light;
-}
