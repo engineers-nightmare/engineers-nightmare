@@ -93,7 +93,7 @@ static void save_chunk(saver *s, std::pair<glm::ivec3, chunk *> chunk) {
         for (auto j = 0u; j < CHUNK_SIZE; j++) {
             for (auto i = 0u; i < CHUNK_SIZE; i++) {
                 auto bl = chunk.second->blocks.get(i, j, k);
-                for (bool f : bl->has_wire) {
+                for (bool f : bl->wire[0].has_wire) {
                     s->write<unsigned char>(f);
                 }
             }
@@ -106,7 +106,7 @@ static void save_chunk(saver *s, std::pair<glm::ivec3, chunk *> chunk) {
         for (auto j = 0u; j < CHUNK_SIZE; j++) {
             for (auto i = 0u; i < CHUNK_SIZE; i++) {
                 auto bl = chunk.second->blocks.get(i, j, k);
-                for (unsigned int wire_bit : bl->wire_bits) {
+                for (unsigned int wire_bit : bl->wire[0].wire_bits) {
                     s->write<uint32_t>(wire_bit);
                 }
             }

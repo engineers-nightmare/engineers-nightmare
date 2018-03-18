@@ -1,5 +1,7 @@
 #pragma once
 
+#include "wiring/wiring_data.h"
+
 enum block_type {
     block_untouched,
     block_empty,
@@ -48,6 +50,11 @@ enum surface_index : unsigned {
     face_count,
 };
 
+struct block_wires {
+    bool has_wire[face_count]{};
+    unsigned wire_bits[face_count]{};
+};
+
 /* a single block
  * represents a 1m^3 cube
  * for more information see docs/ships-space.md
@@ -56,8 +63,7 @@ struct block {
     block_type type = block_untouched;
 
     surface_type surfs[face_count]{};
-    bool has_wire[face_count]{};
-    unsigned wire_bits[face_count]{};
+    block_wires wire[num_wire_types];
 };
 
 static inline unsigned char  /* bool */

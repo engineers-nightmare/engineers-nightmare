@@ -765,10 +765,10 @@ ship_space::set_surface(glm::ivec3 a, glm::ivec3 b, surface_index index, surface
     }
 
     if (st == surface_none) {
-        block->has_wire[index] = false;
-        other_block->has_wire[index ^ 1] = false;
-        block->wire_bits[index] = 0;
-        other_block->wire_bits[index ^ 1] = 0;
+        block->wire[0].has_wire[index] = false;
+        other_block->wire[0].has_wire[index ^ 1] = false;
+        block->wire[0].wire_bits[index] = 0;
+        other_block->wire[0].wire_bits[index ^ 1] = 0;
     }
 }
 

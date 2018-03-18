@@ -31,7 +31,7 @@ template<>
 uint32_t loader::read<uint32_t>(uint32_t &amt_read) {
     uint32_t x;
     auto sz = sizeof(x);
-    amt_read = (uint32_t)fread(&x, sz, 1, f) * sz;
+    amt_read = (uint32_t)(fread(&x, sz, 1, f) * sz);
     return x;
 }
 
@@ -39,7 +39,7 @@ template<>
 int32_t loader::read<int32_t>(uint32_t &amt_read) {
     int32_t x;
     auto sz = sizeof(x);
-    amt_read = (uint32_t)fread(&x, sz, 1, f) * sz;
+    amt_read = (uint32_t)(fread(&x, sz, 1, f) * sz);
     return x;
 }
 
@@ -47,7 +47,7 @@ template<>
 unsigned char loader::read<unsigned char>(uint32_t &amt_read) {
     unsigned char x;
     auto sz = sizeof(x);
-    amt_read = (uint32_t)fread(&x, sz, 1, f) * sz;
+    amt_read = (uint32_t)(fread(&x, sz, 1, f) * sz);
     return x;
 }
 
@@ -55,7 +55,7 @@ template<>
 float loader::read<float>(uint32_t &amt_read) {
     float x;
     auto sz = sizeof(x);
-    amt_read = (uint32_t)fread(&x, sz, 1, f) * sz;
+    amt_read = (uint32_t)(fread(&x, sz, 1, f) * sz);
     return x;
 }
 
@@ -134,7 +134,7 @@ static uint32_t load_chunk(loader *l, ship_space *ship) {
                     for (auto i = 0u; i < CHUNK_SIZE; i++) {
                         ch->blocks.get(i, j, k);
                         auto bl = ch->blocks.get(i, j, k);
-                        for (auto &has_wire : bl->has_wire) {
+                        for (auto &has_wire : bl->wire[0].has_wire) {
                             has_wire = (bool)l->read<unsigned char>(read);
                             chunk_read += read;
                         }
@@ -149,7 +149,7 @@ static uint32_t load_chunk(loader *l, ship_space *ship) {
                     for (auto i = 0u; i < CHUNK_SIZE; i++) {
                         ch->blocks.get(i, j, k);
                         auto bl = ch->blocks.get(i, j, k);
-                        for (auto &wire_bit : bl->wire_bits) {
+                        for (auto &wire_bit : bl->wire[0].wire_bits) {
                             wire_bit = l->read<uint32_t>(read);
                             chunk_read += read;
                         }

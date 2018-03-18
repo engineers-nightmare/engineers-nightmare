@@ -515,12 +515,12 @@ void draw_wires() {
                                 auto meshes = bl->type == block_frame ? inside_meshes : outside_meshes;
 
                                 for (int face = 0; face < 6; face++) {
-                                    if (bl->has_wire[face]) {
+                                    if (bl->wire[0].has_wire[face]) {
                                         auto params = frame->alloc_aligned<glm::mat4>(1);
                                         *(params.ptr) = mat_block_face(glm::vec3(i * CHUNK_SIZE + x, j * CHUNK_SIZE + y, k * CHUNK_SIZE + z), face);
                                         params.bind(1, frame);
 
-                                        auto bits = shuffle_adj_bits_for_face(bl->wire_bits[face], face);
+                                        auto bits = shuffle_adj_bits_for_face(bl->wire[0].wire_bits[face], face);
 
                                         if (bits & 1)
                                             draw_mesh(meshes[0]->hw);
