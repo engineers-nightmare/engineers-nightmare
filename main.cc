@@ -487,19 +487,37 @@ unsigned shuffle_adj_bits_for_face(unsigned bits, unsigned face) {
 
 
 void draw_wires() {
-    const mesh_data* outside_meshes[] = {
-        &asset_man.get_mesh("wire_1"),
-        &asset_man.get_mesh("wire_2"),
-        &asset_man.get_mesh("wire_4"),
-        &asset_man.get_mesh("wire_8"),
-        &asset_man.get_mesh("wire_end"),
+    static const mesh_data* outside_meshes[][5] = {
+        {
+            &asset_man.get_mesh("wire_1"),
+            &asset_man.get_mesh("wire_2"),
+            &asset_man.get_mesh("wire_4"),
+            &asset_man.get_mesh("wire_8"),
+            &asset_man.get_mesh("wire_end"),
+        },
+        {
+            &asset_man.get_mesh("wire_b_1"),
+            &asset_man.get_mesh("wire_b_2"),
+            &asset_man.get_mesh("wire_b_4"),
+            &asset_man.get_mesh("wire_b_8"),
+            &asset_man.get_mesh("wire_end"),
+        },
     };
-    const mesh_data* inside_meshes[] = {
-        &asset_man.get_mesh("wire_1i"),
-        &asset_man.get_mesh("wire_2i"),
-        &asset_man.get_mesh("wire_4i"),
-        &asset_man.get_mesh("wire_8i"),
-        &asset_man.get_mesh("wire_endi"),
+    static const mesh_data* inside_meshes[][5] = {
+        {
+            &asset_man.get_mesh("wire_1i"),
+            &asset_man.get_mesh("wire_2i"),
+            &asset_man.get_mesh("wire_4i"),
+            &asset_man.get_mesh("wire_8i"),
+            &asset_man.get_mesh("wire_endi"),
+        },
+        {
+            &asset_man.get_mesh("wire_1i"),
+            &asset_man.get_mesh("wire_2i"),
+            &asset_man.get_mesh("wire_4i"),
+            &asset_man.get_mesh("wire_8i"),
+            &asset_man.get_mesh("wire_endi"),
+        }
     };
 
     for (int k = ship->mins.z; k <= ship->maxs.z; k++) {
@@ -512,27 +530,30 @@ void draw_wires() {
                             for (int x = 0; x < CHUNK_SIZE; x++) {
                                 auto bl = ch->blocks.get(x, y, z);
 
-                                auto meshes = bl->type == block_frame ? inside_meshes : outside_meshes;
+                                for (int type = 0; type < num_wire_types; type++) {
 
-                                for (int face = 0; face < 6; face++) {
-                                    if (bl->wire[0].has_wire[face]) {
-                                        auto params = frame->alloc_aligned<glm::mat4>(1);
-                                        *(params.ptr) = mat_block_face(glm::vec3(i * CHUNK_SIZE + x, j * CHUNK_SIZE + y, k * CHUNK_SIZE + z), face);
-                                        params.bind(1, frame);
+                                    auto meshes = bl->type == block_frame ? inside_meshes : outside_meshes;
 
-                                        auto bits = shuffle_adj_bits_for_face(bl->wire[0].wire_bits[face], face);
+                                    for (int face = 0; face < 6; face++) {
+                                        if (bl->wire[type].has_wire[face]) {
+                                            auto params = frame->alloc_aligned<glm::mat4>(1);
+                                            *(params.ptr) = mat_block_face(glm::vec3(i * CHUNK_SIZE + x, j * CHUNK_SIZE + y, k * CHUNK_SIZE + z), face);
+                                            params.bind(1, frame);
 
-                                        if (bits & 1)
-                                            draw_mesh(meshes[0]->hw);
-                                        if (bits & 2)
-                                            draw_mesh(meshes[1]->hw);
-                                        if (bits & 4)
-                                            draw_mesh(meshes[2]->hw);
-                                        if (bits & 8)
-                                            draw_mesh(meshes[3]->hw);
+                                            auto bits = shuffle_adj_bits_for_face(bl->wire[type].wire_bits[face], face);
 
-                                        if (!(bits & (bits - 1))) {
-                                            draw_mesh(meshes[4]->hw);
+                                            if (bits & 1)
+                                                draw_mesh(meshes[type][0]->hw);
+                                            if (bits & 2)
+                                                draw_mesh(meshes[type][1]->hw);
+                                            if (bits & 4)
+                                                draw_mesh(meshes[type][2]->hw);
+                                            if (bits & 8)
+                                                draw_mesh(meshes[type][3]->hw);
+
+                                            if (!(bits & (bits - 1))) {
+                                                draw_mesh(meshes[type][4]->hw);
+                                            }
                                         }
                                     }
                                 }
