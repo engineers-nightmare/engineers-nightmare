@@ -1,5 +1,3 @@
-#pragma once
-
 #include <SDL_mouse.h>
 #include <soloud.h>
 
@@ -10,6 +8,7 @@
 #include "../save.h"
 #include "../load.h"
 #include "../ship_space.h"
+#include "../component/component_system_manager.h"
 
 extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
@@ -26,6 +25,8 @@ extern SoLoud::Soloud * audio;
 extern bool draw_fps, draw_debug_text, draw_debug_chunks, draw_debug_axis, draw_debug_physics;
 
 extern ImGuiContext *default_context;
+
+extern component_system_manager component_system_man;
 
 extern glm::vec3 fp_item_offset;
 extern float fp_item_scale;
@@ -124,3 +125,5 @@ struct customize_entity_state : game_state {
         ImGui::Render();
     }
 };
+
+game_state *game_state::create_customize_entity_state(c_entity e) { return new customize_entity_state(e); }

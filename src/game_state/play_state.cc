@@ -1,5 +1,3 @@
-#pragma once
-
 #include <SDL_mouse.h>
 #include <soloud.h>
 
@@ -347,3 +345,5 @@ struct play_state : game_state {
         }
     }
 };
+
+game_state *game_state::create_play_state() { return new play_state; }

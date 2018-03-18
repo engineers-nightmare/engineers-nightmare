@@ -1,5 +1,3 @@
-#pragma once
-
 #include <SDL_mouse.h>
 #include <soloud.h>
 
@@ -218,3 +216,5 @@ struct menu_state : game_state {
         ImGui::Render();
     }
 };
+
+game_state *game_state::create_menu_state() { return new menu_state; }
