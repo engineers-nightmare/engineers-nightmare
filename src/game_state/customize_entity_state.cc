@@ -92,9 +92,10 @@ struct customize_entity_state : game_state {
                 ImGui::Text("%s", *type.name);
                 ImGui::Separator();
                 ImGui::Dummy(ImVec2{10, 10});
-                ImGui::InputText("Label", label, 256, ImGuiInputTextFlags_AutoSelectAll);
+                bool isDone = ImGui::InputText("Label", label, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
                 ImGui::Dummy(ImVec2{10, 10});
-                if (ImGui::Button("Finish")) {
+                isDone = ImGui::Button("Finish") || isDone;
+                if (isDone) {
                     set_next_game_state(create_play_state());
                 }
 
