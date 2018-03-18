@@ -130,12 +130,12 @@ struct customize_entity_tool : tool
                 else {
                     ImGui::Text("Found:");
                     auto name = type_man.get_instance_data(entity).name;
-                    ImGui::Text(*name);
+                    ImGui::Text("%s", *name);
 
                     if (wire_man.exists(entity)) {
                         auto label = *(wire_man.get_instance_data(entity).label);
                         if (label != nullptr && strcmp(label, "") != 0) {
-                            ImGui::Text(label);
+                            ImGui::Text("%s", label);
                         } else {
                             ImGui::Text("No label");
                         }
