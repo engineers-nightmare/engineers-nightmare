@@ -4,6 +4,7 @@
 #pragma once
 
 #include "render_data.h"
+#include "component/c_entity.h"
 
 class game_state {
 
@@ -20,7 +21,7 @@ public:
 
     static game_state *create_play_state();
     static game_state *create_menu_state();
-    static game_state *create_customize_entity_state();
+    static game_state *create_customize_entity_state(c_entity e);
 };
 
 

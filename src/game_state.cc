@@ -9,4 +9,4 @@
 
 game_state *game_state::create_play_state() { return new play_state; }
 game_state *game_state::create_menu_state() { return new menu_state; }
-game_state *game_state::create_customize_entity_state() { return new customize_entity_state; }
+game_state *game_state::create_customize_entity_state(c_entity e) { return new customize_entity_state(e); }

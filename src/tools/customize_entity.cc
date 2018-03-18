@@ -61,7 +61,7 @@ struct customize_entity_tool : tool
         if (!can_use())
             return;
 
-        set_next_game_state(game_state::create_customize_entity_state());
+        set_next_game_state(game_state::create_customize_entity_state(entity));
     }
 
     void preview(frame_data *frame) override {

@@ -39,11 +39,13 @@ struct customize_entity_state : game_state {
         Keybinds,
     } state{MenuState::Main};
 
+    c_entity entity;
+
     bool settings_dirty = false;
 
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
-    customize_entity_state() {
+    explicit customize_entity_state(c_entity e) : entity(e) {
         warp_mouse_to_center_screen();
         state = MenuState::Main;
     }
