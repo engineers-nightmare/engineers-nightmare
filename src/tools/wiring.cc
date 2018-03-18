@@ -172,6 +172,7 @@ struct wiring_tool : tool
 {
     raycast_info_block rc;
     enum { idle, placing } state = idle;
+    wire_type current_type;
     wire_pos start;
     wire_pos last_end;
     std::vector<wire_pos> path;
@@ -184,6 +185,12 @@ struct wiring_tool : tool
 
     bool can_use() {
         return rc.hit;
+    }
+
+    void cycle_mode() override {
+        current_type = (wire_type)(current_type + 1);
+        if (current_type == num_wire_types)
+            current_type = (wire_type)0;
     }
 
     void use() override
