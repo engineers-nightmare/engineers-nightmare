@@ -115,7 +115,7 @@ static float heuristic(wire_pos from, wire_pos to) {
     return (float)manhattan;
 }
 
-std::vector<wire_pos> find_path(wire_pos from, wire_pos to) {
+std::vector<wire_pos> find_path(wire_pos from, wire_pos to, wire_type type) {
     struct path_state {
         float g{ 0.f };
         wire_pos prev;
@@ -152,7 +152,7 @@ std::vector<wire_pos> find_path(wire_pos from, wire_pos to) {
 
         for_each_neighbor(wp, [&](wire_pos const &n) {
             auto cost = ws.g;
-            if (!ship->get_block(n.pos)->wire[0].has_wire[n.face]) cost += 1.f;
+            if (!ship->get_block(n.pos)->wire[type].has_wire[n.face]) cost += 1.f;
             auto is_new = state.find(n) == state.end();
             auto &ns = state[n];
             if (is_new || cost < ns.g) {
@@ -207,11 +207,11 @@ struct wiring_tool : tool
         case placing: {
             if (path.size()) {
                 for (auto &pe : path) {
-                    ship->get_block(pe.pos)->wire[0].has_wire[pe.face] = true;
+                    ship->get_block(pe.pos)->wire[current_type].has_wire[pe.face] = true;
                 }
                 std::unordered_set<wire_pos, wire_pos::hash> ps(path.begin(), path.end());
                 for (auto &pe : path) {
-                    ship->get_block(pe.pos)->wire[0].wire_bits[pe.face] |= get_neighbor_bits(pe, ps);
+                    ship->get_block(pe.pos)->wire[current_type].wire_bits[pe.face] |= get_neighbor_bits(pe, ps);
                 }
                 state = idle;
             }
@@ -231,8 +231,8 @@ struct wiring_tool : tool
             return;
 
         auto p = from_rc(&rc);
-        ship->get_block(p.pos)->wire[0].has_wire[p.face] = false;
-        ship->get_block(p.pos)->wire[0].wire_bits[p.face] = 0;
+        ship->get_block(p.pos)->wire[current_type].has_wire[p.face] = false;
+        ship->get_block(p.pos)->wire[current_type].wire_bits[p.face] = 0;
     }
 
     void preview(frame_data *frame) override
@@ -248,7 +248,7 @@ struct wiring_tool : tool
         if (state == placing) {
             if (last_end != p) {
                 last_end = p;
-                path = find_path(start, p);
+                path = find_path(start, p, current_type);
                 pl.ui_dirty = true;
             }
 
@@ -270,7 +270,7 @@ struct wiring_tool : tool
             glEnable(GL_BLEND);
             for (auto & pe : path) {
                 total_run++;
-                if (!ship->get_block(pe.pos)->wire[0].has_wire[pe.face]) {
+                if (!ship->get_block(pe.pos)->wire[current_type].has_wire[pe.face]) {
                     auto mat = frame->alloc_aligned<mesh_instance>(1);
                     mat.ptr->world_matrix = mat_block_face(glm::vec3(pe.pos), pe.face);
                     mat.ptr->color = glm::vec4(1.f, 1.f, 1.f, 1.f);
@@ -305,7 +305,8 @@ struct wiring_tool : tool
 
         switch (state) {
         case idle:
-            sprintf(str, "Place wiring   %s: Remove wiring", alt_use); break;
+            sprintf(str, "Place wiring type %d   %s: Remove wiring",
+                current_type, alt_use); break;
         case placing:
             if (total_run) {
                 sprintf(str, "Finish run: %dm of new wire, total run %dm    %s: Cancel",
