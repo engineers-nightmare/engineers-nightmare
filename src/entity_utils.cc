@@ -69,7 +69,6 @@ load_entity(entity_data& entity, config_setting_t *e) {
         dep.second = keys.count(dep.first) != 0;
     }
 
-    auto valid = true;
     for (auto &&comp : dependencies) {
         for (auto &&dep : comp.second) {
             if (!dep.second) {

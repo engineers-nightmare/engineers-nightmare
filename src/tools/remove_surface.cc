@@ -56,7 +56,6 @@ struct remove_surface_tool : tool
         if (!can_use())
             return;
 
-        block *bl = rc.block;
         auto index = normal_to_surface_index(&rc);
 
         auto &mesh = asset_man.surf_kinds.at(rc.block->surfs[index]).visual_mesh;
