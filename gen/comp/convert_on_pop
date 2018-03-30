@@ -1,2 +1,3 @@
+ui_name,Convert on pop
 stub,std::string,std::string,,type,.c_str()
 body,const char*,type,nullptr

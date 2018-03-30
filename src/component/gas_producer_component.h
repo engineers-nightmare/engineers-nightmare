@@ -8,7 +8,7 @@
 #include "component_manager.h"
 #include "../enums/enums.h"
 
-struct gas_producer_component_manager : component_manager {
+struct gas_producer_component_manager : component_manager<gas_producer_component_manager> {
     struct instance_data {
         c_entity *entity;
         unsigned *gas_type;
@@ -20,6 +20,10 @@ struct gas_producer_component_manager : component_manager {
     void create_component_instance_data(unsigned count) override;
     void destroy_instance(instance i) override;
     void entity(c_entity e) override;
+
+    static const char* get_ui_name() {
+        return "Gas Producer";
+    }
 
     instance_data get_instance_data(c_entity e) {
         instance_data d{};

@@ -8,7 +8,7 @@
 #include "component_manager.h"
 #include "../enums/enums.h"
 
-struct power_provider_component_manager : component_manager {
+struct power_provider_component_manager : component_manager<power_provider_component_manager> {
     struct instance_data {
         c_entity *entity;
         float *max_provided;
@@ -19,6 +19,10 @@ struct power_provider_component_manager : component_manager {
     void create_component_instance_data(unsigned count) override;
     void destroy_instance(instance i) override;
     void entity(c_entity e) override;
+
+    static const char* get_ui_name() {
+        return "Power Provider";
+    }
 
     instance_data get_instance_data(c_entity e) {
         instance_data d{};

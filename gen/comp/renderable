@@ -1,3 +1,4 @@
+ui_name,Renderable
 stub,std::string,std::string,,mesh,.c_str()
 body,const char*,mesh,nullptr
 body,bool,draw,true

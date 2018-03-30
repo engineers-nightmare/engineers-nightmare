@@ -1,3 +1,4 @@
+ui_name,Type
 stub,std::string,std::string,,name,.c_str()
 body,unsigned,type,0
 body,char const *,name,""

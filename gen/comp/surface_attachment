@@ -1,3 +1,4 @@
+ui_name,Surface Attachment
 body,glm::ivec3,block,glm::ivec3(0)
 body,int,face,0
 body,bool,attached,false
