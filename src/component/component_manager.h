@@ -61,6 +61,7 @@ struct entity_data {
     entity_data& operator=(entity_data&&) = default;
 };
 
+template<class T>
 struct component_manager {
     struct instance {
         unsigned index;
@@ -84,6 +85,10 @@ struct component_manager {
     }
 
     virtual void entity(c_entity e) = 0;
+
+    static const char * get_ui_name() {
+        return T::get_ui_name();
+    };
 
     bool exists(c_entity e) {
         return entity_instance_map.find(e) != entity_instance_map.end();
