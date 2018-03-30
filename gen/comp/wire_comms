@@ -1,2 +1,3 @@
+ui_name,Wire Comms
 body,unsigned,network,0
 body,char const *,label,nullptr

@@ -1,3 +1,4 @@
+ui_name,Power
 stub,float,float,,required_power,
 stub,float,float,,max_required_power,
 body,float,required_power,0

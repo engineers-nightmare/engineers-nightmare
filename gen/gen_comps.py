@@ -15,9 +15,10 @@ def find_matching_stub(body_field, stubs):
 
 
 class component:
-    def __init__(self, cname, cfile, sfields, bfields, depends):
+    def __init__(self, cname, cfile, uiname, sfields, bfields, depends):
         self.comp_name = cname
         self.comp_file = cfile
+        self.ui_name = uiname
         self.stub_fields = sfields
         self.body_fields = bfields
         self.dependencies = depends
@@ -28,6 +29,7 @@ def load_component(comp_file):
     body_fields = []
     dependencies = []
     component_name = os.path.basename(comp_file)
+    ui_name = "Invalid Name"
     with open(comp_file, 'r') as f:
         prev = 'entity'
         for l in f:
@@ -42,10 +44,12 @@ def load_component(comp_file):
                      'comp_name': component_name})
             elif parts[0] == 'depends':
                 dependencies = parts[1:]
+            elif parts[0] == 'ui_name':
+                ui_name = parts[1]
             for body in body_fields:
                 body['stub'] = find_matching_stub(body, stub_fields)
 
-    comp = component(component_name, comp_file, stub_fields, body_fields, dependencies)
+    comp = component(component_name, comp_file, ui_name, stub_fields, body_fields, dependencies)
     return comp
 
 

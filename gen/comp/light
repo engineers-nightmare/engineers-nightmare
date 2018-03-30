@@ -1,3 +1,4 @@
+ui_name,Light
 stub,float,float,,intensity,
 depends,power,wire_comms
 body,float,intensity,0

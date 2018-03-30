@@ -1,3 +1,4 @@
+ui_name,Gas Producer
 stub,unsigned,int,,gas_type,
 stub,float,float,,flow_rate,
 stub,float,float,,max_pressure,

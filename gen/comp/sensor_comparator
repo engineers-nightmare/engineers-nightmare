@@ -1,3 +1,4 @@
+ui_name,Sensor Comparator
 stub,float,float,,compare_epsilon,
 depends,wire_comms
 body,float,compare_result,0
