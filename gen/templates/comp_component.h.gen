@@ -11,7 +11,7 @@
 struct ${comp_name}_component_manager : component_manager {
     struct instance_data {
         c_entity *entity;
-% for body in bodies:
+% for body in comp.body_fields:
         ${body['type']} *${body['name']};
 % endfor
     } instance_pool;
@@ -25,7 +25,7 @@ struct ${comp_name}_component_manager : component_manager {
         auto inst = lookup(e);
 
         d.entity = instance_pool.entity + inst.index;
-% for body in bodies:
+% for body in comp.body_fields:
         d.${body['name']} = instance_pool.${body['name']} + inst.index;
 % endfor
 
@@ -36,7 +36,7 @@ struct ${comp_name}_component_manager : component_manager {
 struct ${comp_name}_component_stub : component_stub {
     ${comp_name}_component_stub() = default;
 
-% for stub in stubs:
+% for stub in comp.stub_fields:
     ${stub['otype']} ${stub['name']}{};
 % endfor
 

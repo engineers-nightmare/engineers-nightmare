@@ -7,7 +7,7 @@
 
 #include "component_manager.h"
 
-% for comp_name in comp_names:
+% for comp_name in comps:
 #include "${comp_name}_component.h"
 % endfor
 
@@ -15,17 +15,17 @@
 
 struct component_managers {
     component_managers() {
-% for comp_name in comp_names:
+% for comp_name in comps:
         ${comp_name}_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
 % endfor
     }
 
-% for comp_name in comp_names:
+% for comp_name in comps:
     ${comp_name}_component_manager ${comp_name}_component_man{};
 % endfor
 
     std::unique_ptr<component_stub> get_stub(const char*comp_name, const config_setting_t *config) {
-% for comp_name in comp_names:
+% for comp_name in comps:
         if (strcmp(comp_name, "${comp_name}") == 0) {
             return ${comp_name}_component_stub::from_config(config);
         }
@@ -35,7 +35,7 @@ struct component_managers {
     }
 
     void destroy_entity_instance(c_entity ce) {
-% for comp_name in comp_names:
+% for comp_name in comps:
         ${comp_name}_component_man.destroy_entity_instance(ce);
 % endfor
     }
