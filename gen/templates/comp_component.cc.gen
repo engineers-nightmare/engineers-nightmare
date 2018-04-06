@@ -19,7 +19,7 @@ ${comp_name}_component_manager::create_component_instance_data(unsigned count) {
     instance_data new_pool{};
 
     size_t size = sizeof(c_entity) * count;
-% for body in bodies:
+% for body in comp.body_fields:
     size = sizeof(${body['type']}) * count + align_size<${body['type']}>(size);
 % endfor
     size += 16;   // for worst-case misalignment of initial ptr
@@ -30,12 +30,12 @@ ${comp_name}_component_manager::create_component_instance_data(unsigned count) {
     memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
-% for body in bodies:
+% for body in comp.body_fields:
     new_pool.${body['name']} = align_ptr((${body['type']} *)(new_pool.${body['prev']} + count));
 % endfor
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
-% for body in bodies:
+% for body in comp.body_fields:
     memcpy(new_pool.${body['name']}, instance_pool.${body['name']}, buffer.num * sizeof(${body['type']}));
 % endfor
 
@@ -52,7 +52,7 @@ ${comp_name}_component_manager::destroy_instance(instance i) {
     auto current_entity = instance_pool.entity[i.index];
 
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
-% for body in bodies:
+% for body in comp.body_fields:
     instance_pool.${body['name']}[i.index] = instance_pool.${body['name']}[last_index];
 % endfor
 
@@ -80,11 +80,11 @@ ${comp_name}_component_stub::assign_component_to_entity(c_entity entity) {
 
     man.assign_entity(entity);
 
-% if bodies:
+% if comp.body_fields:
     auto data = man.get_instance_data(entity);
 % endif
 
-% for body in bodies:
+% for body in comp.body_fields:
     % if body['stub']:
     *data.${body['stub']['name']} = ${body['stub']['pre']}${body['stub']['name']}${body['stub']['extra']};
     % else:
@@ -96,7 +96,7 @@ ${comp_name}_component_stub::assign_component_to_entity(c_entity entity) {
 std::unique_ptr<component_stub> ${comp_name}_component_stub::from_config(const config_setting_t *config) {
     auto ${comp_name}_stub = std::make_unique<${comp_name}_component_stub>();
 
-% for stub in stubs:
+% for stub in comp.stub_fields:
     ${comp_name}_stub->${stub['name']} = load_value_from_config<${stub['type']}>(config, "${stub['name']}");
 % endfor
 
@@ -105,7 +105,7 @@ std::unique_ptr<component_stub> ${comp_name}_component_stub::from_config(const c
 
 std::vector<std::string> ${comp_name}_component_stub::get_dependencies() {
     return {
-% for dep in dependencies:
+% for dep in comp.dependencies:
         "${dep}",
 % endfor
     };
