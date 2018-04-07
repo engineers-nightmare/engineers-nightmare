@@ -5,6 +5,7 @@ import os
 import sys
 
 from mako.template import Template
+from mako import exceptions
 
 
 def find_matching_stub(body_field, stubs):
@@ -57,13 +58,25 @@ def main():
     files = [f for f in glob.glob('gen/comp/*')]
     comps = {f.split('/')[2]: load_component(f) for f in files}
 
-    component_managers_header_template = Template(filename='gen/templates/component_managers.h.gen')
-    component_header_template = Template(filename='gen/templates/comp_component.h.gen')
-    component_impl_template = Template(filename='gen/templates/comp_component.cc.gen')
+    try:
+        gen_component_managers_header(comps)
+        gen_individual_components(comps)
+    except:
+        print(exceptions.text_error_template().render())
 
+    return 0
+
+
+def gen_component_managers_header(comps):
     print("Genning header: src/component/component_managers.h")
+    component_managers_header_template = Template(filename='gen/templates/component_managers.h.gen')
     with open("src/component/component_managers.h", "w") as g:
         g.write(component_managers_header_template.render(comps=sorted(comps)))
+
+
+def gen_individual_components(comps):
+    component_header_template = Template(filename='gen/templates/comp_component.h.gen')
+    component_impl_template = Template(filename='gen/templates/comp_component.cc.gen')
 
     for comp_name in sorted(comps.keys()):
         print("Genning from %s to " % comp_name)
@@ -77,7 +90,6 @@ def main():
         with open("src/component/%s_component.cc" % comp_name, "w") as g:
             g.write(component_impl_template.render(comp_name=comp_name, comp=comp))
 
-    return 0
 
 
 if __name__ == '__main__':
