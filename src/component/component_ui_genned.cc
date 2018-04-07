@@ -22,3 +22,22 @@ std::map<const std::string, std::string> get_filter_map(c_entity entity) {
 
     return map;
 }
+
+void update_filter(c_entity entity, std::string const& comp, char filter[256]) {
+    if (comp == "gas_producer") {
+        auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
+        if (gas_producer_man.exists(entity)) {
+            auto gas_producer = gas_producer_man.get_instance_data(entity);
+            gas_producer.filter->set(filter);
+        }
+    }
+
+    if (comp == "light") {
+        auto &light_man = component_system_man.managers.light_component_man;
+        if (light_man.exists(entity)) {
+            auto light = light_man.get_instance_data(entity);
+            light.filter->set(filter);
+        }
+    }
+
+}
