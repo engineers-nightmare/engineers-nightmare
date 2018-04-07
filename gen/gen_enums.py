@@ -52,7 +52,7 @@ def main():
             source.write("#include <cstring>\n")
             source.write("\n")
 
-            for fl in files:
+            for fl in sorted(files):
                 print("  %s" % fl)
                 enum_name = fl.split(os.sep)[-1]
                 input_file = fl
