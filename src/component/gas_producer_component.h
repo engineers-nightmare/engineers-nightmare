@@ -12,6 +12,7 @@
 struct gas_producer_component_manager : component_manager<gas_producer_component_manager> {
     struct instance_data {
         c_entity *entity;
+        wire_filter_ptr *filter;
         unsigned *gas_type;
         float *flow_rate;
         float *max_pressure;
@@ -31,6 +32,7 @@ struct gas_producer_component_manager : component_manager<gas_producer_component
         auto inst = lookup(e);
 
         d.entity = instance_pool.entity + inst.index;
+        d.filter = instance_pool.filter + inst.index;
         d.gas_type = instance_pool.gas_type + inst.index;
         d.flow_rate = instance_pool.flow_rate + inst.index;
         d.max_pressure = instance_pool.max_pressure + inst.index;
