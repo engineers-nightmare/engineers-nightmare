@@ -61,6 +61,7 @@ def main():
     try:
         gen_component_managers_header(comps)
         gen_individual_components(comps)
+        gen_component_ui(comps)
     except:
         print(exceptions.text_error_template().render())
 
@@ -90,6 +91,13 @@ def gen_individual_components(comps):
         with open("src/component/%s_component.cc" % comp_name, "w") as g:
             g.write(component_impl_template.render(comp_name=comp_name, comp=comp))
 
+
+def gen_component_ui(comps):
+    output = "src/component/component_ui_genned.cc"
+    print("Genning ui: " + output)
+    ui_template = Template(filename='gen/templates/component_ui_genned.cc.gen')
+    with open(output, "w") as g:
+        g.write(ui_template.render(comps=comps))
 
 
 if __name__ == '__main__':
