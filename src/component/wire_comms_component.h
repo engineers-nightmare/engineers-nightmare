@@ -7,6 +7,7 @@
 
 #include "component_manager.h"
 #include "../enums/enums.h"
+#include "wire_filter.h"
 
 struct wire_comms_component_manager : component_manager<wire_comms_component_manager> {
     struct instance_data {

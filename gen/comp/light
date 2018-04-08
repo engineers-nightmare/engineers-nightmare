@@ -1,5 +1,6 @@
 ui_name,Light
 stub,float,float,,intensity,
 depends,power,wire_comms
+body,wire_filter_ptr,filter,{}
 body,float,intensity,0
 body,float,requested_intensity,1

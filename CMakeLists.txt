@@ -105,6 +105,7 @@ set(EN_HEADERS
     src/component/switch_component.h
     src/component/type_component.h
     src/component/wire_comms_component.h
+    src/component/wire_filter.h
     src/config.h
     src/fixed_cube.h
     src/input.h
