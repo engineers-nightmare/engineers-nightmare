@@ -7,10 +7,12 @@
 
 #include "component_manager.h"
 #include "../enums/enums.h"
+#include "wire_filter.h"
 
 struct light_component_manager : component_manager<light_component_manager> {
     struct instance_data {
         c_entity *entity;
+        wire_filter_ptr *filter;
         float *intensity;
         float *requested_intensity;
     } instance_pool;
@@ -28,6 +30,7 @@ struct light_component_manager : component_manager<light_component_manager> {
         auto inst = lookup(e);
 
         d.entity = instance_pool.entity + inst.index;
+        d.filter = instance_pool.filter + inst.index;
         d.intensity = instance_pool.intensity + inst.index;
         d.requested_intensity = instance_pool.requested_intensity + inst.index;
 

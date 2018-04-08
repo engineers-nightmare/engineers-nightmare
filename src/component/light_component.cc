@@ -19,6 +19,7 @@ light_component_manager::create_component_instance_data(unsigned count) {
     instance_data new_pool{};
 
     size_t size = sizeof(c_entity) * count;
+    size = sizeof(wire_filter_ptr) * count + align_size<wire_filter_ptr>(size);
     size = sizeof(float) * count + align_size<float>(size);
     size = sizeof(float) * count + align_size<float>(size);
     size += 16;   // for worst-case misalignment of initial ptr
@@ -29,10 +30,12 @@ light_component_manager::create_component_instance_data(unsigned count) {
     memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
-    new_pool.intensity = align_ptr((float *)(new_pool.entity + count));
+    new_pool.filter = align_ptr((wire_filter_ptr *)(new_pool.entity + count));
+    new_pool.intensity = align_ptr((float *)(new_pool.filter + count));
     new_pool.requested_intensity = align_ptr((float *)(new_pool.intensity + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
+    memcpy(new_pool.filter, instance_pool.filter, buffer.num * sizeof(wire_filter_ptr));
     memcpy(new_pool.intensity, instance_pool.intensity, buffer.num * sizeof(float));
     memcpy(new_pool.requested_intensity, instance_pool.requested_intensity, buffer.num * sizeof(float));
 
@@ -49,6 +52,7 @@ light_component_manager::destroy_instance(instance i) {
     auto current_entity = instance_pool.entity[i.index];
 
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
+    instance_pool.filter[i.index] = instance_pool.filter[last_index];
     instance_pool.intensity[i.index] = instance_pool.intensity[last_index];
     instance_pool.requested_intensity[i.index] = instance_pool.requested_intensity[last_index];
 
@@ -78,6 +82,7 @@ light_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);
 
+    *data.filter = {};
     *data.intensity = intensity;
     *data.requested_intensity = 1;
 };
