@@ -79,6 +79,16 @@ std::string load_value_from_config<std::string>(config_setting_t const *s, char 
 }
 
 template<>
+glm::vec3 load_value_from_config<glm::vec3>(config_setting_t const *s, char const *key) {
+    auto m = config_setting_get_member(s, key);
+    float v[3]{};
+    for (int i = 0; i < 3; i++) {
+        v[i] = (float)config_setting_get_float_elem(m, i);
+    }
+    return glm::make_vec3(v);
+}
+
+template<>
 glm::mat4 load_value_from_config<glm::mat4>(config_setting_t const *s, char const *key) {
     auto m = config_setting_get_member(s, key);
     float v[16]{};
