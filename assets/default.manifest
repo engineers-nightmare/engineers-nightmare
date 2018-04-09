@@ -122,6 +122,12 @@ assets = (
     scale = 3.0
 },
 {
+    name = "alarm_light"
+    type = "mesh"
+    file = "mesh/alarm_light.obj"
+    scale = 0.0333
+},
+{
     name = "placement_overlay"
     type = "mesh"
     file = "mesh/placement_overlay.dae"
