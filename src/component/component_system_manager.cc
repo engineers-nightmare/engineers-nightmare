@@ -220,7 +220,10 @@ tick_rotator_components(ship_space *ship) {
 
         /* todo: origin discrimination */
         for (auto msg : net.read_buffer) {
-            if (msg.desc != comms_msg_type_switch_state) {
+            auto filter = rot.filter->c_str();
+            auto sender = cwire_man.get_instance_data(msg.originator);
+
+            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.desc != comms_msg_type_switch_state) {
                 continue;
             }
 
