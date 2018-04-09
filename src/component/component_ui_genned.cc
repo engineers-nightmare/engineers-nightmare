@@ -20,6 +20,12 @@ std::vector<std::pair<const std::string, std::string>> get_filters(c_entity enti
         filters.emplace_back("Light", (light.filter->wrapped && !light.filter->wrapped->empty()) ? (*light.filter->wrapped) : "");
     }
 
+    auto &rotator_man = component_system_man.managers.rotator_component_man;
+    if (rotator_man.exists(entity)) {
+        auto rotator = rotator_man.get_instance_data(entity);
+        filters.emplace_back("Rotator", (rotator.filter->wrapped && !rotator.filter->wrapped->empty()) ? (*rotator.filter->wrapped) : "");
+    }
+
     return filters;
 }
 
@@ -37,6 +43,14 @@ void update_filter(c_entity entity, std::string const& comp, char filter[256]) {
         if (light_man.exists(entity)) {
             auto light = light_man.get_instance_data(entity);
             light.filter->set(filter);
+        }
+    }
+
+    if (comp == "Rotator") {
+        auto &rotator_man = component_system_man.managers.rotator_component_man;
+        if (rotator_man.exists(entity)) {
+            auto rotator = rotator_man.get_instance_data(entity);
+            rotator.filter->set(filter);
         }
     }
 
