@@ -1,14 +1,11 @@
 #include <SDL_mouse.h>
 #include <soloud.h>
-#include <map>
+#include <vector>
 
 #include "../game_state.h"
 #include "../imgui/imgui.h"
 #include "../input.h"
 #include "../config.h"
-#include "../save.h"
-#include "../load.h"
-#include "../ship_space.h"
 #include "../component/component_system_manager.h"
 
 extern action const* get_input(en_action a);
@@ -19,7 +16,7 @@ extern void apply_video_settings();
 extern void request_exit();
 extern void new_imgui_frame();
 extern void teardown_chunks();
-extern std::map<const std::string, std::string> get_filter_map(c_entity);
+extern std::vector<std::pair<const std::string, std::string>> get_filters(c_entity);
 extern void update_filter(c_entity entity, std::string const&, char[256]);
 
 extern en_settings game_settings;
@@ -45,7 +42,7 @@ struct customize_entity_state : game_state {
     c_entity entity;
 
     char entity_label[256]{};
-    std::map<const std::string, std::string> comp_name_to_filter_name;
+    std::vector<std::pair<const std::string, std::string>> comp_name_to_filter_name;
 
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
@@ -80,7 +77,7 @@ struct customize_entity_state : game_state {
                 break;
             }
             case CustomizeState::CommsFilter: {
-                comp_name_to_filter_name = get_filter_map(entity);
+                comp_name_to_filter_name = get_filters(entity);
                 break;
             }
             default:
@@ -189,7 +186,7 @@ struct customize_entity_state : game_state {
                     bool save_filter = ImGui::InputText(comp.c_str(), filter, 256,
                                                        ImGuiInputTextFlags_AutoSelectAll |
                                                        ImGuiInputTextFlags_EnterReturnsTrue);
-                    comp_name_to_filter_name[comp] = filter;
+                    kvp.second = filter;
                     ImGui::Dummy(ImVec2{10, 10});
                     save_filter = ImGui::Button("Save") || save_filter;
                     if (save_filter) {
