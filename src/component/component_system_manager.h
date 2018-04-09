@@ -36,6 +36,9 @@ void
 tick_light_components(ship_space *ship);
 
 void
+tick_rotator_components(ship_space *ship);
+
+void
 tick_pressure_sensors(ship_space *ship);
 
 void

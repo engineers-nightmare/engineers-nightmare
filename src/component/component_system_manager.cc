@@ -6,9 +6,11 @@
 #include "../particle.h"
 #include "../mesh.h"
 #include "../entity_utils.h"
+#include "../common.h"
 
 extern asset_manager asset_man;
 extern component_system_manager component_system_man;
+extern frame_info frame_info;
 
 extern particle_manager *particle_man;
 
@@ -191,6 +193,46 @@ tick_light_components(ship_space *ship) {
                 *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
             }
         }
+    }
+}
+
+
+void
+tick_rotator_components(ship_space *ship) {
+    auto &rot_man = component_system_man.managers.rotator_component_man;
+    auto &pos_man = component_system_man.managers.position_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
+    auto &power_man = component_system_man.managers.power_component_man;
+
+    for (auto i = 0u; i < rot_man.buffer.num; i++) {
+        auto ce = rot_man.instance_pool.entity[i];
+
+        auto power = power_man.get_instance_data(ce);
+        auto rot = rot_man.get_instance_data(ce);
+        auto pos = pos_man.get_instance_data(ce);
+
+        if (!*power.powered) {
+            return;
+        }
+
+        auto const &cwire = cwire_man.get_instance_data(ce);
+        auto const &net = ship->get_comms_network(*cwire.network);
+
+        /* todo: origin discrimination */
+        for (auto msg : net.read_buffer) {
+            if (msg.desc != comms_msg_type_switch_state) {
+                continue;
+            }
+
+            *rot.rot_cur_speed = *rot.rot_cur_speed ? 0 : *rot.rot_speed;
+        }
+
+        auto pos_mat = *pos.mat;
+        if (*rot.rot_cur_speed) {
+            pos_mat = glm::rotate(pos_mat, (float)*rot.rot_dir * *rot.rot_cur_speed * (float)frame_info.dt, *rot.rot_axis);
+        }
+
+        set_entity_matrix(ce, pos_mat);
     }
 }
 

@@ -738,6 +738,7 @@ update()
         tick_sensor_comparators(ship);
         tick_proximity_sensors(ship, &pl);
         tick_doors(ship);
+        tick_rotator_components(ship);
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);
