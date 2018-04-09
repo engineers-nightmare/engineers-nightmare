@@ -116,7 +116,7 @@ struct customize_entity_state : game_state {
                 if (ImGui::Button("Output")) {
                     set_next_state(CustomizeState::CommsOutput);
                 }
-                else if (ImGui::Button("Filters")) {
+                else if (!get_filters(entity).empty() && ImGui::Button("Filters")) {
                     set_next_state(CustomizeState::CommsFilter);
                 }
                 else if (ImGui::Button("Back")) {
