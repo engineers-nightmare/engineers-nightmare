@@ -1,0 +1,36 @@
+entity: {
+    components: {
+        type: {
+            name: "alarm light",
+        },
+        renderable: {
+            mesh: "alarm_light",
+        },
+        placeable: {
+            rot: 15,
+            place: "quarter_block_snapped",
+        },
+        position: {
+        },
+        physics: {
+            mesh: "alarm_light",
+            mass: 0.45,
+        },
+        surface_attachment: {
+        },
+        power: {
+            required_power: 1.0,
+            max_required_power: 1.0,
+        },
+        light: {
+            intensity: 1.0,
+        },
+        wire_comms: {
+        },
+        rotator: {
+            rot_dir: 1,
+            rot_speed: 10.0,
+            rot_axis: ( 0.0, 0.0, 1.0 ),
+        },
+    };
+};
