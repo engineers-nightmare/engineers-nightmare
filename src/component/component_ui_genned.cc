@@ -11,13 +11,13 @@ std::vector<std::pair<const std::string, std::string>> get_filters(c_entity enti
     auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
     if (gas_producer_man.exists(entity)) {
         auto gas_producer = gas_producer_man.get_instance_data(entity);
-        filters.emplace_back("gas_producer", (gas_producer.filter->wrapped && !gas_producer.filter->wrapped->empty()) ? (*gas_producer.filter->wrapped) : "");
+        filters.emplace_back(gas_producer_man.get_ui_name(), (gas_producer.filter->wrapped && !gas_producer.filter->wrapped->empty()) ? (*gas_producer.filter->wrapped) : "");
     }
 
     auto &light_man = component_system_man.managers.light_component_man;
     if (light_man.exists(entity)) {
         auto light = light_man.get_instance_data(entity);
-        filters.emplace_back("light", (light.filter->wrapped && !light.filter->wrapped->empty()) ? (*light.filter->wrapped) : "");
+        filters.emplace_back(light_man.get_ui_name(), (light.filter->wrapped && !light.filter->wrapped->empty()) ? (*light.filter->wrapped) : "");
     }
 
     return filters;
