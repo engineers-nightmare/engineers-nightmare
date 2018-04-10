@@ -9,6 +9,7 @@
 #include "../load.h"
 #include "../ship_space.h"
 #include "../component/component_system_manager.h"
+#include "../imgui_impl_sdl_gl3.h"
 
 extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
@@ -122,6 +123,7 @@ struct customize_entity_state : game_state {
         }
 
         ImGui::Render();
+        ImGui_ImplSdlGL3_RenderDrawData(ImGui::GetDrawData());
     }
 };
 

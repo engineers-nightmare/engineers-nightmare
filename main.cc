@@ -913,6 +913,7 @@ run()
             glClearColor(0, 0.18f, 0.21f, 1);
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui::Render();
+            ImGui_ImplSdlGL3_RenderDrawData(ImGui::GetDrawData());
         }
 
         ImGui::SetCurrentContext(offscreen_contexts[1]);
@@ -938,6 +939,7 @@ run()
             glClearColor(1, 0.0f, 0.18f, 1);
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui::Render();
+            ImGui_ImplSdlGL3_RenderDrawData(ImGui::GetDrawData());
         }
 
         auto *t = tools[pl.active_tool_slot];
@@ -983,7 +985,12 @@ main(int, char **)
 
     wnd.gl_ctx = SDL_GL_CreateContext(wnd.ptr);
 
+    ImGui::CreateContext();
+    ImGui::GetIO();
     ImGui_ImplSdlGL3_Init(wnd.ptr);
+    new_imgui_frame();
+    ImGui::EndFrame();
+    ImGui::StyleColorsDark();
 
     keys = SDL_GetKeyboardState(nullptr);
 

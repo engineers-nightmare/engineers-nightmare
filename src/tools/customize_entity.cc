@@ -149,6 +149,7 @@ struct customize_entity_tool : tool
             glClearColor(0, 0.18f, 0.21f, 1);
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui::Render();
+            ImGui_ImplSdlGL3_RenderDrawData(ImGui::GetDrawData());
         }
     }
 
