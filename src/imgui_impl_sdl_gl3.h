@@ -18,6 +18,7 @@ typedef union SDL_Event SDL_Event;
 IMGUI_API bool        ImGui_ImplSdlGL3_Init(SDL_Window* window, const char* glsl_version = NULL);
 IMGUI_API void        ImGui_ImplSdlGL3_Shutdown();
 IMGUI_API void        ImGui_ImplSdlGL3_NewFrame(SDL_Window* window);
+IMGUI_API void        ImGui_ImplSdlGL3_NewFrameOffscreen(int w, int h);
 IMGUI_API void        ImGui_ImplSdlGL3_RenderDrawData(ImDrawData* draw_data);
 IMGUI_API bool        ImGui_ImplSdlGL3_ProcessEvent(SDL_Event* event);
 
