@@ -826,6 +826,8 @@ run()
         mouse_axes[EN_MOUSE_AXIS(input_mouse_x)] = 0;
         mouse_axes[EN_MOUSE_AXIS(input_mouse_y)] = 0;
 
+        // only handle input in default imgui context
+        ImGui::SetCurrentContext(default_context);
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             ImGui_ImplSdlGL3_ProcessEvent(&e);
