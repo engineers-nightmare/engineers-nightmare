@@ -177,9 +177,11 @@ tick_light_components(ship_space *ship) {
         auto const &cwire = cwire_man.get_instance_data(ce);
         auto const &net = ship->get_comms_network(*cwire.network);
 
-        /* todo: origin discrimination */
         for (auto msg : net.read_buffer) {
-            if (msg.desc != comms_msg_type_switch_state) {
+            auto filter = light.filter->c_str();
+            auto sender = cwire_man.get_instance_data(msg.originator);
+
+            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.desc != comms_msg_type_switch_state) {
                 continue;
             }
 
@@ -218,7 +220,6 @@ tick_rotator_components(ship_space *ship) {
         auto const &cwire = cwire_man.get_instance_data(ce);
         auto const &net = ship->get_comms_network(*cwire.network);
 
-        /* todo: origin discrimination */
         for (auto msg : net.read_buffer) {
             auto filter = rot.filter->c_str();
             auto sender = cwire_man.get_instance_data(msg.originator);
