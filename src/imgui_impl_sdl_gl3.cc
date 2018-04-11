@@ -55,7 +55,6 @@ static SDL_Cursor*  g_MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
 
 // OpenGL data
 static char         g_GlslVersion[32] = "#version 150";
-static GLuint       g_FontTexture = 0;
 static int          g_ShaderHandle = 0, g_VertHandle = 0, g_FragHandle = 0;
 static int          g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0;
 static int          g_AttribLocationPosition = 0, g_AttribLocationUV = 0, g_AttribLocationColor = 0;
@@ -228,19 +227,20 @@ void ImGui_ImplSdlGL3_CreateFontsTexture()
 
     // Upload texture to graphics system
     GLint last_texture;
+    GLuint texture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-    glGenTextures(1, &g_FontTexture);
-    glBindTexture(GL_TEXTURE_2D, g_FontTexture);
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
     // Store our identifier
-    io.Fonts->TexID = (void *)(intptr_t)g_FontTexture;
+    io.Fonts->TexID = (void *)(intptr_t)texture;
 
     // Restore state
-    glBindTexture(GL_TEXTURE_2D, last_texture);
+    glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(last_texture));
 }
 
 bool ImGui_ImplSdlGL3_CreateDeviceObjects()
@@ -325,11 +325,11 @@ void    ImGui_ImplSdlGL3_InvalidateDeviceObjects()
     if (g_ShaderHandle) glDeleteProgram(g_ShaderHandle);
     g_ShaderHandle = 0;
 
-    if (g_FontTexture)
+    if (ImGui::GetIO().Fonts->TexID)
     {
-        glDeleteTextures(1, &g_FontTexture);
+        GLuint texture = (GLuint)(intptr_t)ImGui::GetIO().Fonts->TexID;
+        glDeleteTextures(1, &texture);
         ImGui::GetIO().Fonts->TexID = 0;
-        g_FontTexture = 0;
     }
 }
 
@@ -406,7 +406,9 @@ void ImGui_ImplSdlGL3_Shutdown()
 
 void ImGui_ImplSdlGL3_NewFrameOffscreen(int w, int h)
 {
-    if (!g_FontTexture)
+    ImGuiIO& io = ImGui::GetIO();
+
+    if (!io.Fonts->TexID)
         ImGui_ImplSdlGL3_CreateDeviceObjects();
 
     io.DisplaySize = ImVec2((float)w, (float)h);
@@ -425,6 +427,9 @@ void ImGui_ImplSdlGL3_NewFrameOffscreen(int w, int h)
 void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window)
 {
     ImGuiIO& io = ImGui::GetIO();
+
+    if (!io.Fonts->TexID)
+        ImGui_ImplSdlGL3_CreateDeviceObjects();
 
     // Setup display size (every frame to accommodate for window resizing)
     int w, h;
