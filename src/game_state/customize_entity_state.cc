@@ -16,8 +16,8 @@ extern void apply_video_settings();
 extern void request_exit();
 extern void new_imgui_frame();
 extern void teardown_chunks();
-extern std::vector<std::pair<const std::string, std::string>> get_filters(c_entity);
-extern void update_filter(c_entity entity, std::string const&, char[256]);
+extern std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_entity);
+extern void update_filter(c_entity entity, std::string const&, std::array<char, 256> const&);
 
 extern en_settings game_settings;
 extern ship_space *ship;
@@ -42,7 +42,7 @@ struct customize_entity_state : game_state {
     c_entity entity;
 
     char entity_label[256]{};
-    std::vector<std::pair<const std::string, std::string>> comp_name_to_filter_name;
+    std::vector<std::pair<const std::string, std::array<char, 256>>> comp_name_to_filter_name;
 
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
@@ -178,19 +178,15 @@ struct customize_entity_state : game_state {
                 ImGui::Text("%s", *type.name);
                 ImGui::Separator();
                 ImGui::Dummy(ImVec2{10, 10});
-                for (auto && kvp: comp_name_to_filter_name) {
-                    auto comp = kvp.first;
-                    char filter[256];
-                    strcpy(filter, kvp.second.c_str());
+                for (auto &kvp : comp_name_to_filter_name) {
+                    auto comp = kvp.first.c_str();
+                    ImGui::InputText(comp, kvp.second.data(), 256);
+                }
 
-                    bool save_filter = ImGui::InputText(comp.c_str(), filter, 256,
-                                                       ImGuiInputTextFlags_AutoSelectAll |
-                                                       ImGuiInputTextFlags_EnterReturnsTrue);
-                    kvp.second = filter;
-                    ImGui::Dummy(ImVec2{10, 10});
-                    save_filter = ImGui::Button("Save") || save_filter;
-                    if (save_filter) {
-                        update_filter(entity, comp, filter);
+                ImGui::Dummy(ImVec2{10, 10});
+                if (ImGui::Button("Save")) {
+                    for (auto &kvp : comp_name_to_filter_name) {
+                        update_filter(entity, kvp.first, kvp.second);
                     }
                 }
 
