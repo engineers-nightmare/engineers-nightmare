@@ -32,7 +32,7 @@ struct wire_filter_ptr
         }
     }
 
-    void set(char * string) {
+    void set(const char * string) {
         if (!wrapped) {
             wrapped = new std::string(string);
         }
