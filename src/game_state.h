@@ -21,7 +21,8 @@ public:
 
     static game_state *create_play_state();
     static game_state *create_menu_state();
-    static game_state *create_customize_entity_state(c_entity e);
+    static game_state *create_customize_entity_comms_filter_state(c_entity e);
+    static game_state *create_customize_entity_comms_output_state(c_entity e);
 };
 
 

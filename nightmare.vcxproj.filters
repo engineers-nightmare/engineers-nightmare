@@ -336,7 +336,10 @@
     <ClCompile Include="src\component\placeable_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
-    <ClCompile Include="src\game_state\customize_entity_state.cc">
+    <ClCompile Include="src\game_state\customize_entity_comms_filter_state.cc">
+      <Filter>Source Files\game_states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game_state\customize_entity_comms_output_state.cc">
       <Filter>Source Files\game_states</Filter>
     </ClCompile>
     <ClCompile Include="src\game_state\menu_state.cc">
