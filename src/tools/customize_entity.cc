@@ -93,15 +93,14 @@ struct customize_entity_tool : tool
 
         switch (state) {
             case CustomizeState::CommsInspection: {
-                set_next_game_state(game_state::create_customize_entity_state(entity));
                 break;
             }
             case CustomizeState::CommsOutput: {
-                set_next_game_state(game_state::create_customize_entity_state(entity));
+                set_next_game_state(game_state::create_customize_entity_comms_output_state(entity));
                 break;
             }
             case CustomizeState::CommsFilter: {
-                set_next_game_state(game_state::create_customize_entity_state(entity));
+                set_next_game_state(game_state::create_customize_entity_comms_filter_state(entity));
                 break;
             }
         }
@@ -236,6 +235,8 @@ struct customize_entity_tool : tool
                 break;
             }
         }
+
+        return "";
     }
 
     void get_description(char *str) override {
