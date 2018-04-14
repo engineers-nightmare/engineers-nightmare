@@ -776,6 +776,11 @@ update()
      * every-frame assumptions baked in (player impulse state, etc) */
     phy->tick_controller(dt);
 
+    auto *t = tools[pl.active_tool_slot];
+    if (t) {
+        t->update();
+    }
+
     while (fast_tick_accum.tick()) {
         proj_man.simulate(fast_tick_accum.period);
         particle_man->simulate(fast_tick_accum.period);
