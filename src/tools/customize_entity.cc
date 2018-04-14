@@ -41,10 +41,35 @@ struct customize_entity_tool : tool
     c_entity entity;
     raycast_info_world rc;
 
+    enum class CustomizeState {
+        CommsInspection,
+        CommsOutput,
+        CommsFilter,
+    } state{CustomizeState::CommsInspection}, next_state{state};
+
     void pre_use(player *pl) {
         // todo: cast from tool instead of eye?
         phys_raycast_world(pl->eye, pl->eye + 2.f * pl->dir,
                            phy->rb_controller.get(), phy->dynamicsWorld.get(), &rc);
+    }
+
+    void switch_state(CustomizeState new_state) {
+        switch (new_state) {
+            case CustomizeState::CommsInspection: {
+                break;
+            }
+            case CustomizeState::CommsOutput: {
+                break;
+            }
+            case CustomizeState::CommsFilter: {
+                break;
+            }
+        }
+        state = new_state;
+    }
+
+    void set_next_state(CustomizeState new_state) {
+        next_state = new_state;
     }
 
     bool can_use() {
@@ -56,11 +81,30 @@ struct customize_entity_tool : tool
         return valid_hit && wire_man.exists(entity);
     }
 
+    void update() override {
+        if (next_state != state) {
+            switch_state(next_state);
+        }
+    }
+
     void use() override {
         if (!can_use())
             return;
 
-        set_next_game_state(game_state::create_customize_entity_state(entity));
+        switch (state) {
+            case CustomizeState::CommsInspection: {
+                set_next_game_state(game_state::create_customize_entity_state(entity));
+                break;
+            }
+            case CustomizeState::CommsOutput: {
+                set_next_game_state(game_state::create_customize_entity_state(entity));
+                break;
+            }
+            case CustomizeState::CommsFilter: {
+                set_next_game_state(game_state::create_customize_entity_state(entity));
+                break;
+            }
+        }
     }
 
     void preview(frame_data *frame) override {
@@ -177,11 +221,28 @@ struct customize_entity_tool : tool
         draw_mesh(mesh->hw);
     }
 
+    const char * get_state_description() {
+        switch (state) {
+            case CustomizeState::CommsInspection: {
+                return "Inspection";
+                break;
+            }
+            case CustomizeState::CommsOutput: {
+                return "Output";
+                break;
+            }
+            case CustomizeState::CommsFilter: {
+                return "Filter";
+                break;
+            }
+        }
+    }
+
     void get_description(char *str) override {
         auto &type_man = component_system_man.managers.type_component_man;
         if (can_use()) {
             auto type = type_man.get_instance_data(entity);
-            sprintf(str, "Customize %s", *type.name);
+            sprintf(str, "Customize %s - %s", *type.name, get_state_description());
         }
         else {
             strcpy(str, "Customize entity tool");
@@ -193,6 +254,23 @@ struct customize_entity_tool : tool
             auto &rend = component_system_man.managers.renderable_component_man;
             *rend.get_instance_data(entity).draw = true;
             entity = c_entity{};
+        }
+    }
+
+    virtual void cycle_mode() {
+        switch (state) {
+            case CustomizeState::CommsInspection: {
+                set_next_state(CustomizeState::CommsOutput);
+                break;
+            }
+            case CustomizeState::CommsOutput: {
+                set_next_state(CustomizeState::CommsFilter);
+                break;
+            }
+            case CustomizeState::CommsFilter: {
+                set_next_state(CustomizeState::CommsInspection);
+                break;
+            }
         }
     }
 };
