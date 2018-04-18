@@ -1,11 +1,13 @@
 #include <epoxy/gl.h>
+#include <deque>
+#include <sstream>
 
+#include "tools.h"
 #include "../asset_manager.h"
 #include "../common.h"
 #include "../ship_space.h"
 #include "../mesh.h"
 #include "../player.h"
-#include "tools.h"
 #include "../component/component_system_manager.h"
 #include "../imgui/imgui.h"
 #include "../imgui_impl_sdl_gl3.h"
@@ -40,6 +42,8 @@ struct customize_entity_tool : tool
 {
     c_entity entity;
     raycast_info_world rc;
+
+    std::deque<std::string> net_msg_history {};
 
     enum class CustomizeState {
         CommsInspection,
@@ -81,9 +85,32 @@ struct customize_entity_tool : tool
         return valid_hit && wire_man.exists(entity);
     }
 
-    void update() override {
+    void update(ship_space *ship) override {
         if (next_state != state) {
             switch_state(next_state);
+        }
+
+        if (c_entity::is_valid(entity)) {
+            auto &wire_man = component_system_man.managers.wire_comms_component_man;
+            if (wire_man.exists(entity)) {
+                auto wire = wire_man.get_instance_data(entity);
+                auto net = ship->comms_networks[*wire.network];
+
+                for (auto const &m : net.read_buffer) {
+                    if (wire_man.exists(m.originator)) {
+                        auto l = *wire_man.get_instance_data(m.originator).label;
+                        std::string sender = l ? l : "";
+                        auto type = get_enum_description(m.type);
+                        std::stringstream s;
+                        s << sender << ": " << type << " - " << m.data;
+                        net_msg_history.emplace_back(s.str());
+                    }
+                }
+
+                while (net_msg_history.size() > 3) {
+                    net_msg_history.pop_front();
+                }
+            }
         }
     }
 
@@ -175,11 +202,16 @@ struct customize_entity_tool : tool
                     ImGui::Text("%s", *name);
 
                     if (wire_man.exists(entity)) {
+
                         auto label = *(wire_man.get_instance_data(entity).label);
                         if (label != nullptr && strcmp(label, "") != 0) {
                             ImGui::Text("%s", label);
                         } else {
                             ImGui::Text("No label");
+                        }
+
+                        for (auto const &h : net_msg_history) {
+                            ImGui::TextUnformatted(h.c_str());
                         }
                     }
                 }

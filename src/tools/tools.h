@@ -5,6 +5,7 @@
 
 struct player;
 struct frame_data;
+struct ship_space;
 
 
 struct tool
@@ -25,7 +26,7 @@ struct tool
     virtual void do_offscreen_render() {}
     virtual void preview(frame_data *frame) {}
     virtual void get_description(char *str) = 0;
-    virtual void update() {};
+    virtual void update(ship_space *ship) {};
 
     static tool *create_remove_block_tool();
     static tool *create_remove_surface_tool();

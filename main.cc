@@ -776,7 +776,7 @@ update()
 
     auto *t = tools[pl.active_tool_slot];
     if (t) {
-        t->update();
+        t->update(ship);
     }
 
     while (fast_tick_accum.tick()) {
