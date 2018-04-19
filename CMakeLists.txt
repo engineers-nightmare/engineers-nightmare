@@ -48,6 +48,7 @@ set(EN_SOURCES
     src/imgui_impl_sdl_gl3.cc
     src/game_state/customize_entity_comms_filter_state.cc
     src/game_state/customize_entity_comms_output_state.cc
+    src/game_state/customize_entity_comms_inspection_state.cc
     src/game_state/menu_state.cc
     src/game_state/play_state.cc
     src/load.cc
