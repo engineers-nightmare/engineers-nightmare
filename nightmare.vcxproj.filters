@@ -345,6 +345,12 @@
     <ClCompile Include="src\game_state\play_state.cc">
       <Filter>Source Files\game_states</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\rotator_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\component_ui_genned.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -544,6 +550,12 @@
     </ClInclude>
     <ClInclude Include="src\game_state.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\rotator_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\wire_filter.h">
+      <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
