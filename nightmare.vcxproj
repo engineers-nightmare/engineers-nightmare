@@ -127,6 +127,7 @@
     <ClCompile Include="src\blob.cc" />
     <ClCompile Include="src\char.cc" />
     <ClCompile Include="src\component\component_system_manager.cc" />
+    <ClCompile Include="src\component\component_ui_genned.cc" />
     <ClCompile Include="src\component\convert_on_pop_component.cc" />
     <ClCompile Include="src\component\display_component.cc" />
     <ClCompile Include="src\component\door_component.cc" />
@@ -141,6 +142,7 @@
     <ClCompile Include="src\component\proximity_sensor_component.cc" />
     <ClCompile Include="src\component\position_component.cc" />
     <ClCompile Include="src\component\renderable_component.cc" />
+    <ClCompile Include="src\component\rotator_component.cc" />
     <ClCompile Include="src\component\sensor_comparator_component.cc" />
     <ClCompile Include="src\component\surface_attachment_component.cc" />
     <ClCompile Include="src\component\switch_component.cc" />
@@ -240,11 +242,13 @@
     <ClInclude Include="src\component\proximity_sensor_component.h" />
     <ClInclude Include="src\component\position_component.h" />
     <ClInclude Include="src\component\renderable_component.h" />
+    <ClInclude Include="src\component\rotator_component.h" />
     <ClInclude Include="src\component\sensor_comparator_component.h" />
     <ClInclude Include="src\component\surface_attachment_component.h" />
     <ClInclude Include="src\component\switch_component.h" />
     <ClInclude Include="src\component\type_component.h" />
     <ClInclude Include="src\component\wire_comms_component.h" />
+    <ClInclude Include="src\component\wire_filter.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\enums\enums.h" />
     <ClInclude Include="src\fixed_cube.h" />
