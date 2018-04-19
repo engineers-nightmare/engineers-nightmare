@@ -13,7 +13,7 @@ struct tool
 
     virtual void pre_use(player *pl) {}
 
-    virtual void use() {}
+    virtual void use(ship_space *ship = nullptr) {}
     virtual void alt_use() {}
     virtual void long_use() {}
     virtual void long_alt_use() {}

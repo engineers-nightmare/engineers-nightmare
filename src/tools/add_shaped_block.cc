@@ -107,7 +107,7 @@ struct add_shaped_block_tool : tool
         }
     }
 
-    void use() override
+    void use(ship_space *ship) override
     {
         if (!can_use())
             return; /* n/a */
