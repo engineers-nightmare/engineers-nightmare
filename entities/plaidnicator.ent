@@ -4,7 +4,7 @@ entity: {
             name: "Power Supply",
         },
         renderable: {
-            mesh: "frobnicator",
+            mesh: "power_gen-base",
         },
         placeable: {
             rot: 90,
@@ -13,8 +13,8 @@ entity: {
         position: {
         },
         physics: {
-            mesh: "frobnicator",
-            mass: 1.0,
+            mesh: "power_gen-base",
+            mass: 50.0,
         },
         surface_attachment: {
         },
@@ -22,6 +22,26 @@ entity: {
             max_provided: 6.0,
         },
         wire_comms: {
+        },
+        convert_on_pop: {
+            type: "door-kit",
+        },
+    },
+
+    children: (
+        {
+            components: {
+                renderable: { mesh: "power_gen-1", },
+                position: {},
+                type: { name: "power_gen cooling" },
+                parent: {
+                    local_mat: (
+                        1.0, 0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0, 0.0,
+                        0.0, 0.0, 1.0, 0.0,
+                        0.0, 0.0, 0.0, 1.0),
+                },
+            },
         }
-    };
+    );
 };
