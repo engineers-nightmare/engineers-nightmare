@@ -147,6 +147,13 @@ assets = (
     offset = [0.0,0.0,0.0]
 },
 {
+    name = "power_gen-rotor"
+    type = "mesh"
+    file = "mesh/power_gen-2.obj"
+    scale = 0.03125
+    offset = [0.0,0.0,0.0]
+},
+{
     name = "o2_gen"
     type = "mesh"
     file = "mesh/o2_gen.obj"
