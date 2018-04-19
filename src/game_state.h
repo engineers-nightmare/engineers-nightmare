@@ -6,6 +6,8 @@
 #include "render_data.h"
 #include "component/c_entity.h"
 
+struct ship_space;
+
 class game_state {
 
 public:
@@ -23,6 +25,7 @@ public:
     static game_state *create_menu_state();
     static game_state *create_customize_entity_comms_filter_state(c_entity e);
     static game_state *create_customize_entity_comms_output_state(c_entity e);
+    static game_state *create_customize_entity_comms_inspection_state(ship_space *ship, c_entity e);
 };
 
 

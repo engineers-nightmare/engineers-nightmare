@@ -114,12 +114,13 @@ struct customize_entity_tool : tool
         }
     }
 
-    void use() override {
+    void use(ship_space *ship) override {
         if (!can_use())
             return;
 
         switch (state) {
             case CustomizeState::CommsInspection: {
+                set_next_game_state(game_state::create_customize_entity_comms_inspection_state(ship, entity));
                 break;
             }
             case CustomizeState::CommsOutput: {
