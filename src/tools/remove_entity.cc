@@ -46,7 +46,7 @@ struct remove_entity_tool : tool
         return sam.exists(entity) && *sam.get_instance_data(entity).attached;
     }
 
-    void use() override {
+    void use(ship_space *ship) override {
         if (!can_use())
             return;
 

@@ -30,7 +30,7 @@ struct remove_surface_tool : tool
         return rc.hit;
     }
 
-    void use() override
+    void use(ship_space *ship) override
     {
         if (!can_use())
             return;
