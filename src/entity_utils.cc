@@ -327,13 +327,16 @@ void pop_entity_off(c_entity entity) {
 void
 set_entity_matrix(c_entity ce, glm::mat4 mat) {
     auto &phys_man = component_system_man.managers.physics_component_man;
+    if (phys_man.exists(ce)) {
+        auto phy = phys_man.get_instance_data(ce);
+        (*phy.rigid)->setWorldTransform(mat4_to_bt(mat));
+    }
+
     auto &pos_man = component_system_man.managers.position_component_man;
-
-    auto phy = phys_man.get_instance_data(ce);
-    auto pos = pos_man.get_instance_data(ce);
-
-    (*phy.rigid)->setWorldTransform(mat4_to_bt(mat));
-    *(pos.mat) = mat;
+    if (pos_man.exists(ce)) {
+        auto pos = pos_man.get_instance_data(ce);
+        *(pos.mat) = mat;
+    }
 }
 
 void
