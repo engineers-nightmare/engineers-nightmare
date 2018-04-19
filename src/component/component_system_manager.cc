@@ -47,7 +47,7 @@ tick_gas_producers(ship_space *ship)
         /* todo: origin discrimination */
         for (auto msg : net.read_buffer) {
 
-            if (msg.desc == comms_msg_type_switch_state) {
+            if (msg.type == msg_type::switch_transition) {
 
                 auto data = clamp(msg.data, 0.0f, 1.0f);
                 gas_man.instance_pool.enabled[i] = data > 0;
@@ -125,7 +125,7 @@ tick_doors(ship_space *ship)
         auto const &net = ship->get_comms_network(*cwire.network);
 
         for (auto msg : net.read_buffer) {
-            if (msg.desc != comms_msg_type_switch_state) {
+            if (msg.type == msg_type::switch_transition) {
                 continue;
             }
 
@@ -181,7 +181,7 @@ tick_light_components(ship_space *ship) {
             auto filter = light.filter->c_str();
             auto sender = cwire_man.get_instance_data(msg.originator);
 
-            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.desc != comms_msg_type_switch_state) {
+            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.type != msg_type::switch_transition) {
                 continue;
             }
 
@@ -226,7 +226,7 @@ tick_rotator_components(ship_space *ship) {
 //            auto filter = rot.filter->c_str();
 //            auto sender = cwire_man.get_instance_data(msg.originator);
 //
-//            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.desc != comms_msg_type_switch_state) {
+//            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.type == msg_type::switch_transition) {
 //                continue;
 //            }
 //
@@ -271,9 +271,9 @@ tick_pressure_sensors(ship_space* ship) {
         float pressure = z ? (z->air_amount / t->size) : 0.0f;
 
         auto which_sensor = pressure_man.instance_pool.type[i];
-        auto desc = comms_msg_type_pressure_sensor_1_state;
+        auto desc = msg_type::pressure_sensor_1;
         if (which_sensor == 2) {
-            desc = comms_msg_type_pressure_sensor_2_state;
+            desc = msg_type::pressure_sensor_2;
         }
 
         comms_msg msg{
@@ -310,10 +310,10 @@ tick_sensor_comparators(ship_space *ship) {
         /* now that we have the wire, see if it has any msgs for us */
         /* todo: origin discrimination */
         for (auto msg : net.read_buffer) {
-            if (sensor_1 == FLT_MAX && msg.desc == comms_msg_type_pressure_sensor_1_state) {
+            if (sensor_1 == FLT_MAX && msg.type == msg_type::pressure_sensor_1) {
                 sensor_1 = msg.data;
             }
-            if (sensor_2 == FLT_MAX && msg.desc == comms_msg_type_pressure_sensor_2_state) {
+            if (sensor_2 == FLT_MAX && msg.type == msg_type::pressure_sensor_2) {
                 sensor_2 = msg.data;
             }
 
@@ -336,7 +336,7 @@ tick_sensor_comparators(ship_space *ship) {
         /* publish result */
         comms_msg msg{
             ce,
-            comms_msg_type_sensor_comparison_state,
+            msg_type::sensor_comparison,
             difference,
         };
         publish_msg(ship, net_id, msg);
@@ -421,7 +421,7 @@ tick_proximity_sensors(ship_space *ship, player *pl) {
 
             comms_msg msg{
                 ce,
-                comms_msg_type_proximity_sensor_state,
+                msg_type::proximity_sensor,
                 (*(proximity.is_detected)) ? 1.0f : 0.0f,
             };
 

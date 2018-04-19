@@ -4,11 +4,17 @@
 
 #include <libconfig.h>
 #include <glm/ext.hpp>
+#include <vector>
+#include <unordered_map>
+#include <set>
+
 #include "libconfig_shim.h"
+#include "tinydir.h"
+
 #include "entity_utils.h"
 #include "asset_manager.h"
 #include "component/component_system_manager.h"
-#include "tinydir.h"
+#include "enums/enums.h"
 
 extern ship_space *ship;
 
@@ -365,7 +371,7 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
 
         comms_msg msg{
             ce,
-            comms_msg_type_switch_state,
+            msg_type::switch_transition,
             enabled ? 1.f : 0.f,
         };
         publish_msg(ship, *cwire_man.get_instance_data(ce).network, msg);

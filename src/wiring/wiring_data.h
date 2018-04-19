@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "../component/c_entity.h"
+#include "../enums/enums.h"
 
 enum wire_type {
     wire_type_power = 0,
@@ -23,7 +24,7 @@ struct power_wiring_data {
 
 struct comms_msg {
     c_entity originator{0};
-    char const *desc{nullptr};           /* non-owned: expected to point to memory outliving the comms_data */
+    msg_type type;
 
     /* todo: other data types */
     float data = 0.0f;
