@@ -7,6 +7,86 @@
 
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+const char* get_enum_description(msg_type value) {
+    switch(value)
+    {
+    case msg_type::switch_transition:
+        return "Switch";
+    case msg_type::pressure_sensor_1:
+        return "Pressure Sensor 1";
+    case msg_type::pressure_sensor_2:
+        return "Pressure_sensor 2";
+    case msg_type::sensor_comparison:
+        return "Sensor Comparison";
+    case msg_type::proximity_sensor:
+        return "Proximity Sensor";
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
+const char* get_enum_string(msg_type value) {
+    switch(value)
+    {
+    case msg_type::switch_transition:
+        return "switch_transition";
+    case msg_type::pressure_sensor_1:
+        return "pressure_sensor_1";
+    case msg_type::pressure_sensor_2:
+        return "pressure_sensor_2";
+    case msg_type::sensor_comparison:
+        return "sensor_comparison";
+    case msg_type::proximity_sensor:
+        return "proximity_sensor";
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
+template<> msg_type get_enum<msg_type>(const char *e) {
+    auto val{msg_type::invalid};
+    if (!strcmp(e, "switch_transition")) {
+        val = msg_type::switch_transition;
+    }
+    if (!strcmp(e, "pressure_sensor_1")) {
+        val = msg_type::pressure_sensor_1;
+    }
+    if (!strcmp(e, "pressure_sensor_2")) {
+        val = msg_type::pressure_sensor_2;
+    }
+    if (!strcmp(e, "sensor_comparison")) {
+        val = msg_type::sensor_comparison;
+    }
+    if (!strcmp(e, "proximity_sensor")) {
+        val = msg_type::proximity_sensor;
+    }
+    assert(val != msg_type::invalid);
+    return val;
+}
+
+msg_type config_setting_get_msg_type(const config_setting_t *setting) {
+    const char *str = config_setting_get_string(setting);
+    return get_enum<msg_type>(str);
+}
+
+int config_setting_set_msg_type(config_setting_t *setting, msg_type value) {
+    auto str = get_enum_string(value);
+    return (config_setting_set_string(setting, str));
+}
+
+int config_setting_lookup_msg_type(const config_setting_t *setting, const char *name, msg_type *value) {
+    auto *member = config_setting_get_member(setting, name);
+    if(!member) {
+        return CONFIG_FALSE;
+    }
+
+    *value = (msg_type)config_setting_get_msg_type(member);
+    return CONFIG_TRUE;
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 const char* get_enum_description(placement value) {
     switch(value)
     {

@@ -11,6 +11,29 @@ template<typename T>
 
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+enum class msg_type
+{
+    switch_transition = 0,
+    pressure_sensor_1 = 1,
+    pressure_sensor_2 = 2,
+    sensor_comparison = 3,
+    proximity_sensor = 4,
+    invalid = -1,
+};
+
+const char* get_enum_description(msg_type value);
+
+const char* get_enum_string(msg_type value);
+
+template<> msg_type get_enum<msg_type>(const char *e);
+
+msg_type config_setting_get_msg_type(const config_setting_t *setting);
+
+int config_setting_set_msg_type(config_setting_t *setting, msg_type value);
+
+int config_setting_lookup_msg_type(const config_setting_t *setting, const char *name, msg_type *value);
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 enum class placement
 {
     full_block_snapped = 0,
