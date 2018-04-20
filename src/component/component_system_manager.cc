@@ -203,6 +203,7 @@ void
 tick_rotator_components(ship_space *ship) {
     auto &rot_man = component_system_man.managers.rotator_component_man;
     auto &pos_man = component_system_man.managers.position_component_man;
+    auto &par_man = component_system_man.managers.parent_component_man;
     auto &cwire_man = component_system_man.managers.wire_comms_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
 
@@ -212,6 +213,7 @@ tick_rotator_components(ship_space *ship) {
         auto power = power_man.get_instance_data(ce);
         auto rot = rot_man.get_instance_data(ce);
         auto pos = pos_man.get_instance_data(ce);
+        auto par = par_man.get_instance_data(ce);
 
         if (!*power.powered) {
             return;
@@ -220,18 +222,25 @@ tick_rotator_components(ship_space *ship) {
         auto const &cwire = cwire_man.get_instance_data(ce);
         auto const &net = ship->get_comms_network(*cwire.network);
 
-        for (auto msg : net.read_buffer) {
-            auto filter = rot.filter->c_str();
-            auto sender = cwire_man.get_instance_data(msg.originator);
+//        for (auto msg : net.read_buffer) {
+//            auto filter = rot.filter->c_str();
+//            auto sender = cwire_man.get_instance_data(msg.originator);
+//
+//            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.desc != comms_msg_type_switch_state) {
+//                continue;
+//            }
+//
+//            *rot.rot_cur_speed = *rot.rot_cur_speed ? 0 : *rot.rot_speed;
+//        }
+        *rot.rot_cur_speed = *rot.rot_cur_speed ? 0 : *rot.rot_speed;
 
-            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.desc != comms_msg_type_switch_state) {
-                continue;
-            }
-
-            *rot.rot_cur_speed = *rot.rot_cur_speed ? 0 : *rot.rot_speed;
+        glm::mat4 pos_mat;
+        if (par_man.exists(ce)) {
+            pos_mat = *par.local_mat;
         }
-
-        auto pos_mat = *pos.mat;
+        else {
+            pos_mat = *pos.mat;
+        }
         if (*rot.rot_cur_speed) {
             pos_mat = glm::rotate(pos_mat, (float)*rot.rot_dir * *rot.rot_cur_speed * (float)frame_info.dt, *rot.rot_axis);
         }
