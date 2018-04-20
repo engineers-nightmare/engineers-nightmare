@@ -14,14 +14,6 @@ extern frame_info frame_info;
 
 extern particle_manager *particle_man;
 
-/* I have no clue how we're going to actually handle these */
-const char *comms_msg_type_switch_state = "switch_state";
-const char *comms_msg_type_pressure_sensor_1_state = "pressure_sensor_1_state";
-const char *comms_msg_type_pressure_sensor_2_state = "pressure_sensor_2_state";
-const char *comms_msg_type_sensor_comparison_state = "sensor_comparison_state";
-const char *comms_msg_type_proximity_sensor_state = "proximity_sensor_state";
-
-
 void
 tick_gas_producers(ship_space *ship)
 {

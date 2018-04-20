@@ -17,12 +17,6 @@ struct component_system_manager {
     component_managers managers{};
 };
 
-extern const char *comms_msg_type_switch_state;
-extern const char *comms_msg_type_pressure_sensor_1_state;
-extern const char *comms_msg_type_pressure_sensor_2_state;
-extern const char *comms_msg_type_sensor_comparison_state;
-extern const char *comms_msg_type_proximity_sensor_state;
-
 void
 tick_gas_producers(ship_space *ship);
 
