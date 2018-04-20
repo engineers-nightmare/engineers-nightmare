@@ -190,10 +190,10 @@ struct customize_entity_tool : tool
     }
 
     void unselect() override {
-        tool::unselect();
         if (c_entity::is_valid(entity)) {
             auto &rend = component_system_man.managers.renderable_component_man;
             *rend.get_instance_data(entity).draw = true;
+            entity = c_entity{};
         }
     }
 };
