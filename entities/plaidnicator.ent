@@ -50,7 +50,7 @@ entity: {
                 type: { name: "power_gen rotor" },
                 rotator: {
                     rot_dir: 1,
-                    rot_speed: 20.0,
+                    rot_speed: 10.0,
                     rot_axis: ( 1.0, 0.0, 0.0 ),
                     rot_offset: ( 0.0, 0.0, 0.5 ),
                 },
