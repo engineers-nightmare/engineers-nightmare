@@ -885,7 +885,6 @@ run()
         // which causes side-effects
         if (ImGui::GetIO().WantCaptureMouse) {
             memset(mouse_buttons, 0, input_mouse_buttons_count);
-            memset(mouse_axes, 0, input_mouse_axes_count);
         }
 
         ImGui::SetCurrentContext(offscreen_contexts[0]);
