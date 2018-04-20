@@ -672,14 +672,14 @@ void render() {
         t->preview(frame);
     }
 
-    current_game_state->render(frame);
-
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, main_pass.fbo);
     glBlitFramebuffer(0, 0, wnd.width, wnd.height, 0, 0, wnd.width, wnd.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
     glViewport(0, 0, wnd.width, wnd.height);
+
+    current_game_state->render(frame);
 
     if (draw_hud) {
         /* draw the ui */
