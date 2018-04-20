@@ -56,7 +56,7 @@ def load_component(comp_file):
 
 def main():
     files = [f for f in glob.glob('gen/comp/*')]
-    comps = {f.split('/')[2]: load_component(f) for f in files}
+    comps = {os.path.basename(f): load_component(f) for f in files}
 
     try:
         gen_component_managers_header(comps)
