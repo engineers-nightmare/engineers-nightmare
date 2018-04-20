@@ -243,6 +243,7 @@ tick_rotator_components(ship_space *ship) {
         }
         if (*rot.rot_cur_speed) {
             pos_mat = glm::rotate(pos_mat, (float)*rot.rot_dir * *rot.rot_cur_speed * (float)frame_info.dt, *rot.rot_axis);
+            pos_mat[3] = glm::vec4(*rot.rot_offset, 1.0f);
         }
 
         set_entity_matrix(ce, pos_mat);

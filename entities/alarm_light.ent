@@ -31,6 +31,7 @@ entity: {
             rot_dir: 1,
             rot_speed: 10.0,
             rot_axis: ( 0.0, 0.0, 1.0 ),
+            rot_offset: ( 0.0, 0.0, 0.0 ),
         },
     };
 };

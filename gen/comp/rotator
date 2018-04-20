@@ -1,9 +1,11 @@
 ui_name,Rotator
 stub,glm::vec3,glm::vec3,,rot_axis,
+stub,glm::vec3,glm::vec3,,rot_offset,
 stub,int,int,,rot_dir,
 stub,float,float,,rot_speed,
 body,wire_filter_ptr,filter,{}
 body,glm::vec3,rot_axis,
+body,glm::vec3,rot_offset,
 body,int,rot_dir,
 body,float,rot_speed,5.0
 body,float,rot_cur_speed,0.0

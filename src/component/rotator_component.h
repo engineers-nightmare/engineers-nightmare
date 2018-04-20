@@ -14,6 +14,7 @@ struct rotator_component_manager : component_manager<rotator_component_manager> 
         c_entity *entity;
         wire_filter_ptr *filter;
         glm::vec3 *rot_axis;
+        glm::vec3 *rot_offset;
         int *rot_dir;
         float *rot_speed;
         float *rot_cur_speed;
@@ -34,6 +35,7 @@ struct rotator_component_manager : component_manager<rotator_component_manager> 
         d.entity = instance_pool.entity + inst.index;
         d.filter = instance_pool.filter + inst.index;
         d.rot_axis = instance_pool.rot_axis + inst.index;
+        d.rot_offset = instance_pool.rot_offset + inst.index;
         d.rot_dir = instance_pool.rot_dir + inst.index;
         d.rot_speed = instance_pool.rot_speed + inst.index;
         d.rot_cur_speed = instance_pool.rot_cur_speed + inst.index;
@@ -46,6 +48,7 @@ struct rotator_component_stub : component_stub {
     rotator_component_stub() = default;
 
     glm::vec3 rot_axis{};
+    glm::vec3 rot_offset{};
     int rot_dir{};
     float rot_speed{};
 

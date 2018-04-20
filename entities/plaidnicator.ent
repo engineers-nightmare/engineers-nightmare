@@ -52,6 +52,7 @@ entity: {
                     rot_dir: 1,
                     rot_speed: 20.0,
                     rot_axis: ( 1.0, 0.0, 0.0 ),
+                    rot_offset: ( 0.0, 0.0, 0.5 ),
                 },
                 power: {
                     required_power: 1.0,
