@@ -29,7 +29,6 @@ extern component_system_manager component_system_man;
 
 extern std::array<ImGuiContext*, 3> offscreen_contexts;
 extern GLuint render_displays_fbo;
-extern void new_imgui_frame();
 
 extern void set_next_game_state(game_state *s);
 
