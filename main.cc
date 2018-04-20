@@ -738,7 +738,6 @@ update()
         tick_sensor_comparators(ship);
         tick_proximity_sensors(ship, &pl);
         tick_doors(ship);
-        tick_rotator_components(ship);
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);
@@ -778,9 +777,10 @@ update()
     phy->tick_controller(dt);
 
     while (fast_tick_accum.tick()) {
-
         proj_man.simulate(fast_tick_accum.period);
         particle_man->simulate(fast_tick_accum.period);
+
+        tick_rotator_components(ship);
 
         phy->tick(fast_tick_accum.period);
     }
