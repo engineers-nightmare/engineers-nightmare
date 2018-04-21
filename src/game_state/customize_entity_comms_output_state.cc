@@ -46,9 +46,6 @@ struct customize_entity_comms_output_state : game_state {
     }
 
     void render(frame_data *frame) override {
-        ImGui::SetCurrentContext(default_context);
-        new_imgui_frame();
-
         auto io = ImGui::GetIO();
 
         // center on screen
@@ -87,8 +84,6 @@ struct customize_entity_comms_output_state : game_state {
             }
             ImGui::End();
         }
-
-        ImGui::Render();
     }
 };
 

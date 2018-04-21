@@ -11,7 +11,6 @@ extern void set_next_game_state(game_state *s);
 
 extern void warp_mouse_to_center_screen();
 extern bool window_has_focus();
-extern void new_imgui_frame();
 extern std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_entity);
 extern void update_filter(c_entity entity, std::string const&, std::array<char, 256> const&);
 
@@ -47,9 +46,6 @@ struct customize_entity_comms_filter_state : game_state {
     }
 
     void render(frame_data *frame) override {
-        ImGui::SetCurrentContext(default_context);
-        new_imgui_frame();
-
         auto io = ImGui::GetIO();
 
         // center on screen
@@ -89,8 +85,6 @@ struct customize_entity_comms_filter_state : game_state {
             }
             ImGui::End();
         }
-
-        ImGui::Render();
     }
 };
 

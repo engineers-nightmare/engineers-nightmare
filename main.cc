@@ -142,11 +142,6 @@ window_has_focus() {
     return wnd.has_focus;
 }
 
-void
-new_imgui_frame() {
-    ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
-}
-
 std::unique_ptr<game_state> current_game_state(game_state::create_play_state());
 std::unique_ptr<game_state> next_game_state;
 
@@ -679,7 +674,10 @@ void render() {
 
     glViewport(0, 0, wnd.width, wnd.height);
 
+    ImGui::SetCurrentContext(default_context);
+    ImGui_ImplSdlGL3_NewFrame(wnd.ptr);
     current_game_state->render(frame);
+    ImGui::Render();
 
     if (draw_hud) {
         /* draw the ui */
@@ -833,6 +831,7 @@ run()
 
         // only handle input in default imgui context
         ImGui::SetCurrentContext(default_context);
+
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             ImGui_ImplSdlGL3_ProcessEvent(&e);
@@ -889,7 +888,8 @@ run()
         // then we get the mouse-up button capture on the next frame
         // which causes side-effects
         if (ImGui::GetIO().WantCaptureMouse) {
-            memset(mouse_buttons, 0, input_mouse_buttons_count);
+            std::fill(mouse_buttons, mouse_buttons + input_mouse_buttons_count, 0);
+            std::fill(mouse_axes, mouse_axes + input_mouse_axes_count, 0);
         }
 
         ImGui::SetCurrentContext(offscreen_contexts[0]);

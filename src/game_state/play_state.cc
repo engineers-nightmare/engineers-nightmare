@@ -26,7 +26,6 @@ extern void warp_mouse_to_center_screen();
 extern bool window_has_focus();
 extern void apply_video_settings();
 extern void request_exit();
-extern void new_imgui_frame();
 extern void add_text_with_outline(char const *, float , float, float = 1, float = 1, float = 1);
 
 extern sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;

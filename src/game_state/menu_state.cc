@@ -15,7 +15,6 @@ extern void warp_mouse_to_center_screen();
 extern bool window_has_focus();
 extern void apply_video_settings();
 extern void request_exit();
-extern void new_imgui_frame();
 extern void teardown_chunks();
 
 extern en_settings game_settings;
@@ -185,9 +184,6 @@ struct menu_state : game_state {
     }
 
     void render(frame_data *frame) override {
-        ImGui::SetCurrentContext(default_context);
-        new_imgui_frame();
-
         auto io = ImGui::GetIO();
 
         // center on screen
@@ -212,8 +208,6 @@ struct menu_state : game_state {
                 }
             }
         }
-
-        ImGui::Render();
     }
 };
 
