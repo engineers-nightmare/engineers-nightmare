@@ -33,7 +33,7 @@ struct cut_wall_tool : tool {
         return rc.hit;
     }
 
-    void use(ship_space *ship) override {
+    void use() override {
         if (!can_use()) return;
 
         auto door_center = glm::round(rc.hitCoord);

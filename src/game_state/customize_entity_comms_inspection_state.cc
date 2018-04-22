@@ -17,13 +17,12 @@ extern ship_space *ship;
 extern component_system_manager component_system_man;
 
 struct customize_entity_comms_inspection_state : game_state {
-    ship_space *ship;
     c_entity entity;
     std::unordered_map<c_entity, std::vector<c_entity>> entity_families;
 
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
-    explicit customize_entity_comms_inspection_state(ship_space *ship, c_entity e) : ship(ship), entity(e) {
+    explicit customize_entity_comms_inspection_state(c_entity e) : entity(e) {
         warp_mouse_to_center_screen();
     }
 
@@ -104,4 +103,4 @@ struct customize_entity_comms_inspection_state : game_state {
     }
 };
 
-game_state *game_state::create_customize_entity_comms_inspection_state(ship_space *ship, c_entity e) { return new customize_entity_comms_inspection_state(ship, e); }
+game_state *game_state::create_customize_entity_comms_inspection_state(c_entity e) { return new customize_entity_comms_inspection_state(e); }

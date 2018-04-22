@@ -68,7 +68,7 @@ struct add_entity_tool : tool {
         return place->rot;
     }
 
-    void use(ship_space *ship) override {
+    void use() override {
         if (!can_use()) {
             return;
         }

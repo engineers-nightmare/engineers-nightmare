@@ -77,7 +77,7 @@ struct paint_surface_tool : tool
         return (block && block->type == block_frame);
     }
 
-    void use(ship_space *ship) override {
+    void use() override {
         if (!rc.hit)
             return;
 

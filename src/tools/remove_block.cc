@@ -30,7 +30,7 @@ struct remove_block_tool : tool
         return rc.hit && !rc.inside;
     }
 
-    void use(ship_space *ship) override
+    void use() override
     {
         if (!can_use())
             return;

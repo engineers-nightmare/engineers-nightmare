@@ -14,7 +14,7 @@ struct tool
 
     virtual void pre_use(player *pl) {}
 
-    virtual void use(ship_space *ship = nullptr) {}
+    virtual void use() {}
     virtual void alt_use() {}
     virtual void long_use() {}
     virtual void long_alt_use() {}
@@ -26,7 +26,7 @@ struct tool
     virtual void do_offscreen_render() {}
     virtual void preview(frame_data *frame) {}
     virtual void get_description(char *str) = 0;
-    virtual void update(ship_space *ship) {};
+    virtual void update() {};
 
     static tool *create_remove_block_tool();
     static tool *create_remove_surface_tool();

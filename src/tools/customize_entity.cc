@@ -85,7 +85,7 @@ struct customize_entity_tool : tool
         return valid_hit && wire_man.exists(entity);
     }
 
-    void update(ship_space *ship) override {
+    void update() override {
         if (next_state != state) {
             switch_state(next_state);
         }
@@ -114,13 +114,13 @@ struct customize_entity_tool : tool
         }
     }
 
-    void use(ship_space *ship) override {
+    void use() override {
         if (!can_use())
             return;
 
         switch (state) {
             case CustomizeState::CommsInspection: {
-                set_next_game_state(game_state::create_customize_entity_comms_inspection_state(ship, entity));
+                set_next_game_state(game_state::create_customize_entity_comms_inspection_state(entity));
                 break;
             }
             case CustomizeState::CommsOutput: {
