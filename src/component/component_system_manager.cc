@@ -49,15 +49,14 @@ tick_gas_producers(ship_space *ship)
         auto const &cwire = cwire_man.get_instance_data(ce);
         auto const &net = ship->get_comms_network(*cwire.network);
         /* now that we have the wire, see if it has any msgs for us */
-        /* todo: origin discrimination */
         for (auto msg : net.read_buffer) {
-
-            if (msg.type == msg_type::switch_transition) {
-
-                auto data = clamp(msg.data, 0.0f, 1.0f);
-                gas_man.instance_pool.enabled[i] = data > 0;
-                *power.required_power = data > 0 ? *power.max_required_power : 0.0f;
+            if (!filter_matches_message(msg, gas_man.instance_pool.filter[i]) || msg.type != msg_type::switch_transition) {
+                continue;
             }
+
+            auto data = clamp(msg.data, 0.0f, 1.0f);
+            gas_man.instance_pool.enabled[i] = data > 0;
+            *power.required_power = data > 0 ? *power.max_required_power : 0.0f;
         }
 
         /* we are powered if we get here. check if turned on */
