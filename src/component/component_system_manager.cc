@@ -162,7 +162,6 @@ tick_power_consumers(ship_space *ship) {
     }
 }
 
-
 void
 tick_light_components(ship_space *ship) {
     auto &light_man = component_system_man.managers.light_component_man;
@@ -183,12 +182,8 @@ tick_light_components(ship_space *ship) {
         auto const &net = ship->get_comms_network(*cwire.network);
 
         for (auto msg : net.read_buffer) {
-            auto filter = light.filter->c_str();
-            auto sender = cwire_man.get_instance_data(msg.originator);
-
-            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.type != msg_type::switch_transition) {
+            if (!filter_matches_message(msg, *light.filter) || msg.type != msg_type::switch_transition)
                 continue;
-            }
 
             *(light.requested_intensity) = clamp(msg.data, 0.0f, 1.0f);
 
