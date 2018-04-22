@@ -11,11 +11,8 @@ extern void set_next_game_state(game_state *s);
 
 extern void warp_mouse_to_center_screen();
 extern bool window_has_focus();
-extern void new_imgui_frame();
 extern std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_entity);
 extern void update_filter(c_entity entity, std::string const&, std::array<char, 256> const&);
-
-extern ImGuiContext *default_context;
 
 extern component_system_manager component_system_man;
 
