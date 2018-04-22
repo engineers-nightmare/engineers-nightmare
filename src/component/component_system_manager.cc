@@ -196,7 +196,7 @@ tick_rotator_components(ship_space *ship) {
     auto &rot_man = component_system_man.managers.rotator_component_man;
     auto &pos_man = component_system_man.managers.position_component_man;
     auto &par_man = component_system_man.managers.parent_component_man;
-    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
+//    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
 
     for (auto i = 0u; i < rot_man.buffer.num; i++) {
@@ -210,9 +210,9 @@ tick_rotator_components(ship_space *ship) {
             return;
         }
 
-        auto const &cwire = cwire_man.get_instance_data(ce);
-        auto const &net = ship->get_comms_network(*cwire.network);
-
+//        auto const &cwire = cwire_man.get_instance_data(ce);
+//        auto const &net = ship->get_comms_network(*cwire.network);
+//
 //        for (auto msg : net.read_buffer) {
 //            auto filter = rot.filter->c_str();
 //            auto sender = cwire_man.get_instance_data(msg.originator);
