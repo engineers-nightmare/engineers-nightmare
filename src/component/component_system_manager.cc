@@ -19,12 +19,16 @@ filter_matches_message(comms_msg const &msg, wire_filter_ptr const &filter) {
     auto &cwire_man = component_system_man.managers.wire_comms_component_man;
     auto sender = cwire_man.get_instance_data(msg.originator);
 
-    /* If we have no filter defined, we match everything. */
-    if (!filter.wrapped)
-        return true;
+    /* If we have a filter, sender must have a label, and it must match. */
+    if (filter.wrapped && (!*sender.label || strcmp(*sender.label, filter.wrapped->c_str())))
+        return false;
 
-    /* We have a filter. Sender must have a label, and it must match. */
-    return *sender.label && !strcmp(*sender.label, filter.wrapped->c_str());
+    /* If we have a msgtype, msg must match. */
+    if (filter.msg_type != msg_type::any &&
+        filter.msg_type != msg.type)
+        return false;
+
+    return true;
 }
 
 void
@@ -50,7 +54,7 @@ tick_gas_producers(ship_space *ship)
         auto const &net = ship->get_comms_network(*cwire.network);
         /* now that we have the wire, see if it has any msgs for us */
         for (auto msg : net.read_buffer) {
-            if (!filter_matches_message(msg, gas_man.instance_pool.filter[i]) || msg.type != msg_type::switch_transition) {
+            if (!filter_matches_message(msg, gas_man.instance_pool.filter[i])) {
                 continue;
             }
 
@@ -128,7 +132,7 @@ tick_doors(ship_space *ship)
         auto const &net = ship->get_comms_network(*cwire.network);
 
         for (auto msg : net.read_buffer) {
-            if (!filter_matches_message(msg, door_man.instance_pool.filter[i]) || msg.type != msg_type::switch_transition) {
+            if (!filter_matches_message(msg, door_man.instance_pool.filter[i])) {
                 continue;
             }
 
@@ -180,7 +184,7 @@ tick_light_components(ship_space *ship) {
         auto const &net = ship->get_comms_network(*cwire.network);
 
         for (auto msg : net.read_buffer) {
-            if (!filter_matches_message(msg, *light.filter) || msg.type != msg_type::switch_transition)
+            if (!filter_matches_message(msg, *light.filter))
                 continue;
 
             *(light.requested_intensity) = clamp(msg.data, 0.0f, 1.0f);
@@ -301,12 +305,10 @@ tick_sensor_comparators(ship_space *ship) {
 
         /* now that we have the wire, see if it has any msgs for us */
         for (auto msg : net.read_buffer) {
-            if (filter_matches_message(msg, comparator_man.instance_pool.input_a[i]) &&
-                msg.type == msg_type::pressure_sensor) {
+            if (filter_matches_message(msg, comparator_man.instance_pool.input_a[i])) {
                 input_a = msg.data;
             }
-            if (filter_matches_message(msg, comparator_man.instance_pool.input_b[i]) &&
-                msg.type == msg_type::pressure_sensor) {
+            if (filter_matches_message(msg, comparator_man.instance_pool.input_b[i])) {
                 input_b = msg.data;
             }
         }
