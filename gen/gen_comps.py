@@ -24,6 +24,8 @@ class component:
         self.body_fields = bfields
         self.dependencies = depends
 
+    next_filter_id = 0
+
 
 def load_component(comp_file):
     stub_fields = []
@@ -47,8 +49,15 @@ def load_component(comp_file):
                 dependencies = parts[1:]
             elif parts[0] == 'ui_name':
                 ui_name = parts[1]
-            for body in body_fields:
-                body['stub'] = find_matching_stub(body, stub_fields)
+
+    for body in body_fields:
+        body['stub'] = find_matching_stub(body, stub_fields)
+
+        # give wire_filter_ptr fields unique ids
+        if body['type'] == 'wire_filter_ptr':
+            body['field_id'] = component.next_filter_id
+            print(body)
+            component.next_filter_id += 1
 
     comp = component(component_name, comp_file, ui_name, stub_fields, body_fields, dependencies)
     return comp
