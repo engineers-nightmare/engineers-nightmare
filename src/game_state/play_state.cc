@@ -53,6 +53,8 @@ struct play_state : game_state {
 
     play_state() = default;
 
+    bool is_ui_state() override { return false; }
+
     void rebuild_ui() override {
         auto &type_man = component_system_man.managers.type_component_man;
         auto &switch_man = component_system_man.managers.switch_component_man;
