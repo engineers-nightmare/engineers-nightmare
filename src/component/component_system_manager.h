@@ -99,4 +99,5 @@ struct filter_ui_state {
     std::string component_name;
     int field_id;
     std::array<char, 256> filter;
+    msg_type msg_type;
 };
