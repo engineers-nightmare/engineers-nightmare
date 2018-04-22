@@ -13,10 +13,11 @@ template<typename T>
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 enum class msg_type
 {
-    switch_transition = 0,
-    pressure_sensor = 1,
-    sensor_comparison = 2,
-    proximity_sensor = 3,
+    any = 0,
+    switch_transition = 1,
+    pressure_sensor = 2,
+    sensor_comparison = 3,
+    proximity_sensor = 4,
     invalid = -1,
 };
 

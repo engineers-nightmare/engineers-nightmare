@@ -10,6 +10,8 @@
 const char* get_enum_description(msg_type value) {
     switch(value)
     {
+    case msg_type::any:
+        return "Match anything";
     case msg_type::switch_transition:
         return "Switch";
     case msg_type::pressure_sensor:
@@ -27,6 +29,8 @@ const char* get_enum_description(msg_type value) {
 const char* get_enum_string(msg_type value) {
     switch(value)
     {
+    case msg_type::any:
+        return "any";
     case msg_type::switch_transition:
         return "switch_transition";
     case msg_type::pressure_sensor:
@@ -43,6 +47,9 @@ const char* get_enum_string(msg_type value) {
 
 template<> msg_type get_enum<msg_type>(const char *e) {
     auto val{msg_type::invalid};
+    if (!strcmp(e, "any")) {
+        val = msg_type::any;
+    }
     if (!strcmp(e, "switch_transition")) {
         val = msg_type::switch_transition;
     }
