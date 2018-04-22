@@ -90,15 +90,15 @@ struct component_manager {
         return T::get_ui_name();
     };
 
-    bool exists(c_entity e) {
+    bool exists(c_entity e) const {
         return entity_instance_map.find(e) != entity_instance_map.end();
     }
 
-    instance lookup(c_entity e) {
+    instance lookup(c_entity e) const {
         return make_instance(entity_instance_map.find(e)->second);
     }
 
-    instance make_instance(unsigned i) {
+    instance make_instance(unsigned i) const {
         return { i };
     }
 
