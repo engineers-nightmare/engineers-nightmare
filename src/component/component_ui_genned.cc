@@ -10,7 +10,7 @@ static void add_filter(std::vector<filter_ui_state> &filters, int field_id, wire
     auto & f = filters.back();
     f.component_name = name;
     f.field_id = field_id;
-    f.msg_type = w.msg_type;
+    f.type = w.type;
 
     if (w.wrapped) {
         strcpy(f.filter.data(), w.wrapped->c_str());

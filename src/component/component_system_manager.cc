@@ -24,8 +24,8 @@ filter_matches_message(comms_msg const &msg, wire_filter_ptr const &filter) {
         return false;
 
     /* If we have a msgtype, msg must match. */
-    if (filter.msg_type != msg_type::any &&
-        filter.msg_type != msg.type)
+    if (filter.type != msg_type::any &&
+        filter.type != msg.type)
         return false;
 
     return true;

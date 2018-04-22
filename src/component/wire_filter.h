@@ -9,17 +9,17 @@ struct filter_ui_state {
     std::string component_name;
     int field_id;
     std::array<char, 256> filter;
-    msg_type msg_type;
+    msg_type type;
 };
 
 struct wire_filter_ptr
 {
     std::string *wrapped = nullptr;
-    msg_type msg_type{};
+    msg_type type{};
     wire_filter_ptr(const wire_filter_ptr&) = delete;
 
     wire_filter_ptr& operator=(const wire_filter_ptr &w) {
-        msg_type = w.msg_type;
+        type = w.type;
         if (!wrapped && w.wrapped) {
             wrapped = new std::string(*w.wrapped);
         }
@@ -58,7 +58,7 @@ struct wire_filter_ptr
     }
 
     void set(filter_ui_state const &s) {
-        msg_type = s.msg_type;
+        type = s.type;
         if (!wrapped) {
             wrapped = new std::string(s.filter.data());
         }

@@ -77,7 +77,7 @@ struct customize_entity_comms_filter_state : game_state {
                         ImGui::InputText("###filter", kvp.filter.data(), 256);
 
                         ImGui::SameLine();
-                        ImGui::Combo("###msgtype", (int*)&kvp.msg_type, message_types.data(), message_types.size());
+                        ImGui::Combo("###msgtype", (int*)&kvp.type, message_types.data(), message_types.size());
 
                         ImGui::PopID();
                     }
