@@ -152,6 +152,7 @@
     <ClCompile Include="src\entity_utils.cc" />
     <ClCompile Include="src\enums\enums.cc" />
     <ClCompile Include="src\game_state\customize_entity_comms_filter_state.cc" />
+    <ClCompile Include="src\game_state\customize_entity_comms_inspection_state.cc" />
     <ClCompile Include="src\game_state\customize_entity_comms_output_state.cc" />
     <ClCompile Include="src\game_state\menu_state.cc" />
     <ClCompile Include="src\game_state\play_state.cc" />
