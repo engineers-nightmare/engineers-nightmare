@@ -29,18 +29,20 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
 }
 
 void update_filter(c_entity entity, filter_ui_state const& filter) {
+    switch (filter.field_id) {
 % for name, comp in sorted(comps.items()):
     % for field in comp.body_fields:
         % if field['type'] == "wire_filter_ptr":
-    if (filter.component_name == "${comp.ui_name}") {
+    case ${field['field_id']}: {
         auto &${comp.comp_name}_man = component_system_man.managers.${comp.comp_name}_component_man;
         if (${comp.comp_name}_man.exists(entity)) {
             auto ${comp.comp_name} = ${comp.comp_name}_man.get_instance_data(entity);
             ${comp.comp_name}.${field['name']}->set(filter.filter.data());
         }
-    }
+    } break;
 
         % endif
     % endfor
 % endfor
+    }
 }

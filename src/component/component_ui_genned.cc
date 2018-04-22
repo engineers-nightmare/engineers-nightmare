@@ -45,28 +45,30 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
 }
 
 void update_filter(c_entity entity, filter_ui_state const& filter) {
-    if (filter.component_name == "Gas Producer") {
+    switch (filter.field_id) {
+    case 0: {
         auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
         if (gas_producer_man.exists(entity)) {
             auto gas_producer = gas_producer_man.get_instance_data(entity);
             gas_producer.filter->set(filter.filter.data());
         }
-    }
+    } break;
 
-    if (filter.component_name == "Light") {
+    case 1: {
         auto &light_man = component_system_man.managers.light_component_man;
         if (light_man.exists(entity)) {
             auto light = light_man.get_instance_data(entity);
             light.filter->set(filter.filter.data());
         }
-    }
+    } break;
 
-    if (filter.component_name == "Rotator") {
+    case 2: {
         auto &rotator_man = component_system_man.managers.rotator_component_man;
         if (rotator_man.exists(entity)) {
             auto rotator = rotator_man.get_instance_data(entity);
             rotator.filter->set(filter.filter.data());
         }
-    }
+    } break;
 
+    }
 }
