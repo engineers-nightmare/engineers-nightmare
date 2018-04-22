@@ -1,10 +1,19 @@
 #pragma once
 
 #include <string>
+#include <array>
+
+struct filter_ui_state {
+    std::string component_name;
+    int field_id;
+    std::array<char, 256> filter;
+    msg_type msg_type;
+};
 
 struct wire_filter_ptr
 {
     std::string *wrapped = nullptr;
+    msg_type msg_type{};
     wire_filter_ptr(const wire_filter_ptr&) = delete;
     wire_filter_ptr& operator=(const wire_filter_ptr&) = default;
 
@@ -32,12 +41,13 @@ struct wire_filter_ptr
         }
     }
 
-    void set(const char * string) {
+    void set(filter_ui_state const &s) {
+        msg_type = s.msg_type;
         if (!wrapped) {
-            wrapped = new std::string(string);
+            wrapped = new std::string(s.filter.data());
         }
         else {
-            *wrapped = string;
+            *wrapped = s.filter.data();
         }
     }
 };

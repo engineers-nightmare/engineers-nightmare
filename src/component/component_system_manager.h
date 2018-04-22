@@ -95,9 +95,3 @@ glm::mat4 load_value_from_config<glm::mat4>(config_setting_t const *s, char cons
     return glm::make_mat4(v);
 }
 
-struct filter_ui_state {
-    std::string component_name;
-    int field_id;
-    std::array<char, 256> filter;
-    msg_type msg_type;
-};

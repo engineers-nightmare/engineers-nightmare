@@ -10,6 +10,7 @@ static void add_filter(std::vector<filter_ui_state> &filters, int field_id, wire
     auto & f = filters.back();
     f.component_name = name;
     f.field_id = field_id;
+    f.msg_type = w.msg_type;
 
     if (w.wrapped) {
         strcpy(f.filter.data(), w.wrapped->c_str());
@@ -76,7 +77,7 @@ void update_filter(c_entity entity, filter_ui_state const& filter) {
         auto &door_man = component_system_man.managers.door_component_man;
         if (door_man.exists(entity)) {
             auto door = door_man.get_instance_data(entity);
-            door.filter->set(filter.filter.data());
+            door.filter->set(filter);
         }
     } break;
 
@@ -84,7 +85,7 @@ void update_filter(c_entity entity, filter_ui_state const& filter) {
         auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
         if (gas_producer_man.exists(entity)) {
             auto gas_producer = gas_producer_man.get_instance_data(entity);
-            gas_producer.filter->set(filter.filter.data());
+            gas_producer.filter->set(filter);
         }
     } break;
 
@@ -92,7 +93,7 @@ void update_filter(c_entity entity, filter_ui_state const& filter) {
         auto &light_man = component_system_man.managers.light_component_man;
         if (light_man.exists(entity)) {
             auto light = light_man.get_instance_data(entity);
-            light.filter->set(filter.filter.data());
+            light.filter->set(filter);
         }
     } break;
 
@@ -100,7 +101,7 @@ void update_filter(c_entity entity, filter_ui_state const& filter) {
         auto &rotator_man = component_system_man.managers.rotator_component_man;
         if (rotator_man.exists(entity)) {
             auto rotator = rotator_man.get_instance_data(entity);
-            rotator.filter->set(filter.filter.data());
+            rotator.filter->set(filter);
         }
     } break;
 
@@ -108,7 +109,7 @@ void update_filter(c_entity entity, filter_ui_state const& filter) {
         auto &sensor_comparator_man = component_system_man.managers.sensor_comparator_component_man;
         if (sensor_comparator_man.exists(entity)) {
             auto sensor_comparator = sensor_comparator_man.get_instance_data(entity);
-            sensor_comparator.input_a->set(filter.filter.data());
+            sensor_comparator.input_a->set(filter);
         }
     } break;
 
@@ -116,7 +117,7 @@ void update_filter(c_entity entity, filter_ui_state const& filter) {
         auto &sensor_comparator_man = component_system_man.managers.sensor_comparator_component_man;
         if (sensor_comparator_man.exists(entity)) {
             auto sensor_comparator = sensor_comparator_man.get_instance_data(entity);
-            sensor_comparator.input_b->set(filter.filter.data());
+            sensor_comparator.input_b->set(filter);
         }
     } break;
 

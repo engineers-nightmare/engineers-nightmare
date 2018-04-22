@@ -52,8 +52,34 @@ struct customize_entity_comms_filter_state : game_state {
                     ImGui::Text("Set Input Filters - %s", *type.name);
                     ImGui::Separator();
                     ImGui::Dummy(ImVec2{10, 10});
+
+                    // TODO: enum gen should produce these
+                    std::array<char const *, 5> message_types{
+                        get_enum_description(msg_type::any),
+                        get_enum_description(msg_type::switch_transition),
+                        get_enum_description(msg_type::pressure_sensor),
+                        get_enum_description(msg_type::sensor_comparison),
+                        get_enum_description(msg_type::proximity_sensor),
+                    };
+
+                    ImGui::LabelText("", "");
+                    ImGui::SameLine();
+                    ImGui::LabelText("", "Originator Label");
+                    ImGui::SameLine();
+                    ImGui::LabelText("", "Message Type");
+
+                    int id = 0;
                     for (auto &kvp : comp_name_to_filter_name) {
-                        ImGui::InputText(kvp.component_name.c_str(), kvp.filter.data(), 256);
+                        ImGui::PushID(id++);
+                        ImGui::LabelText("###label", kvp.component_name.c_str());
+
+                        ImGui::SameLine();
+                        ImGui::InputText("###filter", kvp.filter.data(), 256);
+
+                        ImGui::SameLine();
+                        ImGui::Combo("###msgtype", (int*)&kvp.msg_type, message_types.data(), message_types.size());
+
+                        ImGui::PopID();
                     }
 
                     ImGui::Dummy(ImVec2{10, 10});
@@ -62,6 +88,8 @@ struct customize_entity_comms_filter_state : game_state {
                             update_filter(entity, kvp);
                         }
                     }
+
+                    ImGui::SameLine();
 
                     if (ImGui::Button("Back")) {
                         set_next_game_state(create_play_state());
