@@ -13,7 +13,6 @@ struct pressure_sensor_component_manager : component_manager<pressure_sensor_com
     struct instance_data {
         c_entity *entity;
         float *pressure;
-        unsigned *type;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -30,7 +29,6 @@ struct pressure_sensor_component_manager : component_manager<pressure_sensor_com
 
         d.entity = instance_pool.entity + inst.index;
         d.pressure = instance_pool.pressure + inst.index;
-        d.type = instance_pool.type + inst.index;
 
         return d;
     }
@@ -39,7 +37,6 @@ struct pressure_sensor_component_manager : component_manager<pressure_sensor_com
 struct pressure_sensor_component_stub : component_stub {
     pressure_sensor_component_stub() = default;
 
-    unsigned type{};
 
     void
     assign_component_to_entity(c_entity entity) override;

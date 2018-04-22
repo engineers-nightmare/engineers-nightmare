@@ -1,7 +1,7 @@
 entity: {
     components: {
         type: {
-            name: "pressure sensor 1",
+            name: "pressure sensor",
         },
         renderable: {
             mesh: "panel_1x1",
@@ -19,7 +19,6 @@ entity: {
         surface_attachment: {
         },
         pressure_sensor: {
-            type: 2,
         },
         wire_comms: {
         },
