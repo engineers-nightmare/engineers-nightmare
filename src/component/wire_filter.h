@@ -3,6 +3,8 @@
 #include <string>
 #include <array>
 
+#include "../enums/enums.h"
+
 struct filter_ui_state {
     std::string component_name;
     int field_id;
