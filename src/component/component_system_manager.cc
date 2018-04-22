@@ -19,8 +19,12 @@ filter_matches_message(comms_msg const &msg, wire_filter_ptr const &filter) {
     auto &cwire_man = component_system_man.managers.wire_comms_component_man;
     auto sender = cwire_man.get_instance_data(msg.originator);
 
-    /* If we have a filter, sender must have a label, and it must match. */
-    if (filter.wrapped && filter.wrapped->length() && (!*sender.label || strcmp(*sender.label, filter.wrapped->c_str())))
+    /* Unconfigured filter matches NOTHING */
+    if (!filter.wrapped || filter.wrapped->length())
+        return false;
+
+    /* If we have a filter other than `*`, sender must have a label, and it must match. */
+    if (*filter.wrapped != "*" && (!*sender.label || strcmp(*sender.label, filter.wrapped->c_str())))
         return false;
 
     /* If we have a msgtype, msg must match. */
