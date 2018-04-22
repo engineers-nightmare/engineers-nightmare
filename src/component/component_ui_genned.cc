@@ -5,40 +5,39 @@
 
 extern component_system_manager component_system_man;
 
+static void add_filter(std::vector<filter_ui_state> &filters, int field_id, wire_filter_ptr const & w, char const *name) {
+    filters.emplace_back();
+    auto & f = filters.back();
+    f.component_name = name;
+    f.field_id = field_id;
+
+    if (w.wrapped) {
+        strcpy(f.filter.data(), w.wrapped->c_str());
+    }
+    else {
+        f.filter[0] = '\0';
+    }
+}
+
 std::vector<filter_ui_state> get_filters(c_entity entity) {
     std::vector<filter_ui_state> filters;
 
     auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
     if (gas_producer_man.exists(entity)) {
         auto gas_producer = gas_producer_man.get_instance_data(entity);
-        auto filter = (gas_producer.filter->wrapped && !gas_producer.filter->wrapped->empty()) ? (*gas_producer.filter->wrapped).c_str() : "";
-        filters.emplace_back();
-        auto & f = filters.back();
-        f.component_name = "Gas Producer";
-        f.field_id = 0;
-        strcpy(f.filter.data(), filter);
+        add_filter(filters, 0, *(gas_producer.filter), "Gas Producer");
     }
 
     auto &light_man = component_system_man.managers.light_component_man;
     if (light_man.exists(entity)) {
         auto light = light_man.get_instance_data(entity);
-        auto filter = (light.filter->wrapped && !light.filter->wrapped->empty()) ? (*light.filter->wrapped).c_str() : "";
-        filters.emplace_back();
-        auto & f = filters.back();
-        f.component_name = "Light";
-        f.field_id = 1;
-        strcpy(f.filter.data(), filter);
+        add_filter(filters, 1, *(light.filter), "Light");
     }
 
     auto &rotator_man = component_system_man.managers.rotator_component_man;
     if (rotator_man.exists(entity)) {
         auto rotator = rotator_man.get_instance_data(entity);
-        auto filter = (rotator.filter->wrapped && !rotator.filter->wrapped->empty()) ? (*rotator.filter->wrapped).c_str() : "";
-        filters.emplace_back();
-        auto & f = filters.back();
-        f.component_name = "Rotator";
-        f.field_id = 2;
-        strcpy(f.filter.data(), filter);
+        add_filter(filters, 2, *(rotator.filter), "Rotator");
     }
 
     return filters;

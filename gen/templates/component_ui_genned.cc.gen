@@ -5,6 +5,20 @@
 
 extern component_system_manager component_system_man;
 
+static void add_filter(std::vector<filter_ui_state> &filters, int field_id, wire_filter_ptr const & w, char const *name) {
+    filters.emplace_back();
+    auto & f = filters.back();
+    f.component_name = name;
+    f.field_id = field_id;
+
+    if (w.wrapped) {
+        strcpy(f.filter.data(), w.wrapped->c_str());
+    }
+    else {
+        f.filter[0] = '\0';
+    }
+}
+
 std::vector<filter_ui_state> get_filters(c_entity entity) {
     std::vector<filter_ui_state> filters;
 
@@ -14,12 +28,7 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
     auto &${comp.comp_name}_man = component_system_man.managers.${comp.comp_name}_component_man;
     if (${comp.comp_name}_man.exists(entity)) {
         auto ${comp.comp_name} = ${comp.comp_name}_man.get_instance_data(entity);
-        auto filter = (${comp.comp_name}.${field['name']}->wrapped && !${comp.comp_name}.${field['name']}->wrapped->empty()) ? (*${comp.comp_name}.${field['name']}->wrapped).c_str() : "";
-        filters.emplace_back();
-        auto & f = filters.back();
-        f.component_name = "${comp.ui_name}";
-        f.field_id = ${field['field_id']};
-        strcpy(f.filter.data(), filter);
+        add_filter(filters, ${field['field_id']}, *(${comp.comp_name}.${field['name']}), "${comp.ui_name}");
     }
 
         % endif
