@@ -233,7 +233,7 @@ attach_entity_to_surface(c_entity ce, glm::ivec3 p, int face) {
 
 extern physics *phy;
 c_entity
-spawn_floating_generic_entity(glm::mat4 mat, const std::string &mesh, const std::string &phys_mesh) {
+spawn_floating_generic_entity(glm::mat4 mat, const char *mesh, const char *phys_mesh) {
     auto ce = c_entity::spawn();
 
     auto &pos_man = component_system_man.managers.position_component_man;
@@ -250,7 +250,7 @@ spawn_floating_generic_entity(glm::mat4 mat, const std::string &mesh, const std:
 
     auto physics = physics_man.get_instance_data(ce);
     *physics.rigid = nullptr;
-    *physics.mesh = phys_mesh.c_str();
+    *physics.mesh = phys_mesh;
     *physics.mass = 0.2f;
     auto const &pm = asset_man.get_mesh(phys_mesh);
     build_rigidbody(mat, pm.phys_shape, physics.rigid);
@@ -267,7 +267,7 @@ spawn_floating_generic_entity(glm::mat4 mat, const std::string &mesh, const std:
     *pos.mat = mat;
 
     auto render = render_man.get_instance_data(ce);
-    *render.mesh = mesh.c_str();
+    *render.mesh = mesh;
     *render.draw = true;
 
     auto type = type_man.get_instance_data(ce);
