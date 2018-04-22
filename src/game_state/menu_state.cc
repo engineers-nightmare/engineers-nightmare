@@ -11,7 +11,6 @@
 
 extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
-extern void warp_mouse_to_center_screen();
 extern void apply_video_settings();
 extern void request_exit();
 extern void teardown_chunks();
@@ -38,7 +37,6 @@ struct menu_state : game_state {
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
     menu_state() {
-        warp_mouse_to_center_screen();
         state = MenuState::Main;
     }
 

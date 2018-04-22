@@ -9,7 +9,6 @@
 extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
 
-extern void warp_mouse_to_center_screen();
 extern std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_entity);
 extern void update_filter(c_entity entity, std::string const&, std::array<char, 256> const&);
 
@@ -23,7 +22,6 @@ struct customize_entity_comms_output_state : game_state {
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
     explicit customize_entity_comms_output_state(c_entity e) : entity(e) {
-        warp_mouse_to_center_screen();
     }
 
     void handle_input() override {

@@ -10,7 +10,6 @@
 extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
 
-extern void warp_mouse_to_center_screen();
 extern ship_space *ship;
 
 extern component_system_manager component_system_man;
@@ -22,7 +21,6 @@ struct customize_entity_comms_inspection_state : game_state {
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
     explicit customize_entity_comms_inspection_state(c_entity e) : entity(e) {
-        warp_mouse_to_center_screen();
     }
 
     void handle_input() override {
