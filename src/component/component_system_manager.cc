@@ -205,7 +205,6 @@ tick_rotator_components(ship_space *ship) {
         auto power = power_man.get_instance_data(ce);
         auto rot = rot_man.get_instance_data(ce);
         auto pos = pos_man.get_instance_data(ce);
-        auto par = par_man.get_instance_data(ce);
 
         if (!*power.powered) {
             return;
@@ -228,6 +227,7 @@ tick_rotator_components(ship_space *ship) {
 
         glm::mat4 pos_mat;
         if (par_man.exists(ce)) {
+            auto par = par_man.get_instance_data(ce);
             pos_mat = *par.local_mat;
         }
         else {
