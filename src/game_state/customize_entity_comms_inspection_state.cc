@@ -35,9 +35,6 @@ struct customize_entity_comms_inspection_state : game_state {
         }
     }
 
-    void rebuild_ui() override {
-    }
-
     void get_entity_hierarchy() {
         entity_families.clear();
         auto &type_man = component_system_man.managers.type_component_man;

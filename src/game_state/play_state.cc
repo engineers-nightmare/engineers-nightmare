@@ -40,7 +40,6 @@ extern sprite_renderer *ui_sprites;
 extern en_settings game_settings;
 extern ship_space *ship;
 extern SoLoud::Soloud * audio;
-extern ImGuiContext *default_context;
 extern projectile_linear_manager proj_man;
 
 extern bool draw_fps, draw_debug_text, draw_debug_chunks, draw_debug_axis, draw_debug_physics;

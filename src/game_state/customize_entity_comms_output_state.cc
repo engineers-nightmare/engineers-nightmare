@@ -36,9 +36,6 @@ struct customize_entity_comms_output_state : game_state {
         }
     }
 
-    void rebuild_ui() override {
-    }
-
     void update(float dt) override {
         if (window_has_focus() && SDL_GetRelativeMouseMode() == SDL_TRUE) {
             SDL_SetRelativeMouseMode(SDL_FALSE);
