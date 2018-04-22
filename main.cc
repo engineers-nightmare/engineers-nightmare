@@ -712,6 +712,11 @@ update()
 
     set_game_state();
 
+    auto want_relative_mouse_mode = SDL_bool(window_has_focus() && !current_game_state->is_ui_state());
+    if (SDL_GetRelativeMouseMode() != want_relative_mouse_mode) {
+        SDL_SetRelativeMouseMode(want_relative_mouse_mode);
+    }
+
     /* this absolutely must run every frame */
     current_game_state->update(dt);
 

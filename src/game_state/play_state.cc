@@ -22,10 +22,6 @@
 
 extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
-extern void warp_mouse_to_center_screen();
-extern bool window_has_focus();
-extern void apply_video_settings();
-extern void request_exit();
 extern void add_text_with_outline(char const *, float , float, float = 1, float = 1, float = 1);
 
 extern sprite_metrics unlit_ui_slot_sprite, lit_ui_slot_sprite;
@@ -148,13 +144,6 @@ struct play_state : game_state {
     }
 
     void update(float dt) override {
-        if (window_has_focus() && SDL_GetRelativeMouseMode() == SDL_FALSE) {
-            SDL_SetRelativeMouseMode(SDL_TRUE);
-        }
-
-        if (!window_has_focus() && SDL_GetRelativeMouseMode() != SDL_FALSE) {
-            SDL_SetRelativeMouseMode(SDL_FALSE);
-        }
 
         auto *t = tools[pl.active_tool_slot];
 

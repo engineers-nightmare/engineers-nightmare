@@ -11,7 +11,6 @@ extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
 
 extern void warp_mouse_to_center_screen();
-extern bool window_has_focus();
 extern ship_space *ship;
 
 extern component_system_manager component_system_man;
@@ -68,10 +67,6 @@ struct customize_entity_comms_inspection_state : game_state {
     }
 
     void update(float dt) override {
-        if (window_has_focus() && SDL_GetRelativeMouseMode() == SDL_TRUE) {
-            SDL_SetRelativeMouseMode(SDL_FALSE);
-        }
-
         get_entity_hierarchy();
     }
 

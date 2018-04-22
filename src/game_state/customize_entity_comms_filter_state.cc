@@ -10,7 +10,6 @@ extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
 
 extern void warp_mouse_to_center_screen();
-extern bool window_has_focus();
 extern std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_entity);
 extern void update_filter(c_entity entity, std::string const&, std::array<char, 256> const&);
 
@@ -31,12 +30,6 @@ struct customize_entity_comms_filter_state : game_state {
     void handle_input() override {
         if (get_input(action_menu)->just_active) {
             set_next_game_state(create_play_state());
-        }
-    }
-
-    void update(float dt) override {
-        if (window_has_focus() && SDL_GetRelativeMouseMode() == SDL_TRUE) {
-            SDL_SetRelativeMouseMode(SDL_FALSE);
         }
     }
 

@@ -12,7 +12,6 @@
 extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
 extern void warp_mouse_to_center_screen();
-extern bool window_has_focus();
 extern void apply_video_settings();
 extern void request_exit();
 extern void teardown_chunks();
@@ -55,12 +54,6 @@ struct menu_state : game_state {
                     state = MenuState::Main;
                     break;
             }
-        }
-    }
-
-    void update(float dt) override {
-        if (window_has_focus() && SDL_GetRelativeMouseMode() == SDL_TRUE) {
-            SDL_SetRelativeMouseMode(SDL_FALSE);
         }
     }
 

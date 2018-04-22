@@ -15,7 +15,7 @@ public:
 
     virtual void handle_input() = 0;
 
-    virtual void update(float dt) = 0;
+    virtual void update(float dt) {}
 
     virtual void render(frame_data *frame) = 0;
 
