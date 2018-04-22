@@ -26,39 +26,45 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
     if (door_man.exists(entity)) {
         {
             auto door = door_man.get_instance_data(entity);
-            add_filter(filters, 0, *(door.filter), "Door");
+            add_filter(filters, 0, *(door.filter),
+                "Door/filter");
         }
     }
     auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
     if (gas_producer_man.exists(entity)) {
         {
             auto gas_producer = gas_producer_man.get_instance_data(entity);
-            add_filter(filters, 1, *(gas_producer.filter), "Gas Producer");
+            add_filter(filters, 1, *(gas_producer.filter),
+                "Gas Producer/filter");
         }
     }
     auto &light_man = component_system_man.managers.light_component_man;
     if (light_man.exists(entity)) {
         {
             auto light = light_man.get_instance_data(entity);
-            add_filter(filters, 2, *(light.filter), "Light");
+            add_filter(filters, 2, *(light.filter),
+                "Light/filter");
         }
     }
     auto &rotator_man = component_system_man.managers.rotator_component_man;
     if (rotator_man.exists(entity)) {
         {
             auto rotator = rotator_man.get_instance_data(entity);
-            add_filter(filters, 3, *(rotator.filter), "Rotator");
+            add_filter(filters, 3, *(rotator.filter),
+                "Rotator/filter");
         }
     }
     auto &sensor_comparator_man = component_system_man.managers.sensor_comparator_component_man;
     if (sensor_comparator_man.exists(entity)) {
         {
             auto sensor_comparator = sensor_comparator_man.get_instance_data(entity);
-            add_filter(filters, 4, *(sensor_comparator.input_a), "Sensor Comparator");
+            add_filter(filters, 4, *(sensor_comparator.input_a),
+                "Sensor Comparator/input_a");
         }
         {
             auto sensor_comparator = sensor_comparator_man.get_instance_data(entity);
-            add_filter(filters, 5, *(sensor_comparator.input_b), "Sensor Comparator");
+            add_filter(filters, 5, *(sensor_comparator.input_b),
+                "Sensor Comparator/input_b");
         }
     }
     return filters;

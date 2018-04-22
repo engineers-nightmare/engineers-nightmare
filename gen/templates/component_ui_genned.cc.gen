@@ -30,7 +30,8 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
         % if field['type'] == "wire_filter_ptr":
         {
             auto ${comp.comp_name} = ${comp.comp_name}_man.get_instance_data(entity);
-            add_filter(filters, ${field['field_id']}, *(${comp.comp_name}.${field['name']}), "${comp.ui_name}");
+            add_filter(filters, ${field['field_id']}, *(${comp.comp_name}.${field['name']}),
+                "${comp.ui_name}/${field['name']}");
         }
         % endif
     % endfor
