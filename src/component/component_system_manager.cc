@@ -124,12 +124,11 @@ tick_doors(ship_space *ship)
             continue;
         }
 
-        /* todo: origin discrimination */
         /* todo: what if many transitions requested? */
         auto const &net = ship->get_comms_network(*cwire.network);
 
         for (auto msg : net.read_buffer) {
-            if (msg.type == msg_type::switch_transition) {
+            if (!filter_matches_message(msg, door_man.instance_pool.filter[i]) || msg.type != msg_type::switch_transition) {
                 continue;
             }
 

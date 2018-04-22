@@ -22,22 +22,28 @@ static void add_filter(std::vector<filter_ui_state> &filters, int field_id, wire
 std::vector<filter_ui_state> get_filters(c_entity entity) {
     std::vector<filter_ui_state> filters;
 
+    auto &door_man = component_system_man.managers.door_component_man;
+    if (door_man.exists(entity)) {
+        auto door = door_man.get_instance_data(entity);
+        add_filter(filters, 0, *(door.filter), "Door");
+    }
+
     auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
     if (gas_producer_man.exists(entity)) {
         auto gas_producer = gas_producer_man.get_instance_data(entity);
-        add_filter(filters, 0, *(gas_producer.filter), "Gas Producer");
+        add_filter(filters, 1, *(gas_producer.filter), "Gas Producer");
     }
 
     auto &light_man = component_system_man.managers.light_component_man;
     if (light_man.exists(entity)) {
         auto light = light_man.get_instance_data(entity);
-        add_filter(filters, 1, *(light.filter), "Light");
+        add_filter(filters, 2, *(light.filter), "Light");
     }
 
     auto &rotator_man = component_system_man.managers.rotator_component_man;
     if (rotator_man.exists(entity)) {
         auto rotator = rotator_man.get_instance_data(entity);
-        add_filter(filters, 2, *(rotator.filter), "Rotator");
+        add_filter(filters, 3, *(rotator.filter), "Rotator");
     }
 
     return filters;
@@ -46,6 +52,14 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
 void update_filter(c_entity entity, filter_ui_state const& filter) {
     switch (filter.field_id) {
     case 0: {
+        auto &door_man = component_system_man.managers.door_component_man;
+        if (door_man.exists(entity)) {
+            auto door = door_man.get_instance_data(entity);
+            door.filter->set(filter.filter.data());
+        }
+    } break;
+
+    case 1: {
         auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
         if (gas_producer_man.exists(entity)) {
             auto gas_producer = gas_producer_man.get_instance_data(entity);
@@ -53,7 +67,7 @@ void update_filter(c_entity entity, filter_ui_state const& filter) {
         }
     } break;
 
-    case 1: {
+    case 2: {
         auto &light_man = component_system_man.managers.light_component_man;
         if (light_man.exists(entity)) {
             auto light = light_man.get_instance_data(entity);
@@ -61,7 +75,7 @@ void update_filter(c_entity entity, filter_ui_state const& filter) {
         }
     } break;
 
-    case 2: {
+    case 3: {
         auto &rotator_man = component_system_man.managers.rotator_component_man;
         if (rotator_man.exists(entity)) {
             auto rotator = rotator_man.get_instance_data(entity);

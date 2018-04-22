@@ -2,3 +2,4 @@ ui_name,Door
 depends,power,wire_comms
 body,float,pos,1
 body,float,desired_pos,1
+body,wire_filter_ptr,filter,{}

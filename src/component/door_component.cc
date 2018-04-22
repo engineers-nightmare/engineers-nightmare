@@ -21,6 +21,7 @@ door_component_manager::create_component_instance_data(unsigned count) {
     size_t size = sizeof(c_entity) * count;
     size = sizeof(float) * count + align_size<float>(size);
     size = sizeof(float) * count + align_size<float>(size);
+    size = sizeof(wire_filter_ptr) * count + align_size<wire_filter_ptr>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -31,10 +32,12 @@ door_component_manager::create_component_instance_data(unsigned count) {
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.pos = align_ptr((float *)(new_pool.entity + count));
     new_pool.desired_pos = align_ptr((float *)(new_pool.pos + count));
+    new_pool.filter = align_ptr((wire_filter_ptr *)(new_pool.desired_pos + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.pos, instance_pool.pos, buffer.num * sizeof(float));
     memcpy(new_pool.desired_pos, instance_pool.desired_pos, buffer.num * sizeof(float));
+    memcpy(new_pool.filter, instance_pool.filter, buffer.num * sizeof(wire_filter_ptr));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -51,6 +54,7 @@ door_component_manager::destroy_instance(instance i) {
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
     instance_pool.pos[i.index] = instance_pool.pos[last_index];
     instance_pool.desired_pos[i.index] = instance_pool.desired_pos[last_index];
+    instance_pool.filter[i.index] = instance_pool.filter[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
@@ -80,6 +84,7 @@ door_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.pos = 1;
     *data.desired_pos = 1;
+    *data.filter = {};
 };
 
 std::unique_ptr<component_stub> door_component_stub::from_config(const config_setting_t *config) {
