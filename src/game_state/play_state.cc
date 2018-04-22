@@ -79,14 +79,14 @@ struct play_state : game_state {
         add_text_with_outline(".", -w/2, -w/2);
 
         auto bind = game_settings.bindings.bindings.find(action_use_tool);
-        auto key = lookup_key((*bind).second.binds.inputs[0]);
+        auto key = lookup_key(bind->second.binds.inputs[0]);
         sprintf(buf2, "%s: %s", key, buf);
         text->measure(buf2, &w, &h);
         add_text_with_outline(buf2, -w/2, -360);
 
         /* Use key affordance */
         bind = game_settings.bindings.bindings.find(action_use);
-        key = lookup_key((*bind).second.binds.inputs[0]);
+        key = lookup_key(bind->second.binds.inputs[0]);
         char const *pre = nullptr;
         if (c_entity::is_valid(use_entity)) {
             if (!surf_man.exists(use_entity) ||
