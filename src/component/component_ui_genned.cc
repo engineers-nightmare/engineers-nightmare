@@ -5,8 +5,8 @@
 
 extern component_system_manager component_system_man;
 
-std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_entity entity) {
-    std::vector<std::pair<const std::string, std::array<char, 256>>> filters;
+std::vector<filter_ui_state> get_filters(c_entity entity) {
+    std::vector<filter_ui_state> filters;
 
     auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
     if (gas_producer_man.exists(entity)) {
@@ -14,7 +14,7 @@ std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_e
         auto filter = (gas_producer.filter->wrapped && !gas_producer.filter->wrapped->empty()) ? (*gas_producer.filter->wrapped).c_str() : "";
         std::array<char, 256> f;
         strcpy(f.data(), filter);
-        filters.emplace_back("Gas Producer", f);
+        filters.push_back({"Gas Producer", f});
     }
 
     auto &light_man = component_system_man.managers.light_component_man;
@@ -23,7 +23,7 @@ std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_e
         auto filter = (light.filter->wrapped && !light.filter->wrapped->empty()) ? (*light.filter->wrapped).c_str() : "";
         std::array<char, 256> f;
         strcpy(f.data(), filter);
-        filters.emplace_back("Light", f);
+        filters.push_back({"Light", f});
     }
 
     auto &rotator_man = component_system_man.managers.rotator_component_man;
@@ -32,34 +32,34 @@ std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_e
         auto filter = (rotator.filter->wrapped && !rotator.filter->wrapped->empty()) ? (*rotator.filter->wrapped).c_str() : "";
         std::array<char, 256> f;
         strcpy(f.data(), filter);
-        filters.emplace_back("Rotator", f);
+        filters.push_back({"Rotator", f});
     }
 
     return filters;
 }
 
-void update_filter(c_entity entity, std::string const& comp, std::array<char, 256> const& filter) {
-    if (comp == "Gas Producer") {
+void update_filter(c_entity entity, filter_ui_state const& filter) {
+    if (filter.component_name == "Gas Producer") {
         auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
         if (gas_producer_man.exists(entity)) {
             auto gas_producer = gas_producer_man.get_instance_data(entity);
-            gas_producer.filter->set(filter.data());
+            gas_producer.filter->set(filter.filter.data());
         }
     }
 
-    if (comp == "Light") {
+    if (filter.component_name == "Light") {
         auto &light_man = component_system_man.managers.light_component_man;
         if (light_man.exists(entity)) {
             auto light = light_man.get_instance_data(entity);
-            light.filter->set(filter.data());
+            light.filter->set(filter.filter.data());
         }
     }
 
-    if (comp == "Rotator") {
+    if (filter.component_name == "Rotator") {
         auto &rotator_man = component_system_man.managers.rotator_component_man;
         if (rotator_man.exists(entity)) {
             auto rotator = rotator_man.get_instance_data(entity);
-            rotator.filter->set(filter.data());
+            rotator.filter->set(filter.filter.data());
         }
     }
 

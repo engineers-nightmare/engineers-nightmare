@@ -9,9 +9,6 @@
 extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
 
-extern std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_entity);
-extern void update_filter(c_entity entity, std::string const&, std::array<char, 256> const&);
-
 extern component_system_manager component_system_man;
 
 struct customize_entity_comms_output_state : game_state {

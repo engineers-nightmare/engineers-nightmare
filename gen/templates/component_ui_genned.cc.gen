@@ -5,8 +5,8 @@
 
 extern component_system_manager component_system_man;
 
-std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_entity entity) {
-    std::vector<std::pair<const std::string, std::array<char, 256>>> filters;
+std::vector<filter_ui_state> get_filters(c_entity entity) {
+    std::vector<filter_ui_state> filters;
 
 % for name, comp in sorted(comps.items()):
     % for field in comp.body_fields:
@@ -17,7 +17,7 @@ std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_e
         auto filter = (${comp.comp_name}.${field['name']}->wrapped && !${comp.comp_name}.${field['name']}->wrapped->empty()) ? (*${comp.comp_name}.${field['name']}->wrapped).c_str() : "";
         std::array<char, 256> f;
         strcpy(f.data(), filter);
-        filters.emplace_back("${comp.ui_name}", f);
+        filters.push_back({"${comp.ui_name}", f});
     }
 
         % endif
@@ -26,15 +26,15 @@ std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_e
     return filters;
 }
 
-void update_filter(c_entity entity, std::string const& comp, std::array<char, 256> const& filter) {
+void update_filter(c_entity entity, filter_ui_state const& filter) {
 % for name, comp in sorted(comps.items()):
     % for field in comp.body_fields:
         % if field['type'] == "wire_filter_ptr":
-    if (comp == "${comp.ui_name}") {
+    if (filter.component_name == "${comp.ui_name}") {
         auto &${comp.comp_name}_man = component_system_man.managers.${comp.comp_name}_component_man;
         if (${comp.comp_name}_man.exists(entity)) {
             auto ${comp.comp_name} = ${comp.comp_name}_man.get_instance_data(entity);
-            ${comp.comp_name}.${field['name']}->set(filter.data());
+            ${comp.comp_name}.${field['name']}->set(filter.filter.data());
         }
     }
 

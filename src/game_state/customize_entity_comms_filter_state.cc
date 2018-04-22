@@ -9,15 +9,15 @@
 extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
 
-extern std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_entity);
-extern void update_filter(c_entity entity, std::string const&, std::array<char, 256> const&);
+extern std::vector<filter_ui_state> get_filters(c_entity);
+extern void update_filter(c_entity entity, filter_ui_state const&);
 
 extern component_system_manager component_system_man;
 
 struct customize_entity_comms_filter_state : game_state {
     c_entity entity;
 
-    std::vector<std::pair<const std::string, std::array<char, 256>>> comp_name_to_filter_name;
+    std::vector<filter_ui_state> comp_name_to_filter_name;
 
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
@@ -53,14 +53,13 @@ struct customize_entity_comms_filter_state : game_state {
                     ImGui::Separator();
                     ImGui::Dummy(ImVec2{10, 10});
                     for (auto &kvp : comp_name_to_filter_name) {
-                        auto comp = kvp.first.c_str();
-                        ImGui::InputText(comp, kvp.second.data(), 256);
+                        ImGui::InputText(kvp.component_name.c_str(), kvp.filter.data(), 256);
                     }
 
                     ImGui::Dummy(ImVec2{10, 10});
                     if (ImGui::Button("Save")) {
                         for (auto &kvp : comp_name_to_filter_name) {
-                            update_filter(entity, kvp.first, kvp.second);
+                            update_filter(entity, kvp);
                         }
                     }
 
