@@ -22,8 +22,6 @@ extern ship_space *ship;
 extern SoLoud::Soloud * audio;
 extern bool draw_fps, draw_debug_text, draw_debug_chunks, draw_debug_axis, draw_debug_physics;
 
-extern ImGuiContext *default_context;
-
 extern glm::vec3 fp_item_offset;
 extern float fp_item_scale;
 extern glm::quat fp_item_rot;

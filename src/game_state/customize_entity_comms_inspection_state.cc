@@ -12,9 +12,7 @@ extern void set_next_game_state(game_state *s);
 
 extern void warp_mouse_to_center_screen();
 extern bool window_has_focus();
-extern void new_imgui_frame();
-
-extern ImGuiContext *default_context;
+extern ship_space *ship;
 
 extern component_system_manager component_system_man;
 

@@ -14,8 +14,6 @@ extern bool window_has_focus();
 extern std::vector<std::pair<const std::string, std::array<char, 256>>> get_filters(c_entity);
 extern void update_filter(c_entity entity, std::string const&, std::array<char, 256> const&);
 
-extern ImGuiContext *default_context;
-
 extern component_system_manager component_system_man;
 
 struct customize_entity_comms_filter_state : game_state {
