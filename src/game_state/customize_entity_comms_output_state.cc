@@ -19,6 +19,9 @@ struct customize_entity_comms_output_state : game_state {
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
     explicit customize_entity_comms_output_state(c_entity e) : entity(e) {
+        auto &wire_man = component_system_man.managers.wire_comms_component_man;
+        auto wire = wire_man.get_instance_data(entity);
+        strcpy(entity_label, (*wire.label) ? *wire.label : "");
     }
 
     void handle_input() override {
