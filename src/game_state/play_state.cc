@@ -87,14 +87,14 @@ struct play_state : game_state {
         /* Use key affordance */
         bind = game_settings.bindings.bindings.find(action_use);
         key = lookup_key((*bind).second.binds.inputs[0]);
-        char *pre = nullptr;
+        char const *pre = nullptr;
         if (c_entity::is_valid(use_entity)) {
             if (!surf_man.exists(use_entity) ||
                 !*(surf_man.get_instance_data(use_entity)).attached) {
-                pre = const_cast<char *>("Remove");
+                pre = "Remove";
             }
             else if (switch_man.exists(use_entity)) {
-                pre = const_cast<char *>("Use");
+                pre = "Use";
             }
 
             if (pre) {
