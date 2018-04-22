@@ -23,7 +23,7 @@ filter_matches_message(comms_msg const &msg, wire_filter_ptr const &filter) {
     if (!filter.wrapped)
         return true;
 
-    /* We have a filter. Sender must have a filter, and it must match. */
+    /* We have a filter. Sender must have a label, and it must match. */
     return *sender.label && !strcmp(*sender.label, filter.wrapped->c_str());
 }
 
