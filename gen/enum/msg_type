@@ -1,5 +1,4 @@
 switch_transition,"Switch";
-pressure_sensor_1,"Pressure Sensor 1";
-pressure_sensor_2,"Pressure_sensor 2";
+pressure_sensor,"Pressure";
 sensor_comparison,"Sensor Comparison";
 proximity_sensor,"Proximity Sensor";

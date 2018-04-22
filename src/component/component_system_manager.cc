@@ -268,15 +268,9 @@ tick_pressure_sensors(ship_space* ship) {
         zone_info *z = ship->get_zone_info(t);
         float pressure = z ? (z->air_amount / t->size) : 0.0f;
 
-        auto which_sensor = pressure_man.instance_pool.type[i];
-        auto desc = msg_type::pressure_sensor_1;
-        if (which_sensor == 2) {
-            desc = msg_type::pressure_sensor_2;
-        }
-
         comms_msg msg{
             ce,
-            desc,
+            msg_type::pressure_sensor,
             pressure,
         };
         publish_msg(ship, network, msg);
@@ -292,8 +286,8 @@ tick_sensor_comparators(ship_space *ship) {
     for (auto i = 0u; i < comparator_man.buffer.num; i++) {
         auto ce = comparator_man.instance_pool.entity[i];
 
-        auto sensor_1 = FLT_MAX;
-        auto sensor_2 = FLT_MAX;
+        auto input_a = FLT_MAX;
+        auto input_b = FLT_MAX;
         auto epsilon = comparator_man.instance_pool.compare_epsilon[i];
         auto & difference = comparator_man.instance_pool.compare_result[i];
         difference = 0.f;
@@ -306,17 +300,14 @@ tick_sensor_comparators(ship_space *ship) {
         auto const &net = ship->get_comms_network(net_id);
 
         /* now that we have the wire, see if it has any msgs for us */
-        /* todo: origin discrimination */
         for (auto msg : net.read_buffer) {
-            if (sensor_1 == FLT_MAX && msg.type == msg_type::pressure_sensor_1) {
-                sensor_1 = msg.data;
+            if (filter_matches_message(msg, comparator_man.instance_pool.input_a[i]) &&
+                msg.type == msg_type::pressure_sensor) {
+                input_a = msg.data;
             }
-            if (sensor_2 == FLT_MAX && msg.type == msg_type::pressure_sensor_2) {
-                sensor_2 = msg.data;
-            }
-
-            if (sensor_1 != FLT_MAX && sensor_2 != FLT_MAX) {
-                break;
+            if (filter_matches_message(msg, comparator_man.instance_pool.input_b[i]) &&
+                msg.type == msg_type::pressure_sensor) {
+                input_b = msg.data;
             }
         }
 
@@ -327,7 +318,7 @@ tick_sensor_comparators(ship_space *ship) {
         /* the following code always returns 0??
          * difference = (fabsf(sensor_1 - sensor_2) < epsilon) ? 1.f : 0.f;
          */
-        auto d = fabsf(sensor_1 - sensor_2);
+        auto d = fabsf(input_a - input_b);
         auto b = d < epsilon;
         difference = b ? 1.f : 0.f;
 

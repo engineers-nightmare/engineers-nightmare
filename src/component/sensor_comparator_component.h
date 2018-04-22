@@ -14,6 +14,8 @@ struct sensor_comparator_component_manager : component_manager<sensor_comparator
         c_entity *entity;
         float *compare_result;
         float *compare_epsilon;
+        wire_filter_ptr *input_a;
+        wire_filter_ptr *input_b;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -31,6 +33,8 @@ struct sensor_comparator_component_manager : component_manager<sensor_comparator
         d.entity = instance_pool.entity + inst.index;
         d.compare_result = instance_pool.compare_result + inst.index;
         d.compare_epsilon = instance_pool.compare_epsilon + inst.index;
+        d.input_a = instance_pool.input_a + inst.index;
+        d.input_b = instance_pool.input_b + inst.index;
 
         return d;
     }

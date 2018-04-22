@@ -24,28 +24,43 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
 
     auto &door_man = component_system_man.managers.door_component_man;
     if (door_man.exists(entity)) {
-        auto door = door_man.get_instance_data(entity);
-        add_filter(filters, 0, *(door.filter), "Door");
+        {
+            auto door = door_man.get_instance_data(entity);
+            add_filter(filters, 0, *(door.filter), "Door");
+        }
     }
-
     auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
     if (gas_producer_man.exists(entity)) {
-        auto gas_producer = gas_producer_man.get_instance_data(entity);
-        add_filter(filters, 1, *(gas_producer.filter), "Gas Producer");
+        {
+            auto gas_producer = gas_producer_man.get_instance_data(entity);
+            add_filter(filters, 1, *(gas_producer.filter), "Gas Producer");
+        }
     }
-
     auto &light_man = component_system_man.managers.light_component_man;
     if (light_man.exists(entity)) {
-        auto light = light_man.get_instance_data(entity);
-        add_filter(filters, 2, *(light.filter), "Light");
+        {
+            auto light = light_man.get_instance_data(entity);
+            add_filter(filters, 2, *(light.filter), "Light");
+        }
     }
-
     auto &rotator_man = component_system_man.managers.rotator_component_man;
     if (rotator_man.exists(entity)) {
-        auto rotator = rotator_man.get_instance_data(entity);
-        add_filter(filters, 3, *(rotator.filter), "Rotator");
+        {
+            auto rotator = rotator_man.get_instance_data(entity);
+            add_filter(filters, 3, *(rotator.filter), "Rotator");
+        }
     }
-
+    auto &sensor_comparator_man = component_system_man.managers.sensor_comparator_component_man;
+    if (sensor_comparator_man.exists(entity)) {
+        {
+            auto sensor_comparator = sensor_comparator_man.get_instance_data(entity);
+            add_filter(filters, 4, *(sensor_comparator.input_a), "Sensor Comparator");
+        }
+        {
+            auto sensor_comparator = sensor_comparator_man.get_instance_data(entity);
+            add_filter(filters, 5, *(sensor_comparator.input_b), "Sensor Comparator");
+        }
+    }
     return filters;
 }
 
@@ -80,6 +95,22 @@ void update_filter(c_entity entity, filter_ui_state const& filter) {
         if (rotator_man.exists(entity)) {
             auto rotator = rotator_man.get_instance_data(entity);
             rotator.filter->set(filter.filter.data());
+        }
+    } break;
+
+    case 4: {
+        auto &sensor_comparator_man = component_system_man.managers.sensor_comparator_component_man;
+        if (sensor_comparator_man.exists(entity)) {
+            auto sensor_comparator = sensor_comparator_man.get_instance_data(entity);
+            sensor_comparator.input_a->set(filter.filter.data());
+        }
+    } break;
+
+    case 5: {
+        auto &sensor_comparator_man = component_system_man.managers.sensor_comparator_component_man;
+        if (sensor_comparator_man.exists(entity)) {
+            auto sensor_comparator = sensor_comparator_man.get_instance_data(entity);
+            sensor_comparator.input_b->set(filter.filter.data());
         }
     } break;
 

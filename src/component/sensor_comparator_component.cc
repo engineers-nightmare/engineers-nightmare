@@ -21,6 +21,8 @@ sensor_comparator_component_manager::create_component_instance_data(unsigned cou
     size_t size = sizeof(c_entity) * count;
     size = sizeof(float) * count + align_size<float>(size);
     size = sizeof(float) * count + align_size<float>(size);
+    size = sizeof(wire_filter_ptr) * count + align_size<wire_filter_ptr>(size);
+    size = sizeof(wire_filter_ptr) * count + align_size<wire_filter_ptr>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -31,10 +33,14 @@ sensor_comparator_component_manager::create_component_instance_data(unsigned cou
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.compare_result = align_ptr((float *)(new_pool.entity + count));
     new_pool.compare_epsilon = align_ptr((float *)(new_pool.compare_result + count));
+    new_pool.input_a = align_ptr((wire_filter_ptr *)(new_pool.compare_epsilon + count));
+    new_pool.input_b = align_ptr((wire_filter_ptr *)(new_pool.input_a + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.compare_result, instance_pool.compare_result, buffer.num * sizeof(float));
     memcpy(new_pool.compare_epsilon, instance_pool.compare_epsilon, buffer.num * sizeof(float));
+    memcpy(new_pool.input_a, instance_pool.input_a, buffer.num * sizeof(wire_filter_ptr));
+    memcpy(new_pool.input_b, instance_pool.input_b, buffer.num * sizeof(wire_filter_ptr));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -51,6 +57,8 @@ sensor_comparator_component_manager::destroy_instance(instance i) {
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
     instance_pool.compare_result[i.index] = instance_pool.compare_result[last_index];
     instance_pool.compare_epsilon[i.index] = instance_pool.compare_epsilon[last_index];
+    instance_pool.input_a[i.index] = instance_pool.input_a[last_index];
+    instance_pool.input_b[i.index] = instance_pool.input_b[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
@@ -80,6 +88,8 @@ sensor_comparator_component_stub::assign_component_to_entity(c_entity entity) {
 
     *data.compare_result = 0;
     *data.compare_epsilon = compare_epsilon;
+    *data.input_a = {};
+    *data.input_b = {};
 };
 
 std::unique_ptr<component_stub> sensor_comparator_component_stub::from_config(const config_setting_t *config) {

@@ -14,10 +14,9 @@ template<typename T>
 enum class msg_type
 {
     switch_transition = 0,
-    pressure_sensor_1 = 1,
-    pressure_sensor_2 = 2,
-    sensor_comparison = 3,
-    proximity_sensor = 4,
+    pressure_sensor = 1,
+    sensor_comparison = 2,
+    proximity_sensor = 3,
     invalid = -1,
 };
 

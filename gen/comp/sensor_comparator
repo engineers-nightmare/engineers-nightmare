@@ -3,3 +3,5 @@ stub,float,float,,compare_epsilon,
 depends,wire_comms
 body,float,compare_result,0
 body,float,compare_epsilon,0
+body,wire_filter_ptr,input_a,{}
+body,wire_filter_ptr,input_b,{}

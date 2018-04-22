@@ -12,10 +12,8 @@ const char* get_enum_description(msg_type value) {
     {
     case msg_type::switch_transition:
         return "Switch";
-    case msg_type::pressure_sensor_1:
-        return "Pressure Sensor 1";
-    case msg_type::pressure_sensor_2:
-        return "Pressure_sensor 2";
+    case msg_type::pressure_sensor:
+        return "Pressure";
     case msg_type::sensor_comparison:
         return "Sensor Comparison";
     case msg_type::proximity_sensor:
@@ -31,10 +29,8 @@ const char* get_enum_string(msg_type value) {
     {
     case msg_type::switch_transition:
         return "switch_transition";
-    case msg_type::pressure_sensor_1:
-        return "pressure_sensor_1";
-    case msg_type::pressure_sensor_2:
-        return "pressure_sensor_2";
+    case msg_type::pressure_sensor:
+        return "pressure_sensor";
     case msg_type::sensor_comparison:
         return "sensor_comparison";
     case msg_type::proximity_sensor:
@@ -50,11 +46,8 @@ template<> msg_type get_enum<msg_type>(const char *e) {
     if (!strcmp(e, "switch_transition")) {
         val = msg_type::switch_transition;
     }
-    if (!strcmp(e, "pressure_sensor_1")) {
-        val = msg_type::pressure_sensor_1;
-    }
-    if (!strcmp(e, "pressure_sensor_2")) {
-        val = msg_type::pressure_sensor_2;
+    if (!strcmp(e, "pressure_sensor")) {
+        val = msg_type::pressure_sensor;
     }
     if (!strcmp(e, "sensor_comparison")) {
         val = msg_type::sensor_comparison;
