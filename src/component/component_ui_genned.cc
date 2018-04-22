@@ -12,27 +12,33 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
     if (gas_producer_man.exists(entity)) {
         auto gas_producer = gas_producer_man.get_instance_data(entity);
         auto filter = (gas_producer.filter->wrapped && !gas_producer.filter->wrapped->empty()) ? (*gas_producer.filter->wrapped).c_str() : "";
-        std::array<char, 256> f;
-        strcpy(f.data(), filter);
-        filters.push_back({"Gas Producer", f});
+        filters.emplace_back();
+        auto & f = filters.back();
+        f.component_name = "Gas Producer";
+        f.field_id = 0;
+        strcpy(f.filter.data(), filter);
     }
 
     auto &light_man = component_system_man.managers.light_component_man;
     if (light_man.exists(entity)) {
         auto light = light_man.get_instance_data(entity);
         auto filter = (light.filter->wrapped && !light.filter->wrapped->empty()) ? (*light.filter->wrapped).c_str() : "";
-        std::array<char, 256> f;
-        strcpy(f.data(), filter);
-        filters.push_back({"Light", f});
+        filters.emplace_back();
+        auto & f = filters.back();
+        f.component_name = "Light";
+        f.field_id = 1;
+        strcpy(f.filter.data(), filter);
     }
 
     auto &rotator_man = component_system_man.managers.rotator_component_man;
     if (rotator_man.exists(entity)) {
         auto rotator = rotator_man.get_instance_data(entity);
         auto filter = (rotator.filter->wrapped && !rotator.filter->wrapped->empty()) ? (*rotator.filter->wrapped).c_str() : "";
-        std::array<char, 256> f;
-        strcpy(f.data(), filter);
-        filters.push_back({"Rotator", f});
+        filters.emplace_back();
+        auto & f = filters.back();
+        f.component_name = "Rotator";
+        f.field_id = 2;
+        strcpy(f.filter.data(), filter);
     }
 
     return filters;
