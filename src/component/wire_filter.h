@@ -17,7 +17,21 @@ struct wire_filter_ptr
     std::string *wrapped = nullptr;
     msg_type msg_type{};
     wire_filter_ptr(const wire_filter_ptr&) = delete;
-    wire_filter_ptr& operator=(const wire_filter_ptr&) = default;
+
+    wire_filter_ptr& operator=(const wire_filter_ptr &w) {
+        msg_type = w.msg_type;
+        if (!wrapped && w.wrapped) {
+            wrapped = new std::string(*w.wrapped);
+        }
+        else if (wrapped && w.wrapped) {
+            *wrapped = *w.wrapped;
+        }
+        else if (wrapped && !w.wrapped) {
+            delete wrapped;
+            wrapped = nullptr;
+        }
+        return *this;
+    }
 
     ~wire_filter_ptr() {
         delete wrapped;
