@@ -1,0 +1,30 @@
+entity: {
+    components: {
+        type: {
+            name: "power sensor",
+        },
+        renderable: {
+            mesh: "panel_1x1",
+        },
+        placeable: {
+            rot: 15,
+            place: "eighth_block_snapped",
+        },
+        position: {
+        },
+        physics: {
+            mesh: "panel_1x1",
+            mass: 0.1,
+        },
+        surface_attachment: {
+        },
+        power_sensor: {
+        },
+        power: {
+            required_power: 0.1,
+            max_required_power: 0.1,
+        },
+        wire_comms: {
+        },
+    };
+};
