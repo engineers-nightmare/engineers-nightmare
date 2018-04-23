@@ -400,6 +400,13 @@ update_display_contents()
     auto &surf = component_system_man.managers.surface_attachment_component_man;
 
     for (auto i = 0u; i < display_man.buffer.num; i++) {
+
+        /* TODO: allocate render texture layers based on relevance, not instance pool index. */
+        /* It's possible that we have too many displays for our pool; if we hit that point,
+            bail now rather than clobbering the final entry (which is used for tool UIs).*/
+        if (i == asset_man.render_textures->array_size - 1)
+            return;
+
         auto ce = display_man.instance_pool.entity[i];
 
         auto power = power_man.get_instance_data(ce);

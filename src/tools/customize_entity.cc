@@ -173,7 +173,7 @@ struct customize_entity_tool : tool
 
         auto fp_screen = &asset_man.get_mesh("fp_customize_tool_screen");
         glUseProgram(screen_shader);
-        draw_fp_display_mesh(frame, fp_screen, 2);
+        draw_fp_display_mesh(frame, fp_screen, asset_man.render_textures->array_size - 1);
     }
 
     void do_offscreen_render() override {
@@ -219,10 +219,11 @@ struct customize_entity_tool : tool
             }
             ImGui::End();
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_displays_fbo);
-            glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, asset_man.render_textures->texobj, 0, 2);
+            glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, asset_man.render_textures->texobj, 0,
+                asset_man.render_textures->array_size - 1);
             glViewport(0, 0, RENDER_DIM, RENDER_DIM);
-            glClearColor(0, 0.18f, 0.21f, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
+            float color[] = { 0, 0.18f, 0.21f, 1 };
+            glClearBufferfv(GL_COLOR, 0, color);
             ImGui::Render();
         }
     }
