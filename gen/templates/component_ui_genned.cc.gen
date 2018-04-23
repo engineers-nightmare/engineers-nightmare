@@ -4,6 +4,7 @@
 #include "../component/component_system_manager.h"
 
 extern component_system_manager component_system_man;
+extern std::unordered_map<c_entity, std::vector<c_entity>> entity_families;
 
 static void add_filter(std::vector<filter_ui_state> &filters, int field_id, wire_filter_ptr const & w, char const *name) {
     filters.emplace_back();
@@ -40,6 +41,18 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
     }
     % endif
 % endfor
+
+    for (auto e : entity_families[entity]) {
+        auto f = get_filters(e);
+        filters.insert(filters.end(), f.begin(), f.end());
+    }
+
+    std::sort(filters.begin(), filters.end(),
+         [](filter_ui_state const &a, filter_ui_state const &b)
+         {
+             return a.entity < b.entity || (a.entity < b.entity && a.field_id < b.field_id);
+         });
+
     return filters;
 }
 
