@@ -65,6 +65,8 @@ struct customize_entity_comms_filter_state : game_state {
                         get_enum_description(msg_type::power_used),
                     };
 
+                    ImGui::LabelText("", "%s", "Entity");
+                    ImGui::SameLine();
                     ImGui::LabelText("", "%s", "");
                     ImGui::SameLine();
                     ImGui::LabelText("", "%s", "Originator Label");
@@ -74,6 +76,9 @@ struct customize_entity_comms_filter_state : game_state {
                     int id = 0;
                     for (auto &kvp : comp_name_to_filter_name) {
                         ImGui::PushID(id++);
+                        ImGui::LabelText("", "%s", *type_man.get_instance_data(kvp.entity).name);
+
+                        ImGui::SameLine();
                         ImGui::LabelText("", "%s", kvp.component_name.c_str());
 
                         ImGui::SameLine();
