@@ -281,20 +281,6 @@ tick_rotator_stepped_components(ship_space *ship, float dt) {
         auto const &cwire = cwire_man.get_instance_data(ce);
         auto const &net = ship->get_comms_network(*cwire.network);
 
-        auto su = 0;
-        auto sd = 0;
-        for (auto msg : net.read_buffer) {
-            if (filter_matches_message(msg, *rot.step_up_filter) && msg.data == 1.0f) {
-                su = 1;
-            }
-            if (filter_matches_message(msg, *rot.step_down_filter) && msg.data == 1.0f) {
-                sd = -1;
-            }
-        }
-
-        auto step = su + sd;
-        *rot.rot_angle += step * *rot.step_size;
-
         glm::mat4 pos_mat;
         if (par_man.exists(ce)) {
             auto par = par_man.get_instance_data(ce);
@@ -304,18 +290,32 @@ tick_rotator_stepped_components(ship_space *ship, float dt) {
             pos_mat = *pos.mat;
         }
 
-        if (*rot.continuous) {
-            // Get our angle back within range
-            while (*rot.rot_angle >= 180.0f)
-                *rot.rot_angle -= 360.0f;
-            while (*rot.rot_angle <= -180.0f)
-                *rot.rot_angle += 360.0f;
-        }
-        else {
-            *rot.rot_angle = clamp(*rot.rot_angle, -172.5f, 172.5f);
+        auto su = 0;
+        auto sd = 0;
+        for (auto msg : net.read_buffer) {
+            if (filter_matches_message(msg, *rot.step_up_filter) && msg.data == 1.0f) {
+                su = 1;
+            }
+            if (filter_matches_message(msg, *rot.step_down_filter) && msg.data == 1.0f) {
+                sd = -1;
+            }
+
+            auto step = su + sd;
+            *rot.rot_angle += step * *rot.step_size;
+
+            if (*rot.continuous) {
+                // Get our angle back within range
+                while (*rot.rot_angle >= 180.0f)
+                    *rot.rot_angle -= 360.0f;
+                while (*rot.rot_angle <= -180.0f)
+                    *rot.rot_angle += 360.0f;
+            }
+            else {
+                *rot.rot_angle = clamp(*rot.rot_angle, -165.f, 165.f);
+            }
         }
 
-        pos_mat = glm::rotate(glm::mat4(1), *rot.rot_angle, *rot.rot_axis);
+        pos_mat = glm::rotate(glm::mat4(1), glm::degrees(*rot.rot_angle), *rot.rot_axis);
         pos_mat[3] = glm::vec4(*rot.rot_offset, 1.0f);
 
         set_entity_matrix(ce, pos_mat);
