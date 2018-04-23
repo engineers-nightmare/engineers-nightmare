@@ -469,7 +469,7 @@ build_absolute_transforms() {
     }
 }
 
-extern GLuint modelspace_uv_shader;
+extern GLuint screen_shader;
 
 void
 draw_renderables(frame_data *frame)
@@ -494,10 +494,7 @@ draw_renderables(frame_data *frame)
         draw_mesh(mesh.hw);
     }
 
-    // TODO: stop using this hack entirely.
-    // Display meshes need to come with correct UVs.
-    glUseProgram(modelspace_uv_shader);
-
+    glUseProgram(screen_shader);
     asset_man.bind_render_textures(0);
 
     for (auto i = 0u; i < display_man.buffer.num; i++) {
