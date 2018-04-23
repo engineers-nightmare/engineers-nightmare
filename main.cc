@@ -106,7 +106,7 @@ frame_data *frames, *frame;
 unsigned frame_index;
 
 GLuint simple_shader, overlay_shader, ui_shader, ui_sprites_shader;
-GLuint sky_shader, particle_shader, modelspace_uv_shader, highlight_shader;
+GLuint sky_shader, particle_shader, highlight_shader;
 GLuint screen_shader;
 GLuint palette_tex;
 GLuint sky_vao;
@@ -275,7 +275,6 @@ init()
     ui_sprites_shader = load_shader("shaders/ui_sprites.vert", "shaders/ui_sprites.frag");
     sky_shader = load_shader("shaders/sky.vert", "shaders/sky.frag");
     particle_shader = load_shader("shaders/particle.vert", "shaders/particle.frag");
-    modelspace_uv_shader = load_shader("shaders/simple_modelspace_uv.vert", "shaders/simple.frag");
     highlight_shader = load_shader("shaders/highlight.vert", "shaders/highlight.frag");
     screen_shader = load_shader("shaders/layered.vert", "shaders/simple.frag");
 
