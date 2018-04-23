@@ -20,6 +20,7 @@ display_component_manager::create_component_instance_data(unsigned count) {
 
     size_t size = sizeof(c_entity) * count;
     size = sizeof(const char*) * count + align_size<const char*>(size);
+    size = sizeof(struct ImGuiContext *) * count + align_size<struct ImGuiContext *>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -29,9 +30,11 @@ display_component_manager::create_component_instance_data(unsigned count) {
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
     new_pool.mesh = align_ptr((const char* *)(new_pool.entity + count));
+    new_pool.imgui_context = align_ptr((struct ImGuiContext * *)(new_pool.mesh + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.mesh, instance_pool.mesh, buffer.num * sizeof(const char*));
+    memcpy(new_pool.imgui_context, instance_pool.imgui_context, buffer.num * sizeof(struct ImGuiContext *));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -47,6 +50,7 @@ display_component_manager::destroy_instance(instance i) {
 
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
     instance_pool.mesh[i.index] = instance_pool.mesh[last_index];
+    instance_pool.imgui_context[i.index] = instance_pool.imgui_context[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
@@ -75,6 +79,7 @@ display_component_stub::assign_component_to_entity(c_entity entity) {
     auto data = man.get_instance_data(entity);
 
     *data.mesh = mesh.c_str();
+    *data.imgui_context = nullptr;
 };
 
 std::unique_ptr<component_stub> display_component_stub::from_config(const config_setting_t *config) {

@@ -13,6 +13,7 @@ struct display_component_manager : component_manager<display_component_manager> 
     struct instance_data {
         c_entity *entity;
         const char* *mesh;
+        struct ImGuiContext * *imgui_context;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -29,6 +30,7 @@ struct display_component_manager : component_manager<display_component_manager> 
 
         d.entity = instance_pool.entity + inst.index;
         d.mesh = instance_pool.mesh + inst.index;
+        d.imgui_context = instance_pool.imgui_context + inst.index;
 
         return d;
     }

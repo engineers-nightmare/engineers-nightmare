@@ -29,7 +29,7 @@ extern void destroy_entity(c_entity e);
 
 extern component_system_manager component_system_man;
 
-extern std::array<ImGuiContext*, 3> offscreen_contexts;
+extern ImGuiContext* tool_offscreen_context;
 extern GLuint render_displays_fbo;
 
 extern void set_next_game_state(game_state *s);
@@ -180,7 +180,7 @@ struct customize_entity_tool : tool
         auto &type_man = component_system_man.managers.type_component_man;
         auto &wire_man = component_system_man.managers.wire_comms_component_man;
 
-        ImGui::SetCurrentContext(offscreen_contexts[2]);
+        ImGui::SetCurrentContext(tool_offscreen_context);
         const int scale = 6;
         ImGui_ImplSdlGL3_NewFrameOffscreen(RENDER_DIM / scale, RENDER_DIM / scale);
 

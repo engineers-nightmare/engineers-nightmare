@@ -193,7 +193,7 @@ teardown_chunks()
 GLuint render_displays_fbo{ 0 };
 
 ImGuiContext *default_context;
-std::array<ImGuiContext*, 3> offscreen_contexts{};
+ImGuiContext *tool_offscreen_context;
 
 DDRenderInterfaceCoreGL *ddRenderIfaceGL;
 
@@ -259,12 +259,11 @@ init()
     asset_man.load_assets();
 
     default_context = ImGui::GetCurrentContext();
-    for (auto &ctx : offscreen_contexts) {
-        ctx = ImGui::CreateContext();
-        ImGui::SetCurrentContext(ctx);
-        ImGui_ImplSdlGL3_Init(wnd.ptr);
-    }
     ImGui::SetCurrentContext(default_context);
+
+    tool_offscreen_context = ImGui::CreateContext();
+    ImGui::SetCurrentContext(tool_offscreen_context);
+    ImGui_ImplSdlGL3_Init(wnd.ptr);
 
     // must be called after asset_man is setup
     mesher_init();
@@ -425,7 +424,16 @@ update_display_contents()
         float color[] = { 0, 0.18f, 0.21f, 1 };
         glClearBufferfv(GL_COLOR, 0, color);
 
-        ImGui::SetCurrentContext(offscreen_contexts[i]);
+        auto &ctx = display_man.instance_pool.imgui_context[i];
+
+        if (!ctx) {
+            ctx = ImGui::CreateContext();
+            ImGui::SetCurrentContext(ctx);
+            ImGui_ImplSdlGL3_Init(wnd.ptr);
+        }
+        else {
+            ImGui::SetCurrentContext(ctx);
+        }
         ImGui_ImplSdlGL3_NewFrameOffscreen(RENDER_DIM, RENDER_DIM);
 
         auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
