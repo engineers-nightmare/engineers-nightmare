@@ -237,7 +237,7 @@ tick_rotator_components(ship_space *ship) {
 //
 //            *rot.rot_cur_speed = *rot.rot_cur_speed ? 0 : *rot.rot_speed;
 //        }
-        *rot.rot_cur_speed = *rot.rot_cur_speed ? 0 : *rot.rot_speed;
+        *rot.rot_cur_speed = *rot.rot_speed;
 
         glm::mat4 pos_mat;
         if (par_man.exists(ce)) {
@@ -248,7 +248,14 @@ tick_rotator_components(ship_space *ship) {
             pos_mat = *pos.mat;
         }
         if (*rot.rot_cur_speed) {
-            pos_mat = glm::rotate(pos_mat, (float)*rot.rot_dir * *rot.rot_cur_speed * (float)frame_info.dt, *rot.rot_axis);
+            *rot.rot_angle += *rot.rot_cur_speed;
+            // Get our angle back within range
+            while (*rot.rot_angle >= 180.0f)
+                *rot.rot_angle -= 360.0f;
+            while (*rot.rot_angle <= -180.0f)
+                *rot.rot_angle += 360.0f;
+
+            pos_mat = glm::rotate(glm::mat4(1), (float)*rot.rot_dir * *rot.rot_angle * (float)frame_info.dt, *rot.rot_axis);
             pos_mat[3] = glm::vec4(*rot.rot_offset, 1.0f);
         }
 
