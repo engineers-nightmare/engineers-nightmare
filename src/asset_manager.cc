@@ -158,7 +158,7 @@ void asset_manager::load_assets() {
         }
     }
 
-    render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 3);
+    render_textures = new texture_set(GL_TEXTURE_2D_ARRAY, RENDER_DIM, 32);
 
     surf_kinds[surface_wall].visual_mesh = &get_mesh("surface_wall");
     surf_kinds[surface_wall].physics_mesh = &get_mesh("surface_wall");
