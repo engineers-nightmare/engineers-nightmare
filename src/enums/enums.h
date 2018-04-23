@@ -18,6 +18,8 @@ enum class msg_type
     pressure_sensor = 2,
     sensor_comparison = 3,
     proximity_sensor = 4,
+    power_available = 5,
+    power_used = 6,
     invalid = -1,
 };
 

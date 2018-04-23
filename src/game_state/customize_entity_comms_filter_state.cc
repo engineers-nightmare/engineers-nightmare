@@ -54,12 +54,14 @@ struct customize_entity_comms_filter_state : game_state {
                     ImGui::Dummy(ImVec2{10, 10});
 
                     // TODO: enum gen should produce these
-                    std::array<char const *, 5> message_types{
+                    std::array<char const *, 7> message_types{
                         get_enum_description(msg_type::any),
                         get_enum_description(msg_type::switch_transition),
                         get_enum_description(msg_type::pressure_sensor),
                         get_enum_description(msg_type::sensor_comparison),
                         get_enum_description(msg_type::proximity_sensor),
+                        get_enum_description(msg_type::power_available),
+                        get_enum_description(msg_type::power_used),
                     };
 
                     ImGui::LabelText("", "");
@@ -77,7 +79,7 @@ struct customize_entity_comms_filter_state : game_state {
                         ImGui::InputText("###filter", kvp.filter.data(), 256);
 
                         ImGui::SameLine();
-                        ImGui::Combo("###msgtype", (int*)&kvp.type, message_types.data(), message_types.size());
+                        ImGui::Combo("###msgtype", (int*)&kvp.type, message_types.data(), int(message_types.size()));
 
                         ImGui::PopID();
                     }

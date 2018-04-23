@@ -36,6 +36,9 @@ void
 tick_pressure_sensors(ship_space *ship);
 
 void
+tick_power_sensors(ship_space *ship);
+
+void
 tick_sensor_comparators(ship_space *ship);
 
 void

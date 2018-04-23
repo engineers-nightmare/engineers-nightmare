@@ -292,6 +292,31 @@ tick_pressure_sensors(ship_space* ship) {
     }
 }
 
+void
+tick_power_sensors(ship_space* ship) {
+    auto &power_sensor = component_system_man.managers.power_sensor_component_man;
+    auto &power = component_system_man.managers.power_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
+
+    for (auto i = 0u; i < power_sensor.buffer.num; i++) {
+        auto ce = power_sensor.instance_pool.entity[i];
+
+        auto p = power.get_instance_data(ce);
+
+        if (!p.powered) {
+            /* No power available; we're dead and don't report anything */
+            continue;
+        }
+
+        auto const &power_net = ship->get_power_network(*p.network);
+
+        auto network = *cwire_man.get_instance_data(ce).network;
+
+        publish_msg(ship, network, { ce, msg_type::power_available, power_net.total_power });
+        publish_msg(ship, network, { ce, msg_type::power_used, power_net.total_draw });
+    }
+}
+
 
 void
 tick_sensor_comparators(ship_space *ship) {

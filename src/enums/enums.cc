@@ -20,6 +20,10 @@ const char* get_enum_description(msg_type value) {
         return "Sensor Comparison";
     case msg_type::proximity_sensor:
         return "Proximity Sensor";
+    case msg_type::power_available:
+        return "Power Available";
+    case msg_type::power_used:
+        return "Power Used";
     default:
         assert(false);
         return nullptr;
@@ -39,6 +43,10 @@ const char* get_enum_string(msg_type value) {
         return "sensor_comparison";
     case msg_type::proximity_sensor:
         return "proximity_sensor";
+    case msg_type::power_available:
+        return "power_available";
+    case msg_type::power_used:
+        return "power_used";
     default:
         assert(false);
         return nullptr;
@@ -61,6 +69,12 @@ template<> msg_type get_enum<msg_type>(const char *e) {
     }
     if (!strcmp(e, "proximity_sensor")) {
         val = msg_type::proximity_sensor;
+    }
+    if (!strcmp(e, "power_available")) {
+        val = msg_type::power_available;
+    }
+    if (!strcmp(e, "power_used")) {
+        val = msg_type::power_used;
     }
     assert(val != msg_type::invalid);
     return val;
