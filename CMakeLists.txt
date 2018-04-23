@@ -39,6 +39,7 @@ set(EN_SOURCES
     src/component/position_component.cc
     src/component/renderable_component.cc
     src/component/rotator_component.cc
+    src/component/rotator_stepped_component.cc
     src/component/sensor_comparator_component.cc
     src/component/surface_attachment_component.cc
     src/component/switch_component.cc
@@ -107,6 +108,7 @@ set(EN_HEADERS
     src/component/position_component.h
     src/component/renderable_component.h
     src/component/rotator_component.h
+    src/component/rotator_stepped_component.h
     src/component/sensor_comparator_component.h
     src/component/surface_attachment_component.h
     src/component/switch_component.h

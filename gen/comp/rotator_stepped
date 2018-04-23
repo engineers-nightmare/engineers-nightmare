@@ -1,0 +1,16 @@
+ui_name,Stepped Rotator
+stub,glm::vec3,glm::vec3,,axis,
+stub,glm::vec3,glm::vec3,,offset,
+stub,float,float,,speed,
+stub,float,float,,step_size,
+stub,bool,bool,,continuous,
+body,wire_filter_ptr,step_up_filter,{}
+body,wire_filter_ptr,step_down_filter,{}
+body,glm::vec3,axis,
+body,glm::vec3,offset,
+body,float,speed,1
+body,float,step_size,15.0
+body,float,angle,0
+body,float,desired_angle,0
+body,bool,continuous,false
+depends,position,parent,wire_comms

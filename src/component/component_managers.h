@@ -23,6 +23,7 @@
 #include "proximity_sensor_component.h"
 #include "renderable_component.h"
 #include "rotator_component.h"
+#include "rotator_stepped_component.h"
 #include "sensor_comparator_component.h"
 #include "surface_attachment_component.h"
 #include "switch_component.h"
@@ -49,6 +50,7 @@ struct component_managers {
         proximity_sensor_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         renderable_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         rotator_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        rotator_stepped_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         sensor_comparator_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         surface_attachment_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         switch_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
@@ -72,6 +74,7 @@ struct component_managers {
     proximity_sensor_component_manager proximity_sensor_component_man{};
     renderable_component_manager renderable_component_man{};
     rotator_component_manager rotator_component_man{};
+    rotator_stepped_component_manager rotator_stepped_component_man{};
     sensor_comparator_component_manager sensor_comparator_component_man{};
     surface_attachment_component_manager surface_attachment_component_man{};
     switch_component_manager switch_component_man{};
@@ -127,6 +130,9 @@ struct component_managers {
         if (strcmp(comp_name, "rotator") == 0) {
             return rotator_component_stub::from_config(config);
         }
+        if (strcmp(comp_name, "rotator_stepped") == 0) {
+            return rotator_stepped_component_stub::from_config(config);
+        }
         if (strcmp(comp_name, "sensor_comparator") == 0) {
             return sensor_comparator_component_stub::from_config(config);
         }
@@ -163,6 +169,7 @@ struct component_managers {
         proximity_sensor_component_man.destroy_entity_instance(ce);
         renderable_component_man.destroy_entity_instance(ce);
         rotator_component_man.destroy_entity_instance(ce);
+        rotator_stepped_component_man.destroy_entity_instance(ce);
         sensor_comparator_component_man.destroy_entity_instance(ce);
         surface_attachment_component_man.destroy_entity_instance(ce);
         switch_component_man.destroy_entity_instance(ce);
