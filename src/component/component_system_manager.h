@@ -18,6 +18,12 @@ struct component_system_manager {
 };
 
 void
+tick_nets(ship_space *ship);
+
+void
+tick_drivers(ship_space *ship, float dt);
+
+void
 tick_gas_producers(ship_space *ship);
 
 void

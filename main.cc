@@ -802,6 +802,7 @@ update()
         tick_proximity_sensors(ship, &pl);
         tick_doors(ship);
         tick_power_sensors(ship);
+        tick_nets(ship);
 
         calculate_power_wires(ship);
         propagate_comms_wires(ship);
@@ -852,6 +853,7 @@ update()
         particle_man->simulate(fast_tick_accum.period);
 
         tick_rotator_components(ship, fast_tick_accum.period);
+        tick_drivers(ship, fast_tick_accum.period);
 
         phy->tick(fast_tick_accum.period);
     }

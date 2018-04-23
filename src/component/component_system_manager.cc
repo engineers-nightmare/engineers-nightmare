@@ -515,3 +515,9 @@ draw_renderables(frame_data *frame)
         draw_mesh(mesh.hw);
     }
 }
+
+void tick_drivers(ship_space *ship, float dt) {
+}
+
+void tick_nets(ship_space *ship) {
+}
