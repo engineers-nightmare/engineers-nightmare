@@ -67,6 +67,12 @@ int load_value_from_config<int>(config_setting_t const *s, char const *key) {
 }
 
 template<>
+bool load_value_from_config<bool>(config_setting_t const *s, char const *key) {
+    auto m = config_setting_get_member(s, key);
+    return (bool)config_setting_get_bool(m);
+}
+
+template<>
 placement load_value_from_config<placement>(config_setting_t const *s, char const *key) {
     auto m = config_setting_get_member(s, key);
     return config_setting_get_placement(m);
