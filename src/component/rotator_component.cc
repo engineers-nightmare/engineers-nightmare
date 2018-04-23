@@ -121,5 +121,6 @@ std::unique_ptr<component_stub> rotator_component_stub::from_config(const config
 std::vector<std::string> rotator_component_stub::get_dependencies() {
     return {
         "position",
+        "parent",
     };
 }
