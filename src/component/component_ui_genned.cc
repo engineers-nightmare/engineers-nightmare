@@ -29,6 +29,7 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
             auto door = door_man.get_instance_data(entity);
             add_filter(filters, 0, *(door.filter),
                 "Door/filter");
+            filters.back().entity = entity;
         }
     }
     auto &gas_producer_man = component_system_man.managers.gas_producer_component_man;
@@ -37,6 +38,7 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
             auto gas_producer = gas_producer_man.get_instance_data(entity);
             add_filter(filters, 7, *(gas_producer.filter),
                 "Gas Producer/filter");
+            filters.back().entity = entity;
         }
     }
     auto &light_man = component_system_man.managers.light_component_man;
@@ -45,6 +47,7 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
             auto light = light_man.get_instance_data(entity);
             add_filter(filters, 6, *(light.filter),
                 "Light/filter");
+            filters.back().entity = entity;
         }
     }
     auto &rotator_man = component_system_man.managers.rotator_component_man;
@@ -53,6 +56,7 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
             auto rotator = rotator_man.get_instance_data(entity);
             add_filter(filters, 5, *(rotator.filter),
                 "Rotator/filter");
+            filters.back().entity = entity;
         }
     }
     auto &rotator_stepped_man = component_system_man.managers.rotator_stepped_component_man;
@@ -61,11 +65,13 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
             auto rotator_stepped = rotator_stepped_man.get_instance_data(entity);
             add_filter(filters, 1, *(rotator_stepped.step_up_filter),
                 "Stepped Rotator/step_up_filter");
+            filters.back().entity = entity;
         }
         {
             auto rotator_stepped = rotator_stepped_man.get_instance_data(entity);
             add_filter(filters, 2, *(rotator_stepped.step_down_filter),
                 "Stepped Rotator/step_down_filter");
+            filters.back().entity = entity;
         }
     }
     auto &sensor_comparator_man = component_system_man.managers.sensor_comparator_component_man;
@@ -74,17 +80,20 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
             auto sensor_comparator = sensor_comparator_man.get_instance_data(entity);
             add_filter(filters, 3, *(sensor_comparator.input_a),
                 "Sensor Comparator/input_a");
+            filters.back().entity = entity;
         }
         {
             auto sensor_comparator = sensor_comparator_man.get_instance_data(entity);
             add_filter(filters, 4, *(sensor_comparator.input_b),
                 "Sensor Comparator/input_b");
+            filters.back().entity = entity;
         }
     }
     return filters;
 }
 
-void update_filter(c_entity entity, filter_ui_state const& filter) {
+void update_filter(filter_ui_state const& filter) {
+    auto entity = filter.entity;
     switch (filter.field_id) {
     case 0: {
         auto &door_man = component_system_man.managers.door_component_man;

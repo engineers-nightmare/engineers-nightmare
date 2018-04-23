@@ -33,6 +33,7 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
             auto ${comp.comp_name} = ${comp.comp_name}_man.get_instance_data(entity);
             add_filter(filters, ${field['field_id']}, *(${comp.comp_name}.${field['name']}),
                 "${comp.ui_name}/${field['name']}");
+            filters.back().entity = entity;
         }
         % endif
     % endfor
@@ -42,7 +43,8 @@ std::vector<filter_ui_state> get_filters(c_entity entity) {
     return filters;
 }
 
-void update_filter(c_entity entity, filter_ui_state const& filter) {
+void update_filter(filter_ui_state const& filter) {
+    auto entity = filter.entity;
     switch (filter.field_id) {
 % for name, comp in sorted(comps.items()):
     % for field in comp.body_fields:

@@ -10,9 +10,10 @@ extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
 
 extern std::vector<filter_ui_state> get_filters(c_entity);
-extern void update_filter(c_entity entity, filter_ui_state const&);
+extern void update_filter(filter_ui_state const&);
 
 extern component_system_manager component_system_man;
+extern std::unordered_map<c_entity, std::vector<c_entity>> entity_families;
 
 struct customize_entity_comms_filter_state : game_state {
     c_entity entity;
@@ -87,7 +88,7 @@ struct customize_entity_comms_filter_state : game_state {
                     ImGui::Dummy(ImVec2{10, 10});
                     if (ImGui::Button("Save")) {
                         for (auto &kvp : comp_name_to_filter_name) {
-                            update_filter(entity, kvp);
+                            update_filter(kvp);
                         }
                     }
 

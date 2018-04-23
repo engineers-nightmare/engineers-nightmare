@@ -10,6 +10,7 @@ extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
 
 extern component_system_manager component_system_man;
+extern std::unordered_map<c_entity, std::vector<c_entity>> entity_families;
 
 struct customize_entity_comms_output_state : game_state {
     c_entity entity;

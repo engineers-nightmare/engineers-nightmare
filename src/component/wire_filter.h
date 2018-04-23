@@ -6,6 +6,7 @@
 #include "../enums/enums.h"
 
 struct filter_ui_state {
+    c_entity entity;
     std::string component_name;
     int field_id;
     std::array<char, 256> filter;
