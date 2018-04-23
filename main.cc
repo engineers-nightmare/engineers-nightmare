@@ -820,29 +820,46 @@ handle_input()
 }
 
 void
-render_offscreen_display(int n) {
-    ImGui::SetCurrentContext(offscreen_contexts[n]);
-    ImGui_ImplSdlGL3_NewFrameOffscreen(RENDER_DIM, RENDER_DIM);
+update_display_contents()
+{
+    auto &display_man = component_system_man.managers.display_component_man;
+    auto &power_man = component_system_man.managers.power_component_man;
+    auto &surf = component_system_man.managers.surface_attachment_component_man;
 
-    auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
-    // center on screen
-    
-    ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
-    {
-        ImGui::Begin("First Window", nullptr, flags);
-        {
-            ImGui::SetWindowFontScale(5);
-            ImGui::Text("Hello from Display %d!", n);
-            ImGui::SetWindowFontScale(1);
-        }
-        ImGui::End();
+    for (auto i = 0u; i < display_man.buffer.num; i++) {
+        auto ce = display_man.instance_pool.entity[i];
+
+        auto power = power_man.get_instance_data(ce);
+        auto sa = surf.get_instance_data(ce);
+
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_displays_fbo);
-        glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, asset_man.render_textures->texobj, 0, n);
+        glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, asset_man.render_textures->texobj, 0, i);
         glViewport(0, 0, RENDER_DIM, RENDER_DIM);
-        glClearColor(0, 0.18f, 0.21f, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
+
+        if (!*power.powered || !*sa.attached) {
+            float color[] = { 0.02f, 0.02f, 0.02f, 1 };
+            glClearBufferfv(GL_COLOR, 0, color);
+            continue;
+        }
+
+        float color[] = { 0, 0.18f, 0.21f, 1 };
+        glClearBufferfv(GL_COLOR, 0, color);
+
+        ImGui::SetCurrentContext(offscreen_contexts[i]);
+        ImGui_ImplSdlGL3_NewFrameOffscreen(RENDER_DIM, RENDER_DIM);
+
+        auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
+        // center on screen
+
+        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
+        ImGui::Begin("First Window", nullptr, flags);
+        ImGui::SetWindowFontScale(5);
+        ImGui::Text("Hello from Display %d!", i);
+        ImGui::Text("(Entity %d)", ce.id);
+        ImGui::SetWindowFontScale(1);
+        ImGui::End();
         ImGui::Render();
     }
 }
@@ -926,8 +943,7 @@ run()
             std::fill(mouse_axes, mouse_axes + input_mouse_axes_count, 0);
         }
 
-        render_offscreen_display(0);
-        render_offscreen_display(1);
+        update_display_contents();
 
         auto *t = tools[pl.active_tool_slot];
         if (t) {
