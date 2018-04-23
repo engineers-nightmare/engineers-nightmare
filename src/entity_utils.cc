@@ -24,6 +24,7 @@ extern player pl;
 
 std::vector<std::string> entity_names{};
 std::unordered_map<std::string, entity_data> entity_stubs{};
+std::unordered_map<c_entity, std::vector<c_entity>> entity_families;
 
 bool
 load_entity(entity_data& entity, config_setting_t *e) {
@@ -217,6 +218,8 @@ spawn_entity(const std::string &name, glm::mat4 mat) {
     auto pos = pos_man.get_instance_data(ce);
     *pos.mat = mat;
 
+    update_entity_hierarchy();
+
     return ce;
 }
 
@@ -302,9 +305,11 @@ destroy_entity(c_entity e) {
             ++i;
         }
     }
+    update_entity_hierarchy();
 }
 
-void pop_entity_off(c_entity entity) {
+void
+pop_entity_off(c_entity entity) {
     auto &convert = component_system_man.managers.convert_on_pop_component_man;
     auto &pos = component_system_man.managers.position_component_man;
     auto &phys = component_system_man.managers.physics_component_man;
@@ -376,4 +381,32 @@ use_action_on_entity(ship_space *ship, c_entity ce) {
         };
         publish_msg(ship, *cwire_man.get_instance_data(ce).network, msg);
     }
+}
+
+void
+update_entity_hierarchy() {
+    entity_families.clear();
+    auto &type_man = component_system_man.managers.type_component_man;
+    for (auto i = 0u; i < type_man.buffer.num; i++) {
+        entity_families[type_man.instance_pool.entity[i]] = {};
+    }
+    auto &par_man = component_system_man.managers.parent_component_man;
+    for (auto i = 0u; i < par_man.buffer.num; i++) {
+        entity_families[par_man.instance_pool.parent[i]].emplace_back(par_man.instance_pool.entity[i]);
+    }
+
+    for (auto &i : entity_families) {
+        std::sort(i.second.begin(), i.second.end());
+    }
+}
+
+c_entity
+get_root_parent(c_entity entity) {
+    auto &par_man = component_system_man.managers.parent_component_man;
+    auto e = entity;
+    while (par_man.exists(e)) {
+        e = *par_man.get_instance_data(e).parent;
+    }
+
+    return e;
 }

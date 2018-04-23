@@ -6,6 +6,7 @@
 #include "../imgui/imgui.h"
 #include "../input.h"
 #include "../component/component_system_manager.h"
+#include "../entity_utils.h"
 
 extern action const* get_input(en_action a);
 extern void set_next_game_state(game_state *s);
@@ -13,10 +14,10 @@ extern void set_next_game_state(game_state *s);
 extern ship_space *ship;
 
 extern component_system_manager component_system_man;
+extern std::unordered_map<c_entity, std::vector<c_entity>> entity_families;
 
 struct customize_entity_comms_inspection_state : game_state {
     c_entity entity;
-    std::unordered_map<c_entity, std::vector<c_entity>> entity_families;
 
     unsigned menu_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
 
@@ -27,31 +28,6 @@ struct customize_entity_comms_inspection_state : game_state {
         if (get_input(action_menu)->just_active) {
             set_next_game_state(create_play_state());
         }
-    }
-
-    void get_entity_hierarchy() {
-        entity_families.clear();
-        auto &type_man = component_system_man.managers.type_component_man;
-        for (auto i = 0u; i < type_man.buffer.num; i++) {
-            entity_families[type_man.instance_pool.entity[i]] = {};
-        }
-        auto &par_man = component_system_man.managers.parent_component_man;
-        for (auto i = 0u; i < par_man.buffer.num; i++) {
-            entity_families[par_man.instance_pool.parent[i]].emplace_back(par_man.instance_pool.entity[i]);
-        }
-
-        for (auto &i : entity_families) {
-            std::sort(i.second.begin(), i.second.end());
-        }
-    }
-
-    c_entity get_root_parent(c_entity entity, parent_component_manager &par_man) {
-        auto e = entity;
-        while (par_man.exists(e)) {
-            e = *par_man.get_instance_data(e).parent;
-        }
-
-        return e;
     }
 
     void post_label(c_entity entity, type_component_manager &type_man, wire_comms_component_manager &wire_man) {
@@ -65,13 +41,11 @@ struct customize_entity_comms_inspection_state : game_state {
     }
 
     void update(float dt) override {
-        get_entity_hierarchy();
     }
 
     void render(frame_data *frame) override {
         auto &type_man = component_system_man.managers.type_component_man;
         auto &wire_man = component_system_man.managers.wire_comms_component_man;
-        auto &par_man = component_system_man.managers.parent_component_man;
 
         auto io = ImGui::GetIO();
 
@@ -83,7 +57,7 @@ struct customize_entity_comms_inspection_state : game_state {
                 if (!c_entity::is_valid(entity)) {
                     ImGui::Text("Invalid Entity %d", entity.id);
                 } else {
-                    auto cur = get_root_parent(entity, par_man);
+                    auto cur = get_root_parent(entity);
                     post_label(cur, type_man, wire_man);
 
                     if (ImGui::Button("Back")) {

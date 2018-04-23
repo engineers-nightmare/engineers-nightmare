@@ -30,3 +30,9 @@ set_entity_matrix(c_entity ce, glm::mat4 mat);
 
 void
 use_action_on_entity(ship_space *ship, c_entity ce);
+
+void
+update_entity_hierarchy();
+
+c_entity
+get_root_parent(c_entity entity);
