@@ -1,4 +1,5 @@
 #include <epoxy/gl.h>
+#include <array>
 #include <deque>
 #include <sstream>
 
@@ -28,6 +29,7 @@ extern glm::mat4 get_fp_item_matrix();
 extern void destroy_entity(c_entity e);
 
 extern component_system_manager component_system_man;
+extern std::unordered_map<c_entity, std::vector<c_entity>> entity_families;
 
 extern ImGuiContext* tool_offscreen_context;
 extern GLuint render_displays_fbo;
@@ -82,7 +84,19 @@ struct customize_entity_tool : tool
         auto &wire_man = component_system_man.managers.wire_comms_component_man;
 
         // tool is usable if entity contains something configurable by tool
-        return valid_hit && wire_man.exists(entity);
+        if (valid_hit) {
+            if (wire_man.exists(entity)) {
+                return true;
+            }
+
+            for (auto e : entity_families[entity]) {
+                if (wire_man.exists(e)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     void update() override {
