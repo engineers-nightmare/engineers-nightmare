@@ -18,6 +18,7 @@ struct rotator_component_manager : component_manager<rotator_component_manager> 
         int *rot_dir;
         float *rot_speed;
         float *rot_cur_speed;
+        float *rot_angle;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -39,6 +40,7 @@ struct rotator_component_manager : component_manager<rotator_component_manager> 
         d.rot_dir = instance_pool.rot_dir + inst.index;
         d.rot_speed = instance_pool.rot_speed + inst.index;
         d.rot_cur_speed = instance_pool.rot_cur_speed + inst.index;
+        d.rot_angle = instance_pool.rot_angle + inst.index;
 
         return d;
     }

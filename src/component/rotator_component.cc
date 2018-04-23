@@ -25,6 +25,7 @@ rotator_component_manager::create_component_instance_data(unsigned count) {
     size = sizeof(int) * count + align_size<int>(size);
     size = sizeof(float) * count + align_size<float>(size);
     size = sizeof(float) * count + align_size<float>(size);
+    size = sizeof(float) * count + align_size<float>(size);
     size += 16;   // for worst-case misalignment of initial ptr
 
     new_buffer.buffer = malloc(size);
@@ -39,6 +40,7 @@ rotator_component_manager::create_component_instance_data(unsigned count) {
     new_pool.rot_dir = align_ptr((int *)(new_pool.rot_offset + count));
     new_pool.rot_speed = align_ptr((float *)(new_pool.rot_dir + count));
     new_pool.rot_cur_speed = align_ptr((float *)(new_pool.rot_speed + count));
+    new_pool.rot_angle = align_ptr((float *)(new_pool.rot_cur_speed + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
     memcpy(new_pool.filter, instance_pool.filter, buffer.num * sizeof(wire_filter_ptr));
@@ -47,6 +49,7 @@ rotator_component_manager::create_component_instance_data(unsigned count) {
     memcpy(new_pool.rot_dir, instance_pool.rot_dir, buffer.num * sizeof(int));
     memcpy(new_pool.rot_speed, instance_pool.rot_speed, buffer.num * sizeof(float));
     memcpy(new_pool.rot_cur_speed, instance_pool.rot_cur_speed, buffer.num * sizeof(float));
+    memcpy(new_pool.rot_angle, instance_pool.rot_angle, buffer.num * sizeof(float));
 
     free(buffer.buffer);
     buffer = new_buffer;
@@ -67,6 +70,7 @@ rotator_component_manager::destroy_instance(instance i) {
     instance_pool.rot_dir[i.index] = instance_pool.rot_dir[last_index];
     instance_pool.rot_speed[i.index] = instance_pool.rot_speed[last_index];
     instance_pool.rot_cur_speed[i.index] = instance_pool.rot_cur_speed[last_index];
+    instance_pool.rot_angle[i.index] = instance_pool.rot_angle[last_index];
 
     entity_instance_map[last_entity] = i.index;
     entity_instance_map.erase(current_entity);
@@ -100,6 +104,7 @@ rotator_component_stub::assign_component_to_entity(c_entity entity) {
     *data.rot_dir = rot_dir;
     *data.rot_speed = rot_speed;
     *data.rot_cur_speed = 0.0;
+    *data.rot_angle = 0.0;
 };
 
 std::unique_ptr<component_stub> rotator_component_stub::from_config(const config_setting_t *config) {
