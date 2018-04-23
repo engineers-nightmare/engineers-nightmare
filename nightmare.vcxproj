@@ -138,6 +138,7 @@
     <ClCompile Include="src\component\placeable_component.cc" />
     <ClCompile Include="src\component\power_component.cc" />
     <ClCompile Include="src\component\power_provider_component.cc" />
+    <ClCompile Include="src\component\power_sensor_component.cc" />
     <ClCompile Include="src\component\pressure_sensor_component.cc" />
     <ClCompile Include="src\component\proximity_sensor_component.cc" />
     <ClCompile Include="src\component\position_component.cc" />
@@ -240,6 +241,7 @@
     <ClInclude Include="src\component\placeable_component.h" />
     <ClInclude Include="src\component\power_component.h" />
     <ClInclude Include="src\component\power_provider_component.h" />
+    <ClInclude Include="src\component\power_sensor_component.h" />
     <ClInclude Include="src\component\pressure_sensor_component.h" />
     <ClInclude Include="src\component\proximity_sensor_component.h" />
     <ClInclude Include="src\component\position_component.h" />

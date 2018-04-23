@@ -33,6 +33,7 @@ set(EN_SOURCES
     src/component/placeable_component.cc
     src/component/power_component.cc
     src/component/power_provider_component.cc
+    src/component/power_sensor_component.cc
     src/component/pressure_sensor_component.cc
     src/component/proximity_sensor_component.cc
     src/component/position_component.cc
@@ -100,6 +101,7 @@ set(EN_HEADERS
     src/component/placeable_component.h
     src/component/power_component.h
     src/component/power_provider_component.h
+    src/component/power_sensor_component.h
     src/component/pressure_sensor_component.h
     src/component/proximity_sensor_component.h
     src/component/position_component.h

@@ -357,6 +357,9 @@
     <ClCompile Include="src\game_state\customize_entity_comms_inspection_state.cc">
       <Filter>Source Files\game_states</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\power_sensor_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -561,6 +564,9 @@
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\component\wire_filter.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\power_sensor_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>

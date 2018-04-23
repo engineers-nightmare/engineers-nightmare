@@ -1,0 +1,2 @@
+ui_name,Pressure Sensor
+depends,power,wire_comms
