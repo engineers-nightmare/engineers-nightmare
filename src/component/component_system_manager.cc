@@ -20,7 +20,7 @@ filter_matches_message(comms_msg const &msg, wire_filter_ptr const &filter) {
     auto sender = cwire_man.get_instance_data(msg.originator);
 
     /* Unconfigured filter matches NOTHING */
-    if (!filter.wrapped || filter.wrapped->length())
+    if (!filter.wrapped || !filter.wrapped->length())
         return false;
 
     /* If we have a filter other than `*`, sender must have a label, and it must match. */
