@@ -320,14 +320,24 @@ void tick_rotator_stepped_components_net(ship_space *ship) {
         auto const &cwire = cwire_man.get_instance_data(ce);
         auto const &net = ship->get_comms_network(*cwire.network);
 
+        publish_msg(ship, *cwire.network, {
+            ce,
+            msg_type::knob_position,
+            *rot.angle,
+        });
+
         auto su = 0;
         auto sd = 0;
+        auto dr = FLT_MAX;
         for (auto msg : net.read_buffer) {
-            if (filter_matches_message(msg, *rot.step_up_filter) && msg.data == 1.0f) {
+            if (filter_matches_message(msg, *rot.step_up) && msg.data == 1.0f) {
                 su = 1;
             }
-            if (filter_matches_message(msg, *rot.step_down_filter) && msg.data == 1.0f) {
+            if (filter_matches_message(msg, *rot.step_down) && msg.data == 1.0f) {
                 sd = -1;
+            }
+            if (filter_matches_message(msg, *rot.value_driver)) {
+                dr = msg.data;
             }
 
             auto step = su + sd;
@@ -342,6 +352,10 @@ void tick_rotator_stepped_components_net(ship_space *ship) {
             }
             else {
                 *rot.desired_angle = clamp(*rot.desired_angle, -165.f, 165.f);
+            }
+
+            if (dr != FLT_MAX) {
+                *rot.desired_angle = dr;
             }
         }
     }

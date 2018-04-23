@@ -21,6 +21,7 @@ rotator_stepped_component_manager::create_component_instance_data(unsigned count
     size_t size = sizeof(c_entity) * count;
     size = sizeof(wire_filter_ptr) * count + align_size<wire_filter_ptr>(size);
     size = sizeof(wire_filter_ptr) * count + align_size<wire_filter_ptr>(size);
+    size = sizeof(wire_filter_ptr) * count + align_size<wire_filter_ptr>(size);
     size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
     size = sizeof(glm::vec3) * count + align_size<glm::vec3>(size);
     size = sizeof(float) * count + align_size<float>(size);
@@ -36,9 +37,10 @@ rotator_stepped_component_manager::create_component_instance_data(unsigned count
     memset(new_buffer.buffer, 0, size);
 
     new_pool.entity = align_ptr((c_entity *)new_buffer.buffer);
-    new_pool.step_up_filter = align_ptr((wire_filter_ptr *)(new_pool.entity + count));
-    new_pool.step_down_filter = align_ptr((wire_filter_ptr *)(new_pool.step_up_filter + count));
-    new_pool.axis = align_ptr((glm::vec3 *)(new_pool.step_down_filter + count));
+    new_pool.step_up = align_ptr((wire_filter_ptr *)(new_pool.entity + count));
+    new_pool.step_down = align_ptr((wire_filter_ptr *)(new_pool.step_up + count));
+    new_pool.value_driver = align_ptr((wire_filter_ptr *)(new_pool.step_down + count));
+    new_pool.axis = align_ptr((glm::vec3 *)(new_pool.value_driver + count));
     new_pool.offset = align_ptr((glm::vec3 *)(new_pool.axis + count));
     new_pool.speed = align_ptr((float *)(new_pool.offset + count));
     new_pool.step_size = align_ptr((float *)(new_pool.speed + count));
@@ -47,8 +49,9 @@ rotator_stepped_component_manager::create_component_instance_data(unsigned count
     new_pool.continuous = align_ptr((bool *)(new_pool.desired_angle + count));
 
     memcpy(new_pool.entity, instance_pool.entity, buffer.num * sizeof(c_entity));
-    memcpy(new_pool.step_up_filter, instance_pool.step_up_filter, buffer.num * sizeof(wire_filter_ptr));
-    memcpy(new_pool.step_down_filter, instance_pool.step_down_filter, buffer.num * sizeof(wire_filter_ptr));
+    memcpy(new_pool.step_up, instance_pool.step_up, buffer.num * sizeof(wire_filter_ptr));
+    memcpy(new_pool.step_down, instance_pool.step_down, buffer.num * sizeof(wire_filter_ptr));
+    memcpy(new_pool.value_driver, instance_pool.value_driver, buffer.num * sizeof(wire_filter_ptr));
     memcpy(new_pool.axis, instance_pool.axis, buffer.num * sizeof(glm::vec3));
     memcpy(new_pool.offset, instance_pool.offset, buffer.num * sizeof(glm::vec3));
     memcpy(new_pool.speed, instance_pool.speed, buffer.num * sizeof(float));
@@ -70,8 +73,9 @@ rotator_stepped_component_manager::destroy_instance(instance i) {
     auto current_entity = instance_pool.entity[i.index];
 
     instance_pool.entity[i.index] = instance_pool.entity[last_index];
-    instance_pool.step_up_filter[i.index] = instance_pool.step_up_filter[last_index];
-    instance_pool.step_down_filter[i.index] = instance_pool.step_down_filter[last_index];
+    instance_pool.step_up[i.index] = instance_pool.step_up[last_index];
+    instance_pool.step_down[i.index] = instance_pool.step_down[last_index];
+    instance_pool.value_driver[i.index] = instance_pool.value_driver[last_index];
     instance_pool.axis[i.index] = instance_pool.axis[last_index];
     instance_pool.offset[i.index] = instance_pool.offset[last_index];
     instance_pool.speed[i.index] = instance_pool.speed[last_index];
@@ -106,8 +110,9 @@ rotator_stepped_component_stub::assign_component_to_entity(c_entity entity) {
 
     auto data = man.get_instance_data(entity);
 
-    *data.step_up_filter = {};
-    *data.step_down_filter = {};
+    *data.step_up = {};
+    *data.step_down = {};
+    *data.value_driver = {};
     *data.axis = axis;
     *data.offset = offset;
     *data.speed = speed;

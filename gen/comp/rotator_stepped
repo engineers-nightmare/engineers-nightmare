@@ -4,8 +4,9 @@ stub,glm::vec3,glm::vec3,,offset,
 stub,float,float,,speed,
 stub,float,float,,step_size,
 stub,bool,bool,,continuous,
-body,wire_filter_ptr,step_up_filter,{}
-body,wire_filter_ptr,step_down_filter,{}
+body,wire_filter_ptr,step_up,{}
+body,wire_filter_ptr,step_down,{}
+body,wire_filter_ptr,value_driver,{}
 body,glm::vec3,axis,
 body,glm::vec3,offset,
 body,float,speed,1

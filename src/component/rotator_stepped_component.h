@@ -12,8 +12,9 @@
 struct rotator_stepped_component_manager : component_manager<rotator_stepped_component_manager> {
     struct instance_data {
         c_entity *entity;
-        wire_filter_ptr *step_up_filter;
-        wire_filter_ptr *step_down_filter;
+        wire_filter_ptr *step_up;
+        wire_filter_ptr *step_down;
+        wire_filter_ptr *value_driver;
         glm::vec3 *axis;
         glm::vec3 *offset;
         float *speed;
@@ -36,8 +37,9 @@ struct rotator_stepped_component_manager : component_manager<rotator_stepped_com
         auto inst = lookup(e);
 
         d.entity = instance_pool.entity + inst.index;
-        d.step_up_filter = instance_pool.step_up_filter + inst.index;
-        d.step_down_filter = instance_pool.step_down_filter + inst.index;
+        d.step_up = instance_pool.step_up + inst.index;
+        d.step_down = instance_pool.step_down + inst.index;
+        d.value_driver = instance_pool.value_driver + inst.index;
         d.axis = instance_pool.axis + inst.index;
         d.offset = instance_pool.offset + inst.index;
         d.speed = instance_pool.speed + inst.index;

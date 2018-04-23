@@ -76,6 +76,8 @@ const char* get_enum_description(msg_type value) {
         return "Power Available";
     case msg_type::power_used:
         return "Power Used";
+    case msg_type::knob_position:
+        return "Knob Position";
     default:
         assert(false);
         return nullptr;
@@ -99,6 +101,8 @@ const char* get_enum_string(msg_type value) {
         return "power_available";
     case msg_type::power_used:
         return "power_used";
+    case msg_type::knob_position:
+        return "knob_position";
     default:
         assert(false);
         return nullptr;
@@ -127,6 +131,9 @@ template<> msg_type get_enum<msg_type>(const char *e) {
     }
     if (!strcmp(e, "power_used")) {
         val = msg_type::power_used;
+    }
+    if (!strcmp(e, "knob_position")) {
+        val = msg_type::knob_position;
     }
     assert(val != msg_type::invalid);
     return val;

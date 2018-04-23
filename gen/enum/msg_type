@@ -5,3 +5,4 @@ sensor_comparison,"Sensor Comparison";
 proximity_sensor,"Proximity Sensor";
 power_available,"Power Available";
 power_used,"Power Used";
+knob_position,"Knob Position";

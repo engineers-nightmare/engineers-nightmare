@@ -40,7 +40,8 @@ enum class msg_type
     proximity_sensor = 4,
     power_available = 5,
     power_used = 6,
-    upper_bound = 7,
+    knob_position = 7,
+    upper_bound = 8,
     invalid = -1,
 };
 
