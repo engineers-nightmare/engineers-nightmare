@@ -206,7 +206,7 @@ tick_light_components(ship_space *ship) {
 
 
 void
-tick_rotator_components(ship_space *ship) {
+tick_rotator_components(ship_space *ship, float dt) {
     auto &rot_man = component_system_man.managers.rotator_component_man;
     auto &pos_man = component_system_man.managers.position_component_man;
     auto &par_man = component_system_man.managers.parent_component_man;
@@ -248,14 +248,14 @@ tick_rotator_components(ship_space *ship) {
             pos_mat = *pos.mat;
         }
         if (*rot.rot_cur_speed) {
-            *rot.rot_angle += *rot.rot_cur_speed;
+            *rot.rot_angle += *rot.rot_cur_speed * dt;
             // Get our angle back within range
             while (*rot.rot_angle >= 180.0f)
                 *rot.rot_angle -= 360.0f;
             while (*rot.rot_angle <= -180.0f)
                 *rot.rot_angle += 360.0f;
 
-            pos_mat = glm::rotate(glm::mat4(1), (float)*rot.rot_dir * *rot.rot_angle * (float)frame_info.dt, *rot.rot_axis);
+            pos_mat = glm::rotate(glm::mat4(1), (float)*rot.rot_dir * *rot.rot_angle, *rot.rot_axis);
             pos_mat[3] = glm::vec4(*rot.rot_offset, 1.0f);
         }
 
