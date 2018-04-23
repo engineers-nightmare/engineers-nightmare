@@ -221,7 +221,7 @@ tick_rotator_components(ship_space *ship, float dt) {
         auto pos = pos_man.get_instance_data(ce);
 
         if (!*power.powered) {
-            return;
+            continue;
         }
 
 //        auto const &cwire = cwire_man.get_instance_data(ce);
