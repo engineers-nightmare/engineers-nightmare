@@ -270,16 +270,12 @@ tick_rotator_stepped_components(ship_space *ship, float dt) {
     auto &rot_man = component_system_man.managers.rotator_stepped_component_man;
     auto &pos_man = component_system_man.managers.position_component_man;
     auto &par_man = component_system_man.managers.parent_component_man;
-    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
 
     for (auto i = 0u; i < rot_man.buffer.num; i++) {
         auto ce = rot_man.instance_pool.entity[i];
 
         auto rot = rot_man.get_instance_data(ce);
         auto pos = pos_man.get_instance_data(ce);
-
-        auto const &cwire = cwire_man.get_instance_data(ce);
-        auto const &net = ship->get_comms_network(*cwire.network);
 
         glm::mat4 pos_mat;
         if (par_man.exists(ce)) {
@@ -289,6 +285,40 @@ tick_rotator_stepped_components(ship_space *ship, float dt) {
         else {
             pos_mat = *pos.mat;
         }
+
+        auto dir = 0;
+        if (*rot.desired_angle < *rot.angle) {
+            dir = -1;
+        }
+        else if (*rot.desired_angle > *rot.angle) {
+            dir = 1;
+        }
+
+        if (glm::abs(*rot.desired_angle - *rot.angle) < dir * *rot.speed * dt) {
+            *rot.angle = *rot.desired_angle;
+        }
+        else {
+            *rot.angle += dir * *rot.speed * dt;
+        }
+
+        pos_mat = glm::rotate(glm::mat4(1), glm::radians(*rot.angle), *rot.axis);
+        pos_mat[3] = glm::vec4(*rot.offset, 1.0f);
+
+        set_entity_matrix(ce, pos_mat);
+    }
+}
+
+
+void tick_rotator_stepped_components_net(ship_space *ship) {
+    auto &rot_man = component_system_man.managers.rotator_stepped_component_man;
+    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
+
+    for (auto i = 0u; i < rot_man.buffer.num; i++) {
+        auto ce = rot_man.instance_pool.entity[i];
+        auto rot = rot_man.get_instance_data(ce);
+
+        auto const &cwire = cwire_man.get_instance_data(ce);
+        auto const &net = ship->get_comms_network(*cwire.network);
 
         auto su = 0;
         auto sd = 0;
@@ -301,24 +331,19 @@ tick_rotator_stepped_components(ship_space *ship, float dt) {
             }
 
             auto step = su + sd;
-            *rot.rot_angle += step * *rot.step_size;
+            *rot.desired_angle += step * *rot.step_size;
 
             if (*rot.continuous) {
                 // Get our angle back within range
-                while (*rot.rot_angle >= 180.0f)
-                    *rot.rot_angle -= 360.0f;
-                while (*rot.rot_angle <= -180.0f)
-                    *rot.rot_angle += 360.0f;
+                while (*rot.desired_angle >= 180.0f)
+                    *rot.desired_angle -= 360.0f;
+                while (*rot.desired_angle <= -180.0f)
+                    *rot.desired_angle += 360.0f;
             }
             else {
-                *rot.rot_angle = clamp(*rot.rot_angle, -165.f, 165.f);
+                *rot.desired_angle = clamp(*rot.desired_angle, -165.f, 165.f);
             }
         }
-
-        pos_mat = glm::rotate(glm::mat4(1), glm::degrees(*rot.rot_angle), *rot.rot_axis);
-        pos_mat[3] = glm::vec4(*rot.rot_offset, 1.0f);
-
-        set_entity_matrix(ce, pos_mat);
     }
 }
 
@@ -575,7 +600,10 @@ draw_renderables(frame_data *frame)
 }
 
 void tick_drivers(ship_space *ship, float dt) {
+    tick_rotator_components(ship, dt);
+    tick_rotator_stepped_components(ship, dt);
 }
 
 void tick_nets(ship_space *ship) {
+    tick_rotator_stepped_components_net(ship);
 }

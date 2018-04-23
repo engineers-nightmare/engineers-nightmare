@@ -852,9 +852,7 @@ update()
         proj_man.simulate(fast_tick_accum.period);
         particle_man->simulate(fast_tick_accum.period);
 
-        tick_rotator_components(ship, fast_tick_accum.period);
         tick_drivers(ship, fast_tick_accum.period);
-        tick_rotator_stepped_components(ship, fast_tick_accum.period);
 
         phy->tick(fast_tick_accum.period);
     }
