@@ -133,6 +133,18 @@ assets = (
     file = "mesh/placement_overlay.dae"
 },
 {
+    name = "knob_base"
+    type = "mesh"
+    file = "mesh/knob-0.obj"
+    density = 128.0
+},
+{
+    name = "knob"
+    type = "mesh"
+    file = "mesh/knob-1.obj"
+    density = 128.0
+},
+{
     name = "power_gen-base"
     type = "mesh"
     file = "mesh/power_gen-0.obj"
