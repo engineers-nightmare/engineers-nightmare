@@ -1,0 +1,48 @@
+entity: {
+    components: {
+        type: {
+            name: "knob",
+        },
+        renderable: {
+            mesh: "knob_base",
+        },
+        placeable: {
+            rot: 15,
+            place: "quarter_block_snapped",
+        },
+        position: {
+        },
+        physics: {
+            mesh: "knob_base",
+            mass: 0.45,
+        },
+        surface_attachment: {
+        },
+    },
+
+    children: (
+        {
+            components: {
+                renderable: { mesh: "knob", },
+                position: {},
+                type: { name: "knob knob" },
+                rotator_stepped: {
+                    continuous: false,
+                    step_size: 15.0,
+                    speed: 45.0,
+                    axis: ( 0.0, 0.0, -1.0 ),
+                    offset: ( 0.0, 0.0, 0.0 ),
+                },
+                wire_comms: {
+                },
+                parent: {
+                    local_mat: (
+                        1.0, 0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0, 0.0,
+                        0.0, 0.0, 1.0, 0.0,
+                        0.0, 0.0, 0.0, 1.0),
+                },
+            },
+        }
+    );
+};
