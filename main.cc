@@ -820,6 +820,34 @@ handle_input()
 }
 
 void
+render_offscreen_display(int n) {
+    ImGui::SetCurrentContext(offscreen_contexts[n]);
+    ImGui_ImplSdlGL3_NewFrameOffscreen(RENDER_DIM, RENDER_DIM);
+
+    auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
+    // center on screen
+    
+    ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
+    {
+        ImGui::Begin("First Window", nullptr, flags);
+        {
+            ImGui::SetWindowFontScale(5);
+            ImGui::Text("Hello from Display %d!", n);
+            ImGui::SetWindowFontScale(1);
+        }
+        ImGui::End();
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_displays_fbo);
+        glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, asset_man.render_textures->texobj, 0, n);
+        glViewport(0, 0, RENDER_DIM, RENDER_DIM);
+        glClearColor(0, 0.18f, 0.21f, 1);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui::Render();
+    }
+}
+
+void
 run()
 {
     for (;;) {
@@ -898,56 +926,8 @@ run()
             std::fill(mouse_axes, mouse_axes + input_mouse_axes_count, 0);
         }
 
-        ImGui::SetCurrentContext(offscreen_contexts[0]);
-        ImGui_ImplSdlGL3_NewFrameOffscreen(RENDER_DIM, RENDER_DIM);
-
-        auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
-        // center on screen
-        // todo: modify NewFrame() to allow us to use this properly
-        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4}, 0, ImVec2{ 0.5f, 0.5f });
-        {
-            ImGui::Begin("First Window", nullptr, flags);
-            {
-                static float f = 0.0f;
-                ImGui::Text("Hello from Display 1!");
-                ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-                ImGui::Button("Test Window");
-                ImGui::Button("Another Window");
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            }
-            ImGui::End();
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_displays_fbo);
-            glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, asset_man.render_textures->texobj, 0, 0);
-            glViewport(0, 0, RENDER_DIM, RENDER_DIM);
-            glClearColor(0, 0.18f, 0.21f, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
-            ImGui::Render();
-        }
-
-        ImGui::SetCurrentContext(offscreen_contexts[1]);
-        ImGui_ImplSdlGL3_NewFrameOffscreen(RENDER_DIM, RENDER_DIM);
-
-        ImGui::SetNextWindowPos(ImVec2{ RENDER_DIM / 2, RENDER_DIM / 4 }, 0, ImVec2{ 0.5f, 0.5f });
-        {
-            ImGui::Begin("Second Window", nullptr, flags);
-            {
-                static float f = 0.0f;
-                ImGui::Text("Hello from Display 2!");
-                ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-                ImGui::Button("Test Window");
-                ImGui::Button("Another Window");
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            }
-            ImGui::End();
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_displays_fbo);
-            glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, asset_man.render_textures->texobj, 0, 1);
-            glViewport(0, 0, RENDER_DIM, RENDER_DIM);
-            glClearColor(1, 0.0f, 0.18f, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
-            ImGui::Render();
-        }
+        render_offscreen_display(0);
+        render_offscreen_display(1);
 
         auto *t = tools[pl.active_tool_slot];
         if (t) {
