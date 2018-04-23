@@ -181,7 +181,7 @@ tick_light_components(ship_space *ship) {
         auto light = light_man.get_instance_data(ce);
 
         if (!*power.powered) {
-            return;
+            continue;
         }
 
         auto const &cwire = cwire_man.get_instance_data(ce);
