@@ -39,6 +39,9 @@ void
 tick_rotator_components(ship_space *ship, float dt);
 
 void
+tick_rotator_stepped_components(ship_space *ship, float dt);
+
+void
 tick_pressure_sensors(ship_space *ship);
 
 void
