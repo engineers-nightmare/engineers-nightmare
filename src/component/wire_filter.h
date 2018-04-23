@@ -13,6 +13,12 @@ struct filter_ui_state {
     msg_type type;
 };
 
+struct output_ui_state {
+    c_entity entity;
+    std::string component_name;
+    std::array<char, 256> output;
+};
+
 struct wire_filter_ptr
 {
     std::string *wrapped = nullptr;
