@@ -64,16 +64,16 @@ struct customize_entity_comms_filter_state : game_state {
                         get_enum_description(msg_type::power_used),
                     };
 
-                    ImGui::LabelText("", "");
+                    ImGui::LabelText("", "%s", "");
                     ImGui::SameLine();
-                    ImGui::LabelText("", "Originator Label");
+                    ImGui::LabelText("", "%s", "Originator Label");
                     ImGui::SameLine();
-                    ImGui::LabelText("", "Message Type");
+                    ImGui::LabelText("", "%s", "Message Type");
 
                     int id = 0;
                     for (auto &kvp : comp_name_to_filter_name) {
                         ImGui::PushID(id++);
-                        ImGui::LabelText("###label", kvp.component_name.c_str());
+                        ImGui::LabelText("", "%s", kvp.component_name.c_str());
 
                         ImGui::SameLine();
                         ImGui::InputText("###filter", kvp.filter.data(), 256);
