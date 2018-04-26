@@ -284,6 +284,10 @@ destroy_entity(c_entity e) {
     // clean up `e` itself
     auto &physics_man = component_system_man.managers.physics_component_man;
 
+    if (phy->tether.is_attached_to_entity(e)) {
+        phy->tether.detach(phy->dynamicsWorld.get());
+    }
+
     if (physics_man.exists(e)) {
         auto phys_data = physics_man.get_instance_data(e);
         delete (phys_ent_ref *)(*phys_data.rigid)->getUserPointer();

@@ -6,16 +6,21 @@
 #include "../mesh.h"
 #include "../block.h"
 #include "../player.h"
+#include "../physics.h"
 #include "tools.h"
 #include "../entity_utils.h"
+#include "../component/component_system_manager.h"
 
 
 extern GLuint overlay_shader;
 extern GLuint simple_shader;
 
 extern ship_space *ship;
+extern physics *phy;
+extern player pl;
 
 extern asset_manager asset_man;
+extern component_system_manager component_system_man;
 
 struct remove_surface_tool : tool
 {
@@ -30,8 +35,7 @@ struct remove_surface_tool : tool
         return rc.hit;
     }
 
-    void use() override
-    {
+    void use() override {
         if (!can_use())
             return;
 
@@ -39,7 +43,7 @@ struct remove_surface_tool : tool
 
         auto const &mesh = asset_man.surf_kinds.at(rc.block->surfs[index]).legacy_mesh_name;
 
-        ship->set_surface(rc.bl, rc.p, (surface_index)index, surface_none);
+        ship->set_surface(rc.bl, rc.p, (surface_index) index, surface_none);
 
         /* remove any ents using the surface */
         remove_ents_from_surface(rc.p, index ^ 1);
@@ -48,7 +52,31 @@ struct remove_surface_tool : tool
         // 0.9f is gross
         // it's there to ensure the face gets position this side of the old face enough that it comes out
         // instead of getting pushed into the frame
-        spawn_floating_generic_entity(mat_block_face(glm::vec3(rc.p) - (glm::vec3)rc.n * 0.9f, index), mesh, mesh);
+        auto e = spawn_floating_generic_entity(mat_block_face(glm::vec3(rc.p) - (glm::vec3) rc.n * 0.9f, index), mesh,
+                                               mesh);
+
+        /* remove tether if attached to this surface and attach to new entity */
+        if (!phy->tether.is_attached_to_surface(rc.bl, (surface_index) index, rc.p, (surface_index)(index ^ 1))) {
+            return;
+        }
+
+        phy->tether.detach(phy->dynamicsWorld.get());
+
+        auto &phys_man = component_system_man.managers.physics_component_man;
+        auto phys = phys_man.get_instance_data(e);
+        auto floater = *phys_man.get_instance_data(e).rigid;
+
+        btRigidBody *ignore = phy->rb_controller.get();
+        raycast_info_world erc;
+        phys_raycast_world(pl.eye, pl.eye + 6.f * rc.rayDir,
+                           ignore, phy->dynamicsWorld.get(), &erc);
+        ignore = floater;
+        raycast_info_world irc;
+        phys_raycast_world(erc.hitCoord + -pl.dir * 0.0001f, erc.hitCoord + 6.f * -pl.dir,
+                           ignore, phy->dynamicsWorld.get(), &irc);
+
+        phy->tether.attach_to_entity(phy->dynamicsWorld.get(), erc.hitCoord, floater, e);
+        phy->tether.attach_to_rb(phy->dynamicsWorld.get(), irc.hitCoord, phy->rb_controller.get());
     }
 
     void preview(frame_data *frame) override

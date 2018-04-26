@@ -80,6 +80,7 @@ struct raycast_info_block {
     struct block *block;
     float t;                /* distance along the ray */
     glm::vec3 hitCoord;     /* intersection point in ship space */
+    glm::vec3 rayDir;       /* direction of ray */
 };
 
 struct raycast_info_world {
@@ -87,6 +88,7 @@ struct raycast_info_world {
     c_entity entity;
     glm::vec3 hitCoord;
     glm::vec3 hitNormal;
+    glm::vec3 rayDir;       /* direction of ray */
 };
 
 struct raycast_info {

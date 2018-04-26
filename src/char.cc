@@ -105,6 +105,7 @@ phys_raycast_world(glm::vec3 start, glm::vec3 end, btCollisionObject *ignore, bt
         if (callback.m_collisionObject->getUserPointer()) {
             rc->entity = ((phys_ent_ref *) callback.m_collisionObject->getUserPointer())->ce;
         }
+        rc->rayDir = glm::normalize(end - start);
     }
 
     return rc->hit;

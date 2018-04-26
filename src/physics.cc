@@ -1,4 +1,6 @@
 #include <btBulletDynamicsCommon.h>
+#include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
+#include <BulletSoftBody/btSoftBodyHelpers.h>
 #include <stdio.h>
 
 #include "player.h"
@@ -23,16 +25,19 @@ physics::physics(player *p)
     collisionConfiguration(new btDefaultCollisionConfiguration()),
     dispatcher(new btCollisionDispatcher(collisionConfiguration.get())),
     solver(new btSequentialImpulseConstraintSolver),
-    dynamicsWorld(new btDiscreteDynamicsWorld(
+    dynamicsWorld(new btSoftRigidDynamicsWorld(
         dispatcher.get(),
         broadphase.get(),
         solver.get(),
         collisionConfiguration.get()))
 {
-    /* some default gravity
-     * z is up and down
-     */
     this->dynamicsWorld->setGravity(btVector3(0, 0, 0));
+
+    auto &softBodyWorldInfo = dynamicsWorld->getWorldInfo();
+    softBodyWorldInfo.m_broadphase = dynamicsWorld->getBroadphase();
+    softBodyWorldInfo.m_dispatcher = dynamicsWorld->getDispatcher();
+    softBodyWorldInfo.m_gravity = dynamicsWorld->getGravity();
+    softBodyWorldInfo.m_sparsesdf.Initialize();
 
     /* store a pointer to our player so physics can drive his position */
     this->pl = p;
@@ -165,4 +170,171 @@ physics::tick(float dt)
         }
     } break;
     }
+}
+
+std::unique_ptr<physics::tether_point_entity>
+create_tether_point_on_entity(btSoftRigidDynamicsWorld *world, c_entity entity, btRigidBody *entity_rb, glm::vec3 pos) {
+    return std::move(std::make_unique<physics::tether_point_entity>(world, entity, entity_rb, pos));
+}
+
+std::unique_ptr<physics::tether_point_rb>
+create_tether_point_on_rb(btSoftRigidDynamicsWorld *world, btRigidBody *entity_rb, glm::vec3 pos) {
+    return std::move(std::make_unique<physics::tether_point_rb>(world, entity_rb, pos));
+}
+
+std::unique_ptr<physics::tether_point_surface>
+create_tether_point_on_surface(btSoftRigidDynamicsWorld *world, glm::vec3 pos, glm::ivec3 block, surface_index surf) {
+    return std::move(std::make_unique<physics::tether_point_surface>(world, pos, block, surf));
+}
+
+void physics::s_tether::attach_to_entity(btSoftRigidDynamicsWorld *world, glm::vec3 point, btRigidBody *entity_rb, c_entity entity) {
+    auto tp = create_tether_point_on_entity(world, entity, entity_rb, point);
+
+    switch (state) {
+        case attach_state::detached: {
+            tether_ends[0].tp = std::move(tp);
+            tether_ends[0].point = point;
+            state = attach_state::attached_one;
+            break;
+        }
+        case attach_state::attached_one:
+        case attach_state::attached_both: {
+            tether_ends[1].tp = std::move(tp);
+            tether_ends[1].point = point;
+            state = attach_state::attached_both;
+
+            build_tether(world);
+            break;
+        }
+    }
+}
+
+void physics::s_tether::attach_to_rb(btSoftRigidDynamicsWorld *world, glm::vec3 point, en_rb_controller *rb) {
+    auto tp = create_tether_point_on_rb(world, rb, point);
+
+    switch (state) {
+        case attach_state::detached: {
+            tether_ends[0].tp = std::move(tp);
+            tether_ends[0].point = point;
+            state = attach_state::attached_one;
+            break;
+        }
+        case attach_state::attached_one:
+        case attach_state::attached_both: {
+            tether_ends[1].tp = std::move(tp);
+            tether_ends[1].point = point;
+            state = attach_state::attached_both;
+
+            build_tether(world);
+            break;
+        }
+    }
+}
+
+void physics::s_tether::attach_to_surface(btSoftRigidDynamicsWorld *world, glm::vec3 point, glm::ivec3 block, surface_index surf) {
+    auto tp = create_tether_point_on_surface(world, point, block, surf);
+
+    switch (state) {
+        case attach_state::detached: {
+            tether_ends[0].tp = std::move(tp);
+            tether_ends[0].point = point;
+            state = attach_state::attached_one;
+            break;
+        }
+        case attach_state::attached_one:
+        case attach_state::attached_both: {
+            tether_ends[1].tp = std::move(tp);
+            tether_ends[1].point = point;
+            state = attach_state::attached_both;
+
+            build_tether(world);
+            break;
+        }
+    }
+}
+
+void physics::s_tether::build_tether(btSoftRigidDynamicsWorld *world) {
+    if (state != attach_state::attached_both) {
+        return;
+    }
+
+    auto &a_end = tether_ends[0];
+    auto &b_end = tether_ends[1];
+
+    auto ao = vec3_to_bt(a_end.point);
+    auto bo = vec3_to_bt(b_end.point);
+    auto resolution = std::max(1.0f, (ao - bo).length() / 0.025f);
+    printf("Resolution= %f\n", resolution);
+    sb_tether.reset(btSoftBodyHelpers::CreateRope(world->getWorldInfo(), ao, bo, resolution, 0));
+
+    auto capsule = new btSphereShape{0.005f};
+    auto size = sb_tether->m_nodes.size() - 1;
+    for (int k = 0; k < size; k++) {
+        auto node1 = sb_tether->m_nodes[k];
+        auto node2 = sb_tether->m_nodes[k + 1];
+
+        auto pos = bt_to_vec3(node1.m_x);
+        auto dir = glm::normalize(bt_to_vec3(node2.m_x) - pos);
+        auto mat = mat_rotate_mesh(pos, dir);
+        btRigidBody *rb = nullptr;
+        build_rigidbody(mat, capsule, &rb);
+
+        convert_static_rb_to_dynamic(rb, 1.f / size);
+
+        sb_tether->appendAnchor(k, rb, true);
+
+        rb_tether_pieces.emplace_back(rb);
+    }
+
+    sb_tether->setTotalMass(1.f);
+
+    sb_tether->appendAnchor(0, a_end.tp->point.get(), true);
+    sb_tether->appendAnchor(sb_tether->m_nodes.size()-1, b_end.tp->point.get(), true);
+
+    sb_tether->m_cfg.kDP = 0.005f;
+    sb_tether->m_cfg.kSHR = 1;
+    sb_tether->m_cfg.kCHR = 1;
+    sb_tether->m_cfg.kKHR = 1;
+    sb_tether->m_cfg.piterations = 16;
+    sb_tether->m_cfg.citerations = 16;
+    sb_tether->m_cfg.diterations = 16;
+    sb_tether->m_cfg.viterations = 16;
+
+    world->addSoftBody(sb_tether.get());
+}
+
+void physics::s_tether::detach(btSoftRigidDynamicsWorld *world) {
+    world->removeSoftBody(sb_tether.get());
+    sb_tether.reset();
+
+    for (auto &rb : rb_tether_pieces) {
+        world->removeRigidBody(rb.get());
+        rb.reset();
+    }
+    rb_tether_pieces.resize(0);
+
+    tether_ends[0].tp->detach(world);
+    tether_ends[1].tp->detach(world);
+
+    tether_ends[0].tp.reset();
+    tether_ends[1].tp.reset();
+
+    state = attach_state::detached;
+}
+
+bool physics::s_tether::is_attached_to_entity(c_entity entity) {
+    auto ts1 = dynamic_cast<physics::tether_point_entity*>(tether_ends[0].tp.get());
+    auto ts2 = dynamic_cast<physics::tether_point_entity*>(tether_ends[1].tp.get());
+
+    return (ts1 && ts1->entity == entity) || (ts2 && ts2->entity == entity);
+}
+
+bool physics::s_tether::is_attached_to_surface(glm::ivec3 block, surface_index surf, glm::ivec3 other_block, surface_index other_surf) {
+    auto ts1 = dynamic_cast<physics::tether_point_surface*>(tether_ends[0].tp.get());
+    auto ts2 = dynamic_cast<physics::tether_point_surface*>(tether_ends[1].tp.get());
+
+    return
+        ts1 && ((ts1->block == block && ts1->surf == surf) || (ts1->block == other_block && ts1->surf == other_surf)) ||
+        (ts2 && ((ts2->block == block && ts2->surf == surf) || (ts2->block == other_block && ts2->surf == other_surf)));
+
 }

@@ -38,5 +38,6 @@ struct tool
     static tool *create_wiring_tool();
     static tool *create_add_shaped_block_tool();
     static tool *create_customize_entity_tool();
+    static tool *create_tether_tool();
 };
 

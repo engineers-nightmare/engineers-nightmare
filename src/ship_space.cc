@@ -247,6 +247,7 @@ ship_space::raycast_block(glm::vec3 o, glm::vec3 d, float max_reach_distance, ra
                 rc->p.z = z + nz;
                 rc->t = t;
 		        rc->hitCoord = o + rc->t * d;
+                rc->rayDir = d;
                 return rc->hit;
             }
         }
@@ -267,6 +268,7 @@ ship_space::raycast_block(glm::vec3 o, glm::vec3 d, float max_reach_distance, ra
                 rc->p.z = z + nz;
                 rc->t = t;
                 rc->hitCoord = o + rc->t * d;
+                rc->rayDir = d;
                 return rc->hit;
             }
         }

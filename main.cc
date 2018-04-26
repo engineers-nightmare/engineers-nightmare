@@ -471,7 +471,7 @@ remove_ents_from_surface(glm::ivec3 b, int face)
     }
 }
 
-std::array<tool*, 9> tools {
+std::array<tool*, 10> tools {
     //tool::create_fire_projectile_tool(&pl),
     tool::create_add_shaped_block_tool(),
     tool::create_remove_block_tool(),
@@ -481,6 +481,7 @@ std::array<tool*, 9> tools {
     tool::create_remove_entity_tool(),
     tool::create_cut_wall_tool(),
     tool::create_wiring_tool(),
+    tool::create_tether_tool(),
     tool::create_customize_entity_tool(),
 };
 
@@ -599,6 +600,34 @@ void draw_wires() {
     }
 }
 
+
+void draw_rope() {
+    auto& tether = phy->tether;
+
+    if (!tether.is_attached()) {
+        return;
+    }
+
+    auto sb = tether.get_softbody();
+    if (sb == nullptr) {
+        return;
+    }
+
+    for (int k = 1; k < sb->m_nodes.size() - 1; k++) {
+        auto node1 = sb->m_nodes[k];
+        auto node2 = sb->m_nodes[k + 1];
+
+        auto pos = bt_to_vec3(node1.m_x);
+        auto dir = glm::normalize(bt_to_vec3(node2.m_x) - pos);
+
+        auto params = frame->alloc_aligned<glm::mat4>(1);
+        *(params.ptr) = mat_rotate_mesh(pos, dir);;
+        params.bind(1, frame);
+
+        draw_mesh(asset_man.get_mesh("rope_segment").hw);
+    }
+}
+
 glm::vec3 fp_item_offset{ 0.115f, 0.2f, -0.12f };
 float fp_item_scale{ 0.175f };
 glm::quat fp_item_rot{ -1.571f, -0.143f, 2.429f, 1.286f };
@@ -677,6 +706,7 @@ void render() {
     draw_renderables(frame);
     glUseProgram(simple_shader);
     draw_wires();
+    draw_rope();
 
     /* draw the sky */
     glUseProgram(sky_shader);
