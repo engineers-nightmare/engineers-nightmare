@@ -116,12 +116,6 @@ assets = (
     file = "mesh/frobnicator.dae"
 },
 {
-    name = "warning_light"
-    type = "mesh"
-    file = "mesh/warning_light.dae"
-    scale = 3.0
-},
-{
     name = "alarm_light"
     type = "mesh"
     file = "mesh/alarm_light.obj"
