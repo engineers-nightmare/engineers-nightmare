@@ -80,19 +80,20 @@ tick_gas_producers(ship_space *ship)
         zone_info *z = ship->get_zone_info(t);
         if (!z) {
             /* if there wasn't a zone, make one */
-            z = ship->zones[t] = new zone_info(0);
+            z = ship->zones[t] = new zone_info{};
         }
 
         /* add some gas if we can, up to our pressure limit */
         float max_gas = gas_man.instance_pool.max_pressure[i] * t->size;
-        if (z->air_amount < max_gas) {
-            z->air_amount = std::min(max_gas, z->air_amount + gas_man.instance_pool.flow_rate[i]);
+
+        if (z->gas_amount[int(gas::oxygen)] < max_gas) {
+            z->gas_amount[int(gas::oxygen)] = std::min(max_gas, z->gas_amount[int(gas::oxygen)] + gas_man.instance_pool.flow_rate[i]);
 
             /* particle visibility is based on condensation/deposition process
              * as the gas enters a /much/ lower pressure environment.
              * we'll say it goes to zero at 0.3atm, and falloff is roughly quadratic
              */
-            auto vis = std::max(0.0f, 0.3f - (float)z->air_amount / max_gas) / 0.3f;
+            auto vis = std::max(0.0f, 0.3f - (float)z->gas_amount[int(gas::oxygen)] / max_gas) / 0.3f;
             vis = vis * vis;
 
             if (vis > 0.0f) {
@@ -281,7 +282,7 @@ tick_pressure_sensors(ship_space* ship) {
 
         topo_info *t = topo_find(ship->get_topo_info(pos_block));
         zone_info *z = ship->get_zone_info(t);
-        float pressure = z ? (z->air_amount / t->size) : 0.0f;
+        float pressure = z ? (z->gas_amount[int(gas::oxygen)] / t->size) : 0.0f;
 
         comms_msg msg{
             ce,

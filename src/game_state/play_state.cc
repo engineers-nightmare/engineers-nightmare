@@ -114,7 +114,7 @@ struct play_state : game_state {
             topo_info *t = topo_find(ship->get_topo_info(eye_block));
             topo_info *outside = topo_find(&ship->outside_topo_info);
             zone_info *z = ship->get_zone_info(t);
-            float pressure = z ? (z->air_amount / t->size) : 0.0f;
+            float pressure = z ? (z->gas_amount[int(gas::oxygen)] / t->size) : 0.0f;
 
             if (t != outside) {
                 sprintf(buf2, "[INSIDE %p %d %.1f atmo %.2f]", t, t->size, pressure, pl.thing);

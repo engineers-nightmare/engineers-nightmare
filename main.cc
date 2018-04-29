@@ -789,7 +789,7 @@ update()
             zone_info *z = ship->get_zone_info(t);
             if (z) {
                 /* try as hard as you like, you cannot fill space with your air system */
-                z->air_amount = 0;
+                *z = {};
             }
         }
 

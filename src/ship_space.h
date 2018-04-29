@@ -26,9 +26,7 @@ struct ivec3_hash {
 };
 
 struct zone_info {
-    float air_amount;
-
-    zone_info(float air_amount) : air_amount(air_amount) {}
+    float gas_amount[int(gas::upper_bound)];
 };
 
 enum raycast_stopping_rule {

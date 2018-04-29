@@ -184,10 +184,14 @@ static uint32_t load_zone(loader *l, std::vector<std::pair<glm::ivec3, zone_info
     pos.z = l->read<uint32_t>(read);
     zone_read += read;
 
-    auto air = l->read<float>(read);
-    zone_read += read;
+    zone_info z{};
 
-    zones.push_back({pos, {air}});
+    for (int i = 0; i < int(gas::upper_bound); i++) {
+        z.gas_amount[i] = l->read<float>(read);
+        zone_read += read;
+    }
+    
+    zones.push_back({pos, z});
 
     return zone_read;
 }

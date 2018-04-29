@@ -7,6 +7,58 @@
 
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+const char* get_enum_description(gas value) {
+    switch(value)
+    {
+    case gas::oxygen:
+        return "Oxygen";
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
+const char* get_enum_string(gas value) {
+    switch(value)
+    {
+    case gas::oxygen:
+        return "oxygen";
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
+template<> gas get_enum<gas>(const char *e) {
+    auto val{gas::invalid};
+    if (!strcmp(e, "oxygen")) {
+        val = gas::oxygen;
+    }
+    assert(val != gas::invalid);
+    return val;
+}
+
+gas config_setting_get_gas(const config_setting_t *setting) {
+    const char *str = config_setting_get_string(setting);
+    return get_enum<gas>(str);
+}
+
+int config_setting_set_gas(config_setting_t *setting, gas value) {
+    auto str = get_enum_string(value);
+    return (config_setting_set_string(setting, str));
+}
+
+int config_setting_lookup_gas(const config_setting_t *setting, const char *name, gas *value) {
+    auto *member = config_setting_get_member(setting, name);
+    if(!member) {
+        return CONFIG_FALSE;
+    }
+
+    *value = (gas)config_setting_get_gas(member);
+    return CONFIG_TRUE;
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 const char* get_enum_description(msg_type value) {
     switch(value)
     {

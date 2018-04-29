@@ -106,6 +106,7 @@ def main():
                 header.write("{\n")
                 for field_name, fieldValue in fields.items():
                     header.write(tab + "%s = %s,\n" % (field_name, str(fieldValue)))
+                header.write(tab + "upper_bound = %d,\n" % (next_value,))
                 header.write(tab + "invalid = -1,\n")
                 header.write("};\n")
                 header.write("\n")

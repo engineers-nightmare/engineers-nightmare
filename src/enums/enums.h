@@ -11,6 +11,26 @@ template<typename T>
 
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+enum class gas
+{
+    oxygen = 0,
+    upper_bound = 1,
+    invalid = -1,
+};
+
+const char* get_enum_description(gas value);
+
+const char* get_enum_string(gas value);
+
+template<> gas get_enum<gas>(const char *e);
+
+gas config_setting_get_gas(const config_setting_t *setting);
+
+int config_setting_set_gas(config_setting_t *setting, gas value);
+
+int config_setting_lookup_gas(const config_setting_t *setting, const char *name, gas *value);
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 enum class msg_type
 {
     any = 0,
@@ -20,6 +40,7 @@ enum class msg_type
     proximity_sensor = 4,
     power_available = 5,
     power_used = 6,
+    upper_bound = 7,
     invalid = -1,
 };
 
@@ -42,6 +63,7 @@ enum class placement
     half_block_snapped = 1,
     quarter_block_snapped = 2,
     eighth_block_snapped = 3,
+    upper_bound = 4,
     invalid = -1,
 };
 
@@ -62,6 +84,7 @@ enum class window_mode
 {
     windowed = 0,
     fullscreen = 1,
+    upper_bound = 2,
     invalid = -1,
 };
 

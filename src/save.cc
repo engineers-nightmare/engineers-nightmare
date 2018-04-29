@@ -128,7 +128,9 @@ static void save_zone(saver *s, ship_space *ship, std::pair<topo_info *, zone_in
     s->write(pos.y);
     s->write(pos.z);
 
-    s->write(zone.second->air_amount);
+    for (int i = 0; i < int(gas::upper_bound); i++) {
+        s->write(zone.second->gas_amount[i]);
+    }
 
     s->end_lump(zone_lump);
 }

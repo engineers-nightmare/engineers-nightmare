@@ -407,7 +407,9 @@ ship_space::insert_zone(topo_info *t, zone_info *z)
     zone_info *existing_z = get_zone_info(t);
     if (existing_z) {
         /* merge case; mix in this zone, and then we'll delete it. */
-        existing_z->air_amount += z->air_amount;
+        for (int i = 0; i < int(gas::upper_bound); i++) {
+            existing_z->gas_amount[i] += z->gas_amount[i];
+        }
         delete z;
     }
     else {
@@ -508,8 +510,10 @@ ship_space::update_topology_for_add_surface(glm::ivec3 a, glm::ivec3 b, int face
     }
 
     /* grab our air amount data before rebuild_topology invalidates the existing zones */
+    zone_info zone_data{};
     zone_info *zone = get_zone_info(topo_find(get_topo_info(a)));
-    float air_amount = zone ? zone->air_amount : 0.0f;
+    if (zone)
+        zone_data = *zone;
 
     /* we do need to split */
     rebuild_topology();
@@ -529,16 +533,19 @@ ship_space::update_topology_for_add_surface(glm::ivec3 a, glm::ivec3 b, int face
          * we had on both sides, so distribute the mass */
         zone_info *z1 = get_zone_info(t1);
         if (!z1) {
-            z1 = zones[t1] = new zone_info(0);
+            z1 = zones[t1] = new zone_info{};
         }
 
         zone_info *z2 = get_zone_info(t2);
         if (!z2) {
-            z2 = zones[t2] = new zone_info(0);
+            z2 = zones[t2] = new zone_info{};
         }
 
-        z1->air_amount = air_amount * t1->size / (t1->size + t2->size);
-        z2->air_amount = air_amount - z1->air_amount;
+        auto frac = float(t1->size) / (t1->size + t2->size);
+        for (int i = 0; i < int(gas::upper_bound); i++) {
+            z1->gas_amount[i] = zone_data.gas_amount[i] * frac;
+            z2->gas_amount[i] = zone_data.gas_amount[i] - z1->gas_amount[i];
+        }
     }
 }
 
