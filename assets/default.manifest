@@ -111,11 +111,6 @@ assets = (
     nonconvex = true
 },
 {
-    name = "frobnicator"
-    type = "mesh"
-    file = "mesh/frobnicator.dae"
-},
-{
     name = "alarm_light"
     type = "mesh"
     file = "mesh/alarm_light.obj"
