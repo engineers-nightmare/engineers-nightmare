@@ -68,8 +68,9 @@ void asset_manager::load_asset_manifest(char const *filename) {
 
             auto & m = meshes[asset_name] = mesh_data{ asset_file };
 
-            double scale;
-            if (config_setting_lookup_float(asset_setting, "scale", &scale)) {
+            double density;
+            if (config_setting_lookup_float(asset_setting, "density", &density)) {
+                double scale = 1.0 / density;
                 // TODO: if -ve scale, or we add nonuniform sometime, then
                 // I need to fix the normals too
                 for (auto i = 0u; i < m.sw->num_vertices; i++) {
@@ -78,6 +79,7 @@ void asset_manager::load_asset_manifest(char const *filename) {
                     m.sw->verts[i].z *= (float)scale;
                 }
             }
+
             auto offset = config_setting_lookup(asset_setting, "offset");
             if (offset) {
                 auto ox = (float)config_setting_get_float_elem(offset, 0);

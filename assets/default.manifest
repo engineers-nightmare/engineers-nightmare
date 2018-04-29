@@ -3,93 +3,93 @@ assets = (
     name = "frame"
     type = "mesh"
     file = "mesh/mv-frame.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.5,0.5,0.0]
 },
 {
     name = "fp_frame"
     type = "mesh"
     file = "mesh/mv-frame.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.0,0.0,-0.5]
 },
 {
     name = "frame-corner"
     type = "mesh"
     file = "mesh/frame-corner.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.5,0.5,0.0]
 },
 {
     name = "frame-invcorner"
     type = "mesh"
     file = "mesh/frame-invcorner.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.5,0.5,0.0]
 },
 {
     name = "frame-sloped"
     type = "mesh"
     file = "mesh/frame-sloped.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.5,0.5,0.0]
 },
 {
     name = "fp_surface_glass"
     type = "mesh"
     file = "mesh/surface_glass.obj"
-    scale = 0.0625
+    density = 16.0
 },
 {
     name = "fp_surface_wall"
     type = "mesh"
     file = "mesh/surface_wall.obj"
-    scale = 0.0625
+    density = 16.0
 },
 {
     name = "fp_surface_grate"
     type = "mesh"
     file = "mesh/surface_grate.obj"
-    scale = 0.0625
+    density = 16.0
 },
 {
     name = "fp_customize_tool"
     type = "mesh"
     file = "mesh/customize.obj"
-    scale = 0.0625
+    density = 16.0
 },
 {
     name = "fp_customize_tool_screen"
     type = "mesh"
     file = "mesh/customize_screen.obj"
-    scale = 0.0625
+    density = 16.0
 },
 {
     name = "display"
     type = "mesh"
     file = "mesh/display.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "display_panel"
     type = "mesh"
     file = "mesh/display_panel.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "crate-1"
     type = "mesh"
     file = "mesh/crate-1.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "face_marker"
     type = "mesh"
     file = "mesh/face_marker.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.0,0.0,0.0]
 },
 {
@@ -106,7 +106,7 @@ assets = (
     name = "doorframe_2x2"
     type = "mesh"
     file = "mesh/doorframe_2x2.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.5,0.0,0.0]
     nonconvex = true
 },
@@ -125,7 +125,7 @@ assets = (
     name = "alarm_light"
     type = "mesh"
     file = "mesh/alarm_light.obj"
-    scale = 0.0333
+    density = 32.0
 },
 {
     name = "placement_overlay"
@@ -136,119 +136,119 @@ assets = (
     name = "power_gen-base"
     type = "mesh"
     file = "mesh/power_gen-0.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "power_gen-1"
     type = "mesh"
     file = "mesh/power_gen-1.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "power_gen-rotor"
     type = "mesh"
     file = "mesh/power_gen-2.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,-0.5]
 },
 {
     name = "o2_gen"
     type = "mesh"
     file = "mesh/o2_gen.obj"
-    scale = 0.0333
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "surface_wall"
     type = "mesh"
     file = "mesh/surface_wall.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "surface_grate"
     type = "mesh"
     file = "mesh/surface_grate.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "surface_glass"
     type = "mesh"
     file = "mesh/surface_glass.obj"
-    scale = 0.0625
+    density = 16.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "wire_1"
     type = "mesh"
     file = "mesh/wire_1.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "wire_2"
     type = "mesh"
     file = "mesh/wire_2.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "wire_4"
     type = "mesh"
     file = "mesh/wire_4.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "wire_8"
     type = "mesh"
     file = "mesh/wire_8.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "wire_end"
     type = "mesh"
     file = "mesh/wire_end.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "wire_1i"
     type = "mesh"
     file = "mesh/wire_1i.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "wire_2i"
     type = "mesh"
     file = "mesh/wire_2i.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "wire_4i"
     type = "mesh"
     file = "mesh/wire_4i.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "wire_8i"
     type = "mesh"
     file = "mesh/wire_8i.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 {
     name = "wire_endi"
     type = "mesh"
     file = "mesh/wire_endi.obj"
-    scale = 0.03125
+    density = 32.0
     offset = [0.0,0.0,0.0]
 },
 
