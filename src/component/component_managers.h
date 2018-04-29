@@ -10,6 +10,7 @@
 #include "convert_on_pop_component.h"
 #include "display_component.h"
 #include "door_component.h"
+#include "door_slider_component.h"
 #include "gas_producer_component.h"
 #include "light_component.h"
 #include "parent_component.h"
@@ -36,6 +37,7 @@ struct component_managers {
         convert_on_pop_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         display_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         door_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
+        door_slider_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         gas_producer_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         light_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
         parent_component_man.create_component_instance_data(INITIAL_MAX_COMPONENTS);
@@ -59,6 +61,7 @@ struct component_managers {
     convert_on_pop_component_manager convert_on_pop_component_man{};
     display_component_manager display_component_man{};
     door_component_manager door_component_man{};
+    door_slider_component_manager door_slider_component_man{};
     gas_producer_component_manager gas_producer_component_man{};
     light_component_manager light_component_man{};
     parent_component_manager parent_component_man{};
@@ -87,6 +90,9 @@ struct component_managers {
         }
         if (strcmp(comp_name, "door") == 0) {
             return door_component_stub::from_config(config);
+        }
+        if (strcmp(comp_name, "door_slider") == 0) {
+            return door_slider_component_stub::from_config(config);
         }
         if (strcmp(comp_name, "gas_producer") == 0) {
             return gas_producer_component_stub::from_config(config);
@@ -150,6 +156,7 @@ struct component_managers {
         convert_on_pop_component_man.destroy_entity_instance(ce);
         display_component_man.destroy_entity_instance(ce);
         door_component_man.destroy_entity_instance(ce);
+        door_slider_component_man.destroy_entity_instance(ce);
         gas_producer_component_man.destroy_entity_instance(ce);
         light_component_man.destroy_entity_instance(ce);
         parent_component_man.destroy_entity_instance(ce);

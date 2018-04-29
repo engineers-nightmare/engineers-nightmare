@@ -360,6 +360,9 @@
     <ClCompile Include="src\component\power_sensor_component.cc">
       <Filter>Source Files\component</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\door_slider_component.cc">
+      <Filter>Source Files\component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blob.h">
@@ -567,6 +570,9 @@
       <Filter>Header Files\component</Filter>
     </ClInclude>
     <ClInclude Include="src\component\power_sensor_component.h">
+      <Filter>Header Files\component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\door_slider_component.h">
       <Filter>Header Files\component</Filter>
     </ClInclude>
   </ItemGroup>

@@ -25,6 +25,7 @@ entity: {
         convert_on_pop: {
             type: "door-kit",
         },
+	door: { },
     },
     children: (
     {
@@ -39,6 +40,7 @@ entity: {
                     0.0, 0.0, 1.0, 0.0,
                     0.0, 0.0, 0.0, 1.0),
             },
+            door_slider: { open_position: ( -0.8, 0.0, 0.0 ), },
         },
     },
     {
@@ -53,6 +55,7 @@ entity: {
                     0.0, 0.0, 1.0, 0.0,
                     0.0, 0.0, 0.0, 1.0),
             },
+            door_slider: { open_position: ( 0.8, 0.0, 0.0 ), },
         },
     }
     );

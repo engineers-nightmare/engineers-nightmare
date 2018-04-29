@@ -20,7 +20,7 @@ filter_matches_message(comms_msg const &msg, wire_filter_ptr const &filter) {
     auto sender = cwire_man.get_instance_data(msg.originator);
 
     /* Unconfigured filter matches NOTHING */
-    if (!filter.wrapped || filter.wrapped->length())
+    if (!filter.wrapped || !filter.wrapped->length())
         return false;
 
     /* If we have a filter other than `*`, sender must have a label, and it must match. */
@@ -261,6 +261,23 @@ tick_rotator_components(ship_space *ship, float dt) {
         }
 
         set_entity_matrix(ce, pos_mat);
+    }
+}
+
+void
+tick_door_slider_components(ship_space *ship) {
+    auto &slider_man = component_system_man.managers.door_slider_component_man;
+    auto &par_man = component_system_man.managers.parent_component_man;
+    auto &door_man = component_system_man.managers.door_component_man;
+
+    // Follow parent's 'pos' value. Interpolation is between (0,0,0) and open_position.
+    for (auto i = 0u; i < slider_man.buffer.num; i++) {
+        auto ce = slider_man.instance_pool.entity[i];
+        auto par = par_man.get_instance_data(ce);
+        assert(door_man.exists(*par.parent));
+        auto door = door_man.get_instance_data(*par.parent);
+        (*par.local_mat)[3] = glm::vec4(
+            slider_man.instance_pool.open_position[i] * *door.pos, 1.0f);
     }
 }
 

@@ -852,6 +852,7 @@ update()
         particle_man->simulate(fast_tick_accum.period);
 
         tick_rotator_components(ship, fast_tick_accum.period);
+        tick_door_slider_components(ship);
 
         phy->tick(fast_tick_accum.period);
     }
