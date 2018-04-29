@@ -111,6 +111,22 @@ assets = (
     nonconvex = true
 },
 {
+    name = "door-leftside"
+    type = "mesh"
+    file = "mesh/door-leftside.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.0]
+    nonconvex = true
+},
+{
+    name = "door-rightside"
+    type = "mesh"
+    file = "mesh/door-rightside.obj"
+    scale = 0.0625
+    offset = [0.5,0.0,0.0]
+    nonconvex = true
+},
+{
     name = "alarm_light"
     type = "mesh"
     file = "mesh/alarm_light.obj"

@@ -16,19 +16,44 @@ entity: {
             mesh: "doorframe_2x2",
             mass: 5.0,
         },
-        surface_attachment: {
-        },
+        surface_attachment: { },
         power: {
             required_power: 8.0,
             max_required_power: 8.0,
         },
-        door: {
-            mesh: "single_door",
-        },
-        wire_comms: {
-        },
+        wire_comms: { },
         convert_on_pop: {
             type: "door-kit",
         },
-    };
+    },
+    children: (
+    {
+        components: {
+            type: { name: "door-leftside", },
+            renderable: { mesh: "door-leftside", },
+            position: { },
+            parent: {
+                local_mat: (
+                    1.0, 0.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0,
+                    0.0, 0.0, 0.0, 1.0),
+            },
+        },
+    },
+    {
+        components: {
+            type: { name: "door-rightside", },
+            renderable: { mesh: "door-rightside", },
+            position: { },
+            parent: {
+                local_mat: (
+                    1.0, 0.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0,
+                    0.0, 0.0, 0.0, 1.0),
+            },
+        },
+    }
+    );
 };
