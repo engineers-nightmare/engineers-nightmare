@@ -1,4 +1,5 @@
 ui_name,Door slider
 stub,glm::vec3,glm::vec3,,open_position,
 body,glm::vec3,open_position,
+body,float,position,0.0f
 depends,position,parent

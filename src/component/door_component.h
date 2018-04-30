@@ -12,7 +12,7 @@
 struct door_component_manager : component_manager<door_component_manager> {
     struct instance_data {
         c_entity *entity;
-        float *pos;
+        bool *has_mover;
         float *desired_pos;
         wire_filter_ptr *filter;
     } instance_pool;
@@ -30,7 +30,7 @@ struct door_component_manager : component_manager<door_component_manager> {
         auto inst = lookup(e);
 
         d.entity = instance_pool.entity + inst.index;
-        d.pos = instance_pool.pos + inst.index;
+        d.has_mover = instance_pool.has_mover + inst.index;
         d.desired_pos = instance_pool.desired_pos + inst.index;
         d.filter = instance_pool.filter + inst.index;
 

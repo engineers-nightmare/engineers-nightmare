@@ -13,6 +13,7 @@ struct door_slider_component_manager : component_manager<door_slider_component_m
     struct instance_data {
         c_entity *entity;
         glm::vec3 *open_position;
+        float *position;
     } instance_pool;
 
     void create_component_instance_data(unsigned count) override;
@@ -29,6 +30,7 @@ struct door_slider_component_manager : component_manager<door_slider_component_m
 
         d.entity = instance_pool.entity + inst.index;
         d.open_position = instance_pool.open_position + inst.index;
+        d.position = instance_pool.position + inst.index;
 
         return d;
     }

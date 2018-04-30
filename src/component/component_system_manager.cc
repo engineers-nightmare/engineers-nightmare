@@ -144,13 +144,10 @@ tick_doors(ship_space *ship)
             door_man.instance_pool.desired_pos[i] = clamp(msg.data, 0.0f, 1.0f);
         }
 
-        auto desired_state = door_man.instance_pool.desired_pos[i];
-        auto in_desired_state = door_man.instance_pool.pos[i] == desired_state;
+        auto in_desired_state = !door_man.instance_pool.has_mover[i];
         /* TODO: magic number for quiescent power */
         *power.required_power = in_desired_state ? 1 : *power.max_required_power;
-
-        auto delta = clamp(door_man.instance_pool.pos[i] - desired_state, -0.1f, 0.1f);
-        door_man.instance_pool.pos[i] -= delta;
+        door_man.instance_pool.has_mover[i] = false;
     }
 }
 
@@ -188,20 +185,20 @@ tick_light_components(ship_space *ship) {
         auto const &cwire = cwire_man.get_instance_data(ce);
         auto const &net = ship->get_comms_network(*cwire.network);
 
-        for (auto msg : net.read_buffer) {
-            if (!filter_matches_message(msg, *light.filter))
-                continue;
+for (auto msg : net.read_buffer) {
+    if (!filter_matches_message(msg, *light.filter))
+        continue;
 
-            *(light.requested_intensity) = clamp(msg.data, 0.0f, 1.0f);
+    *(light.requested_intensity) = clamp(msg.data, 0.0f, 1.0f);
 
-            auto old_intensity = *(light.intensity);
-            auto new_intensity = *power.powered ? *(light.requested_intensity) : 0.0f;
+    auto old_intensity = *(light.intensity);
+    auto new_intensity = *power.powered ? *(light.requested_intensity) : 0.0f;
 
-            if (old_intensity != new_intensity) {
-                *(light.intensity) = new_intensity;
-                *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
-            }
-        }
+    if (old_intensity != new_intensity) {
+        *(light.intensity) = new_intensity;
+        *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
+    }
+}
     }
 }
 
@@ -211,7 +208,7 @@ tick_rotator_components(ship_space *ship, float dt) {
     auto &rot_man = component_system_man.managers.rotator_component_man;
     auto &pos_man = component_system_man.managers.position_component_man;
     auto &par_man = component_system_man.managers.parent_component_man;
-//    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
+    //    auto &cwire_man = component_system_man.managers.wire_comms_component_man;
     auto &power_man = component_system_man.managers.power_component_man;
 
     for (auto i = 0u; i < rot_man.buffer.num; i++) {
@@ -225,19 +222,19 @@ tick_rotator_components(ship_space *ship, float dt) {
             continue;
         }
 
-//        auto const &cwire = cwire_man.get_instance_data(ce);
-//        auto const &net = ship->get_comms_network(*cwire.network);
-//
-//        for (auto msg : net.read_buffer) {
-//            auto filter = rot.filter->c_str();
-//            auto sender = cwire_man.get_instance_data(msg.originator);
-//
-//            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.type == msg_type::switch_transition) {
-//                continue;
-//            }
-//
-//            *rot.rot_cur_speed = *rot.rot_cur_speed ? 0 : *rot.rot_speed;
-//        }
+        //        auto const &cwire = cwire_man.get_instance_data(ce);
+        //        auto const &net = ship->get_comms_network(*cwire.network);
+        //
+        //        for (auto msg : net.read_buffer) {
+        //            auto filter = rot.filter->c_str();
+        //            auto sender = cwire_man.get_instance_data(msg.originator);
+        //
+        //            if ((*sender.label == nullptr || filter == nullptr) || strcmp(*sender.label, filter) != 0 || msg.type == msg_type::switch_transition) {
+        //                continue;
+        //            }
+        //
+        //            *rot.rot_cur_speed = *rot.rot_cur_speed ? 0 : *rot.rot_speed;
+        //        }
         *rot.rot_cur_speed = *rot.rot_speed;
 
         glm::mat4 pos_mat;
@@ -269,15 +266,30 @@ tick_door_slider_components(ship_space *ship) {
     auto &slider_man = component_system_man.managers.door_slider_component_man;
     auto &par_man = component_system_man.managers.parent_component_man;
     auto &door_man = component_system_man.managers.door_component_man;
+    auto &power_man = component_system_man.managers.power_component_man;
 
     // Follow parent's 'pos' value. Interpolation is between (0,0,0) and open_position.
     for (auto i = 0u; i < slider_man.buffer.num; i++) {
         auto ce = slider_man.instance_pool.entity[i];
         auto par = par_man.get_instance_data(ce);
+
+        auto parent_power = power_man.get_instance_data(*par.parent);
+
+        /* it's a power door, it's not going /anywhere/ without power */
+        if (!*parent_power.powered) {
+            continue;
+        }
+
         assert(door_man.exists(*par.parent));
         auto door = door_man.get_instance_data(*par.parent);
-        (*par.local_mat)[3] = glm::vec4(
-            slider_man.instance_pool.open_position[i] * *door.pos, 1.0f);
+
+        auto delta = clamp(slider_man.instance_pool.position[i] - *door.desired_pos, -0.1f, 0.1f);
+        if (fabsf(delta) > 1e-3f) {
+            slider_man.instance_pool.position[i] -= delta;
+            (*par.local_mat)[3] = glm::vec4(
+                slider_man.instance_pool.open_position[i] * slider_man.instance_pool.position[i], 1.0f);
+            *door.has_mover = true;
+        }
     }
 }
 
