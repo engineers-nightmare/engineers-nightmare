@@ -185,20 +185,20 @@ tick_light_components(ship_space *ship) {
         auto const &cwire = cwire_man.get_instance_data(ce);
         auto const &net = ship->get_comms_network(*cwire.network);
 
-for (auto msg : net.read_buffer) {
-    if (!filter_matches_message(msg, *light.filter))
-        continue;
+        for (auto msg : net.read_buffer) {
+            if (!filter_matches_message(msg, *light.filter))
+                continue;
 
-    *(light.requested_intensity) = clamp(msg.data, 0.0f, 1.0f);
+            *(light.requested_intensity) = clamp(msg.data, 0.0f, 1.0f);
 
-    auto old_intensity = *(light.intensity);
-    auto new_intensity = *power.powered ? *(light.requested_intensity) : 0.0f;
+            auto old_intensity = *(light.intensity);
+            auto new_intensity = *power.powered ? *(light.requested_intensity) : 0.0f;
 
-    if (old_intensity != new_intensity) {
-        *(light.intensity) = new_intensity;
-        *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
-    }
-}
+            if (old_intensity != new_intensity) {
+                *(light.intensity) = new_intensity;
+                *(power.required_power) = *(light.requested_intensity) * *(power.max_required_power);
+            }
+        }
     }
 }
 
