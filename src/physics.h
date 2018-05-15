@@ -118,7 +118,6 @@ struct physics {
             std::unique_ptr<tether_point> tp;
             glm::vec3 point;
         };
-        std::array<tether_end, 2> tether_ends;
 
         enum class attach_state {
             detached,
@@ -129,13 +128,9 @@ struct physics {
         void build_tether(btSoftRigidDynamicsWorld *world);
 
     public:
-        enum class side {
-            none,
-            one,
-            two,
-        };
+        std::array<tether_end, 2> tether_ends;
 
-        bool is_attached() { return state == attach_state::attached_both; }
+        bool is_attached() const { return state == attach_state::attached_both; }
         btSoftBody *get_softbody() { return sb_tether.get(); }
         void attach_to_entity(btSoftRigidDynamicsWorld *world, glm::vec3 point, btRigidBody *entity_rb, c_entity entity);
         void attach_to_surface(btSoftRigidDynamicsWorld *world, glm::vec3 point, glm::ivec3 block, surface_index surf);
@@ -146,7 +141,8 @@ struct physics {
         bool is_attached_to_surface(glm::ivec3 block, surface_index surf, glm::ivec3 other_block, surface_index other_surf);
 
         void attach_to_rb(btSoftRigidDynamicsWorld *world, glm::vec3 point, en_rb_controller *rb);
-    } tether;
+    };
+    std::vector<s_tether> tethers;
 
     /* initialise our physics state */
     explicit physics(player *pl);

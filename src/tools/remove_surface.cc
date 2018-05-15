@@ -56,27 +56,40 @@ struct remove_surface_tool : tool
                                                mesh);
 
         /* remove tether if attached to this surface and attach to new entity */
-        if (!phy->tether.is_attached_to_surface(rc.bl, (surface_index) index, rc.p, (surface_index)(index ^ 1))) {
-            return;
+        bool found = false;
+        for (auto t = phy->tethers.begin(); t != phy->tethers.end();) {
+            if ((*t).is_attached_to_surface(rc.bl, (surface_index) index, rc.p, (surface_index) (index ^ 1))) {
+                (*t).detach(phy->dynamicsWorld.get());
+                phy->tethers.erase(t);
+                found = true;
+                break;
+            }
+            else {
+                t++;
+            }
         }
 
-        phy->tether.detach(phy->dynamicsWorld.get());
-
-        auto &phys_man = component_system_man.managers.physics_component_man;
-        auto phys = phys_man.get_instance_data(e);
-        auto floater = *phys_man.get_instance_data(e).rigid;
-
-        btRigidBody *ignore = phy->rb_controller.get();
-        raycast_info_world erc;
-        phys_raycast_world(pl.eye, pl.eye + 6.f * rc.rayDir,
-                           ignore, phy->dynamicsWorld.get(), &erc);
-        ignore = floater;
-        raycast_info_world irc;
-        phys_raycast_world(erc.hitCoord + -pl.dir * 0.0001f, erc.hitCoord + 6.f * -pl.dir,
-                           ignore, phy->dynamicsWorld.get(), &irc);
-
-        phy->tether.attach_to_entity(phy->dynamicsWorld.get(), erc.hitCoord, floater, e);
-        phy->tether.attach_to_rb(phy->dynamicsWorld.get(), irc.hitCoord, phy->rb_controller.get());
+//        if (!found) {
+//            return;
+//        }
+//
+//        auto &phys_man = component_system_man.managers.physics_component_man;
+//        auto phys = phys_man.get_instance_data(e);
+//        auto floater = *phys_man.get_instance_data(e).rigid;
+//
+//        btRigidBody *ignore = phy->rb_controller.get();
+//        raycast_info_world erc;
+//        phys_raycast_world(pl.eye, pl.eye + 6.f * rc.rayDir,
+//                           ignore, phy->dynamicsWorld.get(), &erc);
+//        ignore = floater;
+//        raycast_info_world irc;
+//        phys_raycast_world(erc.hitCoord + -pl.dir * 0.0001f, erc.hitCoord + 6.f * -pl.dir,
+//                           ignore, phy->dynamicsWorld.get(), &irc);
+//
+//        phy->tethers.emplace_back();
+//        auto *tether = &phy->tethers.back();
+//        tether->attach_to_entity(phy->dynamicsWorld.get(), erc.hitCoord, floater, e);
+//        tether->attach_to_rb(phy->dynamicsWorld.get(), irc.hitCoord, phy->rb_controller.get());
     }
 
     void preview(frame_data *frame) override

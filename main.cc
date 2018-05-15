@@ -602,29 +602,29 @@ void draw_wires() {
 
 
 void draw_rope() {
-    auto& tether = phy->tether;
+    for (auto &tether : phy->tethers) {
+        if (!tether.is_attached()) {
+            return;
+        }
 
-    if (!tether.is_attached()) {
-        return;
-    }
+        auto sb = tether.get_softbody();
+        if (sb == nullptr) {
+            return;
+        }
 
-    auto sb = tether.get_softbody();
-    if (sb == nullptr) {
-        return;
-    }
+        for (int k = 1; k < sb->m_nodes.size() - 1; k++) {
+            auto node1 = sb->m_nodes[k];
+            auto node2 = sb->m_nodes[k + 1];
 
-    for (int k = 1; k < sb->m_nodes.size() - 1; k++) {
-        auto node1 = sb->m_nodes[k];
-        auto node2 = sb->m_nodes[k + 1];
+            auto pos = bt_to_vec3(node1.m_x);
+            auto dir = glm::normalize(bt_to_vec3(node2.m_x) - pos);
 
-        auto pos = bt_to_vec3(node1.m_x);
-        auto dir = glm::normalize(bt_to_vec3(node2.m_x) - pos);
+            auto params = frame->alloc_aligned<glm::mat4>(1);
+            *(params.ptr) = mat_rotate_mesh(pos, dir);;
+            params.bind(1, frame);
 
-        auto params = frame->alloc_aligned<glm::mat4>(1);
-        *(params.ptr) = mat_rotate_mesh(pos, dir);;
-        params.bind(1, frame);
-
-        draw_mesh(asset_man.get_mesh("rope_segment").hw);
+            draw_mesh(asset_man.get_mesh("rope_segment").hw);
+        }
     }
 }
 

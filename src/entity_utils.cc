@@ -284,8 +284,19 @@ destroy_entity(c_entity e) {
     // clean up `e` itself
     auto &physics_man = component_system_man.managers.physics_component_man;
 
-    if (phy->tether.is_attached_to_entity(e)) {
-        phy->tether.detach(phy->dynamicsWorld.get());
+
+    /* remove tether if attached to this surface and attach to new entity */
+    bool found = false;
+    for (auto t = phy->tethers.begin(); t != phy->tethers.end(); ) {
+        if ((*t).is_attached_to_entity(e)) {
+            (*t).detach(phy->dynamicsWorld.get());
+            phy->tethers.erase(t);
+            found = true;
+            break;
+        }
+        else {
+            t++;
+        }
     }
 
     if (physics_man.exists(e)) {

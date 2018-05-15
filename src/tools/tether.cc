@@ -77,34 +77,61 @@ struct tether_tool : tool
         if (!can_use())
             return;
 
-        if (phy->tether.is_attached()) {
-            phy->tether.detach(phy->dynamicsWorld.get());
+//        if (phy->tether.is_attached()) {
+//            phy->tether.detach(phy->dynamicsWorld.get());
+//        }
+        physics::s_tether *tether = nullptr;
+        if (!phy->tethers.empty() && !phy->tethers.back().is_attached()) {
         }
+        else {
+            phy->tethers.emplace_back();
+        }
+        tether = &phy->tethers.back();
 
         if (c_entity::is_valid(rc.entity)) {
             auto &phys_man = component_system_man.managers.physics_component_man;
             auto p = *phys_man.get_instance_data(rc.entity).rigid;
 
-            phy->tether.attach_to_entity(phy->dynamicsWorld.get(), rc.hitCoord, p, rc.entity);
-            phy->tether.attach_to_rb(phy->dynamicsWorld.get(), irc.hitCoord, phy->rb_controller.get());
-        }
-        else {
+            tether->attach_to_entity(phy->dynamicsWorld.get(), rc.hitCoord, p, rc.entity);
+        } else {
             raycast_info_block brc;
             ship->raycast_block(pl.eye, pl.dir, MAX_TETHER_HIT, cross_surface, &brc);
 
-            auto surf = (surface_index)normal_to_surface_index(&brc);
-            phy->tether.attach_to_surface(phy->dynamicsWorld.get(), rc.hitCoord, brc.bl, surf);
-            phy->tether.attach_to_rb(phy->dynamicsWorld.get(), irc.hitCoord, phy->rb_controller.get());
+            auto surf = (surface_index) normal_to_surface_index(&brc);
+            tether->attach_to_surface(phy->dynamicsWorld.get(), rc.hitCoord, brc.bl, surf);
         }
+
+//        else {
+//            if (c_entity::is_valid(rc.entity)) {
+//                auto &phys_man = component_system_man.managers.physics_component_man;
+//                auto p = *phys_man.get_instance_data(rc.entity).rigid;
+//
+//                phy->tether.attach_to_entity(phy->dynamicsWorld.get(), rc.hitCoord, p, rc.entity);
+//            }
+//            else {
+//                raycast_info_block brc;
+//                ship->raycast_block(pl.eye, pl.dir, MAX_TETHER_HIT, cross_surface, &brc);
+//
+//                auto surf = (surface_index) normal_to_surface_index(&brc);
+//                phy->tether.attach_to_surface(phy->dynamicsWorld.get(), rc.hitCoord, brc.bl, surf);
+//            }
+//        }
     }
+
 
     void alt_use() override {
         if (!can_use())
             return;
 
-        if (phy->tether.is_attached()) {
-            phy->tether.detach(phy->dynamicsWorld.get());
+        physics::s_tether *tether = nullptr;
+        if (!phy->tethers.empty() && !phy->tethers.back().is_attached()) {
         }
+        else {
+            phy->tethers.emplace_back();
+        }
+        tether = &phy->tethers.back();
+
+        tether->attach_to_rb(phy->dynamicsWorld.get(), irc.hitCoord, phy->rb_controller.get());
     }
 
     void preview(frame_data *frame) override {
