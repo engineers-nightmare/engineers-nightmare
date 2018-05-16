@@ -164,17 +164,26 @@ void asset_manager::load_assets() {
 
     surf_kinds[surface_wall].visual_mesh = &get_mesh("surface_wall");
     surf_kinds[surface_wall].physics_mesh = &get_mesh("surface_wall");
+    surf_kinds[surface_wall].popped_physics_mesh = &get_mesh("surface_wall_popped");
     surf_kinds[surface_wall].legacy_mesh_name = "surface_wall";
+    surf_kinds[surface_wall].legacy_physics_mesh_name = "surface_wall";
+    surf_kinds[surface_wall].legacy_popped_physics_mesh_name = "surface_wall_popped";
     surf_kinds[surface_wall].name = "Wall";
 
     surf_kinds[surface_glass].visual_mesh = &get_mesh("surface_glass");
     surf_kinds[surface_glass].physics_mesh = &get_mesh("surface_wall");
+    surf_kinds[surface_glass].popped_physics_mesh = &get_mesh("surface_wall_popped");
     surf_kinds[surface_glass].legacy_mesh_name = "surface_glass";
+    surf_kinds[surface_glass].legacy_physics_mesh_name = "surface_wall";
+    surf_kinds[surface_glass].legacy_popped_physics_mesh_name = "surface_wall_popped";
     surf_kinds[surface_glass].name = "Glass";
 
     surf_kinds[surface_grate].visual_mesh = &get_mesh("surface_grate");
     surf_kinds[surface_grate].physics_mesh = &get_mesh("surface_wall");
+    surf_kinds[surface_grate].popped_physics_mesh = &get_mesh("surface_wall_popped");
     surf_kinds[surface_grate].legacy_mesh_name = "surface_grate";
+    surf_kinds[surface_grate].legacy_physics_mesh_name = "surface_wall";
+    surf_kinds[surface_grate].legacy_popped_physics_mesh_name = "surface_wall_popped";
     surf_kinds[surface_grate].name = "Grate";
 }
 

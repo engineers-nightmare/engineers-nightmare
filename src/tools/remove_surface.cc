@@ -41,9 +41,11 @@ struct remove_surface_tool : tool
 
         auto index = normal_to_surface_index(&rc);
 
-        auto const &mesh = asset_man.surf_kinds.at(rc.block->surfs[index]).legacy_mesh_name;
+        auto const &mesh = asset_man.surf_kinds.at(rc.block->surfs[index]);
 
         ship->set_surface(rc.bl, rc.p, (surface_index) index, surface_none);
+        glm::ivec3 ch = ship->get_chunk_coord_containing(rc.bl);
+        ship->get_chunk(ch)->prepare_phys(ch.x, ch.y, ch.z);
 
         /* remove any ents using the surface */
         remove_ents_from_surface(rc.p, index ^ 1);
@@ -52,8 +54,7 @@ struct remove_surface_tool : tool
         // 0.9f is gross
         // it's there to ensure the face gets position this side of the old face enough that it comes out
         // instead of getting pushed into the frame
-        auto e = spawn_floating_generic_entity(mat_block_face(glm::vec3(rc.p) - (glm::vec3) rc.n * 0.9f, index), mesh,
-                                               mesh);
+        auto e = spawn_floating_generic_entity(mat_block_face(glm::vec3(rc.p) - (glm::vec3) rc.n, index), mesh.legacy_mesh_name, mesh.legacy_popped_physics_mesh_name);
 
         /* remove tether if attached to this surface and attach to new entity */
         bool found = false;

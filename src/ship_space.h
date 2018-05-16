@@ -145,6 +145,8 @@ struct ship_space {
 
     /* convert a topo ptr to the corresponding location. not expected to be fast. */
     bool topo_to_pos(topo_info *t, glm::ivec3* out);
+
+    glm::ivec3 get_chunk_coord_containing(glm::ivec3 block);
 };
 
 /* helper */
