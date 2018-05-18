@@ -13,7 +13,10 @@
 struct surface_kind {
     mesh_data const *visual_mesh {};
     mesh_data const *physics_mesh {};
+    mesh_data const *popped_physics_mesh  {};
     char const *legacy_mesh_name {};
+    char const *legacy_physics_mesh_name {};
+    char const *legacy_popped_physics_mesh_name {};
     char const *name {};
 };
 
