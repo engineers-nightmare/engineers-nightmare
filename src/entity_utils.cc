@@ -233,7 +233,7 @@ attach_entity_to_surface(c_entity ce, glm::ivec3 p, int face) {
 
 extern physics *phy;
 c_entity
-spawn_floating_generic_entity(glm::mat4 mat, const char *mesh, const char *phys_mesh) {
+spawn_floating_generic_entity(glm::mat4 mat, const char *mesh, const char *phys_mesh, float mass /*= 0.2f*/) {
     auto ce = c_entity::spawn();
 
     auto &pos_man = component_system_man.managers.position_component_man;
@@ -251,7 +251,7 @@ spawn_floating_generic_entity(glm::mat4 mat, const char *mesh, const char *phys_
     auto physics = physics_man.get_instance_data(ce);
     *physics.rigid = nullptr;
     *physics.mesh = phys_mesh;
-    *physics.mass = 0.2f;
+    *physics.mass = mass;
     auto const &pm = asset_man.get_mesh(phys_mesh);
     build_rigidbody(mat, pm.phys_shape, physics.rigid);
     /* so that we can get back to the entity from a phys raycast */

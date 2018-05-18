@@ -14,7 +14,7 @@ c_entity
 spawn_entity(const std::string &name, glm::mat4 mat);
 
 c_entity
-spawn_floating_generic_entity(glm::mat4 mat, const char *mesh, const char *phys_mesh);
+spawn_floating_generic_entity(glm::mat4 mat, const char *mesh, const char *phys_mesh, float mass = 0.2f);
 
 void
 attach_entity_to_surface(c_entity ce, glm::ivec3 p, int face);
