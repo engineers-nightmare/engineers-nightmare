@@ -4,7 +4,7 @@
 struct texture_set {
     GLuint texobj;
     int dim;
-    int array_size;
+    unsigned int array_size;
     GLenum target;
     unsigned slots;
 
