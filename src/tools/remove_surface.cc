@@ -1,4 +1,5 @@
 #include <epoxy/gl.h>
+#include <glm/gtc/random.hpp>
 
 #include "../asset_manager.h"
 #include "../common.h"
@@ -6,8 +7,10 @@
 #include "../mesh.h"
 #include "../block.h"
 #include "../player.h"
+#include "../physics.h"
 #include "tools.h"
 #include "../entity_utils.h"
+#include "../component/component_system_manager.h"
 
 
 extern GLuint overlay_shader;
@@ -16,6 +19,7 @@ extern GLuint simple_shader;
 extern ship_space *ship;
 
 extern asset_manager asset_man;
+extern component_system_manager component_system_man;
 
 struct remove_surface_tool : tool
 {
@@ -30,25 +34,28 @@ struct remove_surface_tool : tool
         return rc.hit;
     }
 
-    void use() override
-    {
+    void use() override {
         if (!can_use())
             return;
 
         auto index = normal_to_surface_index(&rc);
 
-        auto const &mesh = asset_man.surf_kinds.at(rc.block->surfs[index]).legacy_mesh_name;
+        auto const &mesh = asset_man.surf_kinds.at(rc.block->surfs[index]);
 
-        ship->set_surface(rc.bl, rc.p, (surface_index)index, surface_none);
+        ship->set_surface(rc.bl, rc.p, (surface_index) index, surface_none);
+        glm::ivec3 ch = ship->get_chunk_coord_containing(rc.bl);
+        ship->get_chunk(ch)->prepare_phys(ch.x, ch.y, ch.z);
 
         /* remove any ents using the surface */
         remove_ents_from_surface(rc.p, index ^ 1);
         remove_ents_from_surface(rc.bl, index);
 
-        // 0.9f is gross
-        // it's there to ensure the face gets position this side of the old face enough that it comes out
-        // instead of getting pushed into the frame
-        spawn_floating_generic_entity(mat_block_face(glm::vec3(rc.p) - (glm::vec3)rc.n * 0.9f, index), mesh, mesh);
+        auto e = spawn_floating_generic_entity(mat_block_face(glm::vec3(rc.p) - (glm::vec3) rc.n, index), mesh.legacy_mesh_name, mesh.legacy_popped_physics_mesh_name);
+        auto &phys_man = component_system_man.managers.physics_component_man;
+        auto phy = phys_man.get_instance_data(e);
+        auto m = mat_rotate_mesh(rc.p, rc.n);
+        auto v = m * glm::vec4(glm::diskRand(0.1f), 0.0f, 0.0f);
+        (*phy.rigid)->applyImpulse(vec3_to_bt(rc.n) * 0.025f, vec3_to_bt(glm::vec3(v.x, v.y, v.z)));
     }
 
     void preview(frame_data *frame) override
