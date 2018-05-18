@@ -85,6 +85,7 @@ void convert_static_rb_to_dynamic(btRigidBody *rb, float mass) {
     btVector3 inertia(0, 0, 0);
     rb->getCollisionShape()->calculateLocalInertia(mass, inertia);
     rb->setMassProps(mass, inertia);
+    rb->updateInertiaTensor();
     phy->dynamicsWorld->addRigidBody(rb);
     rb->activate();
 }
