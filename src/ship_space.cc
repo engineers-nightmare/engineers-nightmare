@@ -916,3 +916,13 @@ bool ship_space::topo_to_pos(topo_info *t, glm::ivec3* out) {
 
     return false;
 }
+
+glm::ivec3 ship_space::get_chunk_coord_containing(glm::ivec3 block) {
+    glm::ivec3 ch;
+
+    split_coord(block.x, nullptr, &ch.x);
+    split_coord(block.y, nullptr, &ch.y);
+    split_coord(block.z, nullptr, &ch.z);
+
+    return ch;
+}
